@@ -1,0 +1,19 @@
+[Unit]
+Description=DMS CICD gunicorn daemon
+Requires=dms_gunicorn.socket
+After=network.target
+
+[Service]
+User=jenkins
+Group=www-data
+WorkingDirectory=/var/www/html/Aggregation_test_project/DMS_goa_test
+ExecStart=/var/www/html/Aggregation_test_project/DMS_goa_test/vvenv/bin/gunicorn \
+        --error-logfile /var/www/html/Aggregation_test_project/DMS_goa_test/Deployment/logs/error.log \
+        --access-logfile /var/www/html/Aggregation_test_project/DMS_goa_test/Deployment/logs/access.log \
+        --workers 3 \
+        --capture-output --log-level debug \
+        --bind unix:/run/dms_gunicorn.sock \
+        DMS_goa.wsgi:application
+
+[Install]
+WantedBy=multi-user.target
