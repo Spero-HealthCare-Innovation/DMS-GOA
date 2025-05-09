@@ -1,0 +1,102 @@
+pipeline {
+    agent any
+    
+    options {
+        skipDefaultCheckout(true)
+    }
+ 
+    environment {
+        GIT_REPO_URL = 'https://github.com/gitmaster-dms/Spero-DMS.git'
+        GIT_BRANCH = 'main'
+        TARGET_DIR = '/var/www/html/Aggregation_test_project/DMS_goa_test'
+    }
+
+    stages {
+        stage('Prepare Workspace') {
+            steps {
+                script {
+                    sh '''
+                        if [ ! -d "${TARGET_DIR}" ]; then
+                            echo "Directory does not exist. Creating ${TARGET_DIR}..."
+                            mkdir -p "${TARGET_DIR}"
+                            chmod -R 775 "${TARGET_DIR}"
+                        else
+                            echo "Directory already exists. Skipping creation."
+                        fi
+                    '''
+                }
+            }
+        }
+
+        stage('Clone or Reset Repository') {
+            steps {
+                dir("${TARGET_DIR}") {
+                    script {
+                        if (!fileExists('.git')) {
+                            echo "Cloning repository into ${TARGET_DIR}..."
+                            sh "git clone -b ${GIT_BRANCH} ${GIT_REPO_URL} ."
+                        } else {
+                            echo "Repository already exists. Resetting and pulling latest changes..."
+                            sh '''
+                                git config --global --add safe.directory $(pwd)
+                                git fetch origin ${GIT_BRANCH}
+                                git reset --hard origin/${GIT_BRANCH}
+                                git clean -fd
+                            '''
+                        }
+                    }
+                }
+            }
+        }
+
+        stage('Check Files') {
+            steps {
+                dir("${TARGET_DIR}") {
+                    sh "ls -al"
+                }
+            }
+        }
+
+        stage('Setup Python Virtual ENV for dependencies') {
+            steps {
+                dir("${TARGET_DIR}") {
+                    sh '''
+                        chmod +x Deployment/envsetup.sh
+                        Deployment/envsetup.sh
+                    '''
+                }
+            }
+        }
+ 
+        stage('Setup Gunicorn') {
+            steps {
+                dir("${TARGET_DIR}") {
+                    sh '''
+                        chmod +x Deployment/gunicorn.sh
+                        Deployment/gunicorn.sh
+                    '''
+                }
+            }
+        }
+
+        stage('Setup NGINX') {
+            steps {
+                dir("${TARGET_DIR}") {
+                    sh '''
+                        chmod +x Deployment/nginx.sh
+                        Deployment/nginx.sh
+                    '''
+                }
+            }
+        }
+    } 
+
+    post {
+        success {
+            echo 'Build was successful!'
+        }
+        failure {
+            echo 'Build failed. Please check the logs.'
+        }
+    }
+}
