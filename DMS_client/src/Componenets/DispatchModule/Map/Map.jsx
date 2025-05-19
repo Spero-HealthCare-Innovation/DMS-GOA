@@ -1,6 +1,11 @@
 import React, { useEffect } from "react";
 
 const Map = () => {
+
+  
+      useEffect(() => {
+    document.title = "DMS|Map";
+  }, []);
   useEffect(() => {
     const script = document.createElement("script");
     script.src = "https://embed.windy.com/embed2.js";

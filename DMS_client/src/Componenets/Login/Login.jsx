@@ -28,7 +28,12 @@ function Login() {
     const [captchaLoading, setCaptchaLoading] = useState(true);
     const [captchaError, setCaptchaError] = useState(false);
     const [captchaTextError, setCaptchaTextError] = useState('');
-    // const [userGroup, setUserGroup] = ("")
+
+
+    useEffect(() => {
+        document.title = "DMS|Login";
+    }, []);
+
 
     // Function to fetch new captcha
     const fetchCaptcha = async () => {
@@ -87,133 +92,232 @@ function Login() {
         console.log('Mounting Login component, fetching captcha...');
     }, []);
 
+    // const handleLogin = async () => {
+    //     setUsernameError('');
+    //     setPasswordError('');
+    //     setCaptchaTextError('');
+
+    //     let hasError = false;
+
+    //     if (!emp_username) {
+    //         setUsernameError('Please enter User ID');
+    //         hasError = true;
+    //     }
+
+    //     if (!password) {
+    //         setPasswordError('Please enter Password');
+    //         hasError = true;
+    //     }
+
+    //     if (captchaError || (!captchaValue && captchaKey)) {
+    //         setCaptchaTextError('Please enter valid captcha text');
+    //         hasError = true;
+    //     }
+
+    //     if (hasError) {
+    //         return;
+    //     }
+
+    //     try {
+    //         setLoading(true);
+
+    //         const controller = new AbortController();
+    //         const timeoutId = setTimeout(() => controller.abort(), 5000);
+
+    //         const response = await fetch(`${port}/admin_web/login/`, {
+    //             method: 'POST',
+    //             headers: {
+    //                 'Content-Type': 'application/json',
+    //             },
+    //             body: JSON.stringify({
+    //                 emp_username,
+    //                 password,
+    //                 captcha_key: captchaKey,
+    //                 captcha_value: captchaValue,
+    //             }),
+    //             signal: controller.signal,
+    //         });
+
+    //         clearTimeout(timeoutId);
+
+    //         const data = await response.json();
+    //         console.log('Login response:', data);
+
+    //         if (!response.ok) {
+    //             // Handle DRF-style errors first
+    //             if (data.errors?.non_field_errors?.[0]?.toLowerCase().includes('captcha')) {
+    //                 setCaptchaTextError('Invalid captcha. Please try again.');
+    //                 fetchCaptcha();
+    //             } else if (data.errors?.non_field_errors?.[0]) {
+    //                 setPasswordError(data.errors.non_field_errors[0]);
+    //             } else if (data.msg && data.msg.toLowerCase().includes('captcha')) {
+    //                 setCaptchaTextError('Invalid captcha. Please try again.');
+    //                 fetchCaptcha();
+    //             } else {
+    //                 setPasswordError('Invalid User ID or Password');
+    //             }
+    //             return;
+    //         }
+
+    //         // Handle successful login
+    //         // if (data.token) {
+    //         //     localStorage.setItem('token', data.token.access); // or store full token if needed
+    //         //     localStorage.setItem('user', JSON.stringify(data.token.colleague)); // ✅ Store user info
+    //         //     navigate('/alert-panel');
+
+
+    //         // }
+    //         // Handle successful login
+    //         if (data.token) {
+    //             localStorage.setItem('access_token', data.token.access);
+    //             localStorage.setItem('refresh_token', data.token.refresh);
+    //             localStorage.setItem('user', JSON.stringify(data.token.colleague));
+    //             localStorage.setItem('user_group', data.token.user_group);
+
+    //             // 🔍 Console logs
+    //             console.log('Access Token:', data.token.access);
+    //             console.log('Refresh Token:', data.token.refresh);
+    //             console.log('User Group:', data.token.user_group);
+    //             console.log('User Info:', data.token.colleague);
+
+    //             navigate('/alert-panel');
+    //         }
+
+
+    //         else {
+    //             console.error('Login response did not contain token');
+    //             setPasswordError('Login failed. Please try again.');
+    //         }
+
+    //     } catch (err) {
+    //         console.error('Login error:', err);
+    //         if (err.name === 'AbortError') {
+    //             setPasswordError('Login request timed out. Server might be down.');
+    //         } else if (err.message?.includes('Failed to fetch')) {
+    //             setPasswordError('Cannot connect to server. Please check if backend is running.');
+    //         } else {
+    //             setPasswordError('Login failed. Please try again.');
+    //         }
+    //     } finally {
+    //         setLoading(false);
+    //     }
+    // };
+
+
     const handleLogin = async () => {
-        setUsernameError('');
-        setPasswordError('');
-        setCaptchaTextError('');
+    setUsernameError('');
+    setPasswordError('');
+    setCaptchaTextError('');
 
-        let hasError = false;
+    let hasError = false;
 
-        if (!emp_username) {
-            setUsernameError('Please enter User ID');
-            hasError = true;
-        }
+    if (!emp_username) {
+        setUsernameError('Please enter User ID');
+        hasError = true;
+    }
 
-        if (!password) {
-            setPasswordError('Please enter Password');
-            hasError = true;
-        }
+    if (!password) {
+        setPasswordError('Please enter Password');
+        hasError = true;
+    }
 
-        if (captchaError || (!captchaValue && captchaKey)) {
-            setCaptchaTextError('Please enter valid captcha text');
-            hasError = true;
-        }
+    if (captchaError || (!captchaValue && captchaKey)) {
+        setCaptchaTextError('Please enter valid captcha text');
+        hasError = true;
+    }
 
-        if (hasError) {
+    if (hasError) {
+        return;
+    }
+
+    try {
+        setLoading(true);
+
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 5000);
+
+        const response = await fetch(`${port}/admin_web/login/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                emp_username,
+                password,
+                captcha_key: captchaKey,
+                captcha_value: captchaValue,
+            }),
+            signal: controller.signal,
+        });
+
+        clearTimeout(timeoutId);
+
+        const data = await response.json();
+        console.log('Login response:', data);
+
+        if (!response.ok) {
+            if (data.errors?.non_field_errors?.[0]?.toLowerCase().includes('captcha')) {
+                setCaptchaTextError('Invalid captcha. Please try again.');
+                fetchCaptcha();
+            } else if (data.errors?.non_field_errors?.[0]) {
+                setPasswordError(data.errors.non_field_errors[0]);
+            } else if (data.msg && data.msg.toLowerCase().includes('captcha')) {
+                setCaptchaTextError('Invalid captcha. Please try again.');
+                fetchCaptcha();
+            } else {
+                setPasswordError('Invalid User ID or Password');
+            }
             return;
         }
 
-        try {
-            setLoading(true);
+        if (data.token) {
+            localStorage.setItem('access_token', data.token.access);
+            localStorage.setItem('refresh_token', data.token.refresh);
+            localStorage.setItem('user', JSON.stringify(data.token.colleague));
+            localStorage.setItem('user_group', data.token.user_group);
 
-            const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 5000);
+            console.log('Access Token:', data.token.access);
+            console.log('Refresh Token:', data.token.refresh);
+            console.log('User Group:', data.token.user_group);
+            console.log('User Info:', data.token.colleague);
 
-            const response = await fetch(`${port}/admin_web/login/`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    emp_username,
-                    password,
-                    captcha_key: captchaKey,
-                    captcha_value: captchaValue,
-                }),
-                signal: controller.signal,
-            });
-
-            clearTimeout(timeoutId);
-
-            const data = await response.json();
-            console.log('Login response:', data);
-
-            if (!response.ok) {
-                // Handle DRF-style errors first
-                if (data.errors?.non_field_errors?.[0]?.toLowerCase().includes('captcha')) {
-                    setCaptchaTextError('Invalid captcha. Please try again.');
-                    fetchCaptcha();
-                } else if (data.errors?.non_field_errors?.[0]) {
-                    setPasswordError(data.errors.non_field_errors[0]);
-                } else if (data.msg && data.msg.toLowerCase().includes('captcha')) {
-                    setCaptchaTextError('Invalid captcha. Please try again.');
-                    fetchCaptcha();
-                } else {
-                    setPasswordError('Invalid User ID or Password');
+            // 🟢 WAIT 2 seconds and then send "true" to WebSocket
+            setTimeout(() => {
+                try {
+                    const socket = new WebSocket("ws://192.168.1.116:7777/send_data");  // ← replace IP
+                    socket.onopen = () => {
+                        console.log("🔗 WebSocket connected");
+                        socket.send("true");
+                        console.log("✅ Sent 'true' to server");
+                    };
+                    socket.onerror = (err) => {
+                        console.error("❌ WebSocket error:", err);
+                    };
+                } catch (err) {
+                    console.error("WebSocket connection failed:", err);
                 }
-                return;
-            }
+            }, 2000);
 
-            // Handle successful login
-            // if (data.token) {
-            //     localStorage.setItem('token', data.token.access); // or store full token if needed
-            //     localStorage.setItem('user', JSON.stringify(data.token.colleague)); // ✅ Store user info
-            //     navigate('/alert-panel');
-
-
-            // }
-            // Handle successful login
-            if (data.token) {
-                localStorage.setItem('access_token', data.token.access);
-                localStorage.setItem('refresh_token', data.token.refresh);
-                localStorage.setItem('user', JSON.stringify(data.token.colleague));
-                localStorage.setItem('user_group', data.token.user_group);
-
-                // setUserGroup(data.token.user_group)
-
-                // 🔍 Console logs
-                console.log('Access Token:', data.token.access);
-                console.log('Refresh Token:', data.token.refresh);
-                console.log('User Group:', data.token.user_group);
-                console.log('User Info:', data.token.colleague);
-                const group = data.token.user_group;
-
-
-
-                if (group === '1') {
-                    navigate('/add-group');
-                } else if (group === '2') {
-                    navigate('/alert-panel');
-                } else if (group === '3') {
-                    navigate('/multiscreen');
-                } else {
-                    console.warn('Unhandled user group:', group);
-                    // Optionally redirect to a fallback route
-                    navigate('/not-authorized');
-                }
-
-            }
-
-
-            else {
-                console.error('Login response did not contain token');
-                setPasswordError('Login failed. Please try again.');
-            }
-
-        } catch (err) {
-            console.error('Login error:', err);
-            if (err.name === 'AbortError') {
-                setPasswordError('Login request timed out. Server might be down.');
-            } else if (err.message?.includes('Failed to fetch')) {
-                setPasswordError('Cannot connect to server. Please check if backend is running.');
-            } else {
-                setPasswordError('Login failed. Please try again.');
-            }
-        } finally {
-            setLoading(false);
+            navigate('/multiscreen');
+        } else {
+            console.error('Login response did not contain token');
+            setPasswordError('Login failed. Please try again.');
         }
-    };
 
+    } catch (err) {
+        console.error('Login error:', err);
+        if (err.name === 'AbortError') {
+            setPasswordError('Login request timed out. Server might be down.');
+        } else if (err.message?.includes('Failed to fetch')) {
+            setPasswordError('Cannot connect to server. Please check if backend is running.');
+        } else {
+            setPasswordError('Login failed. Please try again.');
+        }
+    } finally {
+        setLoading(false);
+    }
+};
+    
 
     const [openForgotDialog, setOpenForgotDialog] = useState(false);
     const [username, setUsername] = useState('');
