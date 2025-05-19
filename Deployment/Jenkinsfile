@@ -104,6 +104,17 @@ pipeline {
             }
         }
 
+        stage('Setup Fastapi') {
+            steps {
+                dir("${TARGET_DIR}") {
+                    sh '''
+                        chmod +x Deployment/fastapi.sh
+                        Deployment/fastapi.sh
+                    '''
+                }
+            }
+        }
+ 
         stage('Setup NGINX') {
             steps {
                 dir("${TARGET_DIR}") {

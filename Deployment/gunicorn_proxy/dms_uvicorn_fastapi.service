@@ -1,0 +1,18 @@
+[Unit]
+Description=DMS Goa FastAPI app
+After=network.target
+
+[Service]
+User=www-data
+Group=www-data
+WorkingDirectory=/var/www/html/DMS_goa/DMS_goa/DMS_fastapi_service
+ExecStart=/var/www/html/DMS_goa/vvenv/bin/gunicorn \
+    -k uvicorn.workers.UvicornWorker \
+    -b unix:/tmp/uvicorn.sock \
+    main:app
+Environment=PYTHONPATH=/var/www/html/DMS_goa
+
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
