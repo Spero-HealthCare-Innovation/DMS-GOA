@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
     Box, CardContent, Typography, Table, TableBody, TableContainer,
     TableHead, TableRow, Grid, Checkbox, CircularProgress
@@ -6,6 +6,7 @@ import {
 import { styled } from '@mui/system';
 import { Button } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
+import MapView from './Map';
 
 const EnquiryCard = styled('div')({
     display: 'flex',
@@ -81,6 +82,10 @@ const alertData = [
 ];
 
 const AlertPanel = ({ darkMode }) => {
+
+      useEffect(() => {
+    document.title = "DMS-AlertPanel";
+  }, []);
     const [selected, setSelected] = useState([]);
     const navigate = useNavigate();
 
@@ -239,16 +244,17 @@ const AlertPanel = ({ darkMode }) => {
                 </Grid>
 
                 <Grid item xs={12} md={4}>
-                    <Box sx={{
+                    {/* <Box sx={{
                         backgroundColor: '#fff3cd',
                         padding: 2,
                         borderRadius: '8px',
                         border: '1px solid #ffeeba'
                     }}>
                         <Typography variant="h6" sx={{ color: '#856404' }}>
-                            Hey! Welcome to the Alert Panel!
+                           
                         </Typography>
-                    </Box>
+                    </Box> */}
+                    <MapView/>
                 </Grid>
             </Grid>
         </Box >

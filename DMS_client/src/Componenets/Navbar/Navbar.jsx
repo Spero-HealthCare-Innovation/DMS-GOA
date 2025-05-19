@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import AppBar from "@mui/material/AppBar";
 import Box from "@mui/material/Box";
 import Toolbar from "@mui/material/Toolbar";
@@ -12,13 +12,43 @@ import Tooltip from "@mui/material/Tooltip";
 import MenuItem from "@mui/material/MenuItem";
 import DarkModeIcon from "@mui/icons-material/DarkMode";
 import LightModeIcon from "@mui/icons-material/LightMode";
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
+import Dialog from "@mui/material/Dialog";
+import DialogContent from "@mui/material/DialogContent";
+import DialogTitle from "@mui/material/DialogTitle";
+import DialogActions from "@mui/material/DialogActions";
+import CallIcon from "@mui/icons-material/Call";
+import EmailIcon from "@mui/icons-material/Email";
+import EditIcon from "@mui/icons-material/Edit";
+
 
 const pages = [];
 const settings = ["Profile", "Logout"];
 
+
 const Navbar = ({ darkMode, toggleDarkMode }) => {
+
+  const port = import.meta.env.VITE_APP_API_KEY;
   const [anchorElNav, setAnchorElNav] = useState(null);
   const [anchorElUser, setAnchorElUser] = useState(null);
+  const navigate = useNavigate();
+  const [openProfileDialog, setOpenProfileDialog] = useState(false);
+  const user = JSON.parse(localStorage.getItem('user'));
+  const [logoutConfirmOpen, setLogoutConfirmOpen] = useState(false);
+
+
+
+  const empName = user?.emp_name || "";
+  const nameParts = empName.trim().split(" ");
+  const initials = nameParts.length >= 2
+    ? nameParts[0][0].toUpperCase() + nameParts[nameParts.length - 1][0].toUpperCase()
+    : empName[0]?.toUpperCase() || "";
+
+  const email = user?.email || '';
+  const phoneNo = user?.phone_no || '';
+  // console.log("User from localStorage:", user);
+
 
   const handleOpenNavMenu = (event) => setAnchorElNav(event.currentTarget);
   const handleOpenUserMenu = (event) => setAnchorElUser(event.currentTarget);
@@ -26,6 +56,50 @@ const Navbar = ({ darkMode, toggleDarkMode }) => {
     setAnchorElNav(null);
     setAnchorElUser(null);
   };
+
+
+ const logout = async () => {
+  const accessToken = localStorage.getItem('access_token');  // Use correct key
+
+  if (!accessToken) {
+    console.error('No access token found');
+    window.location.href = '/login';
+    return;
+  }
+
+  try {
+    const response = await fetch(`${port}/admin_web/logout/`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${accessToken}`,
+      }
+    });
+
+    // Clear tokens regardless of logout success or failure
+    localStorage.removeItem('access_token');
+    localStorage.removeItem('refresh_token');
+    localStorage.removeItem('user');
+    localStorage.removeItem('user_group');
+
+
+    if (response.ok) {
+      console.log('Logged out successfully');
+    } else {
+      console.warn('Logout request failed:', await response.text());
+    }
+
+    window.location.href = '/login';
+  } catch (error) {
+    console.error('Error during logout:', error);
+    localStorage.removeItem('access_token');
+    localStorage.removeItem('refresh_token');
+    localStorage.removeItem('token');
+    window.location.href = '/login';
+  }
+};
+
+
 
   return (
     <AppBar
@@ -115,22 +189,34 @@ const Navbar = ({ darkMode, toggleDarkMode }) => {
               open={Boolean(anchorElNav)}
               onClose={handleCloseMenu}
             >
-              {pages.map((page) => (
-                <MenuItem key={page} onClick={handleCloseMenu}>
-                  <Typography>{page}</Typography>
+              {settings.map((setting) => (
+                <MenuItem
+                  key={setting}
+                  onClick={() => {
+                    handleCloseMenu();
+                    if (setting === "Logout") {
+                      setLogoutConfirmOpen(true);
+                    } else if (setting === "Profile") {
+                      setOpenProfileDialog(true);
+                    }
+
+                  }}
+                >
+                  <Typography>{setting}</Typography>
                 </MenuItem>
               ))}
+
             </Menu>
           </Box>
 
           {/* User Menu */}
           <Tooltip title="Open settings">
-            <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
+            <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }} >
               <Avatar
                 alt="User Avatar"
-                src="/static/images/avatar/1.jpg"
+                // src="/static/images/avatar/1.jpg"
                 sx={{ bgcolor: '#5FECC8', color: 'white' }}
-              />
+              >{initials}</Avatar>
             </IconButton>
           </Tooltip>
           <Menu
@@ -139,11 +225,88 @@ const Navbar = ({ darkMode, toggleDarkMode }) => {
             onClose={handleCloseMenu}
           >
             {settings.map((setting) => (
-              <MenuItem key={setting} onClick={handleCloseMenu}>
+              <MenuItem
+                key={setting}
+                onClick={() => {
+                  handleCloseMenu();
+                  if (setting === "Logout") {
+                    setLogoutConfirmOpen(true);
+                  } else if (setting === "Profile") {
+                    setOpenProfileDialog(true);
+                  }
+
+                }}
+              >
                 <Typography>{setting}</Typography>
               </MenuItem>
             ))}
+
           </Menu>
+          <Dialog
+            open={openProfileDialog}
+            onClose={() => setOpenProfileDialog(false)}
+            PaperProps={{
+              sx: {
+                position: "absolute",
+                top: 70,
+                right: 20,
+                m: 0,
+                width: 300,
+                borderRadius: 2,
+              },
+            }}
+          >
+            <DialogTitle>
+              <Box display="flex" alignItems="center" gap={2}>
+                <Avatar sx={{ bgcolor: "#5FECC8", width: 56, height: 56 }}>
+                  {initials}
+                </Avatar>
+
+                <Box>
+                  <Typography variant="h6" display="inline">
+                    {empName}
+                  </Typography>
+                </Box>
+
+              </Box>
+            </DialogTitle>
+
+            <DialogContent dividers>
+              <Box display="flex" alignItems="center" gap={1} mb={2}>
+                <CallIcon color="primary" />
+                <Typography>{phoneNo}</Typography>
+              </Box>
+              <Box display="flex" alignItems="center" gap={1}>
+                <EmailIcon color="primary" />
+                <Typography>{email}</Typography>
+              </Box>
+            </DialogContent>
+
+
+            <DialogActions>
+              <Button onClick={() => setOpenProfileDialog(false)} variant="outlined">Close</Button>
+            </DialogActions>
+          </Dialog>
+
+          <Dialog
+            open={logoutConfirmOpen}
+            onClose={() => setLogoutConfirmOpen(false)}
+          >
+            <DialogTitle>Confirm Logout</DialogTitle>
+            <DialogContent>
+              <Typography>Are you sure you want to logout?</Typography>
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={() => setLogoutConfirmOpen(false)} variant="outlined">
+                Cancel
+              </Button>
+              <Button onClick={logout} color="error" variant="contained">
+                Logout
+              </Button>
+            </DialogActions>
+          </Dialog>
+
+
         </Box>
       </Toolbar>
     </AppBar>
