@@ -63,6 +63,7 @@ const AlertPanel = ({ darkMode }) => {
         socket.onmessage = (event) => {
             try {
                 const data = JSON.parse(event.data);
+                console.log(data, 'data');
                 setAlertData((prev) => [...prev, data]);
             } catch (error) {
                 console.error('Invalid JSON:', event.data);
@@ -82,13 +83,32 @@ const AlertPanel = ({ darkMode }) => {
         };
     }, []);
 
-    // Calculate sliced data for current page
     const startIndex = (page - 1) * rowsPerPage;
     const endIndex = startIndex + rowsPerPage;
     const paginatedData = alertData.slice(startIndex, endIndex);
 
-    // Calculate total pages
+
     const totalPages = Math.ceil(alertData.length / rowsPerPage);
+
+    const handleTriggerClick = async (id, triggerStatus) => {
+        try {
+            const response = await fetch(`${port}/admin_web/alert/?id=${id}`);
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+
+            const data = await response.json();
+
+            navigate('/Sop', {
+                state: {
+                    triggerStatus: triggerStatus
+                }
+            });
+
+        } catch (error) {
+            console.error('Error fetching alert details:', error);
+        }
+    };
 
     return (
         <Box sx={{ flexGrow: 1, mt: 1, ml: 1, mr: 1, mb: 2 }}>
@@ -137,7 +157,7 @@ const AlertPanel = ({ darkMode }) => {
                                             }}
                                         >
                                             <StyledCardContent style={{ flex: 0.3 }}>
-                                                <Typography variant="subtitle2">{startIndex + index + 1}</Typography>
+                                                <Typography variant="subtitle2">{item.pk_id}</Typography>
                                             </StyledCardContent>
                                             <StyledCardContent style={{ flex: 1 }}>
                                                 <Typography variant="subtitle2">{new Date(item.time).toLocaleString()}</Typography>
@@ -150,10 +170,11 @@ const AlertPanel = ({ darkMode }) => {
                                             </StyledCardContent>
                                             <StyledCardContent style={{ flex: 1 }}>
                                                 <Button
-                                                    onClick={() => navigate('/Sop', { state: { flag: 1 } })}
+                                                    // onClick={() => navigate('/Sop', { state: { flag: 1 } })}
+                                                    onClick={() => handleTriggerClick(item.pk_id, item.triger_status)}
                                                     style={{
                                                         width: '60%',
-                                                        backgroundColor: item.triger_status === 1 ? '#00BFA6' : '#FF4C4C',
+                                                        backgroundColor: item.triger_status === 1 ? '#FF4C4C' : '#00BFA6',
                                                         color: darkMode ? 'white' : 'black',
                                                         borderRadius: '10px',
                                                         height: '30px',

@@ -209,80 +209,98 @@ function Login() {
     setPasswordError('');
     setCaptchaTextError('');
 
-    let hasError = false;
+        let hasError = false;
 
-    if (!emp_username) {
-        setUsernameError('Please enter User ID');
-        hasError = true;
-    }
+        if (!emp_username) {
+            setUsernameError('Please enter User ID');
+            hasError = true;
+        }
 
-    if (!password) {
-        setPasswordError('Please enter Password');
-        hasError = true;
-    }
+        if (!password) {
+            setPasswordError('Please enter Password');
+            hasError = true;
+        }
 
-    if (captchaError || (!captchaValue && captchaKey)) {
-        setCaptchaTextError('Please enter valid captcha text');
-        hasError = true;
-    }
+        if (captchaError || (!captchaValue && captchaKey)) {
+            setCaptchaTextError('Please enter valid captcha text');
+            hasError = true;
+        }
 
-    if (hasError) {
-        return;
-    }
-
-    try {
-        setLoading(true);
-
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 5000);
-
-        const response = await fetch(`${port}/admin_web/login/`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                emp_username,
-                password,
-                captcha_key: captchaKey,
-                captcha_value: captchaValue,
-            }),
-            signal: controller.signal,
-        });
-
-        clearTimeout(timeoutId);
-
-        const data = await response.json();
-        console.log('Login response:', data);
-
-        if (!response.ok) {
-            if (data.errors?.non_field_errors?.[0]?.toLowerCase().includes('captcha')) {
-                setCaptchaTextError('Invalid captcha. Please try again.');
-                fetchCaptcha();
-            } else if (data.errors?.non_field_errors?.[0]) {
-                setPasswordError(data.errors.non_field_errors[0]);
-            } else if (data.msg && data.msg.toLowerCase().includes('captcha')) {
-                setCaptchaTextError('Invalid captcha. Please try again.');
-                fetchCaptcha();
-            } else {
-                setPasswordError('Invalid User ID or Password');
-            }
+        if (hasError) {
             return;
         }
 
-        if (data.token) {
-            localStorage.setItem('access_token', data.token.access);
-            localStorage.setItem('refresh_token', data.token.refresh);
-            localStorage.setItem('user', JSON.stringify(data.token.colleague));
-            localStorage.setItem('user_group', data.token.user_group);
+        try {
+            setLoading(true);
+
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 5000);
+
+            const response = await fetch(`${port}/admin_web/login/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    emp_username,
+                    password,
+                    captcha_key: captchaKey,
+                    captcha_value: captchaValue,
+                }),
+                signal: controller.signal,
+            });
+
+            clearTimeout(timeoutId);
+
+            const data = await response.json();
+            console.log('Login response:', data);
+
+            if (!response.ok) {
+                if (data.errors?.non_field_errors?.[0]?.toLowerCase().includes('captcha')) {
+                    setCaptchaTextError('Invalid captcha. Please try again.');
+                    fetchCaptcha();
+                } else if (data.errors?.non_field_errors?.[0]) {
+                    setPasswordError(data.errors.non_field_errors[0]);
+                } else if (data.msg && data.msg.toLowerCase().includes('captcha')) {
+                    setCaptchaTextError('Invalid captcha. Please try again.');
+                    fetchCaptcha();
+                } else {
+                    setPasswordError('Invalid User ID or Password');
+                }
+                return;
+            }
+
+            if (data.token) {
+                localStorage.setItem('access_token', data.token.access);
+                localStorage.setItem('refresh_token', data.token.refresh);
+                localStorage.setItem('user', JSON.stringify(data.token.colleague));
+                localStorage.setItem('user_group', data.token.user_group);
+
+                console.log('Access Token:', data.token.access);
+                console.log('Refresh Token:', data.token.refresh);
+                console.log('User Group:', data.token.user_group);
+                console.log('User Info:', data.token.colleague);
+                const group = data.token.user_group;
 
             console.log('Access Token:', data.token.access);
             console.log('Refresh Token:', data.token.refresh);
             console.log('User Group from response:', data.token.user_group);
             console.log('User Info:', data.token.colleague);
             
-            const group = data.token.user_group;
+            
             console.log('Stored group from localStorage:', localStorage.getItem('user_group'));
+
+                if (group === '1') {
+                    navigate('/add-group');
+                } else if (group === '2') {
+                    navigate('/alert-panel');
+                } else if (group === '3') {
+                    navigate('/multiscreen');
+                } else {
+                    console.warn('Unhandled user group:', group);
+                    // Optionally redirect to a fallback route
+                    navigate('/not-authorized');
+                }
 
             //  IMPORTANT: Only trigger WebSocket for group '3'
             if (group === '3') {
@@ -323,20 +341,20 @@ function Login() {
             setPasswordError('Login failed. Please try again.');
         }
 
-    } catch (err) {
-        console.error('Login error:', err);
-        if (err.name === 'AbortError') {
-            setPasswordError('Login request timed out. Server might be down.');
-        } else if (err.message?.includes('Failed to fetch')) {
-            setPasswordError('Cannot connect to server. Please check if backend is running.');
-        } else {
-            setPasswordError('Login failed. Please try again.');
+        } catch (err) {
+            console.error('Login error:', err);
+            if (err.name === 'AbortError') {
+                setPasswordError('Login request timed out. Server might be down.');
+            } else if (err.message?.includes('Failed to fetch')) {
+                setPasswordError('Cannot connect to server. Please check if backend is running.');
+            } else {
+                setPasswordError('Login failed. Please try again.');
+            }
+        } finally {
+            setLoading(false);
         }
-    } finally {
-        setLoading(false);
-    }
-};
-    
+    };
+
 
     const [openForgotDialog, setOpenForgotDialog] = useState(false);
     const [username, setUsername] = useState('');
