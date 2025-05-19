@@ -16,6 +16,13 @@ urlpatterns = [
     path('employee_post/',DMS_Employee_post_api.as_view(),name='employee_post'),
     path('employee_put/<int:emp_id>/',DMS_Employee_put_api.as_view(),name='employee_put'),
     path('employee_delete/<int:emp_id>/',DMS_Employee_delete_api.as_view(),name='employee_delete'),
+
+    path('employee_changepasswordput/<int:emp_id>/',DMS_ChangePassword_put_api.as_view(),name='employee_put'),
+
+    path('sop_get',DMS_Sop_get_api.as_view(),name='sop_get'),
+    path('sop_post',DMS_Sop_post_api.as_view(),name='sop_post'),
+    path('sop_put/<int:sop_id>/',DMS_Sop_put_api.as_view(),name='sop_put'),
+    path('sop_delete/<int:sop_id>/',DMS_Sop_delete_api.as_view(),name='sop_delete'),
     #===================================Kirti==================================================
     
     
@@ -37,6 +44,11 @@ urlpatterns = [
     
     path('Department_get/',DMS_Department_get_api.as_view(), name='Department_get'),
     path('Department_get_idwise/<int:dep_id>/',DMS_Department_idwise_get_api.as_view(), name='Department_get_idwise'),
+    
+    path('DMS_Disaster_Type_Get/',DMS_Disaster_Type_Get_API.as_view(), name='DMS_Disaster_Type_Get'),
+    path('DMS_Disaster_Type_Get_Idwise/<int:disaster_id>/',DMS_Disaster_Type_Idwise_Get_API.as_view(), name='DMS_Disaster_Type_Get_Idwise'),
+    
+    
     #===================================Mohin==================================================
     
 
@@ -54,5 +66,6 @@ urlpatterns = [
     path('login/', UserLoginView.as_view(), name='login'),
     path('login/refresh/', TokenRefreshView.as_view(), name='login_refresh'),
     path('logout/', LogoutView.as_view(), name='logout'),
+    path('alert/', DMS_Alert_idwise_get_api.as_view(), name='DMS_Alert_idwise'),
     #=============================== Nikita =========================================================
 ]

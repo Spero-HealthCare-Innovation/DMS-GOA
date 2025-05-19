@@ -355,32 +355,136 @@ class CombinedAPIView(APIView):
         permission_serializer = permission_sub_Serializer(permission_objects, many=True)
 
         
-        grouped_modules = {}
+        combined_data = []
         for module_data in modules_serializer.data:
-            r_m_id = module_data["mod_group_id"]
-            if r_m_id not in grouped_modules:
-                grouped_modules[r_m_id] = {
-                    "department_id": module_data["department_id"],
-                    "department_name": module_data["department_name"],
-                    "group_id": r_m_id,
-                    "group_name": module_data["grp_name"],
-                    "modules": []
-                }
-            grouped_modules[r_m_id]["modules"].append({
-                "module_id": module_data["mod_id"],
-                "name": module_data["mod_name"],
-                "submodules": []
-            })
+            module_id = module_data["mod_id"]
+            module_name = module_data["mod_name"]
+            group_id = module_data["mod_group_id"]
+            group_name = module_data["grp_name"]
+            
 
-        
-        for submodule_data in permission_serializer.data:
-            module_id = submodule_data["mod_id"]
-            for group_data in grouped_modules.values():
-                for module in group_data["modules"]:
-                    if module["module_id"] == module_id:
-                        module["submodules"].append(submodule_data)
+            submodules = [submodule for submodule in permission_serializer.data if submodule["mod_id"] == module_id]
 
-        final_data = list(grouped_modules.values())
+            formatted_data = {
+                "group_id": group_id,
+                "group_name": group_name,
+                "module_id": module_id,
+                "name": module_name,
+                "submodules": submodules
+            }
+
+            combined_data.append(formatted_data)
+
+        final_data = combined_data
 
         return Response(final_data)
 
+
+    
+    
+class DMS_Group_put_api(APIView):
+    def get(self, request, grp_id):
+        snippet = DMS_Group.objects.filter(grp_id=grp_id,grp_is_deleted=False)
+        serializers = DMS_Group_serializer(snippet, many=True)
+        return Response(serializers.data)
+
+
+class DMS_ChangePassword_put_api(APIView):
+    def get(self, request, emp_id):
+        snippet = DMS_Employee.objects.filter(emp_id=emp_id,emp_is_deleted=False)
+        serializers = ChangePasswordGetSerializer(snippet, many=True)
+        return Response(serializers.data)
+
+    def put(self, request, emp_id):
+        try:
+            instance = DMS_Employee.objects.get(emp_id=emp_id)
+        except DMS_Employee.DoesNotExist:
+            return Response({"error": "Group not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        serializer = ChangePasswordputSerializer(instance, data=request.data, partial=True)  # partial=True allows partial updates
+
+
+        plain_password = request.data['password']
+        hashed_password = make_password(plain_password)
+        print("++++++++", hashed_password, plain_password)
+        request.data['password'] = hashed_password
+        request.data['password2'] = hashed_password
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class DMS_Sop_get_api(APIView):
+    def get(self,request):
+        snippet = DMS_SOP.objects.all()
+        serializers = SopSerializer(snippet,many=True)
+        return Response(serializers.data,status=status.HTTP_200_OK)
+    
+class DMS_Sop_post_api(APIView):
+    def post(self,request):
+        serializers=SopSerializer(data=request.data)
+        if serializers.is_valid():
+            serializers.save()
+            return Response(serializers.data,status=status.HTTP_201_CREATED)
+        return Response(serializers.errors,status=status.HTTP_400_BAD_REQUEST)
+
+class DMS_Sop_put_api(APIView):
+    def get(self, request, sop_id):
+        snippet = DMS_SOP.objects.filter(sop_id=sop_id)
+        serializers = SopSerializer(snippet, many=True)
+        return Response(serializers.data)
+
+    def put(self, request, sop_id):
+        try:
+            instance = DMS_SOP.objects.get(sop_id=sop_id)
+        except DMS_SOP.DoesNotExist:
+            return Response({"error": "Sop not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        serializer = SopSerializer(instance, data=request.data, partial=True)  # partial=True allows partial updates
+
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+ 
+class DMS_Sop_delete_api(APIView):
+    def get(self, request, sop_id):
+        try:
+            instance = DMS_SOP.objects.get(sop_id=sop_id, sop_is_deleted=False)
+        except DMS_SOP.DoesNotExist:
+            return Response({"error": "Sop not found or already deleted."}, status=status.HTTP_404_NOT_FOUND)
+        serializer = SopSerializer(instance)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def delete(self, request, sop_id):
+        try:
+            instance = DMS_SOP.objects.get(sop_id=sop_id, sop_is_deleted=False)
+        except DMS_SOP.DoesNotExist:
+            return Response({"error": "Sop not found or already deleted."}, status=status.HTTP_404_NOT_FOUND)
+
+        instance.sop_is_deleted = True
+        instance.save()
+        return Response({"message": "Sop soft deleted successfully."}, status=status.HTTP_200_OK)
+
+ 
+class DMS_Disaster_Type_Get_API(APIView):
+    def get(self,request):
+        snippet = DMS_Disaster_Type.objects.filter(disaster_is_deleted=False)
+        serializers = DMS_Disaster_Type_Serializer(snippet,many=True)
+        return Response(serializers.data,status=status.HTTP_200_OK)
+
+class DMS_Disaster_Type_Idwise_Get_API(APIView):
+    def get(self,request,disaster_id):
+        snippet = DMS_Disaster_Type.objects.filter(disaster_is_deleted=False,disaster_id=disaster_id)
+        serializers = DMS_Disaster_Type_Serializer(snippet,many=True)
+        return Response(serializers.data,status=status.HTTP_200_OK)
+    
+
+class DMS_Alert_idwise_get_api(APIView):
+    def get(self,request):
+        alert_id = request.GET.get('id')
+        alert_obj = Weather_alerts.objects.get(pk_id=alert_id)
+        alert_obj.triger_status = 2
+        alert_obj.save()
+        serializers = WeatherAlertSerializer(alert_obj,many=False)
+        return Response(serializers.data,status=status.HTTP_200_OK)

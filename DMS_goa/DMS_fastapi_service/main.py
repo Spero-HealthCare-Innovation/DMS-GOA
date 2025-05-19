@@ -1,4 +1,4 @@
-from fastapi import FastAPI, WebSocket
+from fastapi import FastAPI, WebSocket, WebSocket, WebSocketDisconnect, Depends
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 import socketio
@@ -11,6 +11,25 @@ import asyncio
 from kafka import KafkaProducer
 from kafka import KafkaConsumer
 import threading
+# import subprocess
+import time
+# import pygetwindow as gw
+# import pyautogui
+import os
+from screeninfo import get_monitors
+from fastapi.responses import JSONResponse
+from pydantic import BaseModel
+from fastapi.encoders import jsonable_encoder  # Import jsonable_encoder
+import logging
+# import uiautomation as auto
+import asyncio
+from sqlalchemy import text
+from typing import List
+from websocket_router import router as websocket_router
+# from .websocket_router import router as websocket_router
+import httpx
+import pandas as pd
+
 
 #==================================Send Data to Kafka===(Mayank)========================================#
 
@@ -60,7 +79,7 @@ async def fetch_and_send():
 
             if temp > 20.0:
                 print(f"[✔] Temp is {temp}°C > 20°C — sending to Kafka")
-                producer.send('weather_alerts', data)
+                producer.send('weather_alerts_test', data)
             else:
                 print(f"[ ] Temp is {temp}°C ≤ 20°C — not sending")
 
@@ -73,7 +92,57 @@ async def start_background_task():
     asyncio.create_task(fetch_and_send())
     
     
-#============================ MAYANK =========================================================================#
+#============================ MAYANK(multiple Screen) =========================================================================#
+
+# @app.get("/launch-dashboards")
+# def launch_dashboards():
+#     try:
+#         subprocess.Popen(["cmd", "/c", "start chrome --new-window http://localhost:3000/service-request"])
+#         subprocess.Popen(["cmd", "/c", "start chrome --new-window http://localhost:3000/addservice"])
+#         subprocess.Popen(["cmd", "/c", "start chrome --new-window http://localhost:3000/enquiries"])
+
+#         # subprocess.Popen(["cmd", "/c", "start chrome --new-window http://localhost:5173/dashboard1"])
+#         # subprocess.Popen(["cmd", "/c", "start chrome --new-window http://localhost:5173/dashboard2"])
+#         # subprocess.Popen(["cmd", "/c", "start chrome --new-window http://localhost:5173/dashboard3"])
+
+
+#         time.sleep(5)
+
+#         # Get and sort monitors left to right
+#         monitors = sorted(get_monitors(), key=lambda m: m.x)
+#         if len(monitors) < 3:
+#             return JSONResponse(content={"error": "Less than 3 monitors detected"}, status_code=400)
+
+#         # Map dashboards to correct monitor index
+#         dashboard_monitor_map = {
+#             'service-request': 0,  # This will go to monitor 1
+#             'addservice': 1,       # This will go to monitor 2
+#             'enquiries': 2         # This will go to monitor 3
+#         }
+
+#         # Get Chrome windows
+#         chrome_windows = [w for w in gw.getWindowsWithTitle('Chrome') if w is not None and w.title.strip() != '']
+#         if len(chrome_windows) < 3:
+#             return JSONResponse(content={"error": "Not enough Chrome windows found"}, status_code=500)
+
+#         for dashboard, monitor_index in dashboard_monitor_map.items():
+#             for window in chrome_windows:
+#                 if dashboard in window.title.lower():
+#                     monitor = monitors[monitor_index]
+#                     window.moveTo(monitor.x, monitor.y)
+#                     window.resizeTo(monitor.width, monitor.height)
+#                     break
+
+#         for window in chrome_windows:
+#             if "login" in window.title.lower():  # make sure your login window has "Login" in title
+#                 window.close()
+#                 break
+
+#         return {"message": "Dashboards correctly placed on respective monitors"}
+
+#     except Exception as e:
+#         return JSONResponse(content={"error": str(e)}, status_code=500)
+
 """" Note:- *This command should always remain at the end. Any new code must be added above it.* """
 
 """ Run the FastAPI Project
@@ -83,12 +152,143 @@ cd Spero-DMS\DMS_goa\DMS_fastapi_service
 2. Run the FastAPI server:
 uvicorn main:app --host 0.0.0.0 --port 8000 --reload """
 
+connected_clients: List[WebSocket] = []
+
+@app.websocket("/send_data")
+async def websocket_endpoint(websocket: WebSocket):
+    await websocket.accept()
+    connected_clients.append(websocket)
+    print("Client connected")
+    try:
+        while True:
+            data = await websocket.receive_text()
+            print(f"Received from frontend: {data}")
+            if data.strip().lower() == "true":
+                # Broadcast to all connected clients
+                for client in connected_clients:
+                    if client != websocket:
+                        await client.send_text("true")
+    except WebSocketDisconnect:
+        print("Client disconnected")
+        connected_clients.remove(websocket)
+
 
 
 # ------------------------------------------------------------------------------------------------------------#
 
-from fastapi import FastAPI
-from websocket_router import router as websocket_router
+EXCEL_PATH = "goa_latlong_points.xlsx"  # Update this with your file path
 
-app = FastAPI()
+
+# Excel file se lat-long read karo
+def extract_lat_lon_from_excel(file_path):
+    df = pd.read_excel(file_path)
+    latitudes = df['lat'].dropna().astype(str).tolist()
+    longitudes = df['long'].dropna().astype(str).tolist()
+    return ','.join(latitudes), ','.join(longitudes)
+
+
+# Open-Meteo API ko call karo
+async def call_open_meteo_api():
+    latitudes, longitudes = extract_lat_lon_from_excel(EXCEL_PATH)
+
+    url = (
+        f"https://api.open-meteo.com/v1/forecast?"
+        f"latitude={latitudes}&longitude={longitudes}"
+        f"&hourly=temperature_2m,rain,precipitation,weather_code"
+        f"&models=ecmwf_ifs025"
+    )
+
+    async with httpx.AsyncClient() as client:
+        response = await client.get(url)
+
+    if response.status_code == 200:
+        data = response.json()
+        print("✅ Weather data fetched")
+        # print(f"[✔] Temp is {temp}°C > 20°C — sending to Kafka")
+        producer.send('weather_alerts_rain', data)
+        return data
+    else:
+        print("❌ Error fetching data")
+        return {"error": response.text}
+
+
+# Manual trigger route
+@app.get("/fetch-weather")
+async def fetch_weather():
+    data = await call_open_meteo_api()
+    return JSONResponse(content=data)
+
+
+# Background scheduler
+async def scheduled_weather_fetch():
+    while True:
+        await call_open_meteo_api()
+        await asyncio.sleep(120)  # 2 minutes
+
+
+# Start scheduler on app startup
+@app.on_event("startup")
+async def startup_event():
+    asyncio.create_task(scheduled_weather_fetch())
+
+
+
+# -----------------------------------------NIKITA------------------------------------------------------
+
+from fastapi import FastAPI, WebSocket
+import asyncio
+import json
+from django_setup import *
+from asgiref.sync import sync_to_async
+from admin_web.models import Weather_alerts  # Django model
+from weather_alerts_utils import get_old_weather_alerts
+
+# app = FastAPI()
+
+@app.websocket("/ws/weather_alerts")
+async def websocket_endpoint(websocket: WebSocket):
+    await websocket.accept()
+
+    try:
+        # Send old messages
+        old_messages = await get_old_weather_alerts()
+        for msg in old_messages:
+            await websocket.send_text(json.dumps(msg))
+            await asyncio.sleep(0.05)
+
+        # Send current data
+        alerts = await sync_to_async(list)(Weather_alerts.objects.all().values(
+            "pk_id", "latitude", "longitude", "elevation", "time", "temperature_2m", 
+            "rain", "precipitation", "weather_code", "triger_status"
+        ))
+
+        for alert in alerts:
+            if alert["time"]:
+                alert["time"] = alert["time"].isoformat()
+
+        await websocket.send_text(json.dumps({"type": "all_alerts", "data": alerts}))
+
+        # Keep-alive loop
+        while True:
+            await asyncio.sleep(10)  # You can also check for updates and push here
+            await websocket.send_text(json.dumps({"type": "heartbeat"}))  # Optional
+
+    except WebSocketDisconnect:
+        print("WebSocket disconnected by client.")
+
+    except Exception as e:
+        print(f"WebSocket error: {e}")
+
+
+
+
+
+
+
+
+
+
+
+
+
 app.include_router(websocket_router)

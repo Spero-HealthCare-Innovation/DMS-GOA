@@ -117,7 +117,7 @@ class DMS_Permission(models.Model):
 # Custom User Manager
 class DMS_Employee_Manager(BaseUserManager):
 
-    def create_user(self, emp_username, grp_id, emp_name, emp_email, emp_contact_no, emp_dob, emp_doj, emp_is_login, state_id, dist_id, tahsil_id, city_id, emp_is_deleted, emp_added_by, emp_modified_by, password=None, password2=None):
+    def create_user(self, emp_username, grp_id, emp_name, emp_email, emp_contact_no, emp_dob, emp_doj, emp_is_login, state_id, dist_id, tahsil_id, city_id, emp_is_deleted, emp_added_by, emp_modified_by,password=None, password2=None):
 
         """
         Creates and saves a User with the given email, name, tc and password.
@@ -147,7 +147,7 @@ class DMS_Employee_Manager(BaseUserManager):
         user.save(using=self._db)
         return user
 
-    def create_superuser(self, emp_username, grp_id, emp_name, emp_email, emp_contact_no, emp_dob, emp_doj, emp_is_login, state_id, dist_id, tahsil_id, city_id, emp_is_deleted, emp_added_by, emp_modified_by, password=None):
+    def create_superuser(self, emp_username, grp_id, emp_name, emp_email, emp_contact_no, emp_dob, emp_doj, emp_is_login, state_id, dist_id, tahsil_id, city_id, emp_is_deleted, emp_added_by, emp_modified_by, password=None,):
 
         """Creates and saves a superuser with the given email, name, tc and password."""
         user = self.create_user(
@@ -185,10 +185,10 @@ class DMS_Employee(AbstractBaseUser):
     emp_doj = models.DateField(null=True, blank=True)
     emp_is_login = models.BooleanField(default=False, null=True, blank=True)
     # grp_id = models.ForeignKey(DMS_Group,on_delete=models.CASCADE)
-    # state_id = models.ForeignKey(DMS_State, on_delete=models.CASCADE)
-    # dis_id = models.ForeignKey(DMS_District, on_delete=models.CASCADE)
-    # tah_id = models.ForeignKey(DMS_Tahsil, on_delete=models.CASCADE)
-    # cit_id = models.ForeignKey(DMS_City, on_delete=models.CASCADE)
+    # state_id = models.ForeignKey(DMS_State, on_delete=models.CASCADE, default=1)
+    # dis_id = models.ForeignKey(DMS_District, on_delete=models.CASCADE, default=1)
+    # tah_id = models.ForeignKey(DMS_Tahsil, on_delete=models.CASCADE, default=1)
+    # city_id = models.ForeignKey(DMS_City, on_delete=models.CASCADE, default=1)
 
     grp_id = models.CharField(max_length=255, null=True, blank=True)
     state_id = models.CharField(max_length=255, null=True, blank=True)
@@ -201,8 +201,7 @@ class DMS_Employee(AbstractBaseUser):
     emp_added_date = models.DateTimeField(auto_now_add=True,null=True)
     emp_modified_by = models.CharField(max_length=255, null=True, blank=True)
     emp_modified_date = models.DateTimeField(auto_now=True,null=True, blank=True)
-    emp_plain_password=models.CharField(max_length=255,null=True,blank=True)
-
+ 
 
     username = None
     email = None
@@ -275,3 +274,35 @@ class DMS_Role(models.Model):
     role_added_date = models.DateTimeField(auto_now=True)
     role_modified_by = models.CharField(max_length=255, null=True, blank=True)
     role_modified_date = models.DateTimeField(null=True, blank=True)
+
+class DMS_SOP(models.Model):
+    sop_id=models.AutoField(primary_key=True)
+    sop_description=models.TextField(null=True,blank=True)
+    disaster_id=models.ForeignKey(DMS_Disaster_Type,on_delete=models.CASCADE)
+    sop_is_deleted = models.BooleanField(default=False)
+    sop_added_by=models.CharField(max_length=255,null=True,blank=True)
+    sop_added_date = models.DateTimeField(auto_now=True)
+    sop_modified_by = models.CharField(max_length=255, null=True, blank=True)
+    sop_modified_date = models.DateTimeField(null=True, blank=True)
+    
+    
+class Weather_alerts(models.Model):
+    pk_id = models.AutoField(primary_key=True)
+    latitude = models.FloatField(null=True,blank=True)
+    # latitude = models.FloatField(null=True,blank=True)
+    longitude = models.FloatField(null=True,blank=True)
+    elevation = models.FloatField(null=True,blank=True)
+    timezone = models.TextField(null=True,blank=True)
+    timezone_abbreviation = models.TextField(null=True,blank=True)
+    utc_offset_seconds = models.IntegerField(null=True,blank=True)
+    time = models.DateTimeField(null=True,blank=True)
+    temperature_2m = models.FloatField(null=True,blank=True)
+    triger_status = models.IntegerField(null=True,blank=True)
+    rain = models.FloatField(null=True,blank=True)
+    precipitation = models.FloatField(null=True,blank=True)
+    weather_code = models.IntegerField(null=True,blank=True)
+    added_by=models.CharField(max_length=255,null=True,blank=True)
+    added_date = models.DateTimeField(auto_now=True)
+    modified_by = models.CharField(max_length=255, null=True, blank=True)
+    modified_date = models.DateTimeField(null=True, blank=True)
+

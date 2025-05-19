@@ -4,12 +4,20 @@ pipeline {
     options {
         skipDefaultCheckout(true)
     }
- 
+    // Add permissions to project
+    // sudo groupadd dmsgroup
+    // sudo usermod -aG dmsgroup spero_cad25
+    // sudo usermod -aG dmsgroup jenkins
+    // sudo chown -R :dmsgroup /var/www/html/DMS_goa
+    // sudo chmod -R 775 /var/www/html/DMS_goa/
+    // restart server
+
+
     environment {
         GIT_REPO_URL = 'https://github.com/gitmaster-dms/Spero-DMS.git'
         GIT_BRANCH = 'main'
-        TARGET_DIR = '/var/www/html/Aggregation_test_project/DMS_goa_test'
-    }
+        TARGET_DIR = '/var/www/html/DMS_goa'
+    } 
 
     stages {
         stage('Prepare Workspace') {
@@ -18,6 +26,7 @@ pipeline {
                     sh '''
                         if [ ! -d "${TARGET_DIR}" ]; then
                             echo "Directory does not exist. Creating ${TARGET_DIR}..."
+                            sudo chown -R jenkins:jenkins "${TARGET_DIR}"
                             mkdir -p "${TARGET_DIR}"
                             chmod -R 775 "${TARGET_DIR}"
                         else
@@ -34,20 +43,25 @@ pipeline {
                     script {
                         if (!fileExists('.git')) {
                             echo "Cloning repository into ${TARGET_DIR}..."
-                            sh "git clone -b ${GIT_BRANCH} ${GIT_REPO_URL} ."
+                            sh """
+                                git clone -b ${GIT_BRANCH} ${GIT_REPO_URL} .
+                            """
                         } else {
-                            echo "Repository already exists. Resetting and pulling latest changes..."
-                            sh '''
-                                git config --global --add safe.directory $(pwd)
+                            echo "Repository already exists. Pulling latest changes..."
+                            sh """
+                                git config --global --add safe.directory \$(pwd)
                                 git fetch origin ${GIT_BRANCH}
                                 git reset --hard origin/${GIT_BRANCH}
-                                git clean -fd
-                            '''
+                                git clean -fd -e vvenv/
+                            """
                         }
                     }
                 }
             }
         }
+
+
+
 
         stage('Check Files') {
             steps {
@@ -63,6 +77,17 @@ pipeline {
                     sh '''
                         chmod +x Deployment/envsetup.sh
                         Deployment/envsetup.sh
+                    '''
+                }
+            }
+        }
+
+        stage('Creating React Production Build') {
+            steps {
+                dir("${TARGET_DIR}") {
+                    sh '''
+                        chmod +x Deployment/react_vite.sh
+                        Deployment/react_vite.sh
                     '''
                 }
             }
