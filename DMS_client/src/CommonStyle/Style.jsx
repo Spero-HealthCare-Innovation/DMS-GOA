@@ -7,7 +7,6 @@ export const getThemeBgColors = (darkMode) => {
   const textColor = darkMode ? "#ffffff" : "#000000";
   const bgColor = darkMode ? "#0a1929" : "#ffffff";
   const borderColor = darkMode ? "#7F7F7F" : "#ccc";
-  const labelColor = darkMode ? "#5FECC8" : "#1976d2";
 
   const inputBgColor = darkMode
     ? "rgba(255, 255, 255, 0.16)"
@@ -15,7 +14,7 @@ export const getThemeBgColors = (darkMode) => {
   const TableDataColor = darkMode
     ? "rgba(0, 0, 0, 0.04)"
     : "rgba(255, 255, 255, 0.16)";
- 
+
   return {
     labelColor: darkMode ? "#5FECC8" : "#1976d2",
     textColor,
@@ -23,18 +22,17 @@ export const getThemeBgColors = (darkMode) => {
     borderColor,
     inputBgColor,
     TableDataColor,
-    labelColor,
   };
 };
- 
- 
+
+
 const darkMode = true; // Replace this later with actual dynamic value
- 
+
 // STEP 3: Destructure theme values
 const { textColor, bgColor, borderColor, inputBgColor } =
   getThemeBgColors(darkMode);
- 
- 
+
+
 export const TableHeadingCard = styled("div")(() => ({
   display: "flex",
   alignItems: "center",
@@ -45,7 +43,7 @@ export const TableHeadingCard = styled("div")(() => ({
   color: "black",
   height: "40px",
 }));
- 
+
 export const TableDataCardBody = styled("tr")(({ theme, status }) => ({
   display: "flex",
   alignItems: "center",
@@ -59,22 +57,21 @@ export const TableDataCardBody = styled("tr")(({ theme, status }) => ({
   cursor: "pointer",
   height: "45px",
   "&:hover": {
-    boxShadow: `0 0 8px ${
-      status === "Completed"
+    boxShadow: `0 0 8px ${status === "Completed"
         ? "#00e67699"
         : status === "Pending"
-        ? "#f4433699"
-        : "#88888855"
-    }`,
+          ? "#f4433699"
+          : "#88888855"
+      }`,
   },
 }));
- 
+
 export const StyledCardContent = styled("td")({
   padding: "0 8px",
   display: "flex",
   alignItems: "center",
 });
- 
+
 export const modalStyle = {
   position: "absolute",
   top: "50%",
@@ -86,7 +83,7 @@ export const modalStyle = {
   p: 4,
   borderRadius: 2,
 };
- 
+
 export const CustomTextField = {
   height: "3rem",
   "& .MuiInputBase-input": {
@@ -137,7 +134,7 @@ export const inputStyle = {
     boxShadow: "0px 4px 15px rgba(0, 0, 0, 0.2)",
   },
 };
- 
+
 export const fontsTableBody = {
   fontFamily: "Roboto",
   fontWeight: 400,
@@ -145,7 +142,7 @@ export const fontsTableBody = {
   letterSpacing: 0,
   textAlign: "center",
 };
- 
+
 export const fontsTableHeading = {
   fontFamily: "Roboto",
   fontWeight: 500,
@@ -154,7 +151,7 @@ export const fontsTableHeading = {
   textAlign: "center",
   color: textColor,
 };
- 
+
 export const textfieldInputFonts = {
   fontFamily: "Roboto",
   fontWeight: 400,
@@ -164,7 +161,7 @@ export const textfieldInputFonts = {
   verticalAlign: "middle",
   color: textColor,
 };
- 
+
 export const getCustomSelectStyles = (isDarkMode) => {
   const textColor = isDarkMode ? "#fff" : "#000";
   const textfieldcolor = isDarkMode ? "#fff" : "grey";
@@ -172,7 +169,7 @@ export const getCustomSelectStyles = (isDarkMode) => {
   const bgColor = isDarkMode
     ? "rgba(255, 255, 255, 0.16)"
     : "rgba(0, 0, 0, 0.04)";
- 
+
   return {
     height: "3rem",
     borderRadius: "12px",
