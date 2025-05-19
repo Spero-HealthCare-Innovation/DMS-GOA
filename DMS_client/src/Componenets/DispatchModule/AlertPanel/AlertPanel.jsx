@@ -27,7 +27,8 @@ const EnquiryCardBody = styled('div')({
     marginTop: '0.5em',
     borderRadius: '8px',
     position: 'relative',
-    height: '40px'
+    height: '40px',
+    cursor: 'pointer',
 });
 
 const StyledCardContent = styled(CardContent)({
@@ -43,18 +44,19 @@ const StyledCardContent = styled(CardContent)({
 const AlertPanel = ({ darkMode }) => {
     const port = import.meta.env.VITE_APP_API_KEY;
     const group = localStorage.getItem('user_group');
-    console.log(group,'groupgroup');
-    
+    console.log(group, 'groupgroup');
+    const navigate = useNavigate();
+
     const textColor = darkMode ? "#ffffff" : "#000000";
     const bgColor = darkMode ? "#0a1929" : "#ffffff";
     const borderColor = darkMode ? "#7F7F7F" : "#ccc";
-
     const [page, setPage] = useState(1);
     const [rowsPerPage, setRowsPerPage] = useState(5);
-
     const [alertData, setAlertData] = useState([]);
-
-    const navigate = useNavigate();
+    const startIndex = (page - 1) * rowsPerPage;
+    const endIndex = startIndex + rowsPerPage;
+    const paginatedData = alertData.slice(startIndex, endIndex);
+    const totalPages = Math.ceil(alertData.length / rowsPerPage);
 
     useEffect(() => {
         document.title = "DMS-AlertPanel";
@@ -85,13 +87,6 @@ const AlertPanel = ({ darkMode }) => {
             socket.close();
         };
     }, []);
-
-    const startIndex = (page - 1) * rowsPerPage;
-    const endIndex = startIndex + rowsPerPage;
-    const paginatedData = alertData.slice(startIndex, endIndex);
-
-
-    const totalPages = Math.ceil(alertData.length / rowsPerPage);
 
     const handleTriggerClick = async (id, triggerStatus) => {
         try {
@@ -178,7 +173,6 @@ const AlertPanel = ({ darkMode }) => {
                                             </StyledCardContent>
                                             <StyledCardContent style={{ flex: 1 }}>
                                                 <Button
-                                                    // onClick={() => navigate('/Sop', { state: { flag: 1 } })}
                                                     onClick={() => handleTriggerClick(item.pk_id, item.triger_status)}
                                                     style={{
                                                         width: '60%',
@@ -207,7 +201,6 @@ const AlertPanel = ({ darkMode }) => {
                         mb={4}
                         px={1}
                     >
-                        {/* Records Per Page */}
                         <Box display="flex" alignItems="center" gap={1}>
                             <Typography variant="body2" sx={{ color: textColor }}>
                                 Records per page:
