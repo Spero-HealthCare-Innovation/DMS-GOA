@@ -85,10 +85,10 @@ DATABASES = {
        'default': {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'DMS_GOA_DB_2025',
-        'USER': 'hhc123@sperohealthcare.in',
-        'PASSWORD': 'Spero@123', 
-        'HOST': '192.168.1.116',
-        'PORT': '5432', 
+        'USER': 'postgres',
+        'PASSWORD': 'spero@123#2025$', 
+        'HOST': '122.176.232.35',
+        'PORT': '5433', 
         'OPTIONS': {
             'options': '-c timezone=Asia/Kolkata',
         },
@@ -182,4 +182,86 @@ SIMPLE_JWT = {
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
+    "http://localhost:5174",
+    "http://localhost:5175",
 ]
+
+
+
+
+
+# all logs all day
+# import os
+
+# # Get current project base directory
+# BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+# # Create logs directory in the parent directory
+# PARENT_LOG_DIR = os.path.join(os.path.dirname(BASE_DIR), 'logs')
+# if not os.path.exists(PARENT_LOG_DIR):
+#     os.makedirs(PARENT_LOG_DIR)
+
+# LOGGING = {
+#     "version": 1,
+#     "disable_existing_loggers": False,
+#     "formatters": {
+#         "verbose": {
+#             "format": "{asctime} - {levelname} - {module} - {message}",
+#             "style": "{",
+#         },
+#         "simple": {
+#             "format": "{levelname} - {message}",
+#             "style": "{",
+#         },
+#     },
+#     "handlers": {
+#         "file": {
+#             "level": "INFO",
+#             "class": "logging.FileHandler",
+#             "filename": os.path.join(PARENT_LOG_DIR, "django_logentry.log"),
+#             "formatter": "verbose",
+#         },
+#     },
+#     "loggers": {
+#         "django": {
+#             "handlers": ["file"],
+#             "level": "INFO",
+#             "propagate": True,
+#         },
+#     },
+# }
+import os
+
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+PARENT_DIR = os.path.dirname(BASE_DIR)
+
+LOGGING_DIR = os.path.join(PARENT_DIR, "logs")
+if not os.path.exists(LOGGING_DIR):
+    os.makedirs(LOGGING_DIR)
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "handlers": {
+        "file": {
+            "level": "WARNING",  # Logs WARNING, ERROR, CRITICAL
+            "class": "logging.FileHandler",
+            "filename": os.path.join(LOGGING_DIR, "django_logentry.log"),
+            "formatter": "verbose",
+        },
+    },
+    "formatters": {
+        "verbose": {
+            "format": "{levelname} {asctime} {module} {message}",
+            "style": "{",
+        },
+    },
+    "loggers": {
+        "django": {
+            "handlers": ["file"],
+            "level": "WARNING",
+            "propagate": True,
+        },
+    },
+}
