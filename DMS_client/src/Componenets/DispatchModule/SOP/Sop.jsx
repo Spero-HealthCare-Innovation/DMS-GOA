@@ -6,13 +6,13 @@ import { useEffect, useState } from "react";
 
 function Sop({ darkMode, setDarkMode }) {
 
-    useEffect(() => {
+  useEffect(() => {
     document.title = "DMS|Sop";
   }, []);
   const location = useLocation();
   const flagFromState = location?.state?.triggerStatus ?? 0;
-  console.log(flagFromState,'flagFromState');
-  
+  console.log(flagFromState, 'flagFromState');
+
   const [flag, setFlag] = useState(flagFromState);
   const [selectedIncident, setSelectedIncident] = useState(null);
 
