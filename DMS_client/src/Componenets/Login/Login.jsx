@@ -281,13 +281,6 @@ function Login() {
                 console.log('User Group:', data.token.user_group);
                 console.log('User Info:', data.token.colleague);
                 const group = data.token.user_group;
-
-                console.log('Access Token:', data.token.access);
-                console.log('Refresh Token:', data.token.refresh);
-                console.log('User Group from response:', data.token.user_group);
-                console.log('User Info:', data.token.colleague);
-
-
                 console.log('Stored group from localStorage:', localStorage.getItem('user_group'));
 
                 if (group === '1') {

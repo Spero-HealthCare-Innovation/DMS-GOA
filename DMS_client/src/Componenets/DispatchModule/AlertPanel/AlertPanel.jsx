@@ -42,6 +42,9 @@ const StyledCardContent = styled(CardContent)({
 
 const AlertPanel = ({ darkMode }) => {
     const port = import.meta.env.VITE_APP_API_KEY;
+    const group = localStorage.getItem('user_group');
+    console.log(group,'groupgroup');
+    
     const textColor = darkMode ? "#ffffff" : "#000000";
     const bgColor = darkMode ? "#0a1929" : "#ffffff";
     const borderColor = darkMode ? "#7F7F7F" : "#ccc";
@@ -96,15 +99,20 @@ const AlertPanel = ({ darkMode }) => {
             if (!response.ok) {
                 throw new Error('Network response was not ok');
             }
-
             const data = await response.json();
 
-            navigate('/Sop', {
-                state: {
-                    triggerStatus: triggerStatus
-                }
-            });
-
+            if (group === "2") {
+                navigate('/Sop', {
+                    state: {
+                        triggerStatus: triggerStatus
+                    }
+                });
+            }
+            // navigate('/Sop', {
+            //     state: {
+            //         triggerStatus: triggerStatus
+            //     }
+            // });
         } catch (error) {
             console.error('Error fetching alert details:', error);
         }
