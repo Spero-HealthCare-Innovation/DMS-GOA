@@ -6,14 +6,24 @@ import Navbar from "./Componenets/Navbar/Navbar";
 import Footer from "./Componenets/Footer/Footer";
 import Sidebar from "./Componenets/DispatchModule/Sidebar/Sidebar";
 import AppRoutes from "./routes/AppRoutes";
-import Departmentsidebar from "./Componenets/SuperAdmin/Sidebar/Departmentsidebar";
-
-
+import Departmentsidebar from "./Componenets/SuperAdmin/Sidebar/DepartmentSidebar";
 
 function App() {
   const [darkMode, setDarkMode] = useState(true);
-  const [userGroup, setUserGroup] = useState(null);
+  const [userGroup, setUserGroup] = useState("");
+  console.log(userGroup,'userGroup');
+  
   const location = useLocation();
+
+
+  useEffect(() => {
+  const storedGroup = localStorage.getItem("user_group");
+  console.log("Stored group from localStorage:", storedGroup);
+  setUserGroup(storedGroup);
+}, [location]); // re-run on route change
+
+  // console.log('Loaded user group from localStorage:', userGroup);
+
 
   const isAuthRoute = location.pathname === "/login";
 
@@ -62,6 +72,8 @@ function App() {
               {/* 👇 Correct Sidebar logic */}
               {userGroup === "2" && <Sidebar darkMode={darkMode} />}
               {userGroup === "1" && <Departmentsidebar darkMode={darkMode} />}
+             
+
             </>
           )}
 

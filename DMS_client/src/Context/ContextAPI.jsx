@@ -123,7 +123,7 @@ export const AuthProvider = ({ children }) => {
         error,
         setSelectedDistrictId,
         setSelectedTehsilId,
-        selectedDistrictId,
+        // selectedDistrictId,
       }}
     >
       {children}

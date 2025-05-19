@@ -7,8 +7,6 @@ import { useNavigate } from 'react-router-dom';
 import CachedIcon from '@mui/icons-material/Cached';
 
 function Login() {
-
-
     const port = import.meta.env.VITE_APP_API_KEY;
     // console.log(port,'port');
 
@@ -280,6 +278,21 @@ function Login() {
             console.log('Refresh Token:', data.token.refresh);
             console.log('User Group:', data.token.user_group);
             console.log('User Info:', data.token.colleague);
+  const group = data.token.user_group;
+
+            
+                if (group === '1') {
+                    navigate('/add-group');
+                } else if (group === '2') {
+                    navigate('/alert-panel');
+                } else if (group === '3') {
+                    navigate('/multiscreen');
+                } else {
+                    console.warn('Unhandled user group:', group);
+                    // Optionally redirect to a fallback route
+                    navigate('/not-authorized');
+                }
+
 
             // 🟢 WAIT 2 seconds and then send "true" to WebSocket
             setTimeout(() => {
@@ -298,7 +311,7 @@ function Login() {
                 }
             }, 2000);
 
-            navigate('/multiscreen');
+            // navigate('/multiscreen');
         } else {
             console.error('Login response did not contain token');
             setPasswordError('Login failed. Please try again.');
