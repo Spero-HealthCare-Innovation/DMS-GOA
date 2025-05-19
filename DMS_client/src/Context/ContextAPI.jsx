@@ -7,24 +7,33 @@ export const useAuth = () => useContext(AuthContext);
 export const AuthProvider = ({ children }) => {
   const [states, setStates] = useState([]);
   const [districts, setDistricts] = useState([]);
-  console.log(districts, "districts");
-
-  const [selectedStateId, setSelectedStateId] = useState(null);
   const [Tehsils, setTehsils] = useState([]);
-  const [selectedDistrictId, setSelectedDistrictId] = useState(null);
-  const [selectedTehsilId, setSelectedTehsilId] = useState(null);
+  const [Citys, setCitys] = useState([]);
+
+  
+  const [selectedStateId, setSelectedStateId] = useState('');
+  const [selectedDistrictId, setSelectedDistrictId] = useState('');
+  const [selectedTehsilId, setSelectedTehsilId] = useState('');
+  const [selectedCityID, setSelectedCityId] = useState('');
+
+  
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  
   const port = import.meta.env.VITE_APP_API_KEY;
   const token = localStorage.getItem("access_token");
 
   // 🔹 1. Fetch all states on load
   const fetchStates = async () => {
     try {
+      setLoading(true);
       const res = await axios.get(`${port}/admin_web/state_get/`);
       setStates(res.data);
     } catch (err) {
+      console.error("Error fetching states:", err);
       setError(err);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -32,24 +41,7 @@ export const AuthProvider = ({ children }) => {
   const fetchDistrictsByState = async (stateId) => {
     if (!stateId) return;
     try {
-      const res = await axios.get(
-        `${port}/admin_web/state_get_idwise/${stateId}/`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-      setDistricts(res.data || []); // Adjust based on API response structure
-      console.log(res.data, "res.data");
-    } catch (err) {
-      setError(err);
-    }
-  };
-
-  const fetchDistrictIDWise = async (stateId) => {
-    if (!stateId) return;
-    try {
+      setLoading(true);
       const res = await axios.get(
         `${port}/admin_web/district_get_idwise/${stateId}/`,
         {
@@ -59,71 +51,124 @@ export const AuthProvider = ({ children }) => {
         }
       );
       console.log(`Districts by state ${stateId}:`, res.data);
-      setDistricts(res.data || []); // ✅ Make sure this matches your response format
+      setDistricts(res.data || []);
     } catch (err) {
-      console.error("Error fetching district by ID:", err);
+      console.error("Error fetching districts:", err);
       setError(err);
+    } finally {
+      setLoading(false);
     }
   };
 
-  useEffect(() => {
-    if (selectedStateId) {
-      fetchDistrictIDWise(selectedStateId);
-    } else {
-      setDistricts([]);
-    }
-  }, [selectedStateId]);
-
-  const fetchTehsilsByDistrict = async (DistID) => {
-    if (!DistID) return;
+  // 🔹 3. Fetch tehsils based on selected district
+  const fetchTehsilsByDistrict = async (districtId) => {
+    if (!districtId) return;
     try {
-      const res = await axios.get(`${port}/admin_web/Tahsil_get/${DistID}/`, {
+      setLoading(true);
+      const res = await axios.get(`${port}/admin_web/Tahsil_get_idwise/${districtId}/`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
-      console.log(`tehsile by state ${DistID}:`, res.data);
+      console.log(`Tehsils by district ${districtId}:`, res.data);
       setTehsils(res.data || []);
-      console.log(res.data, "resdata");
     } catch (err) {
+      console.error("Error fetching tehsils:", err);
       setError(err);
+    } finally {
+      setLoading(false);
     }
   };
 
-  useEffect(() => {
-    if (selectedDistrictId) {
-      fetchTehsilsByDistrict(selectedDistrictId);
-    } else {
-      setTehsils([]); // clear if no state selected
-    }
-  }, [selectedDistrictId]);
 
+   const fetchCitysByTehshil = async (tehshilId) => {
+    if (!tehshilId) return;
+    try {
+      setLoading(true);
+      const res = await axios.get(`${port}/admin_web/City_get_idwise/${tehshilId}/`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      console.log(`Tehsils by district ${tehshilId}:`, res.data);
+      setCitys(res.data || []);
+    } catch (err) {
+      console.error("Error fetching tehsils:", err);
+      setError(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+
+  // 🔹 Effects
   useEffect(() => {
     fetchStates();
   }, []);
 
+ // 🔹 useEffect for selectedStateId change
   useEffect(() => {
     if (selectedStateId) {
       fetchDistrictsByState(selectedStateId);
+      setSelectedDistrictId('');
+      setSelectedTehsilId('');
+      setSelectedCityId('');
+      setTehsils([]);
+      setCitys([]);
     } else {
-      setDistricts([]); // clear if no state selected
+      setDistricts([]);
+      setTehsils([]);
+      setCitys([]);
+      setSelectedDistrictId('');
+      setSelectedTehsilId('');
+      setSelectedCityId('');
     }
   }, [selectedStateId]);
+
+  // 🔹 useEffect for selectedDistrictId change
+  useEffect(() => {
+    if (selectedDistrictId) {
+      fetchTehsilsByDistrict(selectedDistrictId);
+      setSelectedTehsilId('');
+      setSelectedCityId('');
+      setCitys([]);
+    } else {
+      setTehsils([]);
+      setCitys([]);
+      setSelectedTehsilId('');
+      setSelectedCityId('');
+    }
+  }, [selectedDistrictId]);
+
+  // ✅ useEffect for selectedTehsilId change (fetch cities)
+  useEffect(() => {
+    if (selectedTehsilId) {
+      fetchCitysByTehshil(selectedTehsilId);
+      setSelectedCityId('');
+    } else {
+      setCitys([]);
+      setSelectedCityId('');
+    }
+  }, [selectedTehsilId]);
+
 
   return (
     <AuthContext.Provider
       value={{
         states,
         districts,
-        selectedDistrictId,
-        selectedStateId,
         Tehsils,
+          Citys,
+        selectedStateId,
+        selectedDistrictId,
+        selectedTehsilId,
+          selectedCityID,
         setSelectedStateId,
-        loading,
-        error,
         setSelectedDistrictId,
         setSelectedTehsilId,
-        // selectedDistrictId,
+          setSelectedCityId, 
+        loading,
+        error,
       }}
     >
       {children}

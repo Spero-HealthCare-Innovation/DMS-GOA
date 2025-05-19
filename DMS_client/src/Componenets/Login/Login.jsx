@@ -7,6 +7,8 @@ import { useNavigate } from 'react-router-dom';
 import CachedIcon from '@mui/icons-material/Cached';
 
 function Login() {
+
+
     const port = import.meta.env.VITE_APP_API_KEY;
     // console.log(port,'port');
 
@@ -202,7 +204,7 @@ function Login() {
     // };
 
 
-    const handleLogin = async () => {
+ const handleLogin = async () => {
     setUsernameError('');
     setPasswordError('');
     setCaptchaTextError('');
@@ -276,42 +278,46 @@ function Login() {
 
             console.log('Access Token:', data.token.access);
             console.log('Refresh Token:', data.token.refresh);
-            console.log('User Group:', data.token.user_group);
+            console.log('User Group from response:', data.token.user_group);
             console.log('User Info:', data.token.colleague);
-  const group = data.token.user_group;
-
             
-                if (group === '1') {
-                    navigate('/add-group');
-                } else if (group === '2') {
-                    navigate('/alert-panel');
-                } else if (group === '3') {
-                    navigate('/multiscreen');
-                } else {
-                    console.warn('Unhandled user group:', group);
-                    // Optionally redirect to a fallback route
-                    navigate('/not-authorized');
-                }
+            const group = data.token.user_group;
+            console.log('Stored group from localStorage:', localStorage.getItem('user_group'));
 
+            //  IMPORTANT: Only trigger WebSocket for group '3'
+            if (group === '3') {
+                console.log(' GROUP 3 DETECTED - WebSocket will be triggered');
+                navigate('/multiscreen');
+                
+                // WebSocket connection ONLY for user group 3
+                setTimeout(() => {
+                    try {
+                        console.log(' Creating WebSocket connection for group 3');
+                        const socket = new WebSocket("ws://192.168.1.116:7777/send_data");
+                        socket.onopen = () => {
+                            console.log(" WebSocket connected for group 3");
+                            socket.send("true");
+                            console.log(" Sent 'true' to server for group 3");
+                        };
+                        socket.onerror = (err) => {
+                            console.error(" WebSocket error:", err);
+                        };
+                    } catch (err) {
+                        console.error("WebSocket connection failed:", err);
+                    }
+                }, 2000);
+                
+            } else if (group === '1') {
+                console.log(' GROUP 1 DETECTED - NO WebSocket - Navigating to /add-group');
+                navigate('/add-department');
+            } else if (group === '2') {
+                console.log(' GROUP 2 DETECTED - NO WebSocket - Navigating to /alert-panel');
+                navigate('/alert-panel');
+            } else {
+                console.warn('Unhandled user group:', group);
+                navigate('/not-authorized');
+            }
 
-            // 🟢 WAIT 2 seconds and then send "true" to WebSocket
-            setTimeout(() => {
-                try {
-                    const socket = new WebSocket("ws://192.168.1.116:7777/send_data");  // ← replace IP
-                    socket.onopen = () => {
-                        console.log("🔗 WebSocket connected");
-                        socket.send("true");
-                        console.log("✅ Sent 'true' to server");
-                    };
-                    socket.onerror = (err) => {
-                        console.error("❌ WebSocket error:", err);
-                    };
-                } catch (err) {
-                    console.error("WebSocket connection failed:", err);
-                }
-            }, 2000);
-
-            // navigate('/multiscreen');
         } else {
             console.error('Login response did not contain token');
             setPasswordError('Login failed. Please try again.');
@@ -345,6 +351,7 @@ function Login() {
     };
 
 
+    
 
     return (
         <Box sx={{ height: '100vh', width: '100%', position: 'relative', overflow: 'hidden', display: 'flex', flexDirection: isSmallScreen ? 'column' : 'row' }}>
