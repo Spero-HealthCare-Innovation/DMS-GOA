@@ -12,22 +12,16 @@ function App() {
   const [darkMode, setDarkMode] = useState(true);
   const [userGroup, setUserGroup] = useState("");
   console.log(userGroup, 'userGroup');
-
   const location = useLocation();
-
 
   useEffect(() => {
     const storedGroup = localStorage.getItem("user_group");
     console.log("Stored group from localStorage:", storedGroup);
     setUserGroup(storedGroup);
-  }, [location]); // re-run on route change
-
-  // console.log('Loaded user group from localStorage:', userGroup);
-
+  }, [location]);
 
   const isAuthRoute = location.pathname === "/login";
 
-  // Load dark mode & user group from localStorage
   useEffect(() => {
     const savedMode = localStorage.getItem("dark_mode");
     const storedGroup = localStorage.getItem("user_group");
@@ -35,7 +29,6 @@ function App() {
     if (storedGroup) setUserGroup(storedGroup);
   }, []);
 
-  // Save dark mode preference
   useEffect(() => {
     localStorage.setItem("dark_mode", darkMode);
   }, [darkMode]);
@@ -69,7 +62,7 @@ function App() {
                 toggleDarkMode={() => setDarkMode((prev) => !prev)}
               />
 
-              {userGroup === "2" && <Sidebar darkMode={darkMode} />}
+              {/* {userGroup === "2" && <Sidebar darkMode={darkMode} />} */}
               {userGroup === "1" && <Departmentsidebar darkMode={darkMode} />}
 
             </>

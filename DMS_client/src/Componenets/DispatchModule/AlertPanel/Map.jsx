@@ -1,5 +1,5 @@
-import {useState,useEffect} from 'react';
-import { MapContainer, TileLayer, Marker, Popup,GeoJSON } from 'react-leaflet';
+import { useState, useEffect } from 'react';
+import { MapContainer, TileLayer, Marker, Popup, GeoJSON } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 
@@ -13,12 +13,12 @@ const customIcon = new L.Icon({
   shadowUrl: null
 });
 
-const MapView = ({data}) => {
-  console.log('Data',data)
+const MapView = ({ data }) => {
+  console.log('Data', data)
   const position = [15.414965044599617, 74.0364962305364]; // Goa
   const [stateData, setStateData] = useState();
-  const [triggeredData,setTriggeredData] = useState();
-  console.log("State",stateData)
+  const [triggeredData, setTriggeredData] = useState();
+  console.log("State", stateData)
 
   useEffect(() => {
     setTriggeredData(data)
@@ -38,11 +38,11 @@ const MapView = ({data}) => {
     fillOpacity: 0.1,
   };
 
-  const markerPosition = triggeredData?.latitude && triggeredData?.longitude 
-    ? [triggeredData.latitude, triggeredData.longitude] 
+  const markerPosition = triggeredData?.latitude && triggeredData?.longitude
+    ? [triggeredData.latitude, triggeredData.longitude]
     : position;
 
-    const popupContent = triggeredData ? (
+  const popupContent = triggeredData ? (
     <div>
       <strong>Latitude:</strong> {triggeredData.latitude}<br />
       <strong>Longitude:</strong> {triggeredData.longitude}<br />
@@ -56,11 +56,11 @@ const MapView = ({data}) => {
 
   return (
     <MapContainer center={position} zoom={9} style={{ height: "80vh", width: "100%" }}>
-    <TileLayer
-  url="https://tile.thunderforest.com/outdoors/{z}/{x}/{y}.png?apikey=e2c62012ab834665b043fe5b2a6c67a4"
-  attribution='&copy; <a href="https://www.thunderforest.com/">Thunderforest</a>'
-/>
-    {stateData && <GeoJSON data={stateData} style={geoJsonStyle} />}
+      <TileLayer
+        url="https://tile.thunderforest.com/outdoors/{z}/{x}/{y}.png?apikey=e2c62012ab834665b043fe5b2a6c67a4"
+        attribution='&copy; <a href="https://www.thunderforest.com/">Thunderforest</a>'
+      />
+      {stateData && <GeoJSON data={stateData} style={geoJsonStyle} />}
       {data && (
         <Marker position={markerPosition} icon={customIcon}>
           <Popup>{popupContent}</Popup>

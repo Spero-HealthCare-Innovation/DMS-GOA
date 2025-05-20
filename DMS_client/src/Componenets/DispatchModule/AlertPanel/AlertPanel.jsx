@@ -7,6 +7,7 @@ import { styled } from '@mui/system';
 import { useNavigate } from 'react-router-dom';
 import MapView from './Map';
 import { useAuth } from './../../../Context/ContextAPI';
+import Sidebar from '../Sidebar/Sidebar';
 
 const EnquiryCard = styled('div')({
     display: 'flex',
@@ -122,7 +123,7 @@ const AlertPanel = ({ darkMode }) => {
             console.error('Error fetching alert details:', error);
         }
     };
-    
+
     const handleTriggeredData = async (id, triggerStatus) => {
         try {
             const response = await fetch(`${port}/admin_web/alert/?id=${id}`, {
@@ -144,6 +145,7 @@ const AlertPanel = ({ darkMode }) => {
 
     return (
         <Box sx={{ flexGrow: 1, mt: 1, ml: 1, mr: 1, mb: 2 }}>
+            <Sidebar darkMode={darkMode} />
             <Grid container spacing={2}>
                 <Grid item xs={12} md={8}>
                     <TableContainer>
@@ -312,7 +314,7 @@ const AlertPanel = ({ darkMode }) => {
                 </Grid>
 
                 <Grid item xs={12} md={4}>
-                    <MapView data={triggeredData}/>
+                    <MapView data={triggeredData} />
                 </Grid>
             </Grid>
         </Box>
