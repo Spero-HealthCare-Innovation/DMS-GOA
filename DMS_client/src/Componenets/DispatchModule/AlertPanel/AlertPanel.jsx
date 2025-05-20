@@ -53,6 +53,9 @@ const AlertPanel = ({ darkMode }) => {
     const [page, setPage] = useState(1);
     const [rowsPerPage, setRowsPerPage] = useState(5);
     const [alertData, setAlertData] = useState([]);
+    const [triggeredData, setTriggeredData] = useState([]);
+    console.log(triggeredData,'triggeredData');
+    
     const startIndex = (page - 1) * rowsPerPage;
     const endIndex = startIndex + rowsPerPage;
     const paginatedData = alertData.slice(startIndex, endIndex);
@@ -95,6 +98,7 @@ const AlertPanel = ({ darkMode }) => {
                 throw new Error('Network response was not ok');
             }
             const data = await response.json();
+            setTriggeredData(data);
 
             if (group === "2") {
                 navigate('/Sop', {
