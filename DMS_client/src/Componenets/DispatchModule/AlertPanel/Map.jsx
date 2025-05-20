@@ -13,12 +13,19 @@ const customIcon = new L.Icon({
   shadowUrl: null
 });
 
-const MapView = () => {
+const MapView = ({data}) => {
+  console.log('Data',data)
   const position = [15.414965044599617, 74.0364962305364]; // Goa
-  const [stateData, setStateData] = useState(null);
+  const [stateData, setStateData] = useState();
+  const [triggeredData,setTriggeredData] = useState();
+  console.log("State",stateData)
 
   useEffect(() => {
-    fetch('/Goa_State.geojson')
+    setTriggeredData(data)
+  }, [data]);
+
+  useEffect(() => {
+    fetch('/Boundaries/Goa_State.geojson')
       .then(res => res.json())
       .then(data => {
         setStateData(data);
@@ -27,9 +34,25 @@ const MapView = () => {
 
   const geoJsonStyle = {
     weight: 2,
-    color: 'blue',
-    fillOpacity: 0.05,
+    color: 'Orange',
+    fillOpacity: 0.1,
   };
+
+  const markerPosition = triggeredData?.latitude && triggeredData?.longitude 
+    ? [triggeredData.latitude, triggeredData.longitude] 
+    : position;
+
+    const popupContent = triggeredData ? (
+    <div>
+      <strong>Latitude:</strong> {triggeredData.latitude}<br />
+      <strong>Longitude:</strong> {triggeredData.longitude}<br />
+      <strong>Elevation:</strong> {triggeredData.elevation}<br />
+      <strong>Precipitation:</strong> {triggeredData.precipitation}<br />
+      <strong>Rain:</strong> {triggeredData.rain}<br />
+      <strong>Temperature 2m:</strong> {triggeredData.temperature_2m}<br />
+      <strong>Time:</strong> {new Date(triggeredData.time).toLocaleString()}<br />
+    </div>
+  ) : "No data";
 
   return (
     <MapContainer center={position} zoom={9} style={{ height: "80vh", width: "100%" }}>
@@ -38,9 +61,11 @@ const MapView = () => {
   attribution='&copy; <a href="https://www.thunderforest.com/">Thunderforest</a>'
 />
     {stateData && <GeoJSON data={stateData} style={geoJsonStyle} />}
-      <Marker position={position} icon={customIcon}>
-        <Popup>You're here!</Popup>
-      </Marker>
+      {data && (
+        <Marker position={markerPosition} icon={customIcon}>
+          <Popup>{popupContent}</Popup>
+        </Marker>
+      )}
     </MapContainer>
   );
 };
