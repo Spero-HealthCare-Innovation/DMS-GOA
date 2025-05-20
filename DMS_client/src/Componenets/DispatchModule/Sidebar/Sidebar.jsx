@@ -8,6 +8,7 @@ import {
     Typography,
     Box,
 } from "@mui/material";
+import { FaCloudSun } from "react-icons/fa";
 import weatherImg from "../../../assets/Cloud angled rain zap.png";
 import heatWatchImg from "../../../assets/Group 427319122.png";
 import cycloneImg from "../../../assets/Tornado.png";
@@ -45,10 +46,10 @@ const Sidebar = ({ darkMode }) => {
                         height: "auto",
                         maxHeight: "100vh",
                         boxShadow: "0px 4px 15px rgba(0, 0, 0, 0.2)",
-                        // background: darkMode
-                        //     ? "linear-gradient(to bottom, #5FECC8, #5FECC8)"
-                        //     : "radial-gradient(6035.71% 72.44% at 0% 50%, #00BFA6 0%, #292D45 100%)",
-                        background: darkMode ? "linear-gradient(to bottom, #5FECC8, rgba(95, 236, 200, 0.05))" : "radial-gradient(6035.71% 72.44% at 0% 50%, #00BFA6 0%, #292D45 100%)",
+                        // background: "linear-gradient(to bottom, #5FECC8, rgba(95, 236, 200, 0.05))",
+                        background: darkMode
+                            ? "linear-gradient(to bottom, #5FECC8, rgba(95, 236, 200, 0.05))"
+                            : "radial-gradient(6035.71% 72.44% at 0% 50%, #00BFA6 0%, #292D45 100%)",
                         border: "1px solid rgba(255, 255, 255, 0.5)",
                         color: "#000",
                         borderRadius: "30px",
@@ -73,7 +74,7 @@ const Sidebar = ({ darkMode }) => {
                             onClick={() => setShowWeatherPanel(item.id === "weather")}
                         >
                             <ListItemIcon sx={{ minWidth: 40 }}>
-                                <img src={item.img} alt={item.text} style={{ width: 24, height: 24, marginRight: '20px' }} />
+                                <img src={item.img} alt={item.text} style={{ width: 24, height: 24 }} />
                             </ListItemIcon>
                             <ListItemText
                                 primary={item.text}

@@ -1,18 +1,37 @@
 // src/App.js
-import { useState, useMemo } from "react";
-import { Routes, Route, useLocation, Navigate } from "react-router-dom";
+import { useState, useMemo, useEffect } from "react";
 import { ThemeProvider, createTheme, CssBaseline } from "@mui/material";
+import { useLocation } from "react-router-dom";
 import Navbar from "./Componenets/Navbar/Navbar";
-import Sop from "./Componenets/DispatchModule/SOP/Sop";
-import Login from "./Componenets/Login/Login";
 import Footer from "./Componenets/Footer/Footer";
-import AlertPanel from "./Componenets/DispatchModule/AlertPanel/AlertPanel";
 import Sidebar from "./Componenets/DispatchModule/Sidebar/Sidebar";
+import AppRoutes from "./routes/AppRoutes";
+import Departmentsidebar from "./Componenets/SuperAdmin/Sidebar/DepartmentSidebar";
 
 function App() {
   const [darkMode, setDarkMode] = useState(true);
-  const [isLoggedIn, setIsLoggedIn] = useState(false); // <-- Login state
+  const [userGroup, setUserGroup] = useState("");
+  console.log(userGroup, 'userGroup');
   const location = useLocation();
+
+  useEffect(() => {
+    const storedGroup = localStorage.getItem("user_group");
+    console.log("Stored group from localStorage:", storedGroup);
+    setUserGroup(storedGroup);
+  }, [location]);
+
+  const isAuthRoute = location.pathname === "/login";
+
+  useEffect(() => {
+    const savedMode = localStorage.getItem("dark_mode");
+    const storedGroup = localStorage.getItem("user_group");
+    if (savedMode) setDarkMode(savedMode === "true");
+    if (storedGroup) setUserGroup(storedGroup);
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem("dark_mode", darkMode);
+  }, [darkMode]);
 
   const theme = useMemo(
     () =>
@@ -23,12 +42,6 @@ function App() {
       }),
     [darkMode]
   );
-
-  const authRoutes = ["/Login"];
-  const isAuthRoute = authRoutes.includes(location.pathname);
-
-  const hideSidebarRoutes = ["/alert-panel", "/Sop"];
-  const shouldHideSidebar = hideSidebarRoutes.includes(location.pathname);
 
   return (
     <ThemeProvider theme={theme}>
@@ -42,16 +55,21 @@ function App() {
         }}
       >
         <div style={{ flex: 1 }}>
-          {!isAuthRoute && <Sidebar darkMode={darkMode} toggleDarkMode={() => setDarkMode(prev => !prev)} />}
-          {!isAuthRoute && <Navbar darkMode={darkMode} toggleDarkMode={() => setDarkMode(prev => !prev)} />}
+          {!isAuthRoute && (
+            <>
+              <Navbar
+                darkMode={darkMode}
+                toggleDarkMode={() => setDarkMode((prev) => !prev)}
+              />
 
-          <div style={{ marginLeft: '70px' }}>
-            <Routes>
-              <Route path="/" element={<Navigate to="/Login" replace />} />
-              <Route path="/Login" element={<Login setIsLoggedIn={setIsLoggedIn} />} />
-              <Route path="/Sop" element={<Sop darkMode={darkMode} />} />
-              <Route path="/alert-panel" element={<AlertPanel darkMode={darkMode} />} />
-            </Routes>
+              {/* {userGroup === "2" && <Sidebar darkMode={darkMode} />} */}
+              {userGroup === "1" && <Departmentsidebar darkMode={darkMode} />}
+
+            </>
+          )}
+
+          <div style={{ marginLeft: "70px" }}>
+            <AppRoutes darkMode={darkMode} />
           </div>
 
           {!isAuthRoute && <Footer darkMode={darkMode} />}

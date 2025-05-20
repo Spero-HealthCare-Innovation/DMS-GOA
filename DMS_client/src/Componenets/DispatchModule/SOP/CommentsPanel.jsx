@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { Paper, Typography, TextField, Button, Stack, Box } from '@mui/material';
 
-function CommentsPanel({ darkMode }) {
+function CommentsPanel({ darkMode,setFlag,flag }) {
   const [placeholderVisible, setPlaceholderVisible] = useState(true);
+  console.log("flagg",flag)
 
   const textColor = darkMode ? '#ffffff' : '#000000';
   const bgColor = darkMode ? '#0a1929' : '#ffffff';
@@ -63,9 +64,13 @@ function CommentsPanel({ darkMode }) {
       </Box>
 
       <Stack direction="row" justifyContent="flex-end">
-        <Button variant="contained" color="primary">
+        {flag ===1 ? (    <Button variant="contained" color="primary">
           Save
-        </Button>
+        </Button>):(<Button variant="contained" color="primary">
+  send
+        </Button>)}
+    
+       
       </Stack>
     </Paper>
   );
