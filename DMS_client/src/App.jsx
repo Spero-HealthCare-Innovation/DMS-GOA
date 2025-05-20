@@ -11,16 +11,16 @@ import Departmentsidebar from "./Componenets/SuperAdmin/Sidebar/DepartmentSideba
 function App() {
   const [darkMode, setDarkMode] = useState(true);
   const [userGroup, setUserGroup] = useState("");
-  console.log(userGroup,'userGroup');
-  
+  console.log(userGroup, 'userGroup');
+
   const location = useLocation();
 
 
   useEffect(() => {
-  const storedGroup = localStorage.getItem("user_group");
-  console.log("Stored group from localStorage:", storedGroup);
-  setUserGroup(storedGroup);
-}, [location]); // re-run on route change
+    const storedGroup = localStorage.getItem("user_group");
+    console.log("Stored group from localStorage:", storedGroup);
+    setUserGroup(storedGroup);
+  }, [location]); // re-run on route change
 
   // console.log('Loaded user group from localStorage:', userGroup);
 
@@ -69,10 +69,8 @@ function App() {
                 toggleDarkMode={() => setDarkMode((prev) => !prev)}
               />
 
-              {/* 👇 Correct Sidebar logic */}
               {userGroup === "2" && <Sidebar darkMode={darkMode} />}
               {userGroup === "1" && <Departmentsidebar darkMode={darkMode} />}
-             
 
             </>
           )}

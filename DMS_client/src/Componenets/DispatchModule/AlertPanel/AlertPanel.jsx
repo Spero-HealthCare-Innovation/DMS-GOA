@@ -118,11 +118,33 @@ const AlertPanel = ({ darkMode }) => {
                     }
                 });
             }
-            // navigate('/Sop', {
-            //     state: {
-            //         triggerStatus: triggerStatus
-            //     }
-            // });
+        } catch (error) {
+            console.error('Error fetching alert details:', error);
+        }
+    };
+    
+    const handleTriggeredData = async (id, triggerStatus) => {
+        try {
+            const response = await fetch(`${port}/admin_web/alert/?id=${id}`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${token || newToken}`,
+                    'Content-Type': 'application/json',
+                },
+            });
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            const data = await response.json();
+            setTriggeredData(data);
+
+            if (group === "2") {
+                navigate('/Sop', {
+                    state: {
+                        triggerStatus: triggerStatus
+                    }
+                });
+            }
         } catch (error) {
             console.error('Error fetching alert details:', error);
         }
@@ -169,7 +191,7 @@ const AlertPanel = ({ darkMode }) => {
                                     paginatedData.map((item, index) => (
                                         <EnquiryCardBody
                                             key={startIndex + index}
-                                            onClick={() => handleTriggerClick(item.pk_id, item.triger_status)} // Add row click
+                                            onClick={() => handleTriggeredData(item.pk_id, item.triger_status)} // Add row click
                                             sx={{
                                                 backgroundColor: darkMode ? "#1C223C" : "#FFFFFF",
                                                 color: darkMode ? "white" : "black",
