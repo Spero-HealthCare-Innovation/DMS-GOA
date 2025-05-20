@@ -298,7 +298,7 @@ const AlertPanel = ({ darkMode }) => {
                 </Grid>
 
                 <Grid item xs={12} md={4}>
-                    <MapView />
+                    <MapView data={triggeredData}/>
                 </Grid>
             </Grid>
         </Box>
