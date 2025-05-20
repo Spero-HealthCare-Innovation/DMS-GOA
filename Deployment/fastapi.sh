@@ -32,14 +32,14 @@ fi
 
 
 # Copy Fastapi Nginx conf not present
-if [ -f "/etc/nginx/sites-available/dms_goa_fastapi_9003.conf" ]; then
+if [ -f "/etc/nginx/sites-available/dms_goa_fastapi_7777.conf" ]; then
     echo "Fastapi Nginx conf already present"
 else
     echo "Copying Fastapi Nginx Conf file..."
-    sudo cp -rf "$PJ_BASE_PATH/nginx_proxy/dms_goa_fastapi_9003.conf" /etc/nginx/sites-available
+    sudo cp -rf "$PJ_BASE_PATH/nginx_proxy/dms_goa_fastapi_7777.conf" /etc/nginx/sites-available
     echo "Fastapi Nginx Conf file copied successfully."
     # Enable the site by creating a symlink
-    sudo ln -s /etc/nginx/sites-available/dms_goa_fastapi_9003.conf /etc/nginx/sites-enabled/
+    sudo ln -s /etc/nginx/sites-available/dms_goa_fastapi_7777.conf /etc/nginx/sites-enabled/
 
 fi
 
@@ -50,7 +50,7 @@ echo "Current Directory: $PWD"
 # Reload systemd and restart Gunicorn
 sudo systemctl daemon-reload
 sudo systemctl enable dms_uvicorn_fastapi
-sudo systemctl restart dms_uvicorn_fastapi
+sudo systemctl start dms_uvicorn_fastapi
  
 # Check Gunicorn status
 sudo systemctl status dms_uvicorn_fastapi

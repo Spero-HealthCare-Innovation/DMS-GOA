@@ -142,7 +142,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
 STATIC_URL = 'static/'
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
@@ -156,7 +156,7 @@ AUTH_USER_MODEL = 'admin_web.DMS_Employee'
 
 SIMPLE_JWT = {
     # "ACCESS_TOKEN_LIFETIME": timedelta(minutes=5),
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=50),  # Short-lived access token
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=10),  # Short-lived access token
     'REFRESH_TOKEN_LIFETIME': timedelta(days=2), # Long-lived refresh token
 
 
@@ -184,6 +184,9 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
     "http://localhost:5174",
     "http://localhost:5175",
+    "http://192.168.1.116:7000",
+    "http://192.168.1.116:6003",
+    "http://192.168.1.116:7777"
 ]
 
 

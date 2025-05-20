@@ -244,7 +244,7 @@ class DMS_Department_idwise_get_api(APIView):
         snippet = DMS_Department.objects.filter(dep_id=dep_id,dep_is_deleted=False)
         serializers = DMS_Department_Serializer(snippet,many=True)
         return Response(serializers.data,status=status.HTTP_200_OK)
-
+ 
 
 
 # class CaptchaTokenObtainPairView(TokenObtainPairView):
