@@ -137,14 +137,6 @@ const AlertPanel = ({ darkMode }) => {
             }
             const data = await response.json();
             setTriggeredData(data);
-
-            if (group === "2") {
-                navigate('/Sop', {
-                    state: {
-                        triggerStatus: triggerStatus
-                    }
-                });
-            }
         } catch (error) {
             console.error('Error fetching alert details:', error);
         }
