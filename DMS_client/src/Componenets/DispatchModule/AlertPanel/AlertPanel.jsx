@@ -43,8 +43,8 @@ const StyledCardContent = styled(CardContent)({
 });
 
 const AlertPanel = ({ darkMode }) => {
-    const { accessToken } = useAuth();
-    console.log(accessToken, 'accessToken');
+    const { newToken } = useAuth();
+    console.log(newToken, 'newToken');
 
     const port = import.meta.env.VITE_APP_API_KEY;
     const group = localStorage.getItem('user_group');
@@ -101,7 +101,7 @@ const AlertPanel = ({ darkMode }) => {
             const response = await fetch(`${port}/admin_web/alert/?id=${id}`, {
                 method: 'GET',
                 headers: {
-                    'Authorization': `Bearer ${token || accessToken}`,
+                    'Authorization': `Bearer ${token || newToken}`,
                     'Content-Type': 'application/json',
                 },
             });
@@ -169,9 +169,11 @@ const AlertPanel = ({ darkMode }) => {
                                     paginatedData.map((item, index) => (
                                         <EnquiryCardBody
                                             key={startIndex + index}
+                                            onClick={() => handleTriggerClick(item.pk_id, item.triger_status)} // Add row click
                                             sx={{
                                                 backgroundColor: darkMode ? "#1C223C" : "#FFFFFF",
                                                 color: darkMode ? "white" : "black",
+                                                cursor: "pointer", // Optional for visual feedback
                                             }}
                                         >
                                             <StyledCardContent style={{ flex: 0.3 }}>
@@ -188,7 +190,10 @@ const AlertPanel = ({ darkMode }) => {
                                             </StyledCardContent>
                                             <StyledCardContent style={{ flex: 1 }}>
                                                 <Button
-                                                    onClick={() => handleTriggerClick(item.pk_id, item.triger_status)}
+                                                    onClick={(e) => {
+                                                        e.stopPropagation(); // Prevent parent click from firing
+                                                        handleTriggerClick(item.pk_id, item.triger_status);
+                                                    }}
                                                     style={{
                                                         width: '60%',
                                                         backgroundColor: item.triger_status === 1 ? '#FF4C4C' : '#00BFA6',

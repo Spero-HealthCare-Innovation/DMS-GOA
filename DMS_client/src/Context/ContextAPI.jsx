@@ -17,21 +17,30 @@ export const AuthProvider = ({ children }) => {
   const [error, setError] = useState(null);
   const port = import.meta.env.VITE_APP_API_KEY;
   const token = localStorage.getItem("access_token");
-  const [accessToken, setAccessToken] = useState(localStorage.getItem("access_token"));
+  const refresh = localStorage.getItem("refresh_token");
+  console.log(refresh, 'refreshhhhhhhhh');
+
+  const [newToken, setNewToken] = useState("");
 
   const refreshAuthToken = async () => {
-    const refreshToken = localStorage.getItem("access_token"); // fetch latest token each time
-    if (!refreshToken) return;
+    const refresh = localStorage.getItem("refresh_token");
+
+    if (!refresh) {
+      console.warn("⚠️ No refresh token found.");
+      return;
+    }
 
     try {
       const response = await axios.post(`${port}/admin_web/login/refresh/`, {
-        refresh: token,
+        refresh: refresh,
       });
 
       if (response.data?.access) {
-        localStorage.setItem("access_token", response.data.access);
+        const updatedToken = response.data.access;
+
+        localStorage.setItem("access_token", updatedToken);
+        setNewToken(updatedToken);
         console.log("✅ Access token refreshed");
-        setAccessToken(response.data.access);
       } else {
         console.warn("⚠️ No access token returned during refresh.");
       }
@@ -41,15 +50,14 @@ export const AuthProvider = ({ children }) => {
   };
 
   useEffect(() => {
-    refreshAuthToken(); 
+    refreshAuthToken();
 
     const interval = setInterval(() => {
       refreshAuthToken();
-    }, 10 * 60 * 1000); 
+    }, 10 * 60 * 1000);
 
-    return () => clearInterval(interval); 
+    return () => clearInterval(interval);
   }, []);
-
 
   // 🔹 1. Fetch all states on load
   const fetchStates = async () => {
@@ -197,7 +205,7 @@ export const AuthProvider = ({ children }) => {
         setSelectedCityId,
         loading,
         error,
-        accessToken
+        newToken
       }}
     >
       {children}
