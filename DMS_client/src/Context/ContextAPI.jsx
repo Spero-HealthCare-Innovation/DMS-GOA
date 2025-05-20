@@ -9,19 +9,47 @@ export const AuthProvider = ({ children }) => {
   const [districts, setDistricts] = useState([]);
   const [Tehsils, setTehsils] = useState([]);
   const [Citys, setCitys] = useState([]);
-
-  
   const [selectedStateId, setSelectedStateId] = useState('');
   const [selectedDistrictId, setSelectedDistrictId] = useState('');
   const [selectedTehsilId, setSelectedTehsilId] = useState('');
   const [selectedCityID, setSelectedCityId] = useState('');
-
-  
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  
   const port = import.meta.env.VITE_APP_API_KEY;
   const token = localStorage.getItem("access_token");
+  const [accessToken, setAccessToken] = useState(localStorage.getItem("access_token"));
+
+  const refreshAuthToken = async () => {
+    const refreshToken = localStorage.getItem("access_token"); // fetch latest token each time
+    if (!refreshToken) return;
+
+    try {
+      const response = await axios.post(`${port}/admin_web/login/refresh/`, {
+        refresh: token,
+      });
+
+      if (response.data?.access) {
+        localStorage.setItem("access_token", response.data.access);
+        console.log("✅ Access token refreshed");
+        setAccessToken(response.data.access);
+      } else {
+        console.warn("⚠️ No access token returned during refresh.");
+      }
+    } catch (error) {
+      console.error("❌ Error refreshing access token:", error);
+    }
+  };
+
+  useEffect(() => {
+    refreshAuthToken(); 
+
+    const interval = setInterval(() => {
+      refreshAuthToken();
+    }, 10 * 60 * 1000); 
+
+    return () => clearInterval(interval); 
+  }, []);
+
 
   // 🔹 1. Fetch all states on load
   const fetchStates = async () => {
@@ -81,7 +109,7 @@ export const AuthProvider = ({ children }) => {
   };
 
 
-   const fetchCitysByTehshil = async (tehshilId) => {
+  const fetchCitysByTehshil = async (tehshilId) => {
     if (!tehshilId) return;
     try {
       setLoading(true);
@@ -106,7 +134,7 @@ export const AuthProvider = ({ children }) => {
     fetchStates();
   }, []);
 
- // 🔹 useEffect for selectedStateId change
+  // 🔹 useEffect for selectedStateId change
   useEffect(() => {
     if (selectedStateId) {
       fetchDistrictsByState(selectedStateId);
@@ -158,17 +186,18 @@ export const AuthProvider = ({ children }) => {
         states,
         districts,
         Tehsils,
-          Citys,
+        Citys,
         selectedStateId,
         selectedDistrictId,
         selectedTehsilId,
-          selectedCityID,
+        selectedCityID,
         setSelectedStateId,
         setSelectedDistrictId,
         setSelectedTehsilId,
-          setSelectedCityId, 
+        setSelectedCityId,
         loading,
         error,
+        accessToken
       }}
     >
       {children}

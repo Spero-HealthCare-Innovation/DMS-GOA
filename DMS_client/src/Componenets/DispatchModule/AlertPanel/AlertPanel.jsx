@@ -6,6 +6,7 @@ import {
 import { styled } from '@mui/system';
 import { useNavigate } from 'react-router-dom';
 import MapView from './Map';
+import { useAuth } from './../../../Context/ContextAPI';
 
 const EnquiryCard = styled('div')({
     display: 'flex',
@@ -42,8 +43,12 @@ const StyledCardContent = styled(CardContent)({
 });
 
 const AlertPanel = ({ darkMode }) => {
+    const { accessToken } = useAuth();
+    console.log(accessToken, 'accessToken');
+
     const port = import.meta.env.VITE_APP_API_KEY;
     const group = localStorage.getItem('user_group');
+    const token = localStorage.getItem('access_token');
     console.log(group, 'groupgroup');
     const navigate = useNavigate();
 
@@ -54,8 +59,8 @@ const AlertPanel = ({ darkMode }) => {
     const [rowsPerPage, setRowsPerPage] = useState(5);
     const [alertData, setAlertData] = useState([]);
     const [triggeredData, setTriggeredData] = useState([]);
-    console.log(triggeredData,'triggeredData');
-    
+    console.log(triggeredData, 'triggeredData');
+
     const startIndex = (page - 1) * rowsPerPage;
     const endIndex = startIndex + rowsPerPage;
     const paginatedData = alertData.slice(startIndex, endIndex);
@@ -93,7 +98,13 @@ const AlertPanel = ({ darkMode }) => {
 
     const handleTriggerClick = async (id, triggerStatus) => {
         try {
-            const response = await fetch(`${port}/admin_web/alert/?id=${id}`);
+            const response = await fetch(`${port}/admin_web/alert/?id=${id}`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${token || accessToken}`,
+                    'Content-Type': 'application/json',
+                },
+            });
             if (!response.ok) {
                 throw new Error('Network response was not ok');
             }
