@@ -19,7 +19,7 @@ const Map = () => {
   return (
     <div
       id="windy-widget"
-      style={{ width: "1280px", height: "85vh", marginLeft: "-70px"}}
+      style={{ width: "100vw", height: "85vh", marginLeft: "-70px", position: 'fixed'}}
     >
       <iframe
         title="Windy"
