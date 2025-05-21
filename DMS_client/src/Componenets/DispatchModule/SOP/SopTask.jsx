@@ -122,7 +122,7 @@ const socketRef = useRef(null);
 
  useEffect(() => {
     const timer = setTimeout(() => {
-        const socket = new WebSocket('ws://192.168.1.116:7777/ws/weather_alerts_trigger2');
+        const socket = new WebSocket('ws://192.168.1.116:8000/ws/weather_alerts_trigger2');
 
         socket.onopen = () => {
             console.log('WebSocket connected');
