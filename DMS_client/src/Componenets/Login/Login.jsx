@@ -301,7 +301,7 @@ function Login() {
                     setTimeout(() => {
                         try {
                             console.log(' Creating WebSocket connection for group 3');
-                            const socket = new WebSocket("ws://192.168.1.116:7777/send_data");
+                            const socket = new WebSocket("ws://192.168.1.116:8000/send_data");
                             socket.onopen = () => {
                                 console.log(" WebSocket connected for group 3");
                                 socket.send("true");
