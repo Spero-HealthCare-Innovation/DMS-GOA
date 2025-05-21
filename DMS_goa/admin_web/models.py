@@ -59,9 +59,10 @@ class DMS_Department(models.Model):
 
 class DMS_Group(models.Model):
     grp_id = models.AutoField(primary_key=True)
-    grp_code = models.CharField(max_length=100)
+    grp_code = models.CharField(max_length=100,null=True, blank=True)
     permission_status = models.IntegerField(null=True, blank=True)
-    grp_name = models.CharField(max_length=255)
+    grp_name = models.CharField(max_length=255,null=True, blank=True)
+    dep_id = models.ForeignKey(DMS_Department, on_delete=models.CASCADE,null=True, blank=True)
     grp_is_deleted = models.BooleanField(default=False)
     grp_added_date = models.DateTimeField(auto_now=True)
     grp_added_by = models.CharField(max_length=255, null=True, blank=True)
