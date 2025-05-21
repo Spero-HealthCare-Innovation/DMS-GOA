@@ -20,6 +20,10 @@ from captcha.models import CaptchaStore
 from captcha.helpers import captcha_image_url
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from django.contrib.auth.tokens import default_token_generator
+from django.utils.http import urlsafe_base64_encode
+from django.utils.encoding import force_bytes
+from django.core.mail import send_mail
 
 class DMS_department_post_api(APIView):
     def post(self,request):
@@ -413,6 +417,72 @@ class DMS_ChangePassword_put_api(APIView):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+
+class DMS_ChangePassword_api(APIView):
+    
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        print("here--------------------")
+        serializer = ChangePasswordSerializer(data=request.data)
+        user = request.user
+
+        if serializer.is_valid():
+            old_password = serializer.validated_data['old_password']
+            new_password = serializer.validated_data['new_password']
+
+            if not user.check_password(old_password):
+                return Response({"old_password": "Wrong password."}, status=status.HTTP_400_BAD_REQUEST)
+
+            user.set_password(new_password)
+            user.save()
+            return Response({"detail": "Password updated successfully."}, status=status.HTTP_200_OK)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+
+
+class PasswordResetRequestView(APIView):
+    def post(self, request):
+        serializer = PasswordResetRequestSerializer(data=request.data)
+        if serializer.is_valid():
+            email = serializer.validated_data['email']
+            user = DMS_Employee.objects.get(email=email)
+            uid = urlsafe_base64_encode(force_bytes(user.pk))
+            token = default_token_generator.make_token(user)
+
+            reset_link = f"http://localhost:3000/reset-password/{uid}/{token}/"
+            # Or send as POST URL: /api/accounts/reset-confirm/{uid}/{token}/
+
+            send_mail(
+                "Password Reset",
+                f"Click the link to reset your password: {reset_link}",
+                "noreply@yourapp.com",
+                [email],
+                fail_silently=False,
+            )
+            return Response({"detail": "Password reset link sent."})
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+# accounts/views.py
+class PasswordResetConfirmView(APIView):
+    def post(self, request, uid, token):
+        data = {
+            "uid": uid,
+            "token": token,
+            "new_password": request.data.get("new_password"),
+        }
+        serializer = PasswordResetConfirmSerializer(data=data)
+        if serializer.is_valid():
+            user = serializer.validated_data['user']
+            user.set_password(serializer.validated_data['new_password'])
+            user.save()
+            return Response({"detail": "Password has been reset successfully."})
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
 
 class DMS_Sop_get_api(APIView):
     def get(self,request):

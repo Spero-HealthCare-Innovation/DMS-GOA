@@ -1,11 +1,10 @@
-from fastapi import FastAPI, WebSocket, WebSocket, WebSocketDisconnect, Depends
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect, Depends
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 import socketio
 from pydantic import BaseModel
 from fastapi import FastAPI, BackgroundTasks
 import requests
-import json
 import time
 import asyncio
 from kafka import KafkaProducer
@@ -29,6 +28,8 @@ from websocket_router import router as websocket_router
 # from .websocket_router import router as websocket_router
 import httpx
 import pandas as pd
+
+
 
 
 #==================================Send Data to Kafka===(Mayank)========================================#
@@ -194,8 +195,7 @@ async def call_open_meteo_api():
     url = (
         f"https://api.open-meteo.com/v1/forecast?"
         f"latitude={latitudes}&longitude={longitudes}"
-        f"&hourly=temperature_2m,rain,precipitation,weather_code"
-        f"&models=ecmwf_ifs025"
+        f"&current=temperature_2m,rain,precipitation,weather_code"
     )
 
     async with httpx.AsyncClient() as client:
@@ -234,61 +234,105 @@ async def startup_event():
 
 
 # -----------------------------------------NIKITA------------------------------------------------------
+# -----------------------------------------Nikita----------------------------------------------
 
-from fastapi import FastAPI, WebSocket
-import asyncio
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 import json
 from django_setup import *
 from asgiref.sync import sync_to_async
 from admin_web.models import Weather_alerts  # Django model
-from weather_alerts_utils import get_old_weather_alerts
+from weather_alerts_utils import get_old_weather_alerts, listen_to_postgres, connected_clients, connected_clients_trigger2
+from contextlib import asynccontextmanager
+from starlette.applications import Starlette
+from starlette.routing import WebSocketRoute
+from starlette.websockets import WebSocket
+import asyncio
+# ------------------------------------###Nikita###--------------------------------------
 
-# app = FastAPI()
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Called on startup
+    task = asyncio.create_task(listen_to_postgres())
+
+    yield  # Application runs here
+
+    # Called on shutdown
+    task.cancel()
+    try:
+        await task
+    except asyncio.CancelledError:
+        pass
+
+
+app = FastAPI(lifespan=lifespan)
+
 
 @app.websocket("/ws/weather_alerts")
 async def websocket_endpoint(websocket: WebSocket):
     await websocket.accept()
+    connected_clients.add(websocket)  # Add client to global set
+    print(f"WebSocket connected: {websocket.client}")
 
     try:
-        # Send old messages
+        # Send old messages once on connect
         old_messages = await get_old_weather_alerts()
         for msg in old_messages:
             await websocket.send_text(json.dumps(msg))
             await asyncio.sleep(0.05)
 
-        # Send current data
+        # Send current data once on connect
         alerts = await sync_to_async(list)(Weather_alerts.objects.all().values(
-            "pk_id", "latitude", "longitude", "elevation", "time", "temperature_2m", 
+            "pk_id", "latitude", "longitude", "elevation", "time", "temperature_2m",
             "rain", "precipitation", "weather_code", "triger_status"
         ))
-
         for alert in alerts:
             if alert["time"]:
                 alert["time"] = alert["time"].isoformat()
-
         await websocket.send_text(json.dumps({"type": "all_alerts", "data": alerts}))
 
-        # Keep-alive loop
+        # Keep the connection alive to receive messages (if any)
         while True:
-            await asyncio.sleep(10)  # You can also check for updates and push here
-            await websocket.send_text(json.dumps({"type": "heartbeat"}))  # Optional
+            # Wait for any message from client or just keep alive
+            try:
+                msg = await asyncio.wait_for(websocket.receive_text(), timeout=30.0)
+                print(f"Received message from client: {msg}")
+            except asyncio.TimeoutError:
+                # No message received in 30 seconds, send heartbeat to keep connection alive
+                # await websocket.send_text(json.dumps({"type": "heartbeat"}))
+                pass
 
     except WebSocketDisconnect:
-        print("WebSocket disconnected by client.")
+        print(f"WebSocket disconnected by client: {websocket.client}")
 
     except Exception as e:
         print(f"WebSocket error: {e}")
 
+    finally:
+        connected_clients.remove(websocket)
+        print(f"WebSocket removed: {websocket.client}")
 
 
 
+@app.websocket("/ws/weather_alerts_trigger2")
+async def websocket_trigger2(websocket: WebSocket):
+    await websocket.accept()
+    connected_clients_trigger2.add(websocket)
+    print(f"Trigger2 WebSocket added: {websocket.client}")
+
+    try:
+        # No old data here — only listen
+        while True:
+            await asyncio.sleep(5)  # Optional heartbeat
+            # await websocket.send_text(json.dumps({"type": "heartbeat"}))
+    except WebSocketDisconnect:
+        print("Trigger2 WebSocket disconnected.")
+    except Exception as e:
+        print(f"Trigger2 WebSocket error: {e}")
+    finally:
+        connected_clients_trigger2.remove(websocket)
+        print(f"Trigger2 WebSocket removed: {websocket.client}")
 
 
+# app.include_router(websocket_router)
 
-
-
-
-
-
-
-app.include_router(websocket_router)
+# --------------------------------------####NIKITA###-------------------------------------
