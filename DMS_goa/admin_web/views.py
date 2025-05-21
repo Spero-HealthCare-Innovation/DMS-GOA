@@ -23,6 +23,16 @@ from rest_framework.response import Response
 
 class DMS_department_post_api(APIView):
     def post(self,request):
+        data = request.data
+        dep_name = data.get('dep_name')
+
+
+        if DMS_Department.objects.filter(dep_name=dep_name).exists():
+            return Response(
+                {"detail": "Department with this dep_name already exists."},
+                status=status.HTTP_409_CONFLICT
+            )
+
         serializers=DMS_department_serializer(data=request.data)
         if serializers.is_valid():
             serializers.save()
@@ -69,6 +79,17 @@ class DMS_department_delete_api(APIView):
 
 class DMS_Group_post_api(APIView):
     def post(self,request):
+        data = request.data
+        grp_name = data.get('grp_name')
+
+
+        if DMS_Group.objects.filter(grp_name=grp_name).exists():
+            return Response(
+                {"detail": "Group with this grp_name already exists."},
+                status=status.HTTP_409_CONFLICT
+            )
+
+
         serializers=DMS_Group_serializer(data=request.data)
         if serializers.is_valid():
             serializers.save()
@@ -115,6 +136,15 @@ class DMS_Group_delete_api(APIView):
 
 class DMS_Employee_post_api(APIView):
     def post(self,request):
+        data = request.data
+        emp_name = data.get('emp_name')
+
+
+        if DMS_Employee.objects.filter(emp_name=emp_name).exists():
+            return Response(
+                {"detail": "Employee with this emp_name already exists."},
+                status=status.HTTP_409_CONFLICT
+            )
         serializers=DMS_Employee_serializer(data=request.data)
         if serializers.is_valid():
             serializers.save()
