@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
-import { Box, Typography, TextField, Button, Paper, InputAdornment, Grid, Popover } from "@mui/material";
+import axios from 'axios';
+import { Box, Typography, TextField, Button, Paper, InputAdornment, Grid, Popover ,Snackbar } from "@mui/material";
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
@@ -8,8 +9,9 @@ import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import { Search, ArrowBack, DeleteOutline, EditOutlined, } from "@mui/icons-material";
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
+import { Alert } from '@mui/material';
 import { styled } from "@mui/material/styles";
-// import { alerts } from "./../../../DispatchModule/SOP/dummydata";
+import dayjs from 'dayjs';
 import Pagination from '@mui/material/Pagination';
 import { Select, MenuItem, IconButton, Popper } from "@mui/material";
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
@@ -18,6 +20,9 @@ import VisibilityIcon from "@mui/icons-material/Visibility";
 import { useAuth } from './../../../../Context/ContextAPI';
 
 function Add_employee({ darkMode }) {
+
+  const port = import.meta.env.VITE_APP_API_KEY;
+
   const {
     states,
     districts,
@@ -36,7 +41,34 @@ function Add_employee({ darkMode }) {
   } = useAuth();
 
 
+  const [empName, setEmpName] = useState('');
+  const [empContact, setEmpContact] = useState('');
+  const [empEmail, setEmpEmail] = useState('');
+  const [empDOJ, setEmpDOJ] = useState('');
+  const [empDOB, setEmpDOB] = useState('');
+  const [groupId, setGroupId] = useState('');
+  const [showSuccessAlert, setShowSuccessAlert] = useState(false);
+
+
+
+  // Format date properly for API submission
+  const formatDate = (date) => {
+    if (!date) return '';
+    try {
+      const d = new Date(date);
+      return d.toISOString().split('T')[0]; // gets YYYY-MM-DD
+    } catch (err) {
+      console.error("Date formatting error:", err);
+      return '';
+    }
+  };
+
+  const formattedDOB = formatDate(empDOB);
+  const formattedDOJ = formatDate(empDOJ);
+
+
   const [anchorEl, setAnchorEl] = useState(null);
+  const [selectedEmployee, setSelectedEmployee] = useState(null);
 
   const handleStateChange = (e) => {
     setSelectedStateId(e.target.value);
@@ -217,15 +249,94 @@ function Add_employee({ darkMode }) {
   const open = Boolean(anchorEl);
   const handleOpen = (event, item) => {
     setAnchorEl(event.currentTarget);
-    // Optionally store item in state if needed
+    setSelectedEmployee(item);
   };
+
   const handleClose = () => {
     setAnchorEl(null);
+    setSelectedEmployee(null);
+  };
+
+
+
+  // POST API INTEGRATION FOR EMPLOYEE
+
+  // Form submission
+  const handleSubmit = async () => {
+    if (!empName || !empContact || !empEmail || !empDOJ || !empDOB || !groupId ||
+      !selectedStateId || !selectedDistrictId || !selectedTehsilId || !selectedCityID) {
+      alert("Please fill all required fields");
+      return;
+    }
+
+    const payload = {
+      emp_username: empName,
+      grp_id: groupId,
+      emp_email: empEmail,
+      emp_name: empName,
+      emp_contact_no: empContact,
+      emp_doj: formatDate(empDOJ),
+      emp_dob: formatDate(empDOB),
+      emp_is_login: "0",
+      state_id: selectedStateId,
+      dist_id: selectedDistrictId,
+      tahsil_id: selectedTehsilId,
+      city_id: selectedCityID,
+      emp_is_deleted: "0",
+      emp_added_by: "1",
+      emp_modified_by: "1",
+      password: "DMS@Spero",
+      password2: "DMS@Spero"
+    };
+
+    try {
+      console.log("Sending employee data:", payload);
+      const res = await axios.post(`${port}/admin_web/employee_post/`, payload);
+      console.log("Employee Registered:", res.data);
+
+      setShowSuccessAlert(true);
+
+      // Optional: Auto-hide after 3 seconds
+      setTimeout(() => setShowSuccessAlert(false), 3000);
+
+      // Reset form after successful submission
+      setEmpName('');
+      setEmpContact('');
+      setEmpEmail('');
+      setEmpDOJ('');
+      setEmpDOB('');
+      setGroupId('');
+      setSelectedStateId('');
+      setSelectedDistrictId('');
+      setSelectedTehsilId('');
+      setSelectedCityId('');
+
+      // alert("Employee added successfully!");
+    } catch (err) {
+      console.error("Error creating employee:", err.response?.data || err.message);
+      alert("Failed to add employee. Please check the console for details.");
+    }
   };
 
 
   return (
     <div>
+      <Snackbar
+        open={showSuccessAlert}
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+        autoHideDuration={3000}
+        onClose={() => setShowSuccessAlert(false)}
+      >
+        <Alert
+          onClose={() => setShowSuccessAlert(false)}
+          severity="success"
+          variant="filled"
+          sx={{ width: '100%' }}
+        >
+          Employee added successfully!
+        </Alert>
+      </Snackbar>
+
       <Box sx={{ display: "flex", alignItems: "center", gap: 2, pb: 2, mt: 3 }}>
 
         {/* Back Arrow */}
@@ -656,6 +767,8 @@ function Add_employee({ darkMode }) {
         </Popover>
 
         <Grid item xs={12} md={5}>
+
+
           <Paper elevation={3} sx={{ padding: 2, borderRadius: 3, backgroundColor: bgColor, mt: 1, mb: 5 }}>
             <Typography
               sx={{
@@ -674,6 +787,8 @@ function Add_employee({ darkMode }) {
               {/* First TextField */}
               <TextField
                 fullWidth
+                value={empName}
+                onChange={(e) => setEmpName(e.target.value)}
                 placeholder="Employee Name"
                 InputLabelProps={{ shrink: false }}
                 sx={inputStyle}
@@ -682,7 +797,8 @@ function Add_employee({ darkMode }) {
               <TextField
                 fullWidth
                 placeholder="Emp Contact No"
-                InputLabelProps={{ shrink: false }}
+                value={empContact}
+                onChange={(e) => setEmpContact(e.target.value)}
                 sx={inputStyle}
               />
             </Box>
@@ -691,14 +807,18 @@ function Add_employee({ darkMode }) {
               <TextField
                 fullWidth
                 placeholder="Employee Email"
-                InputLabelProps={{ shrink: false }}
+                value={empEmail}
+                onChange={(e) => setEmpEmail(e.target.value)}
                 sx={inputStyle}
               />
               {/* Second TextField */}
               <TextField
                 fullWidth
+                InputLabelProps={{ shrink: true }}
+                type="date"
                 placeholder="Emp DOJ"
-                InputLabelProps={{ shrink: false }}
+                value={empDOJ}
+                onChange={(e) => setEmpDOJ(e.target.value)}
                 sx={inputStyle}
               />
             </Box>
@@ -707,7 +827,8 @@ function Add_employee({ darkMode }) {
               <TextField
                 fullWidth
                 placeholder="Group ID"
-                InputLabelProps={{ shrink: false }}
+                value={groupId}
+                onChange={(e) => setGroupId(e.target.value)}
                 sx={inputStyle}
               />
               {/* Second Select  */}
@@ -721,34 +842,10 @@ function Add_employee({ darkMode }) {
                 inputProps={{
                   "aria-label": "Select State",
                 }}
-                sx={{
-                  height: '3rem',
-                  '& .MuiSelect-root': {
-                    color: textColor,
-                  },
-                  borderRadius: '12px',
-                  '& fieldset': {
-                    border: 'none', // Remove border
-                  },
-                  backgroundColor: inputBgColor,
-                  '& .MuiOutlinedInput-notchedOutline': {
-                    border: 'none', // Remove border outline
-                  },
-                  boxShadow: '0px 2px 10px rgba(0, 0, 0, 0.1)', // Add box shadow
-                  '&:hover': {
-                    boxShadow: '0px 4px 15px rgba(0, 0, 0, 0.2)', // Increase shadow on hover
-                  },
-                  '& input::placeholder': {
-                    fontSize: '0.85rem',
-                    color: textColor,
-                  },
-                  '& .MuiSvgIcon-root': {
-                    color: 'white !important', // Dropdown icon color
-                  },
-                }}
+                sx={inputStyle}
                 IconComponent={KeyboardArrowDownIcon} // Use outlined dropdown arrow
               >
-                <MenuItem value="" disabled>
+                <MenuItem value="" disabled  sx={inputStyle}>
                   Select State
                 </MenuItem>
                 {states.map(state => (
@@ -915,8 +1012,11 @@ function Add_employee({ darkMode }) {
 
               <TextField
                 fullWidth
+                InputLabelProps={{ shrink: true }}
+                type="date"
                 placeholder="Employee DOB"
-                InputLabelProps={{ shrink: false }}
+                value={empDOB}
+                onChange={(e) => setEmpDOB(e.target.value)}
                 sx={{
                   // Set desired width
                   height: "3rem",
@@ -950,6 +1050,7 @@ function Add_employee({ darkMode }) {
             <Box sx={{ display: 'flex', justifyContent: 'center', mt: 3, mb: 1 }}>
               <Button
                 variant="contained"
+                onClick={handleSubmit}
                 sx={{
                   mt: 2,
                   width: "40%",
@@ -967,6 +1068,7 @@ function Add_employee({ darkMode }) {
             </Box>
 
           </Paper>
+
         </Grid>
       </Grid>
     </div>

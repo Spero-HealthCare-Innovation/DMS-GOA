@@ -82,7 +82,8 @@ export const AuthProvider = ({ children }) => {
         `${port}/admin_web/district_get_idwise/${stateId}/`,
         {
           headers: {
-            Authorization: `Bearer ${token}`,
+            Authorization: `Bearer ${token || newToken}`,
+
           },
         }
       );
@@ -103,7 +104,8 @@ export const AuthProvider = ({ children }) => {
       setLoading(true);
       const res = await axios.get(`${port}/admin_web/Tahsil_get_idwise/${districtId}/`, {
         headers: {
-          Authorization: `Bearer ${token}`,
+         Authorization: `Bearer ${token || newToken}`,
+
         },
       });
       console.log(`Tehsils by district ${districtId}:`, res.data);
@@ -123,7 +125,8 @@ export const AuthProvider = ({ children }) => {
       setLoading(true);
       const res = await axios.get(`${port}/admin_web/City_get_idwise/${tehshilId}/`, {
         headers: {
-          Authorization: `Bearer ${token}`,
+        Authorization: `Bearer ${token || newToken}`,
+
         },
       });
       console.log(`Tehsils by district ${tehshilId}:`, res.data);
