@@ -161,10 +161,10 @@ window.addEventListener('storage', (e) => {
                             <TableHead>
                                 <TableRow>
                                     <EnquiryCard>
-                                        <StyledCardContent style={{ flex: 0.3, borderRight: "1px solid black" }}>
-                                            <Typography variant="subtitle2">Sr. No</Typography>
+                                        <StyledCardContent style={{ flex: 0.5, borderRight: "1px solid black" }}>
+                                            <Typography variant="subtitle2">Alert Id</Typography>
                                         </StyledCardContent>
-                                        <StyledCardContent style={{ flex: 1, borderRight: "1px solid black" }}>
+                                        <StyledCardContent style={{ flex: 1.2, borderRight: "1px solid black" }}>
                                             <Typography variant="subtitle2">Time</Typography>
                                         </StyledCardContent>
                                         <StyledCardContent style={{ flex: 1, borderRight: "1px solid black" }}>
@@ -197,13 +197,13 @@ window.addEventListener('storage', (e) => {
                                             sx={{
                                                 backgroundColor: darkMode ? "#1C223C" : "#FFFFFF",
                                                 color: darkMode ? "white" : "black",
-                                                cursor: "pointer", // Optional for visual feedback
+                                                cursor: "pointer", 
                                             }}
                                         >
-                                            <StyledCardContent style={{ flex: 0.3 }}>
+                                            <StyledCardContent style={{ flex: 0.5 }}>
                                                 <Typography variant="subtitle2">{item.pk_id}</Typography>
                                             </StyledCardContent>
-                                            <StyledCardContent style={{ flex: 1 }}>
+                                            <StyledCardContent style={{ flex: 1.2 }}>
                                                 <Typography variant="subtitle2">{new Date(item.time).toLocaleString()}</Typography>
                                             </StyledCardContent>
                                             <StyledCardContent style={{ flex: 1 }}>
