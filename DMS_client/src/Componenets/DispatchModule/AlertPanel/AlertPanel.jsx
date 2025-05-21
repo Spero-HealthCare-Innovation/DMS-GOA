@@ -67,6 +67,14 @@ const AlertPanel = ({ darkMode }) => {
     const paginatedData = alertData.slice(startIndex, endIndex);
     const totalPages = Math.ceil(alertData.length / rowsPerPage);
 
+        // initStorageLogoutSync.js
+window.addEventListener('storage', (e) => {
+  if (e.key === 'logout') {
+    // token to already delete ho chuka hoga, ab page hatao
+    location.href = '/login';     // ya location.reload()
+  }
+});
+
     useEffect(() => {
         document.title = "DMS-AlertPanel";
     }, []);
