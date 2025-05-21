@@ -8,8 +8,8 @@ function Sop({ darkMode, setDarkMode }) {
       // initStorageLogoutSync.js
 window.addEventListener('storage', (e) => {
   if (e.key === 'logout') {
-    // token to already delete ho chuka hoga, ab page hatao
-    location.href = '/login';     // ya location.reload()
+ 
+    location.href = '/login';   
   }
 });
 
