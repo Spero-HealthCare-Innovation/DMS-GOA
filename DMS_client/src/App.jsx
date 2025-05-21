@@ -64,7 +64,6 @@ function App() {
 
               {/* {userGroup === "2" && <Sidebar darkMode={darkMode} />} */}
               {userGroup === "1" && <Departmentsidebar darkMode={darkMode} />}
-
             </>
           )}
 
@@ -72,7 +71,9 @@ function App() {
             <AppRoutes darkMode={darkMode} />
           </div>
 
-          {!isAuthRoute && <Footer darkMode={darkMode} />}
+          {/* {!isAuthRoute && <Footer darkMode={darkMode} />} */}
+          {!isAuthRoute && userGroup !== null && <Footer darkMode={darkMode} />}
+
         </div>
       </div>
     </ThemeProvider>
