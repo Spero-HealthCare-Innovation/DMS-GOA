@@ -7,6 +7,7 @@ import { styled } from '@mui/system';
 import { useNavigate } from 'react-router-dom';
 import MapView from './Map';
 import { useAuth } from './../../../Context/ContextAPI';
+import Sidebar from '../Sidebar/Sidebar';
 
 const EnquiryCard = styled('div')({
     display: 'flex',
@@ -118,11 +119,25 @@ const AlertPanel = ({ darkMode }) => {
                     }
                 });
             }
-            // navigate('/Sop', {
-            //     state: {
-            //         triggerStatus: triggerStatus
-            //     }
-            // });
+        } catch (error) {
+            console.error('Error fetching alert details:', error);
+        }
+    };
+
+    const handleTriggeredData = async (id, triggerStatus) => {
+        try {
+            const response = await fetch(`${port}/admin_web/alert/?id=${id}`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${token || newToken}`,
+                    'Content-Type': 'application/json',
+                },
+            });
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            const data = await response.json();
+            setTriggeredData(data);
         } catch (error) {
             console.error('Error fetching alert details:', error);
         }
@@ -130,6 +145,7 @@ const AlertPanel = ({ darkMode }) => {
 
     return (
         <Box sx={{ flexGrow: 1, mt: 1, ml: 1, mr: 1, mb: 2 }}>
+            <Sidebar darkMode={darkMode} />
             <Grid container spacing={2}>
                 <Grid item xs={12} md={8}>
                     <TableContainer>
@@ -169,7 +185,7 @@ const AlertPanel = ({ darkMode }) => {
                                     paginatedData.map((item, index) => (
                                         <EnquiryCardBody
                                             key={startIndex + index}
-                                            onClick={() => handleTriggerClick(item.pk_id, item.triger_status)} // Add row click
+                                            onClick={() => handleTriggeredData(item.pk_id, item.triger_status)} // Add row click
                                             sx={{
                                                 backgroundColor: darkMode ? "#1C223C" : "#FFFFFF",
                                                 color: darkMode ? "white" : "black",
@@ -298,7 +314,7 @@ const AlertPanel = ({ darkMode }) => {
                 </Grid>
 
                 <Grid item xs={12} md={4}>
-                    <MapView />
+                    <MapView data={triggeredData} />
                 </Grid>
             </Grid>
         </Box>

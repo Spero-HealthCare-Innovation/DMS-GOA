@@ -286,21 +286,18 @@ function Login() {
                 if (group === '1') {
                     navigate('/add-group');
                 } else if (group === '2') {
-                    navigate('/alert-panel');
+                    navigate('/Map');
                 } else if (group === '3') {
                     navigate('/multiscreen');
                 } else {
                     console.warn('Unhandled user group:', group);
-                    // Optionally redirect to a fallback route
                     navigate('/not-authorized');
                 }
 
-                //  IMPORTANT: Only trigger WebSocket for group '3'
                 if (group === '3') {
                     console.log(' GROUP 3 DETECTED - WebSocket will be triggered');
                     navigate('/multiscreen');
 
-                    // WebSocket connection ONLY for user group 3
                     setTimeout(() => {
                         try {
                             console.log(' Creating WebSocket connection for group 3');
@@ -323,7 +320,7 @@ function Login() {
                     navigate('/add-department');
                 } else if (group === '2') {
                     console.log(' GROUP 2 DETECTED - NO WebSocket - Navigating to /alert-panel');
-                    navigate('/alert-panel');
+                    navigate('/Map');
                 } else {
                     console.warn('Unhandled user group:', group);
                     navigate('/not-authorized');
@@ -370,7 +367,7 @@ function Login() {
             {/* Background Image */}
             <Box
                 sx={{
-                    position: 'absolute',
+                    position: 'fixed',
                     top: 0,
                     left: 0,
                     height: '100%',
