@@ -56,6 +56,14 @@ const AlertPanel = ({ darkMode }) => {
 
     const navigate = useNavigate();
 
+        // initStorageLogoutSync.js
+window.addEventListener('storage', (e) => {
+  if (e.key === 'logout') {
+    // token to already delete ho chuka hoga, ab page hatao
+    location.href = '/login';     // ya location.reload()
+  }
+});
+
     useEffect(() => {
         document.title = "DMS-AlertPanel";
     }, []);

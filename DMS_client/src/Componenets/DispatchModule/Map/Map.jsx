@@ -2,6 +2,15 @@ import React, { useEffect } from "react";
 
 const Map = () => {
 
+
+
+      // initStorageLogoutSync.js
+window.addEventListener('storage', (e) => {
+  if (e.key === 'logout') {
+    // token to already delete ho chuka hoga, ab page hatao
+    location.href = '/login';     // ya location.reload()
+  }
+});
   
       useEffect(() => {
     document.title = "DMS|Map";
