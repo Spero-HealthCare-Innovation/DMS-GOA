@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import axios from 'axios';
-import { Box, Typography, TextField, Button, Paper, InputAdornment, Grid, Popover, Snackbar } from "@mui/material";
+import { Box, Typography, TextField, Button, Paper, InputAdornment, Grid, Popover ,Snackbar } from "@mui/material";
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
@@ -48,7 +48,6 @@ function Add_employee({ darkMode }) {
   const [empDOB, setEmpDOB] = useState('');
   const [groupId, setGroupId] = useState('');
   const [showSuccessAlert, setShowSuccessAlert] = useState(false);
-
 
 
 
@@ -187,7 +186,7 @@ function Add_employee({ darkMode }) {
 
 
 
- const alerts = [
+  const alerts = [
     {
       empName: "Akshata",
       empContact: "9876543212",
@@ -238,7 +237,7 @@ function Add_employee({ darkMode }) {
       state: "maharashtra"
     },
 
-  ]; 
+  ];
 
   const paginatedData = useMemo(() => {
     const start = (page - 1) * rowsPerPage;
@@ -297,7 +296,7 @@ function Add_employee({ darkMode }) {
 
       setShowSuccessAlert(true);
 
-      // Auto-hide after 3 seconds
+      // Optional: Auto-hide after 3 seconds
       setTimeout(() => setShowSuccessAlert(false), 3000);
 
       // Reset form after successful submission
@@ -331,7 +330,7 @@ function Add_employee({ darkMode }) {
         <Alert
           onClose={() => setShowSuccessAlert(false)}
           severity="success"
-          // variant="filled"
+          variant="filled"
           sx={{ width: '100%' }}
         >
           Employee added successfully!
@@ -768,6 +767,8 @@ function Add_employee({ darkMode }) {
         </Popover>
 
         <Grid item xs={12} md={5}>
+
+
           <Paper elevation={3} sx={{ padding: 2, borderRadius: 3, backgroundColor: bgColor, mt: 1, mb: 5 }}>
             <Typography
               sx={{
@@ -841,34 +842,10 @@ function Add_employee({ darkMode }) {
                 inputProps={{
                   "aria-label": "Select State",
                 }}
-                sx={{
-                  height: '3rem',
-                  '& .MuiSelect-root': {
-                    color: textColor,
-                  },
-                  borderRadius: '12px',
-                  '& fieldset': {
-                    border: 'none', // Remove border
-                  },
-                  backgroundColor: inputBgColor,
-                  '& .MuiOutlinedInput-notchedOutline': {
-                    border: 'none', // Remove border outline
-                  },
-                  boxShadow: '0px 2px 10px rgba(0, 0, 0, 0.1)', // Add box shadow
-                  '&:hover': {
-                    boxShadow: '0px 4px 15px rgba(0, 0, 0, 0.2)', // Increase shadow on hover
-                  },
-                  '& input::placeholder': {
-                    fontSize: '0.85rem',
-                    color: textColor,
-                  },
-                  '& .MuiSvgIcon-root': {
-                    color: 'white !important', // Dropdown icon color
-                  },
-                }}
+                sx={inputStyle}
                 IconComponent={KeyboardArrowDownIcon} // Use outlined dropdown arrow
               >
-                <MenuItem value="" disabled>
+                <MenuItem value="" disabled  sx={inputStyle}>
                   Select State
                 </MenuItem>
                 {states.map(state => (
@@ -1091,6 +1068,7 @@ function Add_employee({ darkMode }) {
             </Box>
 
           </Paper>
+
         </Grid>
       </Grid>
     </div>
