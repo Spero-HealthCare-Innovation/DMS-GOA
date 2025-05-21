@@ -27,20 +27,7 @@ function Sop({ darkMode, setDarkMode }) {
     backgroundColor: darkMode ? "#0a1929" : "#f5f5f5",
     minHeight: "100vh",
     transition: "background-color 0.5s ease-in-out, color 0.5s ease-in-out",
-      // Scrollbar styling
-    '&::-webkit-scrollbar': {
-      width: '8px',
-    },
-    '&::-webkit-scrollbar-track': {
-      backgroundColor: darkMode ? '#1e293b' : '#e0e0e0',
-    },
-    '&::-webkit-scrollbar-thumb': {
-      backgroundColor: darkMode ? '#4b5563' : '#9e9e9e',
-      borderRadius: '4px',
-    },
-    '&::-webkit-scrollbar-thumb:hover': {
-      backgroundColor: darkMode ? '#6b7280' : '#757575',
-    },
+   
   }}
 >
       <Grid container spacing={2}>
