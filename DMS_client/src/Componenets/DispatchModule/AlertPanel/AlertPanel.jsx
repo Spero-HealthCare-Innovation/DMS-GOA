@@ -80,7 +80,7 @@ window.addEventListener('storage', (e) => {
     }, []);
 
     useEffect(() => {
-        const socket = new WebSocket('ws://192.168.1.116:7777/ws/weather_alerts');
+        const socket = new WebSocket('ws://192.168.1.116:8000/ws/weather_alerts');
 
         socket.onmessage = (event) => {
             try {
