@@ -114,6 +114,19 @@ class DMS_Permission(models.Model):
     per_modified_by = models.CharField(max_length=255, null=True, blank=True)
     
 
+class DMS_Disaster_Type(models.Model):
+    disaster_id = models.AutoField(primary_key=True)
+    disaster_name = models.CharField(max_length=255)
+    disaster_rng_high = models.IntegerField(null=True, blank=True)
+    disaster_rng_medium = models.IntegerField(null=True, blank=True)
+    disaster_rng_low = models.IntegerField(null=True, blank=True)
+    disaster_is_deleted = models.BooleanField(default=False)
+    disaster_added_date = models.DateTimeField(auto_now=True,null=True, blank=True)
+    disaster_added_by = models.CharField(max_length=255, null=True, blank=True)
+    disaster_modified_by = models.CharField(max_length=255, null=True, blank=True)
+    disaster_modified_date = models.DateTimeField(null=True, blank=True)
+    
+
 
 # Custom User Manager
 class DMS_Employee_Manager(BaseUserManager):
@@ -190,7 +203,7 @@ class DMS_Employee(AbstractBaseUser):
     # dis_id = models.ForeignKey(DMS_District, on_delete=models.CASCADE, default=1)
     # tah_id = models.ForeignKey(DMS_Tahsil, on_delete=models.CASCADE, default=1)
     # city_id = models.ForeignKey(DMS_City, on_delete=models.CASCADE, default=1)
-
+    disaster_id = models.ForeignKey(DMS_Disaster_Type, on_delete=models.CASCADE)
     grp_id = models.CharField(max_length=255, null=True, blank=True)
     state_id = models.CharField(max_length=255, null=True, blank=True)
     dist_id = models.CharField(max_length=255, null=True, blank=True)
@@ -248,21 +261,6 @@ class DMS_WebLogin(models.Model):
     log_added_date = models.DateTimeField(auto_now=True)
     log_added_by = models.CharField(max_length=255, null=True, blank=True)
     log_modified_by = models.CharField(max_length=255, null=True, blank=True)
-
-
-
-
-class DMS_Disaster_Type(models.Model):
-    disaster_id = models.AutoField(primary_key=True)
-    disaster_name = models.CharField(max_length=255)
-    disaster_rng_high = models.IntegerField(null=True, blank=True)
-    disaster_rng_medium = models.IntegerField(null=True, blank=True)
-    disaster_rng_low = models.IntegerField(null=True, blank=True)
-    disaster_is_deleted = models.BooleanField(default=False)
-    disaster_added_date = models.DateTimeField(auto_now=True,null=True, blank=True)
-    disaster_added_by = models.CharField(max_length=255, null=True, blank=True)
-    disaster_modified_by = models.CharField(max_length=255, null=True, blank=True)
-    disaster_modified_date = models.DateTimeField(null=True, blank=True)
 
 
 
