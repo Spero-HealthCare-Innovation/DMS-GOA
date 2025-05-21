@@ -203,7 +203,7 @@ class DMS_Employee(AbstractBaseUser):
     # dis_id = models.ForeignKey(DMS_District, on_delete=models.CASCADE, default=1)
     # tah_id = models.ForeignKey(DMS_Tahsil, on_delete=models.CASCADE, default=1)
     # city_id = models.ForeignKey(DMS_City, on_delete=models.CASCADE, default=1)
-    disaster_id = models.ForeignKey(DMS_Disaster_Type, on_delete=models.CASCADE)
+
     grp_id = models.CharField(max_length=255, null=True, blank=True)
     state_id = models.CharField(max_length=255, null=True, blank=True)
     dist_id = models.CharField(max_length=255, null=True, blank=True)
@@ -267,6 +267,7 @@ class DMS_WebLogin(models.Model):
 class DMS_Role(models.Model):
     role_id = models.AutoField(primary_key=True)
     dep_id = models.ForeignKey(DMS_Department, on_delete=models.CASCADE)
+    disaster_id = models.ForeignKey(DMS_Disaster_Type, on_delete=models.CASCADE)
     grp_id = models.ForeignKey(DMS_Group, on_delete=models.CASCADE)
     role_is_deleted = models.BooleanField(default=False)
     role_added_by = models.CharField(max_length=255, null=True, blank=True)
@@ -305,3 +306,39 @@ class Weather_alerts(models.Model):
     modified_by = models.CharField(max_length=255, null=True, blank=True)
     modified_date = models.DateTimeField(null=True, blank=True)
 
+
+from django.utils.timezone import now
+class DMS_Incident(models.Model):
+    inc_id = models.AutoField(primary_key=True)
+    incident_id = models.CharField(max_length=255, unique=True, blank=True)
+    responder_scope = models.JSONField(null=True,blank=True)
+    alert_id = models.ForeignKey(Weather_alerts,on_delete=models.CASCADE)
+    inc_is_deleted = models.BooleanField(default=False)
+    inc_added_by=models.CharField(max_length=255,null=True,blank=True)
+    inc_added_date = models.DateTimeField(auto_now=True)
+    inc_modified_by = models.CharField(max_length=255, null=True, blank=True)
+    inc_modified_date = models.DateTimeField(null=True, blank=True)
+    
+    def save(self, *args, **kwargs):
+        is_new = self.pk is None
+        super().save(*args, **kwargs)  
+
+        if is_new and not self.incident_id:
+            date_prefix = now().strftime('%Y%m%d')
+            self.incident_id = f"{date_prefix}{str(self.inc_id).zfill(5)}"
+            super().save(update_fields=['incident_id']) 
+            
+class DMS_Comments(models.Model):
+    comm_id = models.AutoField(primary_key=True)
+    alert_id = models.ForeignKey(Weather_alerts,on_delete=models.CASCADE)
+    incident_id = models.ForeignKey(DMS_Incident,on_delete=models.CASCADE)
+    comments = models.TextField(null=True, blank=True)
+    comm_chat = models.BooleanField(default=False)
+    comm_is_deleted= models.BooleanField(default=False)
+    comm_added_by=models.CharField(max_length=255,null=True,blank=True)
+    comm_added_date = models.DateTimeField(auto_now=True)
+    comm_modified_by = models.CharField(max_length=255, null=True, blank=True)
+    comm_modified_date = models.DateTimeField(null=True, blank=True)
+    
+
+    

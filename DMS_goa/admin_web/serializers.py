@@ -157,3 +157,14 @@ class WeatherAlertSerializer(serializers.ModelSerializer):
     class Meta:
         model = Weather_alerts
         fields = '__all__'
+
+class Incident_Serializer(serializers.ModelSerializer):
+    class Meta:
+        model = DMS_Incident
+        fields = '__all__' 
+        
+class Comments_Serializer(serializers.ModelSerializer):
+    class Meta:
+        model = DMS_Comments
+        fields = '__all__' 
+        

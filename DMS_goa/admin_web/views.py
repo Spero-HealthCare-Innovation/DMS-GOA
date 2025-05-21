@@ -527,3 +527,20 @@ class DMS_Alert_idwise_get_api(APIView):
         alert_obj.save()
         serializers = WeatherAlertSerializer(alert_obj,many=False)
         return Response(serializers.data,status=status.HTTP_200_OK)
+    
+class DMS_Incident_Post_api(APIView):
+    def post(self,request):
+        serializers=Incident_Serializer(data=request.data)
+        if serializers.is_valid():
+            serializers.save()
+            return Response(serializers.data,status=status.HTTP_201_CREATED)
+        return Response(serializers.errors,status=status.HTTP_400_BAD_REQUEST)
+
+
+class DMS_Comments_Post_api(APIView):
+    def post(self,request):
+        serializers=Comments_Serializer(data=request.data)
+        if serializers.is_valid():
+            serializers.save()
+            return Response(serializers.data,status=status.HTTP_201_CREATED)
+        return Response(serializers.errors,status=status.HTTP_400_BAD_REQUEST)
