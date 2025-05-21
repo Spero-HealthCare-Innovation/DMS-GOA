@@ -63,7 +63,7 @@ function App() {
               />
 
               {/* 👇 Correct Sidebar logic */}
-              {userGroup === "2" || userGroup === "3" && <Sidebar darkMode={darkMode} />}
+              {userGroup === "2"  && <Sidebar darkMode={darkMode} />}
               {/* {userGroup === "2" && <Sidebar darkMode={darkMode} />} */}
               {userGroup === "1" && <Departmentsidebar darkMode={darkMode} />}
             </>
