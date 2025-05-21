@@ -26,16 +26,20 @@ window.addEventListener('storage', (e) => {
 
   return (
     <Box
-      sx={{
-        px: { xs: 2, sm: 3, md: 4 },
-        py: { xs: 2, sm: 3 },
-        backgroundColor: darkMode ? "#0a1929" : "#f5f5f5",
-        minHeight: "100vh",
-        transition: "background-color 0.5s ease-in-out, color 0.5s ease-in-out",
-      }}
-    >
+  sx={{
+    ml: { xs: -1.5, sm: -2, md: -3 }, 
+    pr: { xs: 2, sm: 3, md: 4 },      
+    py: { xs: 2, sm: 3 },
+      mx: 0, // No left/right margin
+    px: 0, // No horizontal padding
+    backgroundColor: darkMode ? "#0a1929" : "#f5f5f5",
+    minHeight: "100vh",
+    transition: "background-color 0.5s ease-in-out, color 0.5s ease-in-out",
+   
+  }}
+>
       <Grid container spacing={2}>
-        <Grid item xs={12}>
+        <Grid item xs={12} >
           <SopTask
             darkMode={darkMode}
             setDarkMode={setDarkMode}

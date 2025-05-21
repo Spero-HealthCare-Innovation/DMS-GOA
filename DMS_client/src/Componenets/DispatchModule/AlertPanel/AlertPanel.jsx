@@ -6,6 +6,8 @@ import {
 import { styled } from '@mui/system';
 import { useNavigate } from 'react-router-dom';
 import MapView from './Map';
+import { useAuth } from './../../../Context/ContextAPI';
+import Sidebar from '../Sidebar/Sidebar';
 
 const EnquiryCard = styled('div')({
     display: 'flex',
@@ -27,7 +29,8 @@ const EnquiryCardBody = styled('div')({
     marginTop: '0.5em',
     borderRadius: '8px',
     position: 'relative',
-    height: '40px'
+    height: '40px',
+    cursor: 'pointer',
 });
 
 const StyledCardContent = styled(CardContent)({
@@ -41,20 +44,28 @@ const StyledCardContent = styled(CardContent)({
 });
 
 const AlertPanel = ({ darkMode }) => {
+    const { newToken } = useAuth();
+    console.log(newToken, 'newToken');
+
     const port = import.meta.env.VITE_APP_API_KEY;
     const group = localStorage.getItem('user_group');
-    console.log(group,'groupgroup');
-    
+    const token = localStorage.getItem('access_token');
+    console.log(group, 'groupgroup');
+    const navigate = useNavigate();
+
     const textColor = darkMode ? "#ffffff" : "#000000";
     const bgColor = darkMode ? "#0a1929" : "#ffffff";
     const borderColor = darkMode ? "#7F7F7F" : "#ccc";
-
     const [page, setPage] = useState(1);
     const [rowsPerPage, setRowsPerPage] = useState(5);
-
     const [alertData, setAlertData] = useState([]);
+    const [triggeredData, setTriggeredData] = useState([]);
+    console.log(triggeredData, 'triggeredData');
 
-    const navigate = useNavigate();
+    const startIndex = (page - 1) * rowsPerPage;
+    const endIndex = startIndex + rowsPerPage;
+    const paginatedData = alertData.slice(startIndex, endIndex);
+    const totalPages = Math.ceil(alertData.length / rowsPerPage);
 
         // initStorageLogoutSync.js
 window.addEventListener('storage', (e) => {
@@ -94,20 +105,20 @@ window.addEventListener('storage', (e) => {
         };
     }, []);
 
-    const startIndex = (page - 1) * rowsPerPage;
-    const endIndex = startIndex + rowsPerPage;
-    const paginatedData = alertData.slice(startIndex, endIndex);
-
-
-    const totalPages = Math.ceil(alertData.length / rowsPerPage);
-
     const handleTriggerClick = async (id, triggerStatus) => {
         try {
-            const response = await fetch(`${port}/admin_web/alert/?id=${id}`);
+            const response = await fetch(`${port}/admin_web/alert/?id=${id}`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${token || newToken}`,
+                    'Content-Type': 'application/json',
+                },
+            });
             if (!response.ok) {
                 throw new Error('Network response was not ok');
             }
             const data = await response.json();
+            setTriggeredData(data);
 
             if (group === "2") {
                 navigate('/Sop', {
@@ -116,11 +127,25 @@ window.addEventListener('storage', (e) => {
                     }
                 });
             }
-            // navigate('/Sop', {
-            //     state: {
-            //         triggerStatus: triggerStatus
-            //     }
-            // });
+        } catch (error) {
+            console.error('Error fetching alert details:', error);
+        }
+    };
+
+    const handleTriggeredData = async (id, triggerStatus) => {
+        try {
+            const response = await fetch(`${port}/admin_web/alert/?id=${id}`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${token || newToken}`,
+                    'Content-Type': 'application/json',
+                },
+            });
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            const data = await response.json();
+            setTriggeredData(data);
         } catch (error) {
             console.error('Error fetching alert details:', error);
         }
@@ -128,6 +153,7 @@ window.addEventListener('storage', (e) => {
 
     return (
         <Box sx={{ flexGrow: 1, mt: 1, ml: 1, mr: 1, mb: 2 }}>
+            <Sidebar darkMode={darkMode} />
             <Grid container spacing={2}>
                 <Grid item xs={12} md={8}>
                     <TableContainer>
@@ -167,9 +193,11 @@ window.addEventListener('storage', (e) => {
                                     paginatedData.map((item, index) => (
                                         <EnquiryCardBody
                                             key={startIndex + index}
+                                            onClick={() => handleTriggeredData(item.pk_id, item.triger_status)} // Add row click
                                             sx={{
                                                 backgroundColor: darkMode ? "#1C223C" : "#FFFFFF",
                                                 color: darkMode ? "white" : "black",
+                                                cursor: "pointer", // Optional for visual feedback
                                             }}
                                         >
                                             <StyledCardContent style={{ flex: 0.3 }}>
@@ -186,8 +214,10 @@ window.addEventListener('storage', (e) => {
                                             </StyledCardContent>
                                             <StyledCardContent style={{ flex: 1 }}>
                                                 <Button
-                                                    // onClick={() => navigate('/Sop', { state: { flag: 1 } })}
-                                                    onClick={() => handleTriggerClick(item.pk_id, item.triger_status)}
+                                                    onClick={(e) => {
+                                                        e.stopPropagation(); // Prevent parent click from firing
+                                                        handleTriggerClick(item.pk_id, item.triger_status);
+                                                    }}
                                                     style={{
                                                         width: '60%',
                                                         backgroundColor: item.triger_status === 1 ? '#FF4C4C' : '#00BFA6',
@@ -215,7 +245,6 @@ window.addEventListener('storage', (e) => {
                         mb={4}
                         px={1}
                     >
-                        {/* Records Per Page */}
                         <Box display="flex" alignItems="center" gap={1}>
                             <Typography variant="body2" sx={{ color: textColor }}>
                                 Records per page:
@@ -293,7 +322,7 @@ window.addEventListener('storage', (e) => {
                 </Grid>
 
                 <Grid item xs={12} md={4}>
-                    <MapView />
+                    <MapView data={triggeredData} />
                 </Grid>
             </Grid>
         </Box>

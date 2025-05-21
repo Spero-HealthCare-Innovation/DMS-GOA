@@ -15,7 +15,9 @@ import { styled } from "@mui/material/styles";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { useLocation } from "react-router-dom";
 import { useState } from "react";
-import { tasks, alerts } from "./dummydata";
+import { useRef } from "react";
+import { useEffect } from "react";
+import { tasks} from "./dummydata";
 
 const EnquiryCard = styled("div")(() => ({
   display: "flex",
@@ -83,6 +85,75 @@ const Dispatch=[
 function SopTask({ darkMode, flag, setFlag, setSelectedIncident }) {
   useLocation(); // This line does nothing
   const location = useLocation(); // This is the correct usage
+
+  
+const [alerts, setAlerts] = useState([]); // 👈 Ye existing alerts ka state hai
+const socketRef = useRef(null);
+
+// useEffect(() => {
+//   socketRef.current = new WebSocket("ws://127.0.0.1:9000/ws/weather_alerts_trigger2");
+
+//   socketRef.current.onopen = () => {
+//     console.log("✅ WebSocket connected");
+//   };
+
+//   socketRef.current.onmessage = (event) => {
+//     try {
+//       const newAlert = JSON.parse(event.data); // Assuming backend sends JSON
+
+//       setAlerts((prevAlerts) => [newAlert, ...prevAlerts]); // Latest alert on top
+//     } catch (error) {
+//       console.error("Error parsing alert:", error);
+//     }
+//   };
+
+//   socketRef.current.onerror = (error) => {
+//     console.error("❌ WebSocket error", error);
+//   };
+
+//   socketRef.current.onclose = () => {
+//     console.log("🔌 WebSocket disconnected");
+//   };
+
+//   return () => {
+//     socketRef.current?.close(); // Cleanup
+//   };
+// }, []);
+
+ useEffect(() => {
+    const timer = setTimeout(() => {
+        const socket = new WebSocket('ws://127.0.0.1:9000/ws/weather_alerts_trigger2');
+
+        socket.onopen = () => {
+            console.log('WebSocket connected');
+        };
+
+        socket.onmessage = (event) => {
+            try {
+                const data = JSON.parse(event.data);
+                console.log(data, 'alertssss');
+                setAlerts((prev) => [...prev, data]);
+            } catch (error) {
+                console.error('Invalid JSON:', event.data);
+            }
+        };
+
+        socket.onerror = (error) => {
+            console.error('WebSocket error:', error);
+        };
+
+        socket.onclose = () => {
+            console.log('WebSocket closed');
+        };
+
+        // Clean up
+        return () => {
+            socket.close();
+        };
+    }, 1000); // delay 1 sec
+
+    return () => clearTimeout(timer);
+}, []);
 
   const handleBack = () => {
     setFlag(0);
@@ -168,110 +239,189 @@ function SopTask({ darkMode, flag, setFlag, setSelectedIncident }) {
       </Box>
 
       {flag === 1 ? (
-        <Grid container spacing={2}>
-          <Grid item xs={12}>
-            <TableContainer>
-              <Table>
-                <TableBody>
-                  <EnquiryCard sx={{ display: "flex", flexDirection: "row" }}>
-                    {Alert.map((label, idx) => (
-                      <StyledCardContent
-                        key={idx}
-                        sx={{
-                          flex: 1,
-                          display: "flex",
-                          justifyContent: "center",
-                        }}
-                      >
-                        <Typography variant="subtitle2" fontWeight={500}>
-                          {label}
-                        </Typography>
-                      </StyledCardContent>
-                    ))}
-                  </EnquiryCard>
+        // <Grid container spacing={2}>
+        //   <Grid item xs={12}>
+        //     <TableContainer>
+        //       <Table>
+        //         <TableBody>
+        //           <EnquiryCard sx={{ display: "flex", flexDirection: "row" }}>
+        //             {Alert.map((label, idx) => (
+        //               <StyledCardContent
+        //                 key={idx}
+        //                 sx={{
+        //                   flex: 1,
+        //                   display: "flex",
+        //                   justifyContent: "center",
+        //                 }}
+        //               >
+        //                 <Typography variant="subtitle2" fontWeight={500}>
+        //                   {label}
+        //                 </Typography>
+        //               </StyledCardContent>
+        //             ))}
+        //           </EnquiryCard>
 
-                  {alerts.length === 0 ? (
-                    <Box p={2}>
-                      <Typography align="center" color="textSecondary">
-                        No tasks available.
-                      </Typography>
-                    </Box>
-                  ) : (
-                    alerts.map((item) => (
-                      <EnquiryCardBody
-                        key={item.id}
-                        status={item.status}
-                        sx={{ display: "flex", flexDirection: "row" }}
-                      >
-                        {[
-                          item.alertId,
-                          item.disasterId,
-                          item.disasterType,
-                          `${item.date} ${item.time}`,
-                        ].map((val, i) => (
-                          <StyledCardContent
-                            key={i}
-                            sx={{ flex: 1, justifyContent: "center" }}
-                          >
-                            <Typography variant="subtitle2">{val}</Typography>
-                          </StyledCardContent>
-                        ))}
-                        <StyledCardContent
-                          sx={{ flex: 1, justifyContent: "center" }}
-                        >
-                          <Typography
-                            variant="subtitle2"
-                            sx={{
-                              color:
-                                item.priority === "High"
-                                  ? "#f44336"
-                                  : "#00e676",
-                            }}
-                          >
-                            {item.priority}
-                          </Typography>
-                        </StyledCardContent>
-                        <StyledCardContent
-                          sx={{ flex: 1, justifyContent: "center" }}
-                        >
-                          <Typography variant="subtitle2">
-                            {item.initiatedBy}
-                          </Typography>
-                        </StyledCardContent>
-                        <StyledCardContent
-                          sx={{ flex: 1, justifyContent: "center" }}
-                        >
-                          <AddCircleOutline
-                            sx={{
-                              color: "#00f0c0",
-                              cursor: "pointer",
-                              fontSize: 28,
-                            }}
-                          />
-                        </StyledCardContent>
-                        <StyledCardContent
-                          sx={{ flex: 1, justifyContent: "center" }}
-                        >
-                          <Visibility
-                            onClick={() => {
-                              setSelectedIncident(item); // 👈 Send clicked incident
-                              setFlag(1); // 👈 Trigger view mode
-                            }}
-                            sx={{
-                              color: "#00f0c0",
-                              cursor: "pointer",
-                              fontSize: 28,
-                            }}
-                          />
-                        </StyledCardContent>
-                      </EnquiryCardBody>
-                    ))
-                  )}
-                </TableBody>
-              </Table>
-            </TableContainer>
-          </Grid>
-        </Grid>
+        //           {alerts.length === 0 ? (
+        //             <Box p={2}>
+        //               <Typography align="center" color="textSecondary">
+        //                 No tasks available.
+        //               </Typography>
+        //             </Box>
+        //           ) : (
+        //             alerts.map((item) => (
+        //               <EnquiryCardBody
+        //                 key={item.id}
+        //                 status={item.status}
+        //                 sx={{ display: "flex", flexDirection: "row" }}
+        //               >
+        //                 {[
+        //                   item.pk_id,
+        //                   item.disasterId,
+        //                   item.disasterType,
+        //                   `${item.date} ${item.time}`,
+        //                 ].map((val, i) => (
+        //                   <StyledCardContent
+        //                     key={i}
+        //                     sx={{ flex: 1, justifyContent: "center" }}
+        //                   >
+        //                     <Typography variant="subtitle2">{val}</Typography>
+        //                   </StyledCardContent>
+        //                 ))}
+        //                 <StyledCardContent
+        //                   sx={{ flex: 1, justifyContent: "center" }}
+        //                 >
+        //                   <Typography
+        //                     variant="subtitle2"
+        //                     sx={{
+        //                       color:
+        //                         item.priority === "High"
+        //                           ? "#f44336"
+        //                           : "#00e676",
+        //                     }}
+        //                   >
+        //                     {item.priority}
+        //                   </Typography>
+        //                 </StyledCardContent>
+        //                 <StyledCardContent
+        //                   sx={{ flex: 1, justifyContent: "center" }}
+        //                 >
+        //                   <Typography variant="subtitle2">
+        //                     {item.initiatedBy}
+        //                   </Typography>
+        //                 </StyledCardContent>
+        //                 <StyledCardContent
+        //                   sx={{ flex: 1, justifyContent: "center" }}
+        //                 >
+        //                   <AddCircleOutline
+        //                     sx={{
+        //                       color: "#00f0c0",
+        //                       cursor: "pointer",
+        //                       fontSize: 28,
+        //                     }}
+        //                   />
+        //                 </StyledCardContent>
+        //                 <StyledCardContent
+        //                   sx={{ flex: 1, justifyContent: "center" }}
+        //                 >
+        //                   <Visibility
+        //                     onClick={() => {
+        //                       setSelectedIncident(item); // 👈 Send clicked incident
+        //                       setFlag(1); // 👈 Trigger view mode
+        //                     }}
+        //                     sx={{
+        //                       color: "#00f0c0",
+        //                       cursor: "pointer",
+        //                       fontSize: 28,
+        //                     }}
+        //                   />
+        //                 </StyledCardContent>
+        //               </EnquiryCardBody>
+        //             ))
+        //           )}
+        //         </TableBody>
+        //       </Table>
+        //     </TableContainer>
+        //   </Grid>
+        // </Grid>
+ <Grid container spacing={2}>
+  <Grid item xs={12}>
+    {/* Header Row */}
+    <EnquiryCard sx={{ display: "flex", flexDirection: "row", backgroundColor: "#5FECC8" }}>
+      {["Alert ID", "Latitude", "Longitude", "Temperature", "Rain", "Time", "Added By", "View"].map(
+        (label, idx) => (
+          <StyledCardContent
+            key={idx}
+            sx={{
+              flex: 1,
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              padding: "8px",
+            }}
+          >
+            <Typography variant="subtitle2" fontWeight={600}>
+              {label}
+            </Typography>
+          </StyledCardContent>
+        )
+      )}
+    </EnquiryCard>
+
+    {/* Table Content */}
+    {alerts.length === 0 ? (
+      <Box p={2}>
+        <Typography align="center" color="textSecondary">
+          No alerts available.
+        </Typography>
+      </Box>
+    ) : (
+      alerts.map((item) => (
+        <EnquiryCardBody
+          key={item.pk_id}
+          status={item.status}
+          sx={{ display: "flex", flexDirection: "row", marginTop: "8px" }}
+        >
+          <StyledCardContent sx={{ flex: 1, justifyContent: "center" }}>
+            <Typography variant="subtitle2">{item.pk_id}</Typography>
+          </StyledCardContent>
+          <StyledCardContent sx={{ flex: 1, justifyContent: "center" }}>
+            <Typography variant="subtitle2">{item.latitude}</Typography>
+          </StyledCardContent>
+          <StyledCardContent sx={{ flex: 1, justifyContent: "center" }}>
+            <Typography variant="subtitle2">{item.longitude}</Typography>
+          </StyledCardContent>
+          <StyledCardContent sx={{ flex: 1, justifyContent: "center" }}>
+            <Typography variant="subtitle2">{item.temperature_2m}</Typography>
+          </StyledCardContent>
+          <StyledCardContent sx={{ flex: 1, justifyContent: "center" }}>
+            <Typography variant="subtitle2">{item.rain}</Typography>
+          </StyledCardContent>
+          <StyledCardContent sx={{ flex: 1, justifyContent: "center" }}>
+            <Typography variant="subtitle2" fontSize={12}> 
+              {item.time || `${item.date} ${item.time}`}
+            </Typography>
+          </StyledCardContent>
+          <StyledCardContent sx={{ flex: 1, justifyContent: "center" }}>
+            <Typography variant="subtitle2">{item.added_by}</Typography>
+          </StyledCardContent>
+          <StyledCardContent sx={{ flex: 1, justifyContent: "center" }}>
+            <Visibility
+              onClick={() => {
+                setSelectedIncident(item);
+                setFlag(1);
+              }}
+              sx={{
+                color: "#00f0c0",
+                cursor: "pointer",
+                fontSize: 28,
+              }}
+            />
+          </StyledCardContent>
+        </EnquiryCardBody>
+      ))
+    )}
+  </Grid>
+</Grid>
       ) : (
         <Grid container spacing={2}>
           <Grid item xs={12}>
