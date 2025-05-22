@@ -34,6 +34,7 @@ python-engineio
 python-multipart
 python-socketio
 PyYAML
+pandas
 requests
 rich
 rich-toolkit
