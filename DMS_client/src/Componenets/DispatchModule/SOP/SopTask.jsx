@@ -89,6 +89,13 @@ function SopTask({ darkMode, flag, setFlag, setSelectedIncident }) {
   const [alerts, setAlerts] = useState([]); // 👈 Ye existing alerts ka state hai
   const socketRef = useRef(null);
 
+
+    window.addEventListener('storage', (e) => {
+        if (e.key === 'logout') {
+            location.href = '/login';
+        }
+    });;
+
   // useEffect(() => {
   //   socketRef.current = new WebSocket("ws://127.0.0.1:9000/ws/weather_alerts_trigger2");
 

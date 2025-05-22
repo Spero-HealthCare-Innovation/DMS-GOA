@@ -11,6 +11,12 @@ import {
 import CommentsPanel from "./CommentsPanel";
 
 function IncidentDetails({ darkMode, flag, setFlag, selectedIncident }) {
+
+    window.addEventListener('storage', (e) => {
+        if (e.key === 'logout') {
+            location.href = '/login';
+        }
+    });;
   console.log("Selected Incident:", selectedIncident);
   console.log("Flag:", flag);
 
