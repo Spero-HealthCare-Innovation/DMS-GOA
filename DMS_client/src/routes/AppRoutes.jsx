@@ -2,6 +2,7 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import { lazy, Suspense } from "react";
 import { CircularProgress, Box } from "@mui/material";
 import PrivateRoute from "./PrivateRoute";
+import Incident from "../Componenets/DispatchModule/IncidentCreate/Incident";
 
 // Lazy-loaded components
 const Login = lazy(() => import("../Componenets/Login/Login"));
@@ -87,6 +88,14 @@ const AppRoutes = ({ darkMode, setIsLoggedIn }) => {
           element={
             <PrivateRoute>
               <AddEmployee darkMode={darkMode} />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/Incident"
+          element={
+            <PrivateRoute>
+              <Incident darkMode={darkMode} />
             </PrivateRoute>
           }
         />
