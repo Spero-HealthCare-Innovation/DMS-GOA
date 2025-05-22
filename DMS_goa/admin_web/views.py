@@ -77,6 +77,7 @@ class DMS_department_delete_api(APIView):
         instance.save()
         return Response({"message": "Department soft deleted successfully."}, status=status.HTTP_200_OK)
 
+
 class DMS_Group_post_api(APIView):
     def post(self,request):
         data = request.data
@@ -133,6 +134,14 @@ class DMS_Group_delete_api(APIView):
         instance.grp_is_deleted = True
         instance.save()
         return Response({"message": "Group soft deleted successfully."}, status=status.HTTP_200_OK)
+
+
+class DMS_Employee_get_api(APIView):
+    def get(self,request):
+        snippet = DMS_Employee.objects.filter(emp_is_deleted=False)
+        serializers = DMS_Employee_serializer(snippet,many=True)
+        return Response(serializers.data,status=status.HTTP_200_OK)
+
 
 class DMS_Employee_post_api(APIView):
     def post(self,request):
