@@ -1,26 +1,42 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import axios from "axios";
+import { s } from "framer-motion/client";
 
 const AuthContext = createContext();
 export const useAuth = () => useContext(AuthContext);
 
 export const AuthProvider = ({ children }) => {
   const [states, setStates] = useState([]);
+
   const [districts, setDistricts] = useState([]);
+    console.log(districts, "districts");
+
   const [Tehsils, setTehsils] = useState([]);
   const [Citys, setCitys] = useState([]);
-  // console.log("city id",selectedCityID);
-  
-  const [selectedStateId, setSelectedStateId] = useState('');
-  const [selectedDistrictId, setSelectedDistrictId] = useState('');
-  const [selectedTehsilId, setSelectedTehsilId] = useState('');
-  const [selectedCityID, setSelectedCityId] = useState('');
+  const [selectedStateId, setSelectedStateId] = useState("");
+  const [selectedDistrictId, setSelectedDistrictId] = useState("");
+  const [selectedTehsilId, setSelectedTehsilId] = useState("");
+  const [selectedCityID, setSelectedCityId] = useState("");
+  console.log(Citys, "selectedCityID");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [departmentName, setDepartmentName] = useState("");
+  const [departments, setDepartments] = useState([]);
+  const [disasterIds, setDisasterIds] = useState([]);
+  const [disaster, setdisaster] = useState([]);
+  const [selectedDisasterId, setSelectedDisasterIds] = useState("");
+  const [formValues, setFormValues] = useState({
+    dep_name: "",
+    dis_id: "",
+    state_id: "",
+    tah_id: "",
+    cit_id: "",
+  });
+
   const port = import.meta.env.VITE_APP_API_KEY;
   const token = localStorage.getItem("access_token");
   const refresh = localStorage.getItem("refresh_token");
-  console.log(refresh, 'refreshhhhhhhhh');
+  console.log(refresh, "refreshhhhhhhhh");
 
   const [newToken, setNewToken] = useState("");
 
@@ -104,12 +120,14 @@ export const AuthProvider = ({ children }) => {
     if (!districtId) return;
     try {
       setLoading(true);
-      const res = await axios.get(`${port}/admin_web/Tahsil_get_idwise/${districtId}/`, {
-        headers: {
-         Authorization: `Bearer ${token || newToken}`,
-
-        },
-      });
+      const res = await axios.get(
+        `${port}/admin_web/Tahsil_get_idwise/${districtId}/`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
       console.log(`Tehsils by district ${districtId}:`, res.data);
       setTehsils(res.data || []);
     } catch (err) {
@@ -120,17 +138,18 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-
   const fetchCitysByTehshil = async (tehshilId) => {
     if (!tehshilId) return;
     try {
       setLoading(true);
-      const res = await axios.get(`${port}/admin_web/City_get_idwise/${tehshilId}/`, {
-        headers: {
-        Authorization: `Bearer ${token || newToken}`,
-
-        },
-      });
+      const res = await axios.get(
+        `${port}/admin_web/City_get_idwise/${tehshilId}/`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
       console.log(`Tehsils by district ${tehshilId}:`, res.data);
       setCitys(res.data || []);
     } catch (err) {
@@ -140,8 +159,7 @@ export const AuthProvider = ({ children }) => {
       setLoading(false);
     }
   };
-
-
+  
   // 🔹 Effects
   useEffect(() => {
     fetchStates();
@@ -151,18 +169,18 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     if (selectedStateId) {
       fetchDistrictsByState(selectedStateId);
-      setSelectedDistrictId('');
-      setSelectedTehsilId('');
-      setSelectedCityId('');
+      setSelectedDistrictId("");
+      setSelectedTehsilId("");
+      setSelectedCityId("");
       setTehsils([]);
       setCitys([]);
     } else {
       setDistricts([]);
       setTehsils([]);
       setCitys([]);
-      setSelectedDistrictId('');
-      setSelectedTehsilId('');
-      setSelectedCityId('');
+      setSelectedDistrictId("");
+      setSelectedTehsilId("");
+      setSelectedCityId("");
     }
   }, [selectedStateId]);
 
@@ -170,14 +188,14 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     if (selectedDistrictId) {
       fetchTehsilsByDistrict(selectedDistrictId);
-      setSelectedTehsilId('');
-      setSelectedCityId('');
+      setSelectedTehsilId("");
+      setSelectedCityId("");
       setCitys([]);
     } else {
       setTehsils([]);
       setCitys([]);
-      setSelectedTehsilId('');
-      setSelectedCityId('');
+      setSelectedTehsilId("");
+      setSelectedCityId("");
     }
   }, [selectedDistrictId]);
 
@@ -185,13 +203,12 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     if (selectedTehsilId) {
       fetchCitysByTehshil(selectedTehsilId);
-      setSelectedCityId('');
+      setSelectedCityId("");
     } else {
       setCitys([]);
-      setSelectedCityId('');
+      setSelectedCityId("");
     }
   }, [selectedTehsilId]);
-
 
   return (
     <AuthContext.Provider
@@ -200,6 +217,10 @@ export const AuthProvider = ({ children }) => {
         districts,
         Tehsils,
         Citys,
+        departments,
+        disasterIds,
+        formValues,
+        disaster,
         selectedStateId,
         selectedDistrictId,
         selectedTehsilId,
@@ -208,9 +229,11 @@ export const AuthProvider = ({ children }) => {
         setSelectedDistrictId,
         setSelectedTehsilId,
         setSelectedCityId,
+        setSelectedDisasterIds,
+        setFormValues,
         loading,
         error,
-        newToken
+        newToken,
       }}
     >
       {children}

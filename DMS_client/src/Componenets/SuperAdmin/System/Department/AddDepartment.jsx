@@ -55,24 +55,34 @@ import {
   inputStyle,
 } from "../../../../CommonStyle/Style";
 import { useAuth } from "../../../../Context/ContextAPI";
+import axios from "axios";
 
 const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
   const [modalOpen, setModalOpen] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
+  const port = import.meta.env.VITE_APP_API_KEY;
+  const token = localStorage.getItem("access_token");
   const {
     states,
     districts,
     Tehsils,
+    Citys,
+    setFormValues,
+    disasterIds,
+    disaster,
+    formValues,
     selectedStateId,
     setSelectedStateId,
     setSelectedDistrictId,
     selectedDistrictId,
     selectedTehsilId,
     setSelectedTehsilId,
+    setSelectedDisasterIds,
+    selectedCityID,
     loading,
     error,
   } = useAuth();
-  console.log(selectedTehsilId, "selectedTehsilId");
+  console.log(Citys, "Citys");
 
   const handleStateChange = (e) => {
     const id = e.target.value;
@@ -97,7 +107,8 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
   };
   const navigate = useNavigate();
   const [disasterId, selectedDisasterId] = useState("");
-  const [disasterName, setSelectedDisasterId] = useState("");
+  const [departments, setDepartments] = useState([]);
+
   const [page, setPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [alertData, setAlertData] = useState([
@@ -163,8 +174,8 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
   const paginatedData = useMemo(() => {
     const start = (page - 1) * rowsPerPage;
     const end = start + rowsPerPage;
-    return alertData.slice(start, end);
-  }, [page, rowsPerPage, alertData]);
+    return departments.slice(start, end);
+  }, [page, rowsPerPage, departments]);
 
   const labelColor = darkMode ? "#5FECC8" : "#1976d2";
   const borderColor = darkMode ? "#7F7F7F" : "#ccc";
@@ -184,6 +195,62 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
     { id: 2, name: "Earthquake" },
     { id: 3, name: "Fire" },
   ];
+
+
+  const saveDepartment = async () => {
+    const payload = {
+      dep_name: formValues.dep_name.trim(),
+      dis_id: selectedDistrictId,
+      state_id: selectedStateId,
+      tah_id: selectedTehsilId,
+      cit_id: selectedCityID || (Citys.length > 0 ? Citys[0].cit_id : ""),
+    };
+
+    // Check for duplicate entry before calling the API
+  
+
+    try {
+      const res = await axios.post(
+        `${port}/admin_web/department_post/`,
+        payload,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+
+      const newDepartment = {
+        departmentName: res.data.dep_name,
+        disasterId: getNameById(
+          disasterIds,
+          "dis_id",
+          "dis_name",
+          res.data.dis_id
+        ),
+        state: getNameById(states, "state_id", "state_name", res.data.state_id),
+        city: getNameById(Citys, "cit_id", "cit_name", res.data.cit_id),
+        tehsil: getNameById(Tehsils, "tah_id", "tah_name", res.data.tah_id),
+        district: getNameById(districts, "dis_id", "dis_name", res.data.dis_id),
+      };
+
+      // Append to the state so no need to re-fetch entire list
+      setDepartments((prev) => [newDepartment, ...prev]);
+
+      // Optional: clear form
+      setFormValues({ dep_name: "" });
+      setSelectedStateId("");
+      setSelectedDistrictId("");
+      setSelectedTehsilId("");
+      selectedCityID("");
+    } catch (error) {
+      console.error("Save Error:", error.response?.data || error.message);
+    }
+  };
+
+  const getNameById = (list, idField, nameField, id) => {
+    if (!Array.isArray(list) || id == null) return "-";
+    const found = list.find((item) => item[idField] === id);
+    return found ? found[nameField] : "-";
+  };
 
   return (
     // ..
@@ -309,7 +376,7 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
                           Department Name
                         </Typography>
                       </StyledCardContent>
-                      <StyledCardContent
+                      {/* <StyledCardContent
                         sx={{
                           flex: 1.2,
                           borderRight: "1px solid black",
@@ -318,7 +385,7 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
                         }}
                       >
                         <Typography variant="subtitle2">Disaster ID</Typography>
-                      </StyledCardContent>
+                      </StyledCardContent> */}
                       <StyledCardContent
                         sx={{
                           flex: 1,
@@ -329,16 +396,26 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
                       >
                         <Typography variant="subtitle2">State</Typography>
                       </StyledCardContent>
-                      {/* <StyledCardContent
-                        sx={{ flex: 1, borderRight: "1px solid black" }}
+                      <StyledCardContent
+                        sx={{
+                          flex: 1,
+                          borderRight: "1px solid black",
+                          justifyContent: "center",
+                          ...fontsTableHeading,
+                        }}
                       >
                         <Typography variant="subtitle2">District</Typography>
                       </StyledCardContent>
                       <StyledCardContent
-                        sx={{ flex: 1, borderRight: "1px solid black" }}
+                        sx={{
+                          flex: 1,
+                          borderRight: "1px solid black",
+                          justifyContent: "center",
+                          ...fontsTableHeading,
+                        }}
                       >
                         <Typography variant="subtitle2">Tehsil</Typography>
-                      </StyledCardContent> */}
+                      </StyledCardContent>
                       <StyledCardContent
                         sx={{
                           flex: 1,
@@ -394,7 +471,7 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
                           </StyledCardContent>
                           <StyledCardContent
                             sx={{
-                              flex: 1.8,
+                              flex: 1.4,
                               justifyContent: "center",
                               ...fontsTableBody,
                             }}
@@ -403,7 +480,7 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
                               {item.departmentName}
                             </Typography>
                           </StyledCardContent>
-                          <StyledCardContent
+                          {/* <StyledCardContent
                             sx={{
                               flex: 1.5,
                               justifyContent: "center",
@@ -411,12 +488,12 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
                             }}
                           >
                             <Typography variant="subtitle2">
-                              {item.disasterId}
+                              {item.disaster}
                             </Typography>
-                          </StyledCardContent>
+                          </StyledCardContent> */}
                           <StyledCardContent
                             sx={{
-                              flex: 1.4,
+                              flex: 1,
                               justifyContent: "center",
                               ...fontsTableBody,
                             }}
@@ -425,20 +502,32 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
                               {item.state}
                             </Typography>
                           </StyledCardContent>
-                          {/* <StyledCardContent sx={{ flex: 0.8 }}>
+                          <StyledCardContent
+                            sx={{
+                              flex: 1,
+                              justifyContent: "center",
+                              ...fontsTableBody,
+                            }}
+                          >
                             <Typography variant="subtitle2">
                               {item.district}
                             </Typography>
                           </StyledCardContent>
-                          <StyledCardContent sx={{ flex: 1.3 }}>
+                          <StyledCardContent
+                            sx={{
+                              flex: 0.8,
+                              justifyContent: "center",
+                              ...fontsTableBody,
+                            }}
+                          >
                             <Typography variant="subtitle2">
                               {item.tehsil}
                             </Typography>
-                          </StyledCardContent> */}
+                          </StyledCardContent>
                           <StyledCardContent
                             sx={{
                               flex: 1.3,
-                              justifyContent: "center",
+                              justifyContent: "center ",
                               ...fontsTableBody,
                             }}
                           >
@@ -539,12 +628,12 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
                 <Box>{page}</Box>
                 <Box
                   onClick={() =>
-                    page < Math.ceil(alertData.length / rowsPerPage) &&
+                    page < Math.ceil(departments.length / rowsPerPage) &&
                     setPage(page + 1)
                   }
                   sx={{
                     cursor:
-                      page < Math.ceil(alertData.length / rowsPerPage)
+                      page < Math.ceil(departments.length / rowsPerPage)
                         ? "pointer"
                         : "not-allowed",
                     userSelect: "none",
@@ -651,6 +740,13 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
                   fullWidth
                   size="small"
                   placeholder="Department Name"
+                  value={formValues.dep_name}
+                  onChange={(e) =>
+                    setFormValues((prev) => ({
+                      ...prev,
+                      dep_name: e.target.value,
+                    }))
+                  }
                   InputLabelProps={{ shrink: false }}
                   sx={selectStyles}
                 />
@@ -735,8 +831,11 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
                   <MenuItem value="" disabled>
                     Select City
                   </MenuItem>
-                  <MenuItem value="City 1">City 1</MenuItem>
-                  <MenuItem value="City 2">City 2</MenuItem>
+                  {Citys.map((city) => (
+                    <MenuItem key={city.cit_id} value={city.cit_id}>
+                      {city.cit_name}
+                    </MenuItem>
+                  ))}
                 </Select>
               </Grid>
 
@@ -746,6 +845,13 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
                   fullWidth
                   displayEmpty
                   defaultValue=""
+                  value={formValues.dis_id || ""}
+                  onChange={(e) =>
+                    setFormValues((prev) => ({
+                      ...prev,
+                      dis_id: e.target.value,
+                    }))
+                  }
                   inputProps={{ "aria-label": "Select Disaster" }}
                   sx={selectStyles}
                 >
@@ -756,8 +862,11 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
                   >
                     Select Disaster ID
                   </MenuItem>
-                  <MenuItem value="Disaster 1">Disaster 1</MenuItem>
-                  <MenuItem value="Disaster 2">Disaster 2</MenuItem>
+                  {disaster.map((d) => (
+                    <MenuItem key={d.dis_id} value={d.dis_id}>
+                      {d.dis_id}
+                    </MenuItem>
+                  ))}
                 </Select>
               </Grid>
 
@@ -785,6 +894,7 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
                         color: "white !important",
                       },
                     }}
+                    onClick={saveDepartment}
                   >
                     Submit
                   </Button>

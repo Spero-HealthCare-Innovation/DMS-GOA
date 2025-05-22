@@ -68,7 +68,7 @@ function App() {
             </>
           )}
 
-          <div style={{ marginLeft: "70px" }}>
+          <div>
             <AppRoutes darkMode={darkMode} />
           </div>
 

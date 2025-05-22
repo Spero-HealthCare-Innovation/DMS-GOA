@@ -6,12 +6,11 @@ import { useEffect, useState } from "react";
 
 function Sop({ darkMode, setDarkMode }) {
       // initStorageLogoutSync.js
-window.addEventListener('storage', (e) => {
-  if (e.key === 'logout') {
- 
-    location.href = '/login';   
-  }
-});
+  window.addEventListener('storage', (e) => {
+        if (e.key === 'logout') {
+            location.href = '/login';
+        }
+    });;
 
   useEffect(() => {
     document.title = "DMS|Sop";
@@ -23,11 +22,12 @@ window.addEventListener('storage', (e) => {
   const [flag, setFlag] = useState(flagFromState);
   const [selectedIncident, setSelectedIncident] = useState(null);
   
+console.log(selectedIncident, 'selectedIncident');
 
   return (
     <Box
   sx={{
-    ml: { xs: -1.5, sm: -2, md: -3 }, 
+    ml: { xs: 2.5 }, 
     pr: { xs: 2, sm: 3, md: 4 },      
     py: { xs: 2, sm: 3 },
       mx: 0, // No left/right margin
