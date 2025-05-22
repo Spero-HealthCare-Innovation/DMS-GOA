@@ -113,11 +113,16 @@ const AlertPanel = ({ darkMode }) => {
                 const newData = JSON.parse(event.data);
                 console.log('Received:', newData);
 
+                // setAlertData(prevData => {
+                //     const incoming = Array.isArray(newData) ? newData[0] : newData;
+                //     const filteredData = prevData.filter(item => item.pk_id !== incoming.pk_id);
+                //     return [...filteredData, incoming];
                 setAlertData(prevData => {
                     const incoming = Array.isArray(newData) ? newData[0] : newData;
                     const filteredData = prevData.filter(item => item.pk_id !== incoming.pk_id);
-                    return [...filteredData, incoming];
+                    return [incoming, ...filteredData]; // Put new entry at the top
                 });
+
 
             } catch (error) {
                 console.error('Invalid JSON:', event.data);
