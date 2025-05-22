@@ -107,7 +107,7 @@ function Add_employee({ darkMode }) {
   const selectStyles = getCustomSelectStyles(isDarkMode);
 
   const [page, setPage] = useState(1);
-  const [rowsPerPage, setRowsPerPage] = useState(5); 
+  const [rowsPerPage, setRowsPerPage] = useState(5);
 
 
 
@@ -462,7 +462,7 @@ function Add_employee({ darkMode }) {
 
 
   return (
-    <div>
+    <div style={{ marginLeft: "3.5rem" }}>
       <Snackbar
         open={showSuccessAlert}
         anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
@@ -536,6 +536,7 @@ function Add_employee({ darkMode }) {
           }}
         />
       </Box>
+
       <Grid container spacing={2}>
         <Grid item xs={12} md={7}>
           <Paper elevation={3} sx={{ padding: 3, borderRadius: 3, backgroundColor: bgColor, mt: 1, mb: 1 }}>
@@ -868,7 +869,7 @@ function Add_employee({ darkMode }) {
             },
           }}
         >
-        
+
 
           <Button
             fullWidth
@@ -924,7 +925,7 @@ function Add_employee({ darkMode }) {
           </Button>
         </Popover>
 
-        <Grid item xs={12} md={5}>
+        <Grid item xs={12} md={4.9}>
 
 
           <Paper elevation={3} sx={{ padding: 2, borderRadius: 3, backgroundColor: bgColor, mt: 1, mb: 5 }}>

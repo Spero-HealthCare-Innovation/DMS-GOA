@@ -44,7 +44,7 @@ function Add_group({ darkMode }) {
   const [groups, setGroups] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  
+
   // States for edit functionality
   const [isEditing, setIsEditing] = useState(false);
   const [editingGroupId, setEditingGroupId] = useState(null);
@@ -165,7 +165,7 @@ function Add_group({ darkMode }) {
     setAnchorEl(event.currentTarget);
     setSelectedGroup(item);
   };
-  
+
   const handleClose = () => {
     setAnchorEl(null);
     setSelectedGroup(null);
@@ -306,14 +306,14 @@ function Add_group({ darkMode }) {
           },
         }
       );
-      
+
       console.log('Delete success:', response.data);
       showAlert('Group deleted successfully!', 'success');
-      
+
       // Refresh the groups list
       await fetchGroups();
       handleClose();
-      
+
     } catch (error) {
       console.error('Delete failed:', error);
       if (error.response) {
@@ -328,7 +328,7 @@ function Add_group({ darkMode }) {
   };
 
   return (
-    <div>
+    <div style={{ marginLeft: "3.5rem" }}>
       <Snackbar
         open={showSuccessAlert}
         anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
@@ -344,7 +344,7 @@ function Add_group({ darkMode }) {
           {alertMessage}
         </Alert>
       </Snackbar>
-      
+
       <Box sx={{ display: "flex", alignItems: "center", gap: 2, pb: 2, mt: 3 }}>
         {/* Back Arrow */}
         <IconButton size="small" onClick={() => {/* handle back action here */ }} sx={{
@@ -401,7 +401,7 @@ function Add_group({ darkMode }) {
           }}
         />
       </Box>
-      
+
       <Grid container spacing={2}>
         <Grid item xs={12} md={7}>
           <Paper elevation={3} sx={{ padding: 3, borderRadius: 3, backgroundColor: bgColor, mt: 1, mb: 5 }}>
@@ -441,7 +441,7 @@ function Add_group({ darkMode }) {
                           Department ID
                         </Typography>
                       </StyledCardContent>
-                      
+
                       <StyledCardContent
                         sx={{
                           flex: 2,
@@ -531,7 +531,7 @@ function Add_group({ darkMode }) {
                 </TableBody>
               </Table>
             </TableContainer>
-            
+
             <Box
               display="flex"
               justifyContent="space-between"
@@ -641,7 +641,7 @@ function Add_group({ darkMode }) {
             },
           }}
         >
-       
+
 
           <Button
             fullWidth
@@ -668,7 +668,7 @@ function Add_group({ darkMode }) {
           </Button>
         </Popover>
 
-        <Grid item xs={12} md={5}>
+        <Grid item xs={12} md={4.9}>
           <Paper elevation={3} sx={{ padding: 2, borderRadius: 3, backgroundColor: bgColor, mt: 1, mb: 5 }}>
             <Typography
               sx={{
@@ -705,7 +705,7 @@ function Add_group({ darkMode }) {
                   </MenuItem>
                 ))}
               </Select>
-              
+
               {/* Group Name TextField */}
               <TextField
                 fullWidth
@@ -738,7 +738,7 @@ function Add_group({ darkMode }) {
               >
                 {loading ? 'Loading...' : (isEditing ? 'Update' : 'Submit')}
               </Button>
-              
+
               {isEditing && (
                 <Button
                   variant="outlined"
