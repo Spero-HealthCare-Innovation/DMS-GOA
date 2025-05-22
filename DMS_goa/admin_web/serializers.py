@@ -3,6 +3,51 @@ from rest_framework import serializers
 from django.contrib.auth.hashers import make_password, check_password
 from captcha.models import CaptchaStore
 from .models import *
+from django.utils.http import urlsafe_base64_decode
+from django.contrib.auth.tokens import default_token_generator
+from django.contrib.auth.password_validation import validate_password
+from django.contrib.auth import password_validation
+from admin_web.models import DMS_Employee
+
+class ChangePasswordSerializer(serializers.Serializer):
+    old_password = serializers.CharField(required=True)
+    new_password = serializers.CharField(required=True)
+
+    def validate_new_password(self, value):
+        # Optional: add Django's password validation
+        password_validation.validate_password(value)
+        return value
+    
+class PasswordResetRequestSerializer(serializers.Serializer):
+    emp_email = serializers.EmailField()
+
+    def validate_email(self, value):
+        if not DMS_Employee.objects.filter(emp_email=value).exists():
+            raise serializers.ValidationError("No user with this email.")
+        return value
+    
+
+
+class PasswordResetConfirmSerializer(serializers.Serializer):
+    uid = serializers.CharField()
+    token = serializers.CharField()
+    new_password = serializers.CharField()
+
+    def validate(self, attrs):
+        try:
+            uid = urlsafe_base64_decode(attrs['uid']).decode()
+            user = DMS_Employee.objects.get(pk=uid)
+        except (DMS_Employee.DoesNotExist, ValueError, TypeError, OverflowError):
+            raise serializers.ValidationError({"uid": "Invalid UID"})
+
+        if not default_token_generator.check_token(user, attrs['token']):
+            raise serializers.ValidationError({"token": "Invalid or expired token"})
+
+        validate_password(attrs['new_password'])
+
+        attrs['user'] = user
+        return attrs
+    
 
 class DMS_department_serializer(serializers.ModelSerializer):
     class Meta:

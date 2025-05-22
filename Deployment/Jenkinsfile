@@ -4,6 +4,7 @@ pipeline {
     options {
         skipDefaultCheckout(true)
     }
+
     // Add permissions to project
     // sudo groupadd dmsgroup
     // sudo usermod -aG dmsgroup spero_cad25
@@ -11,7 +12,6 @@ pipeline {
     // sudo chown -R :dmsgroup /var/www/html/DMS_goa
     // sudo chmod -R 775 /var/www/html/DMS_goa/
     // restart server
-
 
     environment {
         GIT_REPO_URL = 'https://github.com/gitmaster-dms/Spero-DMS.git'
@@ -26,9 +26,9 @@ pipeline {
                     sh '''
                         if [ ! -d "${TARGET_DIR}" ]; then
                             echo "Directory does not exist. Creating ${TARGET_DIR}..."
+                            sudo mkdir -p "${TARGET_DIR}"
                             sudo chown -R jenkins:jenkins "${TARGET_DIR}"
-                            mkdir -p "${TARGET_DIR}"
-                            chmod -R 775 "${TARGET_DIR}"
+                            sudo chmod -R 775 "${TARGET_DIR}"
                         else
                             echo "Directory already exists. Skipping creation."
                         fi
@@ -60,7 +60,17 @@ pipeline {
             }
         }
 
-
+        stage('Fix Permissions') {
+            steps {
+                dir("${TARGET_DIR}") {
+                    sh '''
+                        sudo chown -R jenkins:dmsgroup .
+                        sudo chmod -R 775 .
+                        sudo find . -type d -exec chmod g+s {} \\;
+                    '''
+                }
+            }
+        }
 
 
         stage('Check Files') {

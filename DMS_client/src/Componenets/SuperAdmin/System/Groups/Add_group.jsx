@@ -1,23 +1,88 @@
 import { useState, useEffect, useMemo } from "react";
-import { Box, Typography, TextField, Button, Paper, InputAdornment, Grid, Popover} from "@mui/material";
+import axios from "axios";
+import { Box, Typography, TextField, Button, Paper, InputAdornment, Grid, Popover, Snackbar } from "@mui/material";
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
 import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
-import { Search, ArrowBack,DeleteOutline,EditOutlined, } from "@mui/icons-material";
+import { Search, ArrowBack, DeleteOutline, EditOutlined, } from "@mui/icons-material";
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 import { styled } from "@mui/material/styles";
 import Pagination from '@mui/material/Pagination';
+import { Alert } from '@mui/material';
 import { Select, MenuItem, IconButton, Popper } from "@mui/material";
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
 import VisibilityIcon from "@mui/icons-material/Visibility";
-
+import { useTheme } from "@mui/material/styles";
+import { useAuth } from "./../../../../Context/ContextAPI";
+import {
+  TableDataCardBody,
+  TableHeadingCard,
+  CustomTextField,
+  getThemeBgColors,
+  textfieldInputFonts,
+  fontsTableBody,
+  getCustomSelectStyles,
+  fontsTableHeading,
+  StyledCardContent,
+  inputStyle,
+} from "../../../../CommonStyle/Style";
 
 
 function Add_group({ darkMode }) {
+  const port = import.meta.env.VITE_APP_API_KEY;
+
+  const { newToken } = useAuth(); // ✅ pull token from context
+
+  const [departmentList, setDepartmentList] = useState([]);
+  const [departmentId, setDepartmentId] = useState("");
+  const [groupName, setGroupName] = useState("");
+  const [showSuccessAlert, setShowSuccessAlert] = useState(false);
+  const [groups, setGroups] = useState([]);
+
+
+
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+
+  // Determine effective token (context token takes priority)
+  const effectiveToken = newToken || localStorage.getItem("access_token");
+
+  const fetchDepartments = async () => {
+    try {
+      setLoading(true);
+      console.log("Using token:", effectiveToken);
+
+      const response = await axios.get(`${port}/admin_web/Department_get/`, {
+        headers: {
+          Authorization: `Bearer ${effectiveToken}`,
+        },
+      });
+
+      console.log(" Departments fetched:", response.data);
+      setDepartmentList(response.data);
+    } catch (err) {
+      console.error(" Error fetching departments:", err);
+      if (err.response) {
+        console.error("Server Response:", err.response.data);
+      }
+      setError(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (effectiveToken) {
+      fetchDepartments();
+    } else {
+      console.warn("No token found for department fetch.");
+    }
+  }, [effectiveToken]);
+
 
   const textColor = darkMode ? "#ffffff" : "#000000";
   const bgColor = darkMode ? "#0a1929" : "#ffffff";
@@ -25,9 +90,13 @@ function Add_group({ darkMode }) {
   const fontFamily = "Roboto, sans-serif";
   const borderColor = darkMode ? "#7F7F7F" : "#ccc";
 
+  const theme = useTheme();
+  const isDarkMode = theme.palette.mode === "dark";
+  const selectStyles = getCustomSelectStyles(isDarkMode);
+
   const [page, setPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(5);
-     const [anchorEl, setAnchorEl] = useState(null);
+  const [anchorEl, setAnchorEl] = useState(null);
 
 
   const EnquiryCard = styled("div")(() => ({
@@ -70,8 +139,6 @@ function Add_group({ darkMode }) {
   });
 
 
-  
-
   const fontsTableHeading = {
     fontFamily: "Roboto",
     fontWeight: 500,
@@ -84,34 +151,6 @@ function Add_group({ darkMode }) {
     ? "rgba(255, 255, 255, 0.16)"
     : "rgba(0, 0, 0, 0.04)";
 
-
-  const inputStyle = {
-
-    // Set desired width
-    height: "3rem",
-    '& .MuiInputBase-input': {
-      color: textColor,
-    },
-    '& .MuiInputBase-root': {
-      height: "100%",             // Ensure input wrapper matches height
-      padding: "0 12px",          // Horizontal padding
-      display: 'flex',
-      alignItems: 'center',       // Center content vertically
-    },
-    borderRadius: '12px',
-    '& fieldset': {
-      border: 'none', // Remove border
-    },
-    backgroundColor: inputBgColor,
-    '& input::placeholder': {
-      fontSize: '0.85rem',
-      color: textColor,
-    },
-    boxShadow: '0px 2px 10px rgba(0, 0, 0, 0.1)', // Add box shadow
-    '&:hover': {
-      boxShadow: '0px 4px 15px rgba(0, 0, 0, 0.2)', // Increase shadow on hover
-    }
-  }
 
   const fontsTableBody = {
     fontFamily: "Roboto",
@@ -155,14 +194,11 @@ function Add_group({ darkMode }) {
   ]);
 
 
-  const paginatedData = useMemo(() => {
-    const start = (page - 1) * rowsPerPage;
-    const end = start + rowsPerPage;
-    return alertData.slice(start, end);
-  }, [page, rowsPerPage, alertData]);
+  const paginatedData = groups.slice((page - 1) * rowsPerPage, page * rowsPerPage);
 
 
-   const open = Boolean(anchorEl);
+
+  const open = Boolean(anchorEl);
   const handleOpen = (event, item) => {
     setAnchorEl(event.currentTarget);
     // Optionally store item in state if needed
@@ -171,8 +207,109 @@ function Add_group({ darkMode }) {
     setAnchorEl(null);
   };
 
+
+  const handleSubmit = async () => {
+    if (!departmentId || !groupName) {
+      alert("Please fill all required fields.");
+      return;
+    }
+
+    const payload = {
+      grp_code: "GRP001", // static
+      permission_status: 1,
+      grp_name: groupName,
+      dep_id: parseInt(departmentId), // dynamic
+      grp_is_deleted: false,
+      grp_added_by: "admin_user",
+      grp_modified_by: "admin_user",
+    };
+
+    try {
+      setLoading(true);
+
+      const response = await axios.post(
+        `${port}/admin_web/group_post/`,
+        payload,
+        {
+          headers: {
+            Authorization: `Bearer ${effectiveToken}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      console.log("Group added:", response.data);
+      // alert("Group successfully added!");
+      // Optional: reset form
+      setGroupName("");
+      setDepartmentId("");
+      setShowSuccessAlert(true);
+
+      // Optional: Auto-hide after 3 seconds
+      setTimeout(() => setShowSuccessAlert(false), 3000);
+
+      await fetchGroups();
+
+    } catch (err) {
+      console.error("Error posting group:", err);
+
+
+      // Handle specific 409 error
+      if (err.response && err.response.status === 409) {
+        const detailMessage = err.response.data?.detail || "Conflict error";
+        alert(`Failed to add group: ${detailMessage}`);
+      } else {
+        alert("Failed to add group. Please try again.");
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+
+  const fetchGroups = async () => {
+    try {
+      const response = await axios.get(`${port}/admin_web/Group_get/`, {
+        headers: {
+          Authorization: `Bearer ${effectiveToken}`,
+        },
+      });
+
+      const formattedGroups = response.data.map(group => ({
+        departmentID: group.dep_id,
+        groupName: group.grp_name,
+        fullData: group
+      }));
+
+      setGroups(formattedGroups);
+    } catch (error) {
+      console.error("Failed to fetch groups:", error);
+    }
+  };
+
+
+  useEffect(() => {
+    fetchGroups();
+  }, []);
+
+
   return (
     <div>
+      <Snackbar
+        open={showSuccessAlert}
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+        autoHideDuration={3000}
+        onClose={() => setShowSuccessAlert(false)}
+      >
+        <Alert
+          onClose={() => setShowSuccessAlert(false)}
+          severity="success"
+          variant="filled"
+          sx={{ width: '100%' }}
+        >
+          Group added successfully!
+        </Alert>
+      </Snackbar>
       <Box sx={{ display: "flex", alignItems: "center", gap: 2, pb: 2, mt: 3 }}>
 
         {/* Back Arrow */}
@@ -315,72 +452,47 @@ function Add_group({ darkMode }) {
                       </Typography>
                     </Box>
                   ) : (
-                    paginatedData
-                      .slice((page - 1) * rowsPerPage, page * rowsPerPage)
-                      .map((item, index) => (
-                        <EnquiryCardBody
-                          key={index}
-                          sx={{
-                            backgroundColor: inputBgColor,
-                            p: 2,
-                            borderRadius: 2,
-                            color: textColor,
-                            display: "flex",
-                            width: "100%",
-                            mb: 1,
-                          }}
-                        >
-                          <StyledCardContent
-                            sx={{ flex: 0.6, justifyContent: "center" }}
-                          >
-                            <Typography variant="subtitle2" sx={fontsTableBody}>
-                              {(page - 1) * rowsPerPage + index + 1}
-                            </Typography>
-                          </StyledCardContent>
+                    paginatedData.map((item, index) => (
+                      <EnquiryCardBody
+                        key={index}
+                        sx={{
+                          backgroundColor: inputBgColor,
+                          p: 2,
+                          borderRadius: 2,
+                          color: textColor,
+                          display: "flex",
+                          width: "100%",
+                          mb: 1,
+                        }}
+                      >
+                        <StyledCardContent sx={{ flex: 0.6, justifyContent: "center" }}>
+                          <Typography variant="subtitle2" sx={fontsTableBody}>
+                            {(page - 1) * rowsPerPage + index + 1}
+                          </Typography>
+                        </StyledCardContent>
 
-                          <StyledCardContent
-                            sx={{
-                              flex: 2,
-                              justifyContent: "center",
-                              ...fontsTableBody,
-                            }}
-                          >
-                            <Typography variant="subtitle2">
-                              {item.departmentID}
-                            </Typography>
-                          </StyledCardContent>
-                          <StyledCardContent
-                            sx={{
-                              flex: 2,
-                              justifyContent: "center",
-                              ...fontsTableBody,
-                            }}
-                          >
-                            <Typography variant="subtitle2">
-                              {item.groupName}
-                            </Typography>
-                          </StyledCardContent>
+                        <StyledCardContent sx={{ flex: 2, justifyContent: "center", ...fontsTableBody }}>
+                          <Typography variant="subtitle2">{item.departmentID}</Typography>
+                        </StyledCardContent>
 
-                          <StyledCardContent
+                        <StyledCardContent sx={{ flex: 2, justifyContent: "center", ...fontsTableBody }}>
+                          <Typography variant="subtitle2">{item.groupName}</Typography>
+                        </StyledCardContent>
+
+                        <StyledCardContent sx={{ flex: 1.5, justifyContent: "center", ...fontsTableBody }}>
+                          <MoreHorizIcon
+                            onClick={(e) => handleOpen(e, item)}
                             sx={{
-                              flex: 1.5,
+                              color: "#00f0c0",
+                              cursor: "pointer",
+                              fontSize: 28,
                               justifyContent: "center",
                               ...fontsTableBody,
                             }}
-                          >
-                            <MoreHorizIcon
-                              onClick={(e) => handleOpen(e, item)}
-                              sx={{
-                                color: "#00f0c0",
-                                cursor: "pointer",
-                                fontSize: 28,
-                                justifyContent: "center",
-                                ...fontsTableBody,
-                              }}
-                            />
-                          </StyledCardContent>
-                        </EnquiryCardBody>
-                      ))
+                          />
+                        </StyledCardContent>
+                      </EnquiryCardBody>
+                    ))
                   )}
                   {/* {paginatedData.map((item, index) => ( */}
 
@@ -474,68 +586,68 @@ function Add_group({ darkMode }) {
           </Paper>
         </Grid>
 
-             <Popover
-                  open={open}
-                  anchorEl={anchorEl}
-                  onClose={handleClose}
-                  anchorOrigin={{
-                    vertical: "center",
-                    horizontal: "right",
-                  }}
-                  transformOrigin={{
-                    vertical: "center",
-                    horizontal: "left",
-                  }}
-                  PaperProps={{
-                    sx: {
-                      p: 2,
-                      display: "flex",
-                      flexDirection: "column",
-                      gap: 1.5,
-                      borderRadius: 2,
-                      minWidth: 120,
-                    },
-                  }}
-                >
-                  <Button
-                    fullWidth
-                    variant="outlined"
-                    color="primary"
-                    startIcon={<VisibilityIcon />}
-                    onClick={() => {
-                      alert("View clicked");
-                      handleClose();
-                    }}
-                  >
-                    View
-                  </Button>
-        
-                  <Button
-                    fullWidth
-                    variant="outlined"
-                    color="warning"
-                    startIcon={<EditOutlined />}
-                    onClick={() => {
-                      alert("Edit clicked");
-                      handleClose();
-                    }}
-                  >
-                    Edit
-                  </Button>
-        
-                  <Button
-                    fullWidth
-                    variant="outlined"
-                    color="error"
-                    startIcon={<DeleteOutline />}
-                    onClick={() => {
-                      alert("Delete clicked");
-                      handleClose();
-                    }}
-                  >
-                    Delete
-                  </Button>
-                </Popover>
+        <Popover
+          open={open}
+          anchorEl={anchorEl}
+          onClose={handleClose}
+          anchorOrigin={{
+            vertical: "center",
+            horizontal: "right",
+          }}
+          transformOrigin={{
+            vertical: "center",
+            horizontal: "left",
+          }}
+          PaperProps={{
+            sx: {
+              p: 2,
+              display: "flex",
+              flexDirection: "column",
+              gap: 1.5,
+              borderRadius: 2,
+              minWidth: 120,
+            },
+          }}
+        >
+          <Button
+            fullWidth
+            variant="outlined"
+            color="primary"
+            startIcon={<VisibilityIcon />}
+            onClick={() => {
+              alert("View clicked");
+              handleClose();
+            }}
+          >
+            View
+          </Button>
+
+          <Button
+            fullWidth
+            variant="outlined"
+            color="warning"
+            startIcon={<EditOutlined />}
+            onClick={() => {
+              alert("Edit clicked");
+              handleClose();
+            }}
+          >
+            Edit
+          </Button>
+
+          <Button
+            fullWidth
+            variant="outlined"
+            color="error"
+            startIcon={<DeleteOutline />}
+            onClick={() => {
+              alert("Delete clicked");
+              handleClose();
+            }}
+          >
+            Delete
+          </Button>
+        </Popover>
 
         <Grid item xs={12} md={5}>
           <Paper elevation={3} sx={{ padding: 2, borderRadius: 3, backgroundColor: bgColor, mt: 1, mb: 5 }}>
@@ -554,39 +666,57 @@ function Add_group({ darkMode }) {
 
             <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
               {/* First TextField */}
-              <TextField
+              <Select
                 fullWidth
-                placeholder="Department ID"
-                InputLabelProps={{ shrink: false }}
-                sx={inputStyle}
-
-              />
+                displayEmpty
+                placeholder="Select District"
+                defaultValue=""
+                value={departmentId}
+                onChange={(e) => setDepartmentId(e.target.value)}
+                inputProps={{
+                  "aria-label": "Select Name",
+                }}
+                sx={selectStyles}
+                IconComponent={KeyboardArrowDownIcon} // Use outlined dropdown arrow
+              >
+                <MenuItem value="" disabled>
+                  Select Department
+                </MenuItem>
+                {departmentList.map((department) => (
+                  <MenuItem key={department.dep_id} value={department.dep_id}>
+                    {department.dep_name}
+                  </MenuItem>
+                ))}
+                {/* Add more options as needed */}
+              </Select>
               {/* Second TextField */}
               <TextField
                 fullWidth
                 placeholder="Group Name"
                 InputLabelProps={{ shrink: false }}
                 sx={inputStyle}
+                value={groupName}
+                onChange={(e) => setGroupName(e.target.value)}
               />
             </Box>
 
-
             <Box sx={{ display: 'flex', justifyContent: 'center', mt: 3, mb: 1 }}>
-                 <Button
-                                variant="contained"
-                                sx={{
-                                  mt: 2,
-                                  width: "40%",
-                                  backgroundColor: "#00f0c0",
-                                  color: "black",
-                                  fontWeight: "bold",
-                                  borderRadius: "12px",
-                                  "&:hover": {
-                                    backgroundColor: bgColor,
-                                    color: "white !important",
-                                  },
-                                }}
-                              >Submit
+              <Button
+                variant="contained"
+                onClick={handleSubmit}
+                sx={{
+                  mt: 2,
+                  width: "40%",
+                  backgroundColor: "#00f0c0",
+                  color: "black",
+                  fontWeight: "bold",
+                  borderRadius: "12px",
+                  "&:hover": {
+                    backgroundColor: bgColor,
+                    color: "white !important",
+                  },
+                }}
+              >Submit
               </Button>
             </Box>
 

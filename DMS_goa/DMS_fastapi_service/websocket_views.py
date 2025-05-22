@@ -2,7 +2,7 @@ from confluent_kafka import Consumer
 
 
 topic = "weather_alerts"
-
+ 
 # Initialize globally
 consumer = None
 assigned = False

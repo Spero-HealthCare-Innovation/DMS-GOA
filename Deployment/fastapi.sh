@@ -1,56 +1,55 @@
 #!/bin/bash
 
 PJ_BASE_PATH="/var/www/html/DMS_goa/Deployment"
-# Activate virtual environment
-echo "Runining Fastapi Config sh file"
-pwd
-echo "current dir"
+VENV_PATH="./vvenv"
+FASTAPI_SERVICE="/etc/systemd/system/dms_uvicorn_fastapi.service"
+NGINX_CONF="/etc/nginx/sites-available/dms_goa_fastapi_7777.conf"
+SOCKET_FILE="/tmp/dms_uvicorn_fastapi.sock"
 
-# source vvenv/bin/activate
+echo "========= Starting FastAPI Setup ========="
 
-
-if [ -d "vvenv" ]; then
-    echo "Python virtual environment exists." 
-    source vvenv/bin/activate
+# Create or activate virtual environment
+if [ -d "$VENV_PATH" ]; then
+    echo "[✓] Python virtual environment exists."
 else
-    python3 -m venv vvenv
-    echo "Current Directory: $PWD"
-    pip install -r requirnment.txt
+    echo "[+] Creating virtual environment..."
+    python3 -m venv "$VENV_PATH"
+    echo "[✓] Virtual environment created."
 fi
 
+# Activate venv and install dependencies
+source "$VENV_PATH/bin/activate"
+pip install -r "/var/www/html/DMS_goa/requirnment.txt"
 
-
-# Copy Fastapi Gunicorn - Uvicorn not present
-if [ -f "/etc/systemd/system/dms_uvicorn_fastapi.service" ]; then
-    echo "Fastapi Nginx conf already present"
-else
-    echo "Copying Fastapi Gunicorn - Uvicorn service file..."
-    sudo cp -rf "$PJ_BASE_PATH/gunicorn_proxy/dms_uvicorn_fastapi.service" /etc/systemd/system/
-    echo "Fastapi Gunicorn - Uvicorn service copied successfully."
-
+# Remove stale socket if it exists
+if [ -S "$SOCKET_FILE" ]; then
+    echo "[~] Removing stale Uvicorn socket..."
+    sudo rm -f "$SOCKET_FILE"
 fi
 
-
-# Copy Fastapi Nginx conf not present
-if [ -f "/etc/nginx/sites-available/dms_goa_fastapi_7777.conf" ]; then
-    echo "Fastapi Nginx conf already present"
+# Copy FastAPI systemd service
+if [ -f "$FASTAPI_SERVICE" ]; then
+    echo "[✓] dms_uvicorn_fastapi.service already exists."
 else
-    echo "Copying Fastapi Nginx Conf file..."
-    sudo cp -rf "$PJ_BASE_PATH/nginx_proxy/dms_goa_fastapi_7777.conf" /etc/nginx/sites-available
-    echo "Fastapi Nginx Conf file copied successfully."
-    # Enable the site by creating a symlink
-    sudo ln -s /etc/nginx/sites-available/dms_goa_fastapi_7777.conf /etc/nginx/sites-enabled/
-
+    echo "[+] Copying FastAPI systemd service file..."
+    sudo cp -f "$PJ_BASE_PATH/gunicorn_proxy/dms_uvicorn_fastapi.service" "$FASTAPI_SERVICE"
+    echo "[✓] FastAPI service copied."
 fi
 
-# Show user and current directory
-echo "Current User: $USER"
-echo "Current Directory: $PWD"
- 
-# Reload systemd and restart Gunicorn
+# Copy and enable FastAPI nginx conf
+if [ -f "$NGINX_CONF" ]; then
+    echo "[✓] FastAPI nginx conf already exists."
+else
+    echo "[+] Copying FastAPI nginx conf..."
+    sudo cp -f "$PJ_BASE_PATH/nginx_proxy/dms_goa_fastapi_7777.conf" /etc/nginx/sites-available/
+    sudo ln -sf /etc/nginx/sites-available/dms_goa_fastapi_7777.conf /etc/nginx/sites-enabled/
+    echo "[✓] FastAPI nginx conf copied and enabled."
+fi
+
+# Reload systemd and start FastAPI
 sudo systemctl daemon-reload
 sudo systemctl enable dms_uvicorn_fastapi
-sudo systemctl start dms_uvicorn_fastapi
- 
-# Check Gunicorn status
+sudo systemctl restart dms_uvicorn_fastapi
 sudo systemctl status dms_uvicorn_fastapi
+
+echo "========= FastAPI Setup Completed ========="
