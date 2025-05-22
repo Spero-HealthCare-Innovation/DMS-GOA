@@ -317,7 +317,7 @@ class DMS_Incident(models.Model):
     inc_added_by=models.CharField(max_length=255,null=True,blank=True)
     inc_added_date = models.DateTimeField(auto_now=True)
     inc_modified_by = models.CharField(max_length=255, null=True, blank=True)
-    inc_modified_date = models.DateTimeField(null=True, blank=True)
+    inc_modified_date = models.DateTimeField(auto_now=True,null=True, blank=True)
     
     def save(self, *args, **kwargs):
         is_new = self.pk is None
@@ -338,7 +338,7 @@ class DMS_Comments(models.Model):
     comm_added_by=models.CharField(max_length=255,null=True,blank=True)
     comm_added_date = models.DateTimeField(auto_now=True)
     comm_modified_by = models.CharField(max_length=255, null=True, blank=True)
-    comm_modified_date = models.DateTimeField(null=True, blank=True)
+    comm_modified_date = models.DateTimeField(auto_now=True,null=True, blank=True)
     
 
     
