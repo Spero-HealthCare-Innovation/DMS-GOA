@@ -7,11 +7,8 @@ import { useNavigate } from 'react-router-dom';
 import CachedIcon from '@mui/icons-material/Cached';
 
 function Login() {
-
-
     const port = import.meta.env.VITE_APP_API_KEY;
-    // console.log(port,'port');
-
+    const socketUrl = import.meta.env.VITE_SOCKET_API_KEY;
     const theme = useTheme();
     const isSmallScreen = useMediaQuery(theme.breakpoints.down('sm'));
     const navigate = useNavigate();
@@ -20,30 +17,27 @@ function Login() {
     const [usernameError, setUsernameError] = useState('');
     const [passwordError, setPasswordError] = useState('');
     const [loading, setLoading] = useState(false);
-
-    // Captcha states
     const [captchaKey, setCaptchaKey] = useState('');
     const [captchaImageUrl, setCaptchaImageUrl] = useState('');
     const [captchaValue, setCaptchaValue] = useState('');
     const [captchaLoading, setCaptchaLoading] = useState(true);
     const [captchaError, setCaptchaError] = useState(false);
     const [captchaTextError, setCaptchaTextError] = useState('');
-
-
+    const [openForgotDialog, setOpenForgotDialog] = useState(false);
+    const [username, setUsername] = useState('');
+    const [contact, setContact] = useState('');
     useEffect(() => {
         document.title = "DMS|Login";
     }, []);
 
 
-    // Function to fetch new captcha
     const fetchCaptcha = async () => {
         try {
             setCaptchaLoading(true);
             setCaptchaError(false);
 
-            // Add timeout to the fetch to prevent long waits
             const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
+            const timeoutId = setTimeout(() => controller.abort(), 5000);
 
             const response = await fetch(`${port}/admin_web/login/captcha/`, {
                 method: 'GET',
@@ -60,14 +54,12 @@ function Login() {
 
             if (data.captcha_key && data.captcha_image_url) {
                 setCaptchaKey(data.captcha_key);
-                // Make sure the URL is properly formatted with the base URL
                 const fullImageUrl = data.captcha_image_url.startsWith('http')
                     ? data.captcha_image_url
                     : `${port}${data.captcha_image_url}`;
 
                 setCaptchaImageUrl(fullImageUrl);
                 console.log('Captcha image URL:', fullImageUrl);
-                // Reset captcha value when new captcha is fetched
                 setCaptchaValue('');
             } else {
                 console.error('Invalid captcha response format');
@@ -203,7 +195,6 @@ function Login() {
     //     }
     // };
 
-
     const handleLogin = async () => {
         setUsernameError('');
         setPasswordError('');
@@ -301,7 +292,7 @@ function Login() {
                     setTimeout(() => {
                         try {
                             console.log(' Creating WebSocket connection for group 3');
-                            const socket = new WebSocket("ws://192.168.1.116:7777/send_data");
+                            const socket = new WebSocket(`${socketUrl}/send_data`);
                             socket.onopen = () => {
                                 console.log(" WebSocket connected for group 3");
                                 socket.send("true");
@@ -343,23 +334,13 @@ function Login() {
         } finally {
             setLoading(false);
         }
-    };
-
-
-    const [openForgotDialog, setOpenForgotDialog] = useState(false);
-    const [username, setUsername] = useState('');
-    const [contact, setContact] = useState(''); // mobile no or email
+    }
 
     const handleForgotPasswordSubmit = () => {
-        // Call your API or validation logic here
         console.log("Username:", username);
         console.log("Contact:", contact);
-        // Close dialog after submit
         setOpenForgotDialog(false);
     };
-
-
-
 
     return (
         <Box sx={{ height: '100vh', width: '100%', position: 'relative', overflow: 'hidden', display: 'flex', flexDirection: isSmallScreen ? 'column' : 'row' }}>
@@ -367,7 +348,7 @@ function Login() {
             {/* Background Image */}
             <Box
                 sx={{
-                    position: 'absolute',
+                    position: 'fixed',
                     top: 0,
                     left: 0,
                     height: '100%',
@@ -631,7 +612,7 @@ function Login() {
                                     cursor: 'pointer',
                                 }}
                             >
-                                Forgot Password?
+                                {/* Forgot Password? */}
                             </Typography>
                         </Box>
 
