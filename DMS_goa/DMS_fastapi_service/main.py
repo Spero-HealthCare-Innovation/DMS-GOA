@@ -144,14 +144,14 @@ async def start_background_task():
 #     except Exception as e:
 #         return JSONResponse(content={"error": str(e)}, status_code=500)
 
-"""" Note:- *This command should always remain at the end. Any new code must be added above it.* """
+''' Note:- *This command should always remain at the end. Any new code must be added above it.* '''
 
-""" Run the FastAPI Project
+''' Run the FastAPI Project
 1. Navigate to the project directory:
 cd Spero-DMS\DMS_goa\DMS_fastapi_service
 
 2. Run the FastAPI server:
-uvicorn main:app --host 0.0.0.0 --port 8000 --reload """
+uvicorn main:app --host 0.0.0.0 --port 8000 --reload '''
 
 connected_clients: List[WebSocket] = []
 
