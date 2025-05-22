@@ -10,7 +10,6 @@ import TableRow from '@mui/material/TableRow';
 import { Search, ArrowBack, DeleteOutline, EditOutlined, } from "@mui/icons-material";
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 import { styled } from "@mui/material/styles";
-import Pagination from '@mui/material/Pagination';
 import { Alert } from '@mui/material';
 import { Select, MenuItem, IconButton, Popper } from "@mui/material";
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
@@ -35,18 +34,21 @@ import {
 function Add_group({ darkMode }) {
   const port = import.meta.env.VITE_APP_API_KEY;
 
-  const { newToken } = useAuth(); // ✅ pull token from context
-
+  const { newToken } = useAuth(); // pull token from context
   const [departmentList, setDepartmentList] = useState([]);
   const [departmentId, setDepartmentId] = useState("");
   const [groupName, setGroupName] = useState("");
   const [showSuccessAlert, setShowSuccessAlert] = useState(false);
+  const [alertMessage, setAlertMessage] = useState('');
+  const [alertType, setAlertType] = useState('success'); // 'success', 'error', 'warning'
   const [groups, setGroups] = useState([]);
-
-
-
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  
+  // States for edit functionality
+  const [isEditing, setIsEditing] = useState(false);
+  const [editingGroupId, setEditingGroupId] = useState(null);
+  const [selectedGroup, setSelectedGroup] = useState(null);
 
   // Determine effective token (context token takes priority)
   const effectiveToken = newToken || localStorage.getItem("access_token");
@@ -83,7 +85,6 @@ function Add_group({ darkMode }) {
     }
   }, [effectiveToken]);
 
-
   const textColor = darkMode ? "#ffffff" : "#000000";
   const bgColor = darkMode ? "#0a1929" : "#ffffff";
   const labelColor = darkMode ? "#5FECC8" : "#1976d2";
@@ -97,7 +98,6 @@ function Add_group({ darkMode }) {
   const [page, setPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [anchorEl, setAnchorEl] = useState(null);
-
 
   const EnquiryCard = styled("div")(() => ({
     display: "flex",
@@ -138,7 +138,6 @@ function Add_group({ darkMode }) {
     alignItems: "center",
   });
 
-
   const fontsTableHeading = {
     fontFamily: "Roboto",
     fontWeight: 500,
@@ -151,7 +150,6 @@ function Add_group({ darkMode }) {
     ? "rgba(255, 255, 255, 0.16)"
     : "rgba(0, 0, 0, 0.04)";
 
-
   const fontsTableBody = {
     fontFamily: "Roboto",
     fontWeight: 400,
@@ -160,53 +158,32 @@ function Add_group({ darkMode }) {
     textAlign: "center",
   };
 
-
-  const [alertData, setAlertData] = useState([
-    {
-      departmentID: "D-2202020",
-      groupName: "User Admin",
-    },
-    {
-      departmentID: "D-2202020",
-      groupName: " Employee Admin",
-    },
-    {
-      departmentID: "D-2202020",
-      groupName: "Yes Admin",
-    },
-    {
-      departmentID: "D-2202020",
-      groupName: "NO Admin",
-    },
-    {
-      departmentID: "D-2202020",
-      groupName: "Small Admin",
-    },
-    {
-      departmentID: "D-2202020",
-      groupName: "Big Admin",
-    },
-    {
-      departmentID: "D-2202020",
-      groupName: "Super Admin",
-    },
-    // Add more dummy objects...
-  ]);
-
-
   const paginatedData = groups.slice((page - 1) * rowsPerPage, page * rowsPerPage);
-
-
 
   const open = Boolean(anchorEl);
   const handleOpen = (event, item) => {
     setAnchorEl(event.currentTarget);
-    // Optionally store item in state if needed
+    setSelectedGroup(item);
   };
+  
   const handleClose = () => {
     setAnchorEl(null);
+    setSelectedGroup(null);
   };
 
+  // Function to show alert
+  const showAlert = (message, type = 'success') => {
+    setAlertMessage(message);
+    setAlertType(type);
+    setShowSuccessAlert(true);
+    setTimeout(() => setShowSuccessAlert(false), 3000);
+  };
+  const resetForm = () => {
+    setGroupName("");
+    setDepartmentId("");
+    setIsEditing(false);
+    setEditingGroupId(null);
+  };
 
   const handleSubmit = async () => {
     if (!departmentId || !groupName) {
@@ -227,45 +204,56 @@ function Add_group({ darkMode }) {
     try {
       setLoading(true);
 
-      const response = await axios.post(
-        `${port}/admin_web/group_post/`,
-        payload,
-        {
-          headers: {
-            Authorization: `Bearer ${effectiveToken}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      if (isEditing) {
+        // Update existing group
+        const response = await axios.put(
+          `${port}/admin_web/group_put/${editingGroupId}/`,
+          payload,
+          {
+            headers: {
+              Authorization: `Bearer ${effectiveToken}`,
+              "Content-Type": "application/json",
+            },
+          }
+        );
 
-      console.log("Group added:", response.data);
-      // alert("Group successfully added!");
-      // Optional: reset form
-      setGroupName("");
-      setDepartmentId("");
-      setShowSuccessAlert(true);
+        console.log("Group updated:", response.data);
+        showAlert("Group updated successfully!", "success");
+      } else {
+        // Create new group
+        const response = await axios.post(
+          `${port}/admin_web/group_post/`,
+          payload,
+          {
+            headers: {
+              Authorization: `Bearer ${effectiveToken}`,
+              "Content-Type": "application/json",
+            },
+          }
+        );
 
-      // Optional: Auto-hide after 3 seconds
-      setTimeout(() => setShowSuccessAlert(false), 3000);
+        console.log("Group added:", response.data);
+        showAlert("Group added successfully!", "success");
+      }
 
+      // Reset form and refresh data
+      resetForm();
       await fetchGroups();
 
     } catch (err) {
-      console.error("Error posting group:", err);
-
+      console.error("Error posting/updating group:", err);
 
       // Handle specific 409 error
       if (err.response && err.response.status === 409) {
         const detailMessage = err.response.data?.detail || "Conflict error";
-        alert(`Failed to add group: ${detailMessage}`);
+        showAlert(`Failed to ${isEditing ? 'update' : 'add'} group: ${detailMessage}`, "error");
       } else {
-        alert("Failed to add group. Please try again.");
+        showAlert(`Failed to ${isEditing ? 'update' : 'add'} group. Please try again.`, "error");
       }
     } finally {
       setLoading(false);
     }
   };
-
 
   const fetchGroups = async () => {
     try {
@@ -275,23 +263,69 @@ function Add_group({ darkMode }) {
         },
       });
 
+      console.log("Groups fetched:", response.data); // Debug log
+
       const formattedGroups = response.data.map(group => ({
+        id: group.grp_id, // Make sure this matches your API response
         departmentID: group.dep_id,
         groupName: group.grp_name,
-        fullData: group
+        fullData: group // Store complete group data for reference
       }));
 
+      console.log("Formatted groups:", formattedGroups); // Debug log
       setGroups(formattedGroups);
     } catch (error) {
       console.error("Failed to fetch groups:", error);
     }
   };
 
-
   useEffect(() => {
     fetchGroups();
   }, []);
 
+  // Handle Edit functionality
+  const handleEdit = (group) => {
+    console.log("Editing group:", group); // Debug log
+    setIsEditing(true);
+    setEditingGroupId(group.id);
+    // Make sure to set the department ID properly
+    setDepartmentId(group.fullData?.dep_id?.toString() || group.departmentID?.toString() || "");
+    setGroupName(group.groupName || "");
+    handleClose();
+  };
+
+  // Delete functionality
+  const deleteGroup = async (groupId) => {
+    try {
+      setLoading(true);
+      const response = await axios.delete(
+        `${port}/admin_web/group_delete/${groupId}/`,
+        {
+          headers: {
+            Authorization: `Bearer ${effectiveToken}`,
+          },
+        }
+      );
+      
+      console.log('Delete success:', response.data);
+      showAlert('Group deleted successfully!', 'success');
+      
+      // Refresh the groups list
+      await fetchGroups();
+      handleClose();
+      
+    } catch (error) {
+      console.error('Delete failed:', error);
+      if (error.response) {
+        console.error("Server Response:", error.response.data);
+        showAlert(`Failed to delete group: ${error.response.data.detail || 'Server error'}`, 'error');
+      } else {
+        showAlert('Failed to delete group. Please try again.', 'error');
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div>
@@ -303,15 +337,15 @@ function Add_group({ darkMode }) {
       >
         <Alert
           onClose={() => setShowSuccessAlert(false)}
-          severity="success"
+          severity={alertType}
           variant="filled"
           sx={{ width: '100%' }}
         >
-          Group added successfully!
+          {alertMessage}
         </Alert>
       </Snackbar>
+      
       <Box sx={{ display: "flex", alignItems: "center", gap: 2, pb: 2, mt: 3 }}>
-
         {/* Back Arrow */}
         <IconButton size="small" onClick={() => {/* handle back action here */ }} sx={{
           backgroundColor: "#00f0c0",
@@ -332,7 +366,7 @@ function Add_group({ darkMode }) {
           fontFamily,
           fontSize: 16,
         }}>
-          Add Group
+          {isEditing ? 'Edit Group' : 'Add Group'}
         </Typography>
 
         <TextField
@@ -367,6 +401,7 @@ function Add_group({ darkMode }) {
           }}
         />
       </Box>
+      
       <Grid container spacing={2}>
         <Grid item xs={12} md={7}>
           <Paper elevation={3} sx={{ padding: 3, borderRadius: 3, backgroundColor: bgColor, mt: 1, mb: 5 }}>
@@ -394,7 +429,6 @@ function Add_group({ darkMode }) {
                         </Typography>
                       </StyledCardContent>
 
-
                       <StyledCardContent
                         sx={{
                           flex: 1.9,
@@ -407,6 +441,7 @@ function Add_group({ darkMode }) {
                           Department ID
                         </Typography>
                       </StyledCardContent>
+                      
                       <StyledCardContent
                         sx={{
                           flex: 2,
@@ -430,7 +465,6 @@ function Add_group({ darkMode }) {
                         <Typography variant="subtitle2">Actions</Typography>
                       </StyledCardContent>
 
-
                       <StyledCardContent sx={{ flex: 1, justifyContent: "center" }}>
                         <MoreHorizIcon
                           sx={{
@@ -448,7 +482,7 @@ function Add_group({ darkMode }) {
                   {paginatedData.length === 0 ? (
                     <Box p={2}>
                       <Typography align="center" color="textSecondary">
-                        No tasks available.
+                        No groups available.
                       </Typography>
                     </Box>
                   ) : (
@@ -494,12 +528,10 @@ function Add_group({ darkMode }) {
                       </EnquiryCardBody>
                     ))
                   )}
-                  {/* {paginatedData.map((item, index) => ( */}
-
-                  {/* // ))} */}
                 </TableBody>
               </Table>
             </TableContainer>
+            
             <Box
               display="flex"
               justifyContent="space-between"
@@ -568,12 +600,12 @@ function Add_group({ darkMode }) {
                 <Box>{page}</Box>
                 <Box
                   onClick={() =>
-                    page < Math.ceil(alertData.length / rowsPerPage) &&
+                    page < Math.ceil(groups.length / rowsPerPage) &&
                     setPage(page + 1)
                   }
                   sx={{
                     cursor:
-                      page < Math.ceil(alertData.length / rowsPerPage)
+                      page < Math.ceil(groups.length / rowsPerPage)
                         ? "pointer"
                         : "not-allowed",
                     userSelect: "none",
@@ -609,28 +641,14 @@ function Add_group({ darkMode }) {
             },
           }}
         >
-          <Button
-            fullWidth
-            variant="outlined"
-            color="primary"
-            startIcon={<VisibilityIcon />}
-            onClick={() => {
-              alert("View clicked");
-              handleClose();
-            }}
-          >
-            View
-          </Button>
+       
 
           <Button
             fullWidth
             variant="outlined"
             color="warning"
             startIcon={<EditOutlined />}
-            onClick={() => {
-              alert("Edit clicked");
-              handleClose();
-            }}
+            onClick={() => handleEdit(selectedGroup)}
           >
             Edit
           </Button>
@@ -641,8 +659,9 @@ function Add_group({ darkMode }) {
             color="error"
             startIcon={<DeleteOutline />}
             onClick={() => {
-              alert("Delete clicked");
-              handleClose();
+              if (selectedGroup) {
+                deleteGroup(selectedGroup.id);
+              }
             }}
           >
             Delete
@@ -656,43 +675,42 @@ function Add_group({ darkMode }) {
                 color: labelColor,
                 fontWeight: 600,
                 fontSize: 16,
-
                 mb: 2,
                 fontFamily,
               }}
             >
-              Add Group
+              {isEditing ? 'Edit Group' : 'Add Group'}
             </Typography>
 
             <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
-              {/* First TextField */}
+              {/* Department Select */}
               <Select
                 fullWidth
                 displayEmpty
-                placeholder="Select District"
-                defaultValue=""
+                placeholder="Select Department"
                 value={departmentId}
                 onChange={(e) => setDepartmentId(e.target.value)}
                 inputProps={{
-                  "aria-label": "Select Name",
+                  "aria-label": "Select Department",
                 }}
                 sx={selectStyles}
-                IconComponent={KeyboardArrowDownIcon} // Use outlined dropdown arrow
+                IconComponent={KeyboardArrowDownIcon}
               >
                 <MenuItem value="" disabled>
                   Select Department
                 </MenuItem>
                 {departmentList.map((department) => (
-                  <MenuItem key={department.dep_id} value={department.dep_id}>
+                  <MenuItem key={department.dep_id} value={department.dep_id.toString()}>
                     {department.dep_name}
                   </MenuItem>
                 ))}
-                {/* Add more options as needed */}
               </Select>
-              {/* Second TextField */}
+              
+              {/* Group Name TextField */}
               <TextField
                 fullWidth
                 placeholder="Group Name"
+                label={groupName ? "" : "Group Name"} // Show placeholder only when empty
                 InputLabelProps={{ shrink: false }}
                 sx={inputStyle}
                 value={groupName}
@@ -700,10 +718,11 @@ function Add_group({ darkMode }) {
               />
             </Box>
 
-            <Box sx={{ display: 'flex', justifyContent: 'center', mt: 3, mb: 1 }}>
+            <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, mt: 3, mb: 1 }}>
               <Button
                 variant="contained"
                 onClick={handleSubmit}
+                disabled={loading}
                 sx={{
                   mt: 2,
                   width: "40%",
@@ -716,10 +735,31 @@ function Add_group({ darkMode }) {
                     color: "white !important",
                   },
                 }}
-              >Submit
+              >
+                {loading ? 'Loading...' : (isEditing ? 'Update' : 'Submit')}
               </Button>
+              
+              {isEditing && (
+                <Button
+                  variant="outlined"
+                  onClick={resetForm}
+                  sx={{
+                    mt: 2,
+                    width: "40%",
+                    borderColor: "#00f0c0",
+                    color: "#00f0c0",
+                    fontWeight: "bold",
+                    borderRadius: "12px",
+                    "&:hover": {
+                      borderColor: "#00d8ac",
+                      backgroundColor: "rgba(0, 240, 192, 0.1)",
+                    },
+                  }}
+                >
+                  Cancel
+                </Button>
+              )}
             </Box>
-
           </Paper>
         </Grid>
       </Grid>

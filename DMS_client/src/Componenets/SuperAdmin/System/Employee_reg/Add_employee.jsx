@@ -107,7 +107,7 @@ function Add_employee({ darkMode }) {
   const selectStyles = getCustomSelectStyles(isDarkMode);
 
   const [page, setPage] = useState(1);
-  const [rowsPerPage, setRowsPerPage] = useState(5); // default 5 rows
+  const [rowsPerPage, setRowsPerPage] = useState(5); 
 
 
 
@@ -252,9 +252,6 @@ function Add_employee({ darkMode }) {
   //   },
 
   // ];
-
-
-
 
 
   const open = Boolean(anchorEl);
@@ -871,18 +868,7 @@ function Add_employee({ darkMode }) {
             },
           }}
         >
-          <Button
-            fullWidth
-            variant="outlined"
-            color="primary"
-            startIcon={<VisibilityIcon />}
-            onClick={() => {
-              alert("View clicked");
-              handleClose();
-            }}
-          >
-            View
-          </Button>
+        
 
           <Button
             fullWidth
