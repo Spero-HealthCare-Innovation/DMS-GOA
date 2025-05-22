@@ -2,6 +2,12 @@ import { useState } from 'react';
 import { Paper, Typography, TextField, Button, Stack, Box } from '@mui/material';
 
 function CommentsPanel({ darkMode,setFlag,flag }) {
+
+    window.addEventListener('storage', (e) => {
+        if (e.key === 'logout') {
+            location.href = '/login';
+        }
+    });;
   const [placeholderVisible, setPlaceholderVisible] = useState(true);
   console.log("flagg",flag)
 

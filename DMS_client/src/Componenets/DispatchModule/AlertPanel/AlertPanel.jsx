@@ -1,13 +1,14 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
     Box, CardContent, Typography, Table, TableBody, TableContainer,
-    TableHead, TableRow, Grid, Button, Select, MenuItem
+    TableHead, TableRow, Grid, Button, Select, MenuItem, InputAdornment, TextField
 } from '@mui/material';
 import { styled } from '@mui/system';
 import { useNavigate } from 'react-router-dom';
 import MapView from './Map';
 import { useAuth } from './../../../Context/ContextAPI';
 import Sidebar from '../Sidebar/Sidebar';
+import { Search, Visibility, AddCircleOutline } from "@mui/icons-material";
 
 const EnquiryCard = styled('div')({
     display: 'flex',
@@ -48,6 +49,7 @@ const AlertPanel = ({ darkMode }) => {
     console.log(newToken, 'newToken');
 
     const port = import.meta.env.VITE_APP_API_KEY;
+    const socketUrl = import.meta.env.VITE_SOCKET_API_KEY;
     const group = localStorage.getItem('user_group');
     const token = localStorage.getItem('access_token');
     console.log(group, 'groupgroup');
@@ -59,6 +61,7 @@ const AlertPanel = ({ darkMode }) => {
     const [page, setPage] = useState(1);
     const [rowsPerPage, setRowsPerPage] = useState(5);
     const [alertData, setAlertData] = useState([]);
+    const socketRef = useRef(null);
     const [triggeredData, setTriggeredData] = useState([]);
     console.log(triggeredData, 'triggeredData');
 
@@ -67,18 +70,61 @@ const AlertPanel = ({ darkMode }) => {
     const paginatedData = alertData.slice(startIndex, endIndex);
     const totalPages = Math.ceil(alertData.length / rowsPerPage);
 
+    window.addEventListener('storage', (e) => {
+        if (e.key === 'logout') {
+            location.href = '/login';
+        }
+    });
+
     useEffect(() => {
         document.title = "DMS-AlertPanel";
     }, []);
 
+    // useEffect(() => {
+    //     const socket = new WebSocket('ws://192.168.1.116:8000/ws/weather_alerts');
+
+    //     socket.onmessage = (event) => {
+    //         try {
+    //             const data = JSON.parse(event.data);
+    //             console.log(data, 'data');
+    //             setAlertData((prev) => [...prev, data]);
+    //         } catch (error) {
+    //             console.error('Invalid JSON:', event.data);
+    //         }
+    //     };
+
+    //     socket.onerror = (error) => {
+    //         console.error('WebSocket error:', error);
+    //     };
+
+    //     socket.onclose = () => {
+    //         console.log('WebSocket closed');
+    //     };
+
+    //     // return () => {
+    //     //     socket.close();
+    //     // };
+    // }, []);
+
     useEffect(() => {
-        const socket = new WebSocket('ws://192.168.1.116:7777/ws/weather_alerts');
+        const socket = new WebSocket(`${socketUrl}/ws/weather_alerts`);
 
         socket.onmessage = (event) => {
             try {
-                const data = JSON.parse(event.data);
-                console.log(data, 'data');
-                setAlertData((prev) => [...prev, data]);
+                const newData = JSON.parse(event.data);
+                console.log('Received:', newData);
+
+                // setAlertData(prevData => {
+                //     const incoming = Array.isArray(newData) ? newData[0] : newData;
+                //     const filteredData = prevData.filter(item => item.pk_id !== incoming.pk_id);
+                //     return [...filteredData, incoming];
+                setAlertData(prevData => {
+                    const incoming = Array.isArray(newData) ? newData[0] : newData;
+                    const filteredData = prevData.filter(item => item.pk_id !== incoming.pk_id);
+                    return [incoming, ...filteredData];
+                });
+
+
             } catch (error) {
                 console.error('Invalid JSON:', event.data);
             }
@@ -92,9 +138,7 @@ const AlertPanel = ({ darkMode }) => {
             console.log('WebSocket closed');
         };
 
-        return () => {
-            socket.close();
-        };
+        // return () => socket.close(); // enable cleanup on unmount if needed
     }, []);
 
     const handleTriggerClick = async (id, triggerStatus) => {
@@ -111,14 +155,14 @@ const AlertPanel = ({ darkMode }) => {
             }
             const data = await response.json();
             setTriggeredData(data);
-
-            if (group === "2") {
-                navigate('/Sop', {
-                    state: {
-                        triggerStatus: triggerStatus
-                    }
-                });
-            }
+            // window.location.reload();
+            // if (group === "2") {
+            //     navigate('/Sop', {
+            //         state: {
+            //             triggerStatus: triggerStatus
+            //         }
+            //     });
+            // }
         } catch (error) {
             console.error('Error fetching alert details:', error);
         }
@@ -147,6 +191,39 @@ const AlertPanel = ({ darkMode }) => {
         <Box sx={{ flexGrow: 1, mt: 1, ml: 1, mr: 1, mb: 2 }}>
             <Sidebar darkMode={darkMode} />
             <Grid container spacing={2}>
+                <Grid item xs={12} md={12}>
+                    <TextField
+                        variant="outlined"
+                        size="small"
+                        placeholder="Search"
+                        InputProps={{
+                            startAdornment: (
+                                <InputAdornment position="start">
+                                    <Search sx={{ color: "gray", fontSize: 18 }} />
+                                </InputAdornment>
+                            ),
+                        }}
+                        sx={{
+                            width: "200px",
+                            "& .MuiOutlinedInput-root": {
+                                borderRadius: "25px",
+                                backgroundColor: darkMode ? "#1e293b" : "#fff",
+                                color: darkMode ? "#fff" : "#000",
+                                px: 1,
+                                py: 0.2,
+                            },
+                            "& .MuiOutlinedInput-notchedOutline": {
+                                borderColor: darkMode ? "#444" : "#ccc",
+                            },
+                            "& input": {
+                                color: darkMode ? "#fff" : "#000",
+                                padding: "6px 8px",
+                                fontSize: "13px",
+                            },
+                        }}
+                    />
+                </Grid>
+
                 <Grid item xs={12} md={8}>
                     <TableContainer>
                         <Table>
@@ -154,9 +231,12 @@ const AlertPanel = ({ darkMode }) => {
                                 <TableRow>
                                     <EnquiryCard>
                                         <StyledCardContent style={{ flex: 0.3, borderRight: "1px solid black" }}>
-                                            <Typography variant="subtitle2">Sr. No</Typography>
+                                            <Typography variant="subtitle2">Sr No</Typography>
                                         </StyledCardContent>
-                                        <StyledCardContent style={{ flex: 1, borderRight: "1px solid black" }}>
+                                        <StyledCardContent style={{ flex: 0.5, borderRight: "1px solid black" }}>
+                                            <Typography variant="subtitle2">Alert Id</Typography>
+                                        </StyledCardContent>
+                                        <StyledCardContent style={{ flex: 1.2, borderRight: "1px solid black" }}>
                                             <Typography variant="subtitle2">Time</Typography>
                                         </StyledCardContent>
                                         <StyledCardContent style={{ flex: 1, borderRight: "1px solid black" }}>
@@ -189,13 +269,16 @@ const AlertPanel = ({ darkMode }) => {
                                             sx={{
                                                 backgroundColor: darkMode ? "#1C223C" : "#FFFFFF",
                                                 color: darkMode ? "white" : "black",
-                                                cursor: "pointer", // Optional for visual feedback
+                                                cursor: "pointer",
                                             }}
                                         >
                                             <StyledCardContent style={{ flex: 0.3 }}>
+                                                <Typography variant="subtitle2">{index + 1}</Typography>
+                                            </StyledCardContent>
+                                            <StyledCardContent style={{ flex: 0.5 }}>
                                                 <Typography variant="subtitle2">{item.pk_id}</Typography>
                                             </StyledCardContent>
-                                            <StyledCardContent style={{ flex: 1 }}>
+                                            <StyledCardContent style={{ flex: 1.2 }}>
                                                 <Typography variant="subtitle2">{new Date(item.time).toLocaleString()}</Typography>
                                             </StyledCardContent>
                                             <StyledCardContent style={{ flex: 1 }}>
@@ -207,7 +290,7 @@ const AlertPanel = ({ darkMode }) => {
                                             <StyledCardContent style={{ flex: 1 }}>
                                                 <Button
                                                     onClick={(e) => {
-                                                        e.stopPropagation(); // Prevent parent click from firing
+                                                        e.stopPropagation();
                                                         handleTriggerClick(item.pk_id, item.triger_status);
                                                     }}
                                                     style={{
@@ -216,7 +299,8 @@ const AlertPanel = ({ darkMode }) => {
                                                         color: darkMode ? 'white' : 'black',
                                                         borderRadius: '10px',
                                                         height: '30px',
-                                                        marginTop: '15px'
+                                                        marginTop: '15px',
+                                                        fontSize: '12px',
                                                     }}
                                                 >
                                                     {item.triger_status === 1 ? "Trigger" : "Triggered"}

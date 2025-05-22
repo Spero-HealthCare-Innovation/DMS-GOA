@@ -75,6 +75,7 @@ const Navbar = ({ darkMode, toggleDarkMode }) => {
         'Authorization': `Bearer ${accessToken}`,
       }
     });
+       localStorage.setItem('logout', Date.now()); 
 
     // Clear tokens regardless of logout success or failure
     localStorage.removeItem('access_token');
