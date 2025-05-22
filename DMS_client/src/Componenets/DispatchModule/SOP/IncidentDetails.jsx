@@ -42,261 +42,8 @@ function IncidentDetails({ darkMode, flag, setFlag, selectedIncident }) {
           padding: 2,
         }}
       >
-         {/* {flag === 1 ? (
+        {flag === 1 ? (
           <Grid container>
-           
-            <Grid
-              item
-              xs={12}
-              md={3}
-              sx={{
-                borderRight: { md: `1px solid ${borderColor}` },
-                pr: { md: 2 },
-                mb: { xs: 2, md: 0 },
-              }}
-            >
-              <Box sx={boxStyle}>
-                <Typography
-                  sx={{ color: labelColor, fontWeight: 500, fontFamily }}
-                >
-                  Alert ID
-                </Typography>
-                <Typography variant="subtitle2" sx={{ fontFamily }}>
-                  {selectedIncident?.pk_id || "N/A"}
-                </Typography>
-              </Box>
-
-              <Box sx={boxStyle}>
-                {" "}
-             
-                <Typography
-                  variant="subtitle2"
-                  sx={{ color: labelColor, fontWeight: 500, fontFamily }}
-                >
-                  Disaster Id
-                </Typography>
-                <Typography variant="subtitle2" sx={{ fontFamily }}>
-                  {selectedIncident?.disasterId || "N/A"}
-                </Typography>
-              </Box>
-
-              <Box>
-                <Typography
-                  variant="subtitle2"
-                  sx={{ color: labelColor, fontWeight: 500, fontFamily }}
-                >
-                  Alert Type
-                </Typography>
-                <Typography variant="subtitle2" sx={{ fontFamily }}>
-                  {selectedIncident?.disasterType || "N/A"}
-                </Typography>
-              </Box>
-            </Grid>
-
-           
-            <Grid
-              item
-              xs={12}
-              md={4}
-              sx={{
-                borderRight: { md: `1px solid ${borderColor}` },
-                px: { md: 2 },
-                mb: { xs: 2, md: 0 },
-              }}
-            >
-              <Box sx={boxStyle}>
-                <Typography
-                  variant="subtitle2"
-                  sx={{ color: labelColor, fontWeight: 500, fontFamily }}
-                >
-                  Response Procedure
-                </Typography>
-                <Typography variant="subtitle2" sx={{ fontFamily }}>
-                  Mass intimation to public, Media, Boat, Fisheries
-                </Typography>
-              </Box>
-              <Box>
-                <Typography
-                  variant="subtitle2"
-                  sx={{ color: labelColor, fontWeight: 500, fontFamily }}
-                >
-                  Responder Scope
-                </Typography>
-                <Stack spacing={1} mt={1}>
-                  <Box display="flex" flexWrap="wrap" gap={1}>
-                    <FormControlLabel
-                      control={
-                        <Checkbox defaultChecked sx={{ color: labelColor }} />
-                      }
-                      label={
-                        <Typography variant="subtitle2" sx={{ fontFamily }}>
-                          Police
-                        </Typography>
-                      }
-                    />
-                    <FormControlLabel
-                      control={<Checkbox sx={{ color: labelColor }} />}
-                      label={
-                        <Typography variant="subtitle2" sx={{ fontFamily }}>
-                          Fire
-                        </Typography>
-                      }
-                    />
-                    <FormControlLabel
-                      control={<Checkbox sx={{ color: labelColor }} />}
-                      label={
-                        <Typography variant="subtitle2" sx={{ fontFamily }}>
-                          Marine
-                        </Typography>
-                      }
-                    />
-                    <FormControlLabel
-                      control={<Checkbox sx={{ color: labelColor }} />}
-                      label={
-                        <Typography variant="subtitle2" sx={{ fontFamily }}>
-                          Fisheries
-                        </Typography>
-                      }
-                    />
-                  </Box>
-                </Stack>
-              </Box>
-            </Grid>
-
-       
-            <Grid item xs={12} md={5} pl={{ md: 2 }}>
-              <CommentsPanel darkMode={darkMode} flag={flag} />
-            </Grid>
-          </Grid>
-        ) : (
-          <Grid container>
-          
-            <Grid
-              item
-              xs={12}
-              md={3}
-              sx={{
-                borderRight: { md: `1px solid ${borderColor}` },
-                pr: { md: 2 },
-                mb: { xs: 2, md: 0 },
-              }}
-            >
-              <Box sx={boxStyle}>
-                <Typography
-                  sx={{ color: labelColor, fontWeight: 500, fontFamily }}
-                >
-                  Incident ID
-                </Typography>
-                <Typography variant="subtitle2" sx={{ fontFamily }}>
-                  {selectedIncident?.IncidentId || "N/A"}
-                </Typography>
-              </Box>
-
-              <Box sx={boxStyle}>
-                {" "}
-     
-                <Typography
-                  variant="subtitle2"
-                  sx={{ color: labelColor, fontWeight: 500, fontFamily }}
-                >
-                  Incident Type
-                </Typography>
-                <Typography variant="subtitle2" sx={{ fontFamily }}>
-                  {selectedIncident?.disasterType || "N/A"}
-                </Typography>
-              </Box>
-
-              <Box>
-                <Typography
-                  variant="subtitle2"
-                  sx={{ color: labelColor, fontWeight: 500, fontFamily }}
-                >
-                  Alert Type
-                </Typography>
-                <Typography variant="subtitle2" sx={{ fontFamily }}>
-                  {selectedIncident?.disasterType || "N/A"}
-                </Typography>
-              </Box>
-            </Grid>
-
-       
-            <Grid
-              item
-              xs={12}
-              md={4}
-              sx={{
-                borderRight: { md: `1px solid ${borderColor}` },
-                px: { md: 2 },
-                mb: { xs: 2, md: 0 },
-              }}
-            >
-              <Box sx={boxStyle}>
-                <Typography
-                  variant="subtitle2"
-                  sx={{ color: labelColor, fontWeight: 500, fontFamily }}
-                >
-                  Response Procedure
-                </Typography>
-                <Typography variant="subtitle2" sx={{ fontFamily }}>
-                  Mass intimation to public, Media, Boat, Fisheries
-                </Typography>
-              </Box>
-              <Box>
-                <Typography
-                  variant="subtitle2"
-                  sx={{ color: labelColor, fontWeight: 500, fontFamily }}
-                >
-                  Responder Scope
-                </Typography>
-                <Stack spacing={1} mt={1}>
-                  <Box display="flex" flexWrap="wrap" gap={1}>
-                    <FormControlLabel
-                      control={
-                        <Checkbox defaultChecked sx={{ color: labelColor }} />
-                      }
-                      label={
-                        <Typography variant="subtitle2" sx={{ fontFamily }}>
-                          Police
-                        </Typography>
-                      }
-                    />
-                    <FormControlLabel
-                      control={<Checkbox sx={{ color: labelColor }} />}
-                      label={
-                        <Typography variant="subtitle2" sx={{ fontFamily }}>
-                          Fire
-                        </Typography>
-                      }
-                    />
-                    <FormControlLabel
-                      control={<Checkbox sx={{ color: labelColor }} />}
-                      label={
-                        <Typography variant="subtitle2" sx={{ fontFamily }}>
-                          Marine
-                        </Typography>
-                      }
-                    />
-                    <FormControlLabel
-                      control={<Checkbox sx={{ color: labelColor }} />}
-                      label={
-                        <Typography variant="subtitle2" sx={{ fontFamily }}>
-                          Fisheries
-                        </Typography>
-                      }
-                    />
-                  </Box>
-                </Stack>
-              </Box>
-            </Grid>
-
-  
-            <Grid item xs={12} md={5} pl={{ md: 2 }}>
-              <CommentsPanel darkMode={darkMode} flag={flag} />
-            </Grid>
-          </Grid>
-        )} */}
-        
-            <Grid container>
             {/* Left Column */}
             <Grid
               item
@@ -321,7 +68,7 @@ function IncidentDetails({ darkMode, flag, setFlag, selectedIncident }) {
 
               <Box sx={boxStyle}>
                 {" "}
-             
+                {/* 🟢 ADDED BORDER */}
                 <Typography
                   variant="subtitle2"
                   sx={{ color: labelColor, fontWeight: 500, fontFamily }}
@@ -346,7 +93,7 @@ function IncidentDetails({ darkMode, flag, setFlag, selectedIncident }) {
               </Box>
             </Grid>
 
-           
+            {/* Middle Column */}
             <Grid
               item
               xs={12}
@@ -416,11 +163,138 @@ function IncidentDetails({ darkMode, flag, setFlag, selectedIncident }) {
               </Box>
             </Grid>
 
-       
+            {/* Right Column */}
             <Grid item xs={12} md={5} pl={{ md: 2 }}>
               <CommentsPanel darkMode={darkMode} flag={flag} />
             </Grid>
           </Grid>
+        ) : (
+          <Grid container>
+            {/* Left Column */}
+            <Grid
+              item
+              xs={12}
+              md={3}
+              sx={{
+                borderRight: { md: `1px solid ${borderColor}` },
+                pr: { md: 2 },
+                mb: { xs: 2, md: 0 },
+              }}
+            >
+              <Box sx={boxStyle}>
+                <Typography
+                  sx={{ color: labelColor, fontWeight: 500, fontFamily }}
+                >
+                  Incident ID
+                </Typography>
+                <Typography variant="subtitle2" sx={{ fontFamily }}>
+                  {selectedIncident?.IncidentId || "N/A"}
+                </Typography>
+              </Box>
+
+              <Box sx={boxStyle}>
+                {" "}
+                {/* 🟢 ADDED BORDER */}
+                <Typography
+                  variant="subtitle2"
+                  sx={{ color: labelColor, fontWeight: 500, fontFamily }}
+                >
+                  Incident Type
+                </Typography>
+                <Typography variant="subtitle2" sx={{ fontFamily }}>
+                  {selectedIncident?.disasterType || "N/A"}
+                </Typography>
+              </Box>
+
+              <Box>
+                <Typography
+                  variant="subtitle2"
+                  sx={{ color: labelColor, fontWeight: 500, fontFamily }}
+                >
+                  Alert Type
+                </Typography>
+                <Typography variant="subtitle2" sx={{ fontFamily }}>
+                  {selectedIncident?.disasterType || "N/A"}
+                </Typography>
+              </Box>
+            </Grid>
+
+            {/* Middle Column */}
+            <Grid
+              item
+              xs={12}
+              md={4}
+              sx={{
+                borderRight: { md: `1px solid ${borderColor}` },
+                px: { md: 2 },
+                mb: { xs: 2, md: 0 },
+              }}
+            >
+              <Box sx={boxStyle}>
+                <Typography
+                  variant="subtitle2"
+                  sx={{ color: labelColor, fontWeight: 500, fontFamily }}
+                >
+                  Response Procedure
+                </Typography>
+                <Typography variant="subtitle2" sx={{ fontFamily }}>
+                  Mass intimation to public, Media, Boat, Fisheries
+                </Typography>
+              </Box>
+              <Box>
+                <Typography
+                  variant="subtitle2"
+                  sx={{ color: labelColor, fontWeight: 500, fontFamily }}
+                >
+                  Responder Scope
+                </Typography>
+                <Stack spacing={1} mt={1}>
+                  <Box display="flex" flexWrap="wrap" gap={1}>
+                    <FormControlLabel
+                      control={
+                        <Checkbox defaultChecked sx={{ color: labelColor }} />
+                      }
+                      label={
+                        <Typography variant="subtitle2" sx={{ fontFamily }}>
+                          Police
+                        </Typography>
+                      }
+                    />
+                    <FormControlLabel
+                      control={<Checkbox sx={{ color: labelColor }} />}
+                      label={
+                        <Typography variant="subtitle2" sx={{ fontFamily }}>
+                          Fire
+                        </Typography>
+                      }
+                    />
+                    <FormControlLabel
+                      control={<Checkbox sx={{ color: labelColor }} />}
+                      label={
+                        <Typography variant="subtitle2" sx={{ fontFamily }}>
+                          Marine
+                        </Typography>
+                      }
+                    />
+                    <FormControlLabel
+                      control={<Checkbox sx={{ color: labelColor }} />}
+                      label={
+                        <Typography variant="subtitle2" sx={{ fontFamily }}>
+                          Fisheries
+                        </Typography>
+                      }
+                    />
+                  </Box>
+                </Stack>
+              </Box>
+            </Grid>
+
+            {/* Right Column */}
+            <Grid item xs={12} md={5} pl={{ md: 2 }}>
+              <CommentsPanel darkMode={darkMode} flag={flag} />
+            </Grid>
+          </Grid>
+        )}
       </Paper>
     </>
   );
