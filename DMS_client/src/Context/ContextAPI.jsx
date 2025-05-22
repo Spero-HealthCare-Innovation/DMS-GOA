@@ -9,6 +9,8 @@ export const AuthProvider = ({ children }) => {
   const [districts, setDistricts] = useState([]);
   const [Tehsils, setTehsils] = useState([]);
   const [Citys, setCitys] = useState([]);
+  // console.log("city id",selectedCityID);
+  
   const [selectedStateId, setSelectedStateId] = useState('');
   const [selectedDistrictId, setSelectedDistrictId] = useState('');
   const [selectedTehsilId, setSelectedTehsilId] = useState('');

@@ -631,7 +631,7 @@ function Login() {
                                     cursor: 'pointer',
                                 }}
                             >
-                                Forgot Password?
+                                {/* Forgot Password? */}
                             </Typography>
                         </Box>
 

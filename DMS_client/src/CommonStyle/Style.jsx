@@ -179,8 +179,15 @@ export const getCustomSelectStyles = (isDarkMode) => {
       boxShadow: "0px 4px 15px rgba(0, 0, 0, 0.2)",
     },
     "& .MuiSelect-select": {
-      color: textColor,
+      color: "#C0C0C0",
       fontSize: "13px",
+       fontFamily: "Roboto",
+    },
+       '& input': {
+      fontSize: '12px', 
+        color: '#C0C0C0',
+         fontFamily: "Roboto",
+     
     },
     "& .MuiSelect-displayEmpty": {
       color: placeholderColor,
@@ -193,6 +200,7 @@ export const getCustomSelectStyles = (isDarkMode) => {
       padding: "0 12px",
       display: "flex",
       alignItems: "center",
+      color:"grey"
     },
     "& fieldset": {
       border: "none",
