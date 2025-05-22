@@ -128,7 +128,8 @@ function SopTask({ darkMode, flag, setFlag, setSelectedIncident }) {
   useEffect(() => {
     const timer = setTimeout(() => {
       const socket = new WebSocket(
-        `${socketUrl}/ws/weather_alerts_trigger2`
+        `ws://192.168.1.116:7777/ws/weather_alerts_trigger2`
+        // `${socketUrl}/ws/weather_alerts_trigger2`
       );
 
       socket.onopen = () => {

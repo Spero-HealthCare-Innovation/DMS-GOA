@@ -9,6 +9,8 @@ import CachedIcon from '@mui/icons-material/Cached';
 function Login() {
     const port = import.meta.env.VITE_APP_API_KEY;
     const socketUrl = import.meta.env.VITE_SOCKET_API_KEY;
+    console.log(socketUrl,'socketUrlsocketUrlsocketUrl');
+    
     const theme = useTheme();
     const isSmallScreen = useMediaQuery(theme.breakpoints.down('sm'));
     const navigate = useNavigate();
@@ -292,7 +294,8 @@ function Login() {
                     setTimeout(() => {
                         try {
                             console.log(' Creating WebSocket connection for group 3');
-                            const socket = new WebSocket(`${socketUrl}/send_data`);
+                            const socket = new WebSocket(`ws://192.168.1.116:7777/send_data`);
+                            // const socket = new WebSocket(`${socketUrl}/send_data`);
                             socket.onopen = () => {
                                 console.log(" WebSocket connected for group 3");
                                 socket.send("true");
