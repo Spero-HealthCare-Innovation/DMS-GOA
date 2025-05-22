@@ -49,6 +49,7 @@ const AlertPanel = ({ darkMode }) => {
     console.log(newToken, 'newToken');
 
     const port = import.meta.env.VITE_APP_API_KEY;
+    const socketUrl = import.meta.env.VITE_SOCKET_API_KEY;
     const group = localStorage.getItem('user_group');
     const token = localStorage.getItem('access_token');
     console.log(group, 'groupgroup');
@@ -106,7 +107,7 @@ const AlertPanel = ({ darkMode }) => {
     // }, []);
 
     useEffect(() => {
-        const socket = new WebSocket('ws://192.168.1.116:8000/ws/weather_alerts');
+        const socket = new WebSocket(`${socketUrl}/ws/weather_alerts`);
 
         socket.onmessage = (event) => {
             try {
@@ -120,7 +121,7 @@ const AlertPanel = ({ darkMode }) => {
                 setAlertData(prevData => {
                     const incoming = Array.isArray(newData) ? newData[0] : newData;
                     const filteredData = prevData.filter(item => item.pk_id !== incoming.pk_id);
-                    return [incoming, ...filteredData]; // Put new entry at the top
+                    return [incoming, ...filteredData];
                 });
 
 
