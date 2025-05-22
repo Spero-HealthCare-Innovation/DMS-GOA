@@ -67,9 +67,10 @@ class DMS_State_Serializer(serializers.ModelSerializer):
         fields = '__all__'
         
 class DMS_Group_Serializer(serializers.ModelSerializer):
+    dep_name = serializers.CharField(source='dep_id.dep_name', read_only=True)
     class Meta:
         model = DMS_Group
-        fields = '__all__'
+        fields = ['grp_id','grp_code','permission_status','grp_name','grp_is_deleted','grp_added_date','grp_added_by','grp_modified_date','grp_modified_by','dep_id','dep_name']
         
 class DMS_Department_Serializer(serializers.ModelSerializer):
     class Meta:
