@@ -421,11 +421,11 @@ class CombinedAPIView(APIView):
 
     
     
-class DMS_Group_put_api(APIView):
-    def get(self, request, grp_id):
-        snippet = DMS_Group.objects.filter(grp_id=grp_id,grp_is_deleted=False)
-        serializers = DMS_Group_serializer(snippet, many=True)
-        return Response(serializers.data)
+# class DMS_Group_put_api(APIView):
+#     def get(self, request, grp_id):
+#         snippet = DMS_Group.objects.filter(grp_id=grp_id,grp_is_deleted=False)
+#         serializers = DMS_Group_serializer(snippet, many=True)
+#         return Response(serializers.data)
 
 
 class DMS_ChangePassword_put_api(APIView):
