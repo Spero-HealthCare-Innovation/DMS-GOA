@@ -8,8 +8,7 @@ import { useNavigate } from 'react-router-dom';
 import MapView from './Map';
 import { useAuth } from './../../../Context/ContextAPI';
 import Sidebar from '../Sidebar/Sidebar';
-import { Search, Add } from "@mui/icons-material";
-import { IconButton } from "@mui/material";
+import { Search, Visibility, AddCircleOutline } from "@mui/icons-material";
 
 const EnquiryCard = styled('div')({
     display: 'flex',
@@ -48,11 +47,14 @@ const StyledCardContent = styled(CardContent)({
 const AlertPanel = ({ darkMode }) => {
     const { newToken } = useAuth();
     console.log(newToken, 'newToken');
-    const navigate = useNavigate();
+
     const port = import.meta.env.VITE_APP_API_KEY;
     const socketUrl = import.meta.env.VITE_SOCKET_API_KEY;
     const group = localStorage.getItem('user_group');
     const token = localStorage.getItem('access_token');
+    console.log(group, 'groupgroup');
+    const navigate = useNavigate();
+
     const textColor = darkMode ? "#ffffff" : "#000000";
     const bgColor = darkMode ? "#0a1929" : "#ffffff";
     const borderColor = darkMode ? "#7F7F7F" : "#ccc";
@@ -67,17 +69,12 @@ const AlertPanel = ({ darkMode }) => {
     const endIndex = startIndex + rowsPerPage;
     const paginatedData = alertData.slice(startIndex, endIndex);
     const totalPages = Math.ceil(alertData.length / rowsPerPage);
-    const [hovered, setHovered] = useState(false);
 
     window.addEventListener('storage', (e) => {
         if (e.key === 'logout') {
             location.href = '/login';
         }
     });
-
-    const handleClick = () => {
-        navigate("/Incident");
-    };
 
     useEffect(() => {
         document.title = "DMS-AlertPanel";
@@ -110,7 +107,8 @@ const AlertPanel = ({ darkMode }) => {
     // }, []);
 
     useEffect(() => {
-        const socket = new WebSocket(`${socketUrl}/ws/weather_alerts`);
+        const socket = new WebSocket(`ws://192.168.1.116:7777/ws/weather_alerts`);
+        // const socket = new WebSocket(`${socketUrl}/ws/weather_alerts`);
 
         socket.onmessage = (event) => {
             try {
@@ -137,9 +135,9 @@ const AlertPanel = ({ darkMode }) => {
             console.error('WebSocket error:', error);
         };
 
-        // socket.onclose = () => {
-        //     console.log('WebSocket closed');
-        // };
+        socket.onclose = () => {
+            console.log('WebSocket closed');
+        };
 
         // return () => socket.close(); // enable cleanup on unmount if needed
     }, []);
@@ -159,13 +157,13 @@ const AlertPanel = ({ darkMode }) => {
             const data = await response.json();
             setTriggeredData(data);
             // window.location.reload();
-            if (group === "2") {
-                navigate('/Sop', {
-                    state: {
-                        triggerStatus: triggerStatus
-                    }
-                });
-            }
+            // if (group === "2") {
+            //     navigate('/Sop', {
+            //         state: {
+            //             triggerStatus: triggerStatus
+            //         }
+            //     });
+            // }
         } catch (error) {
             console.error('Error fetching alert details:', error);
         }
@@ -191,92 +189,43 @@ const AlertPanel = ({ darkMode }) => {
     };
 
     return (
-        <Box sx={{ flexGrow: 1, mt: 1, ml: '5em', mr: 1, mb: 2 }}>
+        <Box sx={{ flexGrow: 1, mt: 1, ml: 1, mr: 1, mb: 2 }}>
             <Sidebar darkMode={darkMode} />
             <Grid container spacing={2}>
+                <Grid item xs={12} md={12}>
+                    <TextField
+                        variant="outlined"
+                        size="small"
+                        placeholder="Search"
+                        InputProps={{
+                            startAdornment: (
+                                <InputAdornment position="start">
+                                    <Search sx={{ color: "gray", fontSize: 18 }} />
+                                </InputAdornment>
+                            ),
+                        }}
+                        sx={{
+                            width: "200px",
+                            "& .MuiOutlinedInput-root": {
+                                borderRadius: "25px",
+                                backgroundColor: darkMode ? "#1e293b" : "#fff",
+                                color: darkMode ? "#fff" : "#000",
+                                px: 1,
+                                py: 0.2,
+                            },
+                            "& .MuiOutlinedInput-notchedOutline": {
+                                borderColor: darkMode ? "#444" : "#ccc",
+                            },
+                            "& input": {
+                                color: darkMode ? "#fff" : "#000",
+                                padding: "6px 8px",
+                                fontSize: "13px",
+                            },
+                        }}
+                    />
+                </Grid>
+
                 <Grid item xs={12} md={8}>
-                    <Grid item xs={12} sx={{ mb: 2, mt: 1 }}>
-                        <Box
-                            sx={{
-                                display: "flex",
-                                alignItems: "center",
-                                justifyContent: "space-between",
-                            }}
-                        >
-                            <TextField
-                                variant="outlined"
-                                size="small"
-                                placeholder="Search your location"
-                                InputProps={{
-                                    startAdornment: (
-                                        <InputAdornment position="start">
-                                            <Search sx={{ color: "gray", fontSize: 18 }} />
-                                        </InputAdornment>
-                                    ),
-                                }}
-                                sx={{
-                                    width: "250px",
-                                    "& .MuiOutlinedInput-root": {
-                                        borderRadius: "25px",
-                                        backgroundColor: darkMode ? "#1e293b" : "#fff",
-                                        color: darkMode ? "#fff" : "#000",
-                                        px: 1,
-                                        py: 0.2,
-                                    },
-                                    "& .MuiOutlinedInput-notchedOutline": {
-                                        borderColor: darkMode ? "#444" : "#ccc",
-                                    },
-                                    "& input": {
-                                        color: darkMode ? "#fff" : "#000",
-                                        padding: "6px 8px",
-                                        fontSize: "13px",
-                                    },
-                                }}
-                            />
-
-                            <Box
-                                onMouseEnter={() => setHovered(true)}
-                                onMouseLeave={() => setHovered(false)}
-                                onClick={handleClick}
-                                sx={{
-                                    display: "flex",
-                                    alignItems: "center",
-                                    transition: "width 0.3s ease",
-                                    overflow: "hidden",
-                                    backgroundColor: "#00c896",
-                                    color: "#fff",
-                                    borderRadius: "25px",
-                                    px: hovered ? 1 : 0,
-                                    height: 36,
-                                    width: hovered ? "145px" : "36px",
-                                    cursor: "pointer",
-                                    "&:hover": {
-                                        backgroundColor: "#00b080",
-                                    },
-                                }}
-                            >
-                                <IconButton
-                                    disableRipple
-                                    sx={{
-                                        color: "#fff",
-                                        padding: 0,
-                                        ml: hovered ? 0.6 : 0.6,
-                                    }}
-                                >
-                                    <Add />
-                                </IconButton>
-                                {hovered && (
-                                    <Typography
-                                        variant="body2"
-                                        sx={{ whiteSpace: "nowrap", fontSize: "13px", fontWeight: 500 }}
-                                    >
-                                        Create Incident
-                                    </Typography>
-                                )}
-                            </Box>
-                        </Box>
-                    </Grid>
-
                     <TableContainer>
                         <Table>
                             <TableHead>
