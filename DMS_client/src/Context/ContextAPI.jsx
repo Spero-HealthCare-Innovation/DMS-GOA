@@ -100,7 +100,8 @@ export const AuthProvider = ({ children }) => {
         `${port}/admin_web/district_get_idwise/${stateId}/`,
         {
           headers: {
-            Authorization: `Bearer ${token}`,
+            Authorization: `Bearer ${token || newToken}`,
+
           },
         }
       );
