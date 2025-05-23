@@ -63,3 +63,4 @@ django-cors-headers
 screeninfo
 uiautomation
 sqlalchemy
+asyncpg
