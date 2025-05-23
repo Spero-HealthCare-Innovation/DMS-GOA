@@ -465,15 +465,16 @@ function Add_employee({ darkMode }) {
     <div style={{ marginLeft: "3.5rem" }}>
       <Snackbar
         open={showSuccessAlert}
-        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
         autoHideDuration={3000}
         onClose={() => setShowSuccessAlert(false)}
+      
       >
         <Alert
           onClose={() => setShowSuccessAlert(false)}
           severity="success"
           variant="filled"
-          sx={{ width: '100%' }}
+          sx={{ width: '100%'}}
         >
           Employee added successfully!
         </Alert>
