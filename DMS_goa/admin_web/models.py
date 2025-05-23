@@ -305,10 +305,6 @@ class DMS_SOP(models.Model):
     sop_modified_by = models.CharField(max_length=255, null=True, blank=True)
     sop_modified_date = models.DateTimeField(null=True, blank=True)
 
-<<<<<<< HEAD
-
-=======
->>>>>>> Development
 from django.utils.timezone import now
 class DMS_Incident(models.Model):
     inc_id = models.AutoField(primary_key=True)
@@ -343,8 +339,6 @@ class DMS_Comments(models.Model):
     comm_modified_date = models.DateTimeField(auto_now=True,null=True, blank=True)
     
 
-<<<<<<< HEAD
-=======
 class DMS_Alert_Type(models.Model):
     alert_id = models.AutoField(primary_key=True)
     alert_name = models.CharField(max_length=255,null=True,blank=True)
@@ -365,5 +359,4 @@ class DMS_Notify(models.Model):
     not_added_date = models.DateTimeField(auto_now=True)
     not_modified_by = models.CharField(max_length=255, null=True, blank=True)
     not_modified_date = models.DateTimeField(auto_now=True,null=True, blank=True)
->>>>>>> Development
     
