@@ -52,6 +52,10 @@ urlpatterns = [
     path('DMS_Disaster_Type_Get/',DMS_Disaster_Type_Get_API.as_view(), name='DMS_Disaster_Type_Get'),
     path('DMS_Disaster_Type_Get_Idwise/<int:disaster_id>/',DMS_Disaster_Type_Idwise_Get_API.as_view(), name='DMS_Disaster_Type_Get_Idwise'),
     
+    path('DMS_Incident_Post/',DMS_Incident_Post_api.as_view(), name='DMS_Incident_Post'),
+    path('DMS_Comments_Post/',DMS_Comments_Post_api.as_view(), name='DMS_Comments_Post'),
+    
+    path('alerts_get_api/<int:alert_id>/',alerts_get_api.as_view(), name='alerts_get_api'),    
     
     #===================================Mohin==================================================
     
