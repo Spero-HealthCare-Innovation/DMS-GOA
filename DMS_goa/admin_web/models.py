@@ -306,7 +306,10 @@ class Weather_alerts(models.Model):
     modified_by = models.CharField(max_length=255, null=True, blank=True)
     modified_date = models.DateTimeField(null=True, blank=True)
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> Development
 from django.utils.timezone import now
 class DMS_Incident(models.Model):
     inc_id = models.AutoField(primary_key=True)
@@ -341,4 +344,27 @@ class DMS_Comments(models.Model):
     comm_modified_date = models.DateTimeField(auto_now=True,null=True, blank=True)
     
 
+<<<<<<< HEAD
+=======
+class DMS_Alert_Type(models.Model):
+    alert_id = models.AutoField(primary_key=True)
+    alert_name = models.CharField(max_length=255,null=True,blank=True)
+    alert_code = models.CharField(max_length=255,null=True,blank=True)
+    alert_is_deleted= models.BooleanField(default=False)
+    alert_added_by=models.CharField(max_length=255,null=True,blank=True)
+    alert_added_date = models.DateTimeField(auto_now=True)
+    alert_modified_by = models.CharField(max_length=255, null=True, blank=True)
+    alert_modified_date = models.DateTimeField(auto_now=True,null=True, blank=True)
+    
+class DMS_Notify(models.Model):
+    not_id = models.AutoField(primary_key=True)
+    name = models.CharField(max_length=255,null=True,blank=True)
+    alert_type_id = models.JSONField(null=True,blank=True)
+    alert_id = models.ForeignKey(Weather_alerts,on_delete=models.CASCADE)
+    not_is_deleted= models.BooleanField(default=False)
+    not_added_by=models.CharField(max_length=255,null=True,blank=True)
+    not_added_date = models.DateTimeField(auto_now=True)
+    not_modified_by = models.CharField(max_length=255, null=True, blank=True)
+    not_modified_date = models.DateTimeField(auto_now=True,null=True, blank=True)
+>>>>>>> Development
     

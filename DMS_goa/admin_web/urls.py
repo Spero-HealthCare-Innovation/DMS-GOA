@@ -58,8 +58,12 @@ urlpatterns = [
     path('DMS_Incident_Post/',DMS_Incident_Post_api.as_view(), name='DMS_Incident_Post'),
     path('DMS_Comments_Post/',DMS_Comments_Post_api.as_view(), name='DMS_Comments_Post'),
     
+<<<<<<< HEAD
     
     
+=======
+    path('alerts_get_api/<int:alert_id>/',alerts_get_api.as_view(), name='alerts_get_api'),    
+>>>>>>> Development
     
     #===================================Mohin==================================================
     

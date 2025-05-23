@@ -431,6 +431,20 @@ class CombinedAPIView(APIView):
 #         serializers = DMS_Group_serializer(snippet, many=True)
 #         return Response(serializers.data)
 
+    def put(self, request, grp_id):
+        try:
+            instance = DMS_Group.objects.get(grp_id=grp_id)
+        except DMS_Group.DoesNotExist:
+            return Response({"error": "Group not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        serializer = DMS_Group_serializer(instance, data=request.data, partial=True)
+
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
 
 class DMS_ChangePassword_put_api(APIView):
     def get(self, request, emp_id):
@@ -598,6 +612,10 @@ class DMS_Alert_idwise_get_api(APIView):
         serializers = WeatherAlertSerializer(alert_obj,many=False)
         return Response(serializers.data,status=status.HTTP_200_OK)
     
+<<<<<<< HEAD
+=======
+
+>>>>>>> Development
 class DMS_Incident_Post_api(APIView):
     def post(self,request):
         serializers=Incident_Serializer(data=request.data)
@@ -613,4 +631,25 @@ class DMS_Comments_Post_api(APIView):
         if serializers.is_valid():
             serializers.save()
             return Response(serializers.data,status=status.HTTP_201_CREATED)
+<<<<<<< HEAD
         return Response(serializers.errors,status=status.HTTP_400_BAD_REQUEST)
+=======
+        return Response(serializers.errors,status=status.HTTP_400_BAD_REQUEST)
+
+class alerts_get_api(APIView):
+    def get(self, request, alert_id):
+        weather_alerts = Weather_alerts.objects.filter(pk_id=alert_id)
+        sop_responses = DMS_SOP.objects.filter(alert_id=alert_id)
+        responder_scopes = DMS_Notify.objects.filter(alert_id=alert_id)
+        
+
+        weather_serializer = Weather_alerts_Serializer(weather_alerts, many=True)
+        sop_serializer = Sop_Response_Procedure_Serializer(sop_responses, many=True)
+        responder_serializer = Responder_Scope_Serializer(responder_scopes, many=True)
+
+        return Response({
+            'Alert_id': weather_serializer.data,
+            'sop_response_procedures': sop_serializer.data,
+            'responder_scopes': responder_serializer.data,
+        }, status=status.HTTP_200_OK)
+>>>>>>> Development

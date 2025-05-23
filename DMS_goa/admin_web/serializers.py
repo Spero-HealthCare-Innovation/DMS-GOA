@@ -118,6 +118,10 @@ class DMS_Group_Serializer(serializers.ModelSerializer):
         fields = ['grp_id','grp_code','permission_status','grp_name','grp_is_deleted','grp_added_date','grp_added_by','grp_modified_date','grp_modified_by','dep_id','dep_name']
         
 class DMS_Department_Serializer(serializers.ModelSerializer):
+    dst_name = serializers.CharField(source='dis_id.dis_name', read_only=True)
+    state_name = serializers.CharField(source='state_id.state_name', read_only=True)
+    tah_name = serializers.CharField(source='tah_id.tah_name', read_only=True)
+    city_name = serializers.CharField(source='cit_id.cit_name', read_only=True)
     class Meta:
         model = DMS_Department
         fields = '__all__'
@@ -204,6 +208,10 @@ class WeatherAlertSerializer(serializers.ModelSerializer):
         model = Weather_alerts
         fields = '__all__'
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> Development
 # class Incident_Serializer(serializers.ModelSerializer):
 #     class Meta:
 #         model = DMS_Incident
@@ -242,3 +250,25 @@ class Comments_Serializer(serializers.ModelSerializer):
         fields = '__all__' 
         
         
+<<<<<<< HEAD
+=======
+class Weather_alerts_Serializer(serializers.ModelSerializer):
+    class Meta:
+        model = Weather_alerts
+        fields = ['pk_id']
+        
+class Sop_Response_Procedure_Serializer(serializers.ModelSerializer):
+    class Meta:
+        model = DMS_SOP
+        fields = ['sop_description','alert_id']
+
+class Responder_Scope_Serializer(serializers.ModelSerializer):
+    class Meta:
+        model = DMS_Notify
+        fields = ['alert_type_id']
+        
+class Alert_Type_Serializer(serializers.ModelSerializer):
+    class Meta:
+        model = DMS_Alert_Type
+        fields = ['alert_name']
+>>>>>>> Development
