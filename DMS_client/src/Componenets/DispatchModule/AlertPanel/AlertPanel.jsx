@@ -189,7 +189,7 @@ const AlertPanel = ({ darkMode }) => {
     };
 
     return (
-        <Box sx={{ flexGrow: 1, mt: 1, ml: 1, mr: 1, mb: 2 }}>
+        <Box sx={{ flexGrow: 1, mt: 1, ml: 9, mr: 1, mb: 2 }}>
             <Sidebar darkMode={darkMode} />
             <Grid container spacing={2}>
                 <Grid item xs={12} md={12}>
