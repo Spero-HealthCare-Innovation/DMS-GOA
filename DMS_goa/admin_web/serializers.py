@@ -117,6 +117,10 @@ class DMS_Group_Serializer(serializers.ModelSerializer):
         fields = '__all__'
         
 class DMS_Department_Serializer(serializers.ModelSerializer):
+    dst_name = serializers.CharField(source='dis_id.dis_name', read_only=True)
+    state_name = serializers.CharField(source='state_id.state_name', read_only=True)
+    tah_name = serializers.CharField(source='tah_id.tah_name', read_only=True)
+    city_name = serializers.CharField(source='cit_id.cit_name', read_only=True)
     class Meta:
         model = DMS_Department
         fields = '__all__'
@@ -202,3 +206,62 @@ class WeatherAlertSerializer(serializers.ModelSerializer):
     class Meta:
         model = Weather_alerts
         fields = '__all__'
+
+
+# class Incident_Serializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = DMS_Incident
+#         fields = '__all__' 
+
+
+class CommentsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DMS_Comments
+        exclude = ['incident_id','alert_id','comm_modified_by','comm_modified_date']
+
+class Incident_Serializer(serializers.ModelSerializer):
+    comments = CommentsSerializer(write_only=True)
+
+    class Meta:
+        model = DMS_Incident
+        fields = '__all__'  
+        extra_fields = ['comments']
+
+    def create(self, validated_data):
+        comments_data = validated_data.pop('comments')
+        incident = DMS_Incident.objects.create(**validated_data)
+
+        DMS_Comments.objects.create(
+            alert_id=incident.alert_id,
+            incident_id=incident,
+            **comments_data
+        )
+
+        return incident
+
+        
+class Comments_Serializer(serializers.ModelSerializer):
+    class Meta:
+        model = DMS_Comments
+        fields = '__all__' 
+        
+        
+class Weather_alerts_Serializer(serializers.ModelSerializer):
+    class Meta:
+        model = Weather_alerts
+        fields = ['pk_id']
+        
+class Sop_Response_Procedure_Serializer(serializers.ModelSerializer):
+    class Meta:
+        model = DMS_SOP
+        fields = ['sop_description','alert_id']
+
+class Responder_Scope_Serializer(serializers.ModelSerializer):
+    class Meta:
+        model = DMS_Notify
+        fields = ['alert_type_id']
+        
+class Alert_Type_Serializer(serializers.ModelSerializer):
+    class Meta:
+        model = DMS_Alert_Type
+        fields = ['alert_name']
