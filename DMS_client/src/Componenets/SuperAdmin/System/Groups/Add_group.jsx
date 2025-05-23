@@ -331,7 +331,7 @@ function Add_group({ darkMode }) {
     <div style={{ marginLeft: "3.5rem" }}>
       <Snackbar
         open={showSuccessAlert}
-        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
         autoHideDuration={3000}
         onClose={() => setShowSuccessAlert(false)}
       >
@@ -438,7 +438,7 @@ function Add_group({ darkMode }) {
                         }}
                       >
                         <Typography variant="subtitle2">
-                          Department ID
+                          Department Name
                         </Typography>
                       </StyledCardContent>
 
