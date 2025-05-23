@@ -100,11 +100,7 @@ admin.site.register(DMS_Employee)
 admin.site.register(DMS_WebLogin)
 admin.site.register(DMS_Disaster_Type)
 admin.site.register(DMS_Incident)
-<<<<<<< HEAD
-admin.site.register(Weather_alerts)
-=======
 admin.site.register(Weather_alerts)
 admin.site.register(DMS_Notify)
 admin.site.register(DMS_Alert_Type)
 admin.site.register(DMS_SOP)
->>>>>>> Development
