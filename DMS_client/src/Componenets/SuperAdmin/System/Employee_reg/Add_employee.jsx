@@ -906,7 +906,6 @@ function Add_employee({ darkMode }) {
             Edit
           </Button>
 
-// 9. Implement the delete functionality in the Popover
           <Button
             fullWidth
             variant="outlined"
