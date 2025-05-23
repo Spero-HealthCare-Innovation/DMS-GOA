@@ -392,6 +392,20 @@ class DMS_Group_put_api(APIView):
         serializers = DMS_Group_serializer(snippet, many=True)
         return Response(serializers.data)
 
+    def put(self, request, grp_id):
+        try:
+            instance = DMS_Group.objects.get(grp_id=grp_id)
+        except DMS_Group.DoesNotExist:
+            return Response({"error": "Group not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        serializer = DMS_Group_serializer(instance, data=request.data, partial=True)
+
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
 
 class DMS_ChangePassword_put_api(APIView):
     def get(self, request, emp_id):
