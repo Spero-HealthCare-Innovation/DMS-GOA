@@ -274,18 +274,7 @@ class DMS_Role(models.Model):
     role_added_date = models.DateTimeField(auto_now=True)
     role_modified_by = models.CharField(max_length=255, null=True, blank=True)
     role_modified_date = models.DateTimeField(null=True, blank=True)
-
-class DMS_SOP(models.Model):
-    sop_id=models.AutoField(primary_key=True)
-    sop_description=models.TextField(null=True,blank=True)
-    disaster_id=models.ForeignKey(DMS_Disaster_Type,on_delete=models.CASCADE)
-    sop_is_deleted = models.BooleanField(default=False)
-    sop_added_by=models.CharField(max_length=255,null=True,blank=True)
-    sop_added_date = models.DateTimeField(auto_now=True)
-    sop_modified_by = models.CharField(max_length=255, null=True, blank=True)
-    sop_modified_date = models.DateTimeField(null=True, blank=True)
-    
-    
+  
 class Weather_alerts(models.Model):
     pk_id = models.AutoField(primary_key=True)
     latitude = models.FloatField(null=True,blank=True)
@@ -305,6 +294,16 @@ class Weather_alerts(models.Model):
     added_date = models.DateTimeField(auto_now=True)
     modified_by = models.CharField(max_length=255, null=True, blank=True)
     modified_date = models.DateTimeField(null=True, blank=True)
+    
+class DMS_SOP(models.Model):
+    sop_id=models.AutoField(primary_key=True)
+    sop_description=models.TextField(null=True,blank=True)
+    alert_id=models.ForeignKey(Weather_alerts,on_delete=models.CASCADE)
+    sop_is_deleted = models.BooleanField(default=False)
+    sop_added_by=models.CharField(max_length=255,null=True,blank=True)
+    sop_added_date = models.DateTimeField(auto_now=True)
+    sop_modified_by = models.CharField(max_length=255, null=True, blank=True)
+    sop_modified_date = models.DateTimeField(null=True, blank=True)
 
 <<<<<<< HEAD
 

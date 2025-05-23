@@ -208,10 +208,6 @@ class WeatherAlertSerializer(serializers.ModelSerializer):
         model = Weather_alerts
         fields = '__all__'
 
-<<<<<<< HEAD
-=======
-
->>>>>>> Development
 # class Incident_Serializer(serializers.ModelSerializer):
 #     class Meta:
 #         model = DMS_Incident
@@ -249,26 +245,48 @@ class Comments_Serializer(serializers.ModelSerializer):
         model = DMS_Comments
         fields = '__all__' 
         
-        
-<<<<<<< HEAD
-=======
+
 class Weather_alerts_Serializer(serializers.ModelSerializer):
     class Meta:
         model = Weather_alerts
         fields = ['pk_id']
         
+
 class Sop_Response_Procedure_Serializer(serializers.ModelSerializer):
     class Meta:
         model = DMS_SOP
         fields = ['sop_description','alert_id']
 
+# class Responder_Scope_Serializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = DMS_Notify
+#         fields = ['alert_type_id']
+
+
+
 class Responder_Scope_Serializer(serializers.ModelSerializer):
+    alert_type_details = serializers.SerializerMethodField()
+
     class Meta:
         model = DMS_Notify
-        fields = ['alert_type_id']
+        fields = ['alert_type_details']
+
+    def get_alert_type_details(self, obj):
+        alert_ids = obj.alert_type_id or []
+        try:
+            # Convert all IDs to integers for lookup
+            alert_ids = [int(i) for i in alert_ids]
+        except (ValueError, TypeError):
+            return []
+
+        alert_types = DMS_Alert_Type.objects.filter(alert_id__in=alert_ids)
+        return [
+            {'alert_id': at.alert_id, 'alert_name': at.alert_name}
+            for at in alert_types
+        ]
+
         
 class Alert_Type_Serializer(serializers.ModelSerializer):
     class Meta:
         model = DMS_Alert_Type
         fields = ['alert_name']
->>>>>>> Development
