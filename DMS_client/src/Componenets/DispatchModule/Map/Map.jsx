@@ -28,7 +28,7 @@ window.addEventListener('storage', (e) => {
   return (
     <div
       id="windy-widget"
-      style={{ width: "100vw", height: "85vh", marginLeft: "-70px", position: 'fixed'}}
+      style={{ width: "100vw", height: "85vh", marginLeft: "0px", position: 'fixed'}}
     >
       <iframe
         title="Windy"
