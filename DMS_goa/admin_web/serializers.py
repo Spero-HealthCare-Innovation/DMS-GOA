@@ -89,8 +89,49 @@ class DMS_Employee_serializer(serializers.ModelSerializer):
         user.set_password(password)  # hashes and sets it correctly
         user.save()
         return user
+    
+    
 
+class DMS_Employee_GET_serializer(serializers.ModelSerializer):
+    state_name = serializers.SerializerMethodField()
+    dis_name = serializers.SerializerMethodField()
+    tah_name = serializers.SerializerMethodField()
+    cit_name = serializers.SerializerMethodField()
 
+    class Meta:
+        model = DMS_Employee
+        fields = [
+            'emp_id', 'emp_username', 'grp_id', 'emp_name', 'emp_email',
+            'emp_contact_no', 'emp_dob', 'emp_doj', 'emp_is_login',
+            'state_id', 'state_name', 'dist_id','dis_name','tahsil_id','tah_name','city_id','cit_name',
+            'emp_is_deleted', 'emp_added_by', 'emp_modified_by', 'password'
+        ]
+
+    def get_state_name(self, obj):
+        try:
+            return DMS_State.objects.get(state_id=obj.state_id).state_name
+        except DMS_State.DoesNotExist:
+            return None
+    
+    def get_dis_name(self, obj):
+        try:
+            return DMS_District.objects.get(dis_id=obj.dist_id).dis_name
+        except (DMS_District.DoesNotExist, ValueError, TypeError):
+            return None
+        
+    def get_tah_name(self, obj):
+        try:
+            return DMS_Tahsil.objects.get(tah_id=obj.tahsil_id).tah_name
+        except (DMS_Tahsil.DoesNotExist, ValueError, TypeError):
+            return None
+        
+    def get_cit_name(self, obj):
+        try:
+            return DMS_City.objects.get(cit_id=obj.city_id).cit_name
+        except (DMS_City.DoesNotExist, ValueError, TypeError):
+            return None
+        
+    
 class DMS_District_Serializer(serializers.ModelSerializer):
     class Meta:
         model = DMS_District

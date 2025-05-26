@@ -142,7 +142,7 @@ class DMS_Group_delete_api(APIView):
 class DMS_Employee_get_api(APIView):
     def get(self,request):
         snippet = DMS_Employee.objects.filter(emp_is_deleted=False)
-        serializers = DMS_Employee_serializer(snippet,many=True)
+        serializers = DMS_Employee_GET_serializer(snippet,many=True)
         return Response(serializers.data,status=status.HTTP_200_OK)
 
 class DMS_Employee_post_api(APIView):
@@ -635,7 +635,4 @@ class alerts_get_api(APIView):
         sop_serializer = Sop_Response_Procedure_Serializer(sop_responses, many=True)
         responder_serializer = Responder_Scope_Serializer(responder_scopes, many=True)
 
-        return Response({
-            'sop_response_procedures': sop_serializer.data,
-            'responder_scopes': responder_serializer.data,
-        }, status=status.HTTP_200_OK)
+        return Response({'sop_response_procedures': sop_serializer.data,'responder_scopes': responder_serializer.data,}, status=status.HTTP_200_OK)
