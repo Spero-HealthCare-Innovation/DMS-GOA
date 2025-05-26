@@ -12,6 +12,8 @@ import {
     Stack
 } from "@mui/material";
 import { useAuth } from "../../../Context/ContextAPI";
+import IncidentCreateMap from "./IncidentCreateMap";
+
 
 const inputStyle = {
     mb: 2,
@@ -218,8 +220,8 @@ const Incident = ({ darkMode }) => {
                     </Grid>
                 </Grid>
 
-                <Grid item xs={12} md={4}>
-                    Map View
+                <Grid item xs={12} md={4} style={{ position: "relative" }}>
+                    <IncidentCreateMap />
                 </Grid>
             </Grid>
         </Box>
