@@ -105,7 +105,7 @@ const Incident = ({ darkMode }) => {
                             </Paper>
                         </Grid>
 
-                        {selectedEmergencyValue === 1 ? (
+                        {selectedEmergencyValue === 1 && (
                             <Grid item xs={12} md={12}>
                                 <Paper elevation={3} sx={{ ...inputStyle, p: 3, borderRadius: 3, backgroundColor: bgColor }}>
                                     <Grid container>
@@ -147,7 +147,7 @@ const Incident = ({ darkMode }) => {
                                             md={9}
                                             sx={{
                                                 px: { md: 2 },
-                                                mb: { xs: 2, md: 0 },
+                                                mb: { xs: 5, md: 0 },
                                             }}
                                         >
                                             <Box sx={boxStyle}>
@@ -211,12 +211,7 @@ const Incident = ({ darkMode }) => {
                                     </Grid>
                                 </Paper>
                             </Grid>
-                        )
-                            :
-                            (
-                                <></>
-                            )
-                        }
+                        )}
                     </Grid>
                 </Grid>
 
