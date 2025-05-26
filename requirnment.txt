@@ -64,3 +64,4 @@ screeninfo
 uiautomation
 sqlalchemy
 asyncpg
+openpyxl
