@@ -255,6 +255,7 @@ useEffect(() => {
             border: "2px solid grey",
             borderColor: darkMode ? "#5BB9B4" : "#1C3B52",
             gap: 1,
+            cursor: "pointer",
           }}
         >
           <Typography

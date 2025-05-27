@@ -9,6 +9,8 @@ import MapView from './Map';
 import { useAuth } from './../../../Context/ContextAPI';
 import Sidebar from '../Sidebar/Sidebar';
 import { Search, Visibility, AddCircleOutline } from "@mui/icons-material";
+import { IconButton } from "@mui/material";
+import { Add } from "@mui/icons-material";
 
 const EnquiryCard = styled('div')({
     display: 'flex',
@@ -19,7 +21,8 @@ const EnquiryCard = styled('div')({
     color: 'black',
     borderRadius: '8px 10px 0 0',
     fontWeight: '600',
-    height: '35px'
+    height: '35px',
+    cursor: "pointer",
 });
 
 const EnquiryCardBody = styled('div')({
@@ -46,14 +49,19 @@ const StyledCardContent = styled(CardContent)({
 
 const AlertPanel = ({ darkMode }) => {
     const { newToken } = useAuth();
+    const navigate = useNavigate();
     console.log(newToken, 'newToken');
 
     const port = import.meta.env.VITE_APP_API_KEY;
     const socketUrl = import.meta.env.VITE_SOCKET_API_KEY;
     const group = localStorage.getItem('user_group');
     const token = localStorage.getItem('access_token');
+    const [isHovered, setIsHovered] = useState(false);
+    const handleClick = () => {
+        navigate("/Incident");
+    };
+
     console.log(group, 'groupgroup');
-    const navigate = useNavigate();
 
     const textColor = darkMode ? "#ffffff" : "#000000";
     const bgColor = darkMode ? "#0a1929" : "#ffffff";
@@ -80,66 +88,28 @@ const AlertPanel = ({ darkMode }) => {
         document.title = "DMS-AlertPanel";
     }, []);
 
-    // useEffect(() => {
-    //     const socket = new WebSocket('ws://192.168.1.116:8000/ws/weather_alerts');
-
-    //     socket.onmessage = (event) => {
-    //         try {
-    //             const data = JSON.parse(event.data);
-    //             console.log(data, 'data');
-    //             setAlertData((prev) => [...prev, data]);
-    //         } catch (error) {
-    //             console.error('Invalid JSON:', event.data);
-    //         }
-    //     };
-
-    //     socket.onerror = (error) => {
-    //         console.error('WebSocket error:', error);
-    //     };
-
-    //     socket.onclose = () => {
-    //         console.log('WebSocket closed');
-    //     };
-
-    //     // return () => {
-    //     //     socket.close();
-    //     // };
-    // }, []);
-
     useEffect(() => {
-        const socket = new WebSocket(`ws://192.168.1.116:7777/ws/weather_alerts`);
-        // const socket = new WebSocket(`${socketUrl}/ws/weather_alerts`);
+        const socket = new WebSocket(`${socketUrl}/ws/weather_alerts`);
 
         socket.onmessage = (event) => {
             try {
                 const newData = JSON.parse(event.data);
                 console.log('Received:', newData);
-
-                // setAlertData(prevData => {
-                //     const incoming = Array.isArray(newData) ? newData[0] : newData;
-                //     const filteredData = prevData.filter(item => item.pk_id !== incoming.pk_id);
-                //     return [...filteredData, incoming];
                 setAlertData(prevData => {
                     const incoming = Array.isArray(newData) ? newData[0] : newData;
                     const filteredData = prevData.filter(item => item.pk_id !== incoming.pk_id);
                     return [incoming, ...filteredData];
                 });
-
-
             } catch (error) {
                 console.error('Invalid JSON:', event.data);
             }
         };
-
         socket.onerror = (error) => {
             console.error('WebSocket error:', error);
         };
-
         socket.onclose = () => {
             console.log('WebSocket closed');
         };
-
-        // return () => socket.close(); // enable cleanup on unmount if needed
     }, []);
 
     const handleTriggerClick = async (id, triggerStatus) => {
@@ -189,44 +159,84 @@ const AlertPanel = ({ darkMode }) => {
     };
 
     return (
-        <Box sx={{ flexGrow: 1, mt: 1, ml: 9, mr: 1, mb: 2 }}>
+        <Box sx={{ flexGrow: 1, mt: 1, ml: '6em', mr: 1, mb: 2 }}>
             <Sidebar darkMode={darkMode} />
             <Grid container spacing={2}>
-                <Grid item xs={12} md={12}>
-                    <TextField
-                        variant="outlined"
-                        size="small"
-                        placeholder="Search"
-                        InputProps={{
-                            startAdornment: (
-                                <InputAdornment position="start">
-                                    <Search sx={{ color: "gray", fontSize: 18 }} />
-                                </InputAdornment>
-                            ),
-                        }}
-                        sx={{
-                            width: "200px",
-                            "& .MuiOutlinedInput-root": {
-                                borderRadius: "25px",
-                                backgroundColor: darkMode ? "#1e293b" : "#fff",
-                                color: darkMode ? "#fff" : "#000",
-                                px: 1,
-                                py: 0.2,
-                            },
-                            "& .MuiOutlinedInput-notchedOutline": {
-                                borderColor: darkMode ? "#444" : "#ccc",
-                            },
-                            "& input": {
-                                color: darkMode ? "#fff" : "#000",
-                                padding: "6px 8px",
-                                fontSize: "13px",
-                            },
-                        }}
-                    />
-                </Grid>
-
                 <Grid item xs={12} md={8}>
-                    <TableContainer>
+                    <Grid container spacing={2} alignItems="center">
+                        <Grid item xs={12} md={12} display="flex" alignItems="center">
+                            <TextField
+                                variant="outlined"
+                                size="small"
+                                placeholder="Search"
+                                InputProps={{
+                                    startAdornment: (
+                                        <InputAdornment position="start">
+                                            <Search sx={{ color: "gray", fontSize: 18 }} />
+                                        </InputAdornment>
+                                    ),
+                                }}
+                                sx={{
+                                    width: "200px",
+                                    "& .MuiOutlinedInput-root": {
+                                        borderRadius: "25px",
+                                        backgroundColor: darkMode ? "#1e293b" : "#fff",
+                                        color: darkMode ? "#fff" : "#000",
+                                        px: 1,
+                                        py: 0.2,
+                                    },
+                                    "& .MuiOutlinedInput-notchedOutline": {
+                                        borderColor: darkMode ? "#444" : "#ccc",
+                                    },
+                                    "& input": {
+                                        color: darkMode ? "#fff" : "#000",
+                                        padding: "6px 8px",
+                                        fontSize: "13px",
+                                    },
+                                }}
+                            />
+
+                            <IconButton
+                                onClick={handleClick}
+                                onMouseEnter={() => setIsHovered(true)}
+                                onMouseLeave={() => setIsHovered(false)}
+                                size="small"
+                                sx={{
+                                    ml: "auto",
+                                    backgroundColor: "#5FECC8",
+                                    color: "black",
+                                    borderRadius: "18px",
+                                    "&:hover": {
+                                        backgroundColor: "#5FECC8",
+                                    },
+                                    width: isHovered ? 140 : 36,
+                                    height: 36,
+                                    transition: "width 0.3s ease",
+                                    overflow: "hidden",
+                                    display: "flex",
+                                    justifyContent: "center",
+                                    alignItems: "center",
+                                    paddingRight: isHovered ? 1 : 1,
+                                }}
+                            >
+                                <Add sx={{ color: darkMode ? "#000000" : "#000000" }} />
+                                {isHovered && (
+                                    <Typography
+                                        variant="body2"
+                                        sx={{
+                                            marginLeft: 1,
+                                            color: "black",
+                                            whiteSpace: "nowrap",
+                                        }}
+                                    >
+                                        Create Incident
+                                    </Typography>
+                                )}
+                            </IconButton>
+                        </Grid>
+                    </Grid>
+
+                    <TableContainer style={{ marginTop: '1em' }}>
                         <Table>
                             <TableHead>
                                 <TableRow>
