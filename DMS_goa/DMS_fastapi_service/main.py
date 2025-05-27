@@ -44,6 +44,32 @@ from datetime import timedelta
 from django.utils import timezone
 
 
+# ----------------------Authentication for websockets---------------------------------------------------
+from rest_framework_simplejwt.tokens import UntypedToken
+from rest_framework_simplejwt.exceptions import InvalidToken, TokenError
+from admin_web.models import DMS_Employee
+from rest_framework_simplejwt.tokens import AccessToken
+from rest_framework_simplejwt.exceptions import TokenError
+
+# def get_user_from_token(token: str):
+#     try:
+#         validated_token = UntypedToken(token)
+#         user_id = validated_token['emp_id']
+#         return DMS_Employee.objects.get(id=user_id)
+#     except (InvalidToken, TokenError, DMS_Employee.DoesNotExist):
+#         return None
+
+
+def get_user_from_token(token: str):
+    try:
+        access_token = AccessToken(token)  # This checks signature and expiration
+        user_id = access_token["user_id"]  # Or "emp_id" if you've added it
+        return DMS_Employee.objects.get(id=user_id)
+    except (TokenError, DMS_Employee.DoesNotExist):
+        return None
+
+
+
 
 #==================================Send Data to Kafka===(Mayank)========================================#
 
@@ -524,6 +550,14 @@ async def websocket_endpoint(websocket: WebSocket):
 
 @app.websocket("/ws/weather_alerts_trigger2")
 async def websocket_trigger2(websocket: WebSocket):
+    # token = websocket.query_params.get("token")
+    # print("tokennnnnnn----", token)
+    # user = get_user_from_token(token)
+    # print("user-----", user)
+    # if not user:
+    #     await websocket.close(code=1008)
+    #     return
+    
     await websocket.accept()
     connected_clients_trigger2.add(websocket)
     print(f"Trigger2 WebSocket added: {websocket.client}")
