@@ -55,6 +55,7 @@ class DMS_department_serializer(serializers.ModelSerializer):
         fields='__all__'
 
 class DMS_Group_serializer(serializers.ModelSerializer):
+    dep_name = serializers.CharField(source='dep_id.dep_name', read_only=True)
     class Meta:
         model=DMS_Group
         fields='__all__'
@@ -153,6 +154,7 @@ class DMS_State_Serializer(serializers.ModelSerializer):
         fields = '__all__'
         
 class DMS_Group_Serializer(serializers.ModelSerializer):
+    dep_name = serializers.CharField(source='dep_id.dep_name', read_only=True)
     class Meta:
         model = DMS_Group
         fields = '__all__'
@@ -298,26 +300,7 @@ class Sop_Response_Procedure_Serializer(serializers.ModelSerializer):
 
 
 
-class Responder_Scope_Serializer(serializers.ModelSerializer):
-    alert_type_details = serializers.SerializerMethodField()
 
-    class Meta:
-        model = DMS_Notify
-        fields = ['alert_type_details']
-
-    def get_alert_type_details(self, obj):
-        alert_ids = obj.alert_type_id or []
-        try:
-            # Convert all IDs to integers for lookup
-            alert_ids = [int(i) for i in alert_ids]
-        except (ValueError, TypeError):
-            return []
-
-        alert_types = DMS_Alert_Type.objects.filter(alert_id__in=alert_ids)
-        return [
-            {'alert_id': at.alert_id, 'alert_name': at.alert_name}
-            for at in alert_types
-        ]
 
         
 class Alert_Type_Serializer(serializers.ModelSerializer):

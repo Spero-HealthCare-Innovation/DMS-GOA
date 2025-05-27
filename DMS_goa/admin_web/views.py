@@ -134,7 +134,7 @@ class DMS_Employee_post_api(APIView):
 class DMS_Employee_put_api(APIView):
     def get(self, request, emp_id):
         snippet = DMS_Employee.objects.filter(emp_id=emp_id,emp_is_deleted=False)
-        serializers = DMS_Employee_serializer(snippet, many=True)
+        serializers = DMS_Employee_GET_serializer(snippet, many=True)
         return Response(serializers.data)
 
     def put(self, request, emp_id):
@@ -395,7 +395,7 @@ class CombinedAPIView(APIView):
 class DMS_Group_put_api(APIView):
     def get(self, request, grp_id):
         snippet = DMS_Group.objects.filter(grp_id=grp_id,grp_is_deleted=False)
-        serializers = DMS_Group_serializer(snippet, many=True)
+        serializers = DMS_Group_Serializer(snippet, many=True)
         return Response(serializers.data)
 
     def put(self, request, grp_id):
@@ -571,10 +571,14 @@ class DMS_Disaster_Type_Idwise_Get_API(APIView):
     
 
 class DMS_Alert_idwise_get_api(APIView):
+    permission_classes = [IsAuthenticated]
+
     def get(self,request):
+        print("request user-- ",request.user)
         alert_id = request.GET.get('id')
         alert_obj = Weather_alerts.objects.get(pk_id=alert_id)
         alert_obj.triger_status = 2
+        alert_obj.modified_by = str(request.user)
         alert_obj.save()
         serializers = WeatherAlertSerializer(alert_obj,many=False)
         return Response(serializers.data,status=status.HTTP_200_OK)
@@ -598,11 +602,7 @@ class DMS_Comments_Post_api(APIView):
         return Response(serializers.errors,status=status.HTTP_400_BAD_REQUEST)
 
 class alerts_get_api(APIView):
-    def get(self, request, alert_id):
-        sop_responses = DMS_SOP.objects.filter(alert_id=alert_id)
-        responder_scopes = DMS_Notify.objects.filter(alert_id=alert_id)
-        
+    def get(self, request, disaster_id):
+        sop_responses = DMS_SOP.objects.filter(disaster_id=disaster_id)
         sop_serializer = Sop_Response_Procedure_Serializer(sop_responses, many=True)
-        responder_serializer = Responder_Scope_Serializer(responder_scopes, many=True)
-
-        return Response({'sop_response_procedures': sop_serializer.data,'responder_scopes': responder_serializer.data,}, status=status.HTTP_200_OK)
+        return Response(sop_serializer.data, status=status.HTTP_200_OK)
