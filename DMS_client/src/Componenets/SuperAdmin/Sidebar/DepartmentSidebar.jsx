@@ -75,6 +75,7 @@ const Departmentsidebar = ({ darkMode }) => {
               overflow: "hidden", // ✅ Prevent scrollbars
               height: "50vh", // ✅ Height will grow with content
               maxHeight: "90vh", // ✅ Prevent overflow from screen
+              marginLeft:"0.2em"
             },
           }}
         >
