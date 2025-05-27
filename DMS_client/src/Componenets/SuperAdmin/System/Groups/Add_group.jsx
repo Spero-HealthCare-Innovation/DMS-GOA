@@ -597,7 +597,7 @@ function Add_group({ darkMode }) {
                 >
                   &#8249;
                 </Box>
-                <Box>{page}</Box>
+                <Box>{page}/ {Math.ceil(groups.length / rowsPerPage)}</Box>
                 <Box
                   onClick={() =>
                     page < Math.ceil(groups.length / rowsPerPage) &&

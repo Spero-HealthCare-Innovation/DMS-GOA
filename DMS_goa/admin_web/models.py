@@ -59,9 +59,9 @@ class DMS_Department(models.Model):
 
 class DMS_Group(models.Model):
     grp_id = models.AutoField(primary_key=True)
-    grp_code = models.CharField(max_length=100)
+    grp_code = models.CharField(max_length=100,null=True, blank=True)
     permission_status = models.IntegerField(null=True, blank=True)
-    grp_name = models.CharField(max_length=255)
+    grp_name = models.CharField(max_length=255,null=True, blank=True)
     dep_id = models.ForeignKey(DMS_Department, on_delete=models.CASCADE,null=True, blank=True)
     grp_is_deleted = models.BooleanField(default=False)
     grp_added_date = models.DateTimeField(auto_now=True)
@@ -112,6 +112,19 @@ class DMS_Permission(models.Model):
     per_added_by = models.CharField(max_length=255, null=True, blank=True)
     per_modified_date = models.DateTimeField(auto_now=True,null=True, blank=True)
     per_modified_by = models.CharField(max_length=255, null=True, blank=True)
+    
+
+class DMS_Disaster_Type(models.Model):
+    disaster_id = models.AutoField(primary_key=True)
+    disaster_name = models.CharField(max_length=255)
+    disaster_rng_high = models.IntegerField(null=True, blank=True)
+    disaster_rng_medium = models.IntegerField(null=True, blank=True)
+    disaster_rng_low = models.IntegerField(null=True, blank=True)
+    disaster_is_deleted = models.BooleanField(default=False)
+    disaster_added_date = models.DateTimeField(auto_now=True,null=True, blank=True)
+    disaster_added_by = models.CharField(max_length=255, null=True, blank=True)
+    disaster_modified_by = models.CharField(max_length=255, null=True, blank=True)
+    disaster_modified_date = models.DateTimeField(null=True, blank=True)
     
 
 
@@ -251,24 +264,10 @@ class DMS_WebLogin(models.Model):
 
 
 
-
-class DMS_Disaster_Type(models.Model):
-    disaster_id = models.AutoField(primary_key=True)
-    disaster_name = models.CharField(max_length=255)
-    disaster_rng_high = models.IntegerField(null=True, blank=True)
-    disaster_rng_medium = models.IntegerField(null=True, blank=True)
-    disaster_rng_low = models.IntegerField(null=True, blank=True)
-    disaster_is_deleted = models.BooleanField(default=False)
-    disaster_added_date = models.DateTimeField(auto_now=True,null=True, blank=True)
-    disaster_added_by = models.CharField(max_length=255, null=True, blank=True)
-    disaster_modified_by = models.CharField(max_length=255, null=True, blank=True)
-    disaster_modified_date = models.DateTimeField(null=True, blank=True)
-
-
-
 class DMS_Role(models.Model):
     role_id = models.AutoField(primary_key=True)
     dep_id = models.ForeignKey(DMS_Department, on_delete=models.CASCADE)
+    disaster_id = models.ForeignKey(DMS_Disaster_Type, on_delete=models.CASCADE)
     grp_id = models.ForeignKey(DMS_Group, on_delete=models.CASCADE)
     role_is_deleted = models.BooleanField(default=False)
     role_added_by = models.CharField(max_length=255, null=True, blank=True)
@@ -286,7 +285,6 @@ class Weather_alerts(models.Model):
     timezone_abbreviation = models.TextField(null=True,blank=True)
     utc_offset_seconds = models.IntegerField(null=True,blank=True)
     time = models.DateTimeField(null=True,blank=True)
-    disaster_id = models.ForeignKey(DMS_Disaster_Type, on_delete=models.CASCADE)
     temperature_2m = models.FloatField(null=True,blank=True)
     triger_status = models.IntegerField(null=True,blank=True)
     rain = models.FloatField(null=True,blank=True)
@@ -301,7 +299,6 @@ class DMS_SOP(models.Model):
     sop_id=models.AutoField(primary_key=True)
     sop_description=models.TextField(null=True,blank=True)
     alert_id=models.ForeignKey(Weather_alerts,on_delete=models.CASCADE)
-    disaster_id = models.ForeignKey(DMS_Disaster_Type, on_delete=models.CASCADE)
     sop_is_deleted = models.BooleanField(default=False)
     sop_added_by=models.CharField(max_length=255,null=True,blank=True)
     sop_added_date = models.DateTimeField(auto_now=True)

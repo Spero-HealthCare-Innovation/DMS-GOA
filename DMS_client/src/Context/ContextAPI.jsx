@@ -25,13 +25,7 @@ export const AuthProvider = ({ children }) => {
   const [disasterIds, setDisasterIds] = useState([]);
   const [disaster, setdisaster] = useState([]);
   const [selectedDisasterId, setSelectedDisasterIds] = useState("");
-  const [formValues, setFormValues] = useState({
-    dep_name: "",
-    dis_id: "",
-    state_id: "",
-    tah_id: "",
-    cit_id: "",
-  });
+ 
 
   const port = import.meta.env.VITE_APP_API_KEY;
   const token = localStorage.getItem("access_token");
@@ -218,9 +212,6 @@ export const AuthProvider = ({ children }) => {
         Tehsils,
         Citys,
         departments,
-        disasterIds,
-        formValues,
-        disaster,
         selectedStateId,
         selectedDistrictId,
         selectedTehsilId,
@@ -229,8 +220,7 @@ export const AuthProvider = ({ children }) => {
         setSelectedDistrictId,
         setSelectedTehsilId,
         setSelectedCityId,
-        setSelectedDisasterIds,
-        setFormValues,
+        
         loading,
         error,
         newToken,

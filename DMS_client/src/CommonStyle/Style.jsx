@@ -149,7 +149,7 @@ export const fontsTableHeading = {
   fontSize: 14,
   letterSpacing: 0,
   textAlign: "center",
-  color: textColor,
+  color: "black",
 };
 
 export const textfieldInputFonts = {
