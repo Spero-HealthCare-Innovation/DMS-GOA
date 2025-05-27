@@ -550,13 +550,13 @@ async def websocket_endpoint(websocket: WebSocket):
 
 @app.websocket("/ws/weather_alerts_trigger2")
 async def websocket_trigger2(websocket: WebSocket):
-    token = websocket.query_params.get("token")
-    print("tokennnnnnn----", token)
-    user = get_user_from_token(token)
-    print("user-----", user)
-    if not user:
-        await websocket.close(code=1008)
-        return
+    # token = websocket.query_params.get("token")
+    # print("tokennnnnnn----", token)
+    # user = get_user_from_token(token)
+    # print("user-----", user)
+    # if not user:
+    #     await websocket.close(code=1008)
+    #     return
     
     await websocket.accept()
     connected_clients_trigger2.add(websocket)
