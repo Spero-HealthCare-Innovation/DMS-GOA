@@ -571,10 +571,14 @@ class DMS_Disaster_Type_Idwise_Get_API(APIView):
     
 
 class DMS_Alert_idwise_get_api(APIView):
+    permission_classes = [IsAuthenticated]
+
     def get(self,request):
+        print("request user-- ",request.user)
         alert_id = request.GET.get('id')
         alert_obj = Weather_alerts.objects.get(pk_id=alert_id)
         alert_obj.triger_status = 2
+        alert_obj.modified_by = str(request.user)
         alert_obj.save()
         serializers = WeatherAlertSerializer(alert_obj,many=False)
         return Response(serializers.data,status=status.HTTP_200_OK)
