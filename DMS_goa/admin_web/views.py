@@ -134,7 +134,7 @@ class DMS_Employee_post_api(APIView):
 class DMS_Employee_put_api(APIView):
     def get(self, request, emp_id):
         snippet = DMS_Employee.objects.filter(emp_id=emp_id,emp_is_deleted=False)
-        serializers = DMS_Employee_serializer(snippet, many=True)
+        serializers = DMS_Employee_GET_serializer(snippet, many=True)
         return Response(serializers.data)
 
     def put(self, request, emp_id):
@@ -395,7 +395,7 @@ class CombinedAPIView(APIView):
 class DMS_Group_put_api(APIView):
     def get(self, request, grp_id):
         snippet = DMS_Group.objects.filter(grp_id=grp_id,grp_is_deleted=False)
-        serializers = DMS_Group_serializer(snippet, many=True)
+        serializers = DMS_Group_Serializer(snippet, many=True)
         return Response(serializers.data)
 
     def put(self, request, grp_id):
@@ -600,9 +600,6 @@ class DMS_Comments_Post_api(APIView):
 class alerts_get_api(APIView):
     def get(self, request, alert_id):
         sop_responses = DMS_SOP.objects.filter(alert_id=alert_id)
-        responder_scopes = DMS_Notify.objects.filter(alert_id=alert_id)
-        
         sop_serializer = Sop_Response_Procedure_Serializer(sop_responses, many=True)
-        responder_serializer = Responder_Scope_Serializer(responder_scopes, many=True)
 
-        return Response({'sop_response_procedures': sop_serializer.data,'responder_scopes': responder_serializer.data,}, status=status.HTTP_200_OK)
+        return Response(sop_serializer.data, status=status.HTTP_200_OK)
