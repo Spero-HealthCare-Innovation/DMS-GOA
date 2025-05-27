@@ -100,6 +100,132 @@ const Navbar = ({ darkMode, toggleDarkMode }) => {
   }
 };
 
+//auto logout for browser and tab close
+
+// First useEffect remains the same 
+useEffect(() => {
+  const handleBeforeUnload = () => {
+    sessionStorage.setItem('isClosing', 'true');
+  };
+  
+  window.addEventListener('beforeunload', handleBeforeUnload);
+  
+  return () => {
+    window.removeEventListener('beforeunload', handleBeforeUnload);
+  };
+}, []);
+
+// Modified second useEffect with cache clearing functionality
+useEffect(() => {
+  // When page loads, check if we have a 'isClosing' flag
+  const checkClosingStatus = () => {
+    const isClosing = sessionStorage.getItem('isClosing');
+    
+    if (isClosing === 'true') {
+      // Set a flag that we're in the process of checking
+      sessionStorage.setItem('isChecking', 'true');
+      // Set a timeout - this is the key part
+      // If this code runs, it means the page wasn't actually closed
+      // The browser must have refreshed
+      setTimeout(() => {
+        // Clear the closing flag since it was just a refresh
+        sessionStorage.removeItem('isClosing');
+        sessionStorage.removeItem('isChecking');
+      }, 100);
+    }
+  };
+  
+  // Check on initial page load
+  checkClosingStatus();
+  
+  // Function to clear browser cache
+  const clearBrowserCache = async () => {
+    if ('caches' in window) {
+      try {
+        // Get all cache names
+        const cacheNames = await caches.keys();
+        // Delete each cache
+        await Promise.all(
+          cacheNames.map(cacheName => caches.delete(cacheName))
+        );
+        console.log('Browser cache cleared successfully');
+      } catch (error) {
+        console.error('Error clearing browser cache:', error);
+      }
+    }
+  };
+  
+  // On page unload (either close or refresh)
+  const handlePageHide = () => {
+    const isClosing = sessionStorage.getItem('isClosing');
+    const isChecking = sessionStorage.getItem('isChecking');
+  
+    if (isClosing === 'true' && isChecking !== 'true') {
+      // This was a genuine close, not a refresh
+      const userData = localStorage.getItem('userData');
+      const token = Cookies.get('token'); //  replaced with js-cookie
+      clearBrowserCache();
+      if (!userData || !token) {
+        // Remove the token cookie
+        Cookies.remove('token'); //  remove JWT from cookie
+        // Also clean up local/session if needed
+        localStorage.removeItem('userData');
+        sessionStorage.clear();
+        // Logout / redirect
+        handleLogout({ logoutParams: { returnTo: window.location.origin } });
+      }
+    }
+  };
+  
+  
+  window.addEventListener('pagehide', handlePageHide);
+  
+  return () => {
+    window.removeEventListener('pagehide', handlePageHide);
+  };
+}, []);
+
+
+useEffect(() => {
+  // Step 1: Mark tab as "might be closing"
+  const handleBeforeUnload = () => {
+    sessionStorage.setItem('isClosing', 'true');
+  };
+
+  window.addEventListener('beforeunload', handleBeforeUnload);
+
+  // Step 2: On load, check if we were closing but didn't actually close (i.e., just refreshed)
+  const isClosing = sessionStorage.getItem('isClosing');
+  if (isClosing === 'true') {
+    // We refreshed, not closed — cancel the flag
+    sessionStorage.removeItem('isClosing');
+  }
+
+  // Step 3: Handle actual close on pagehide (when tab is really closed)
+  const handlePageHide = () => {
+    const isStillClosing = sessionStorage.getItem('isClosing');
+    if (isStillClosing === 'true') {
+      //  Actually closing — now clear auth + cache
+      Cookies.remove('token');
+      localStorage.removeItem('userData');
+      sessionStorage.clear();
+      if ('caches' in window) {
+        caches.keys().then(cacheNames => {
+          cacheNames.forEach(name => caches.delete(name));
+        });
+      }
+    }
+  };
+
+  window.addEventListener('pagehide', handlePageHide);
+
+  return () => {
+    window.removeEventListener('beforeunload', handleBeforeUnload);
+    window.removeEventListener('pagehide', handlePageHide);
+  };
+}, []);
+
+
 
 
   return (

@@ -60,6 +60,13 @@ function Add_employee({ darkMode }) {
   const [groupId, setGroupId] = useState('');
   const [showSuccessAlert, setShowSuccessAlert] = useState(false);
   const [employees, setEmployees] = useState([]);
+  const { newToken } = useAuth();
+  const effectiveToken = newToken || localStorage.getItem("access_token");
+  // 1. Add new state variables after existing useState declarations
+  const [isEditing, setIsEditing] = useState(false);
+  const [editingEmployeeId, setEditingEmployeeId] = useState(null);
+  const [showDeleteAlert, setShowDeleteAlert] = useState(false);
+  const [showUpdateAlert, setShowUpdateAlert] = useState(false);
 
 
   // Format date properly for API submission
@@ -265,67 +272,6 @@ function Add_employee({ darkMode }) {
     setSelectedEmployee(null);
   };
 
-
-
-  // POST API INTEGRATION FOR EMPLOYEE
-
-  // Form submission
-  // const handleSubmit = async () => {
-  //   if (!empName || !empContact || !empEmail || !empDOJ || !empDOB || !groupId ||
-  //     !selectedStateId || !selectedDistrictId || !selectedTehsilId || !selectedCityID) {
-  //     alert("Please fill all required fields");
-  //     return;
-  //   }
-
-  //   const payload = {
-  //     emp_username: empName,
-  //     grp_id: groupId,
-  //     emp_email: empEmail,
-  //     emp_name: empName,
-  //     emp_contact_no: empContact,
-  //     emp_doj: formatDate(empDOJ),
-  //     emp_dob: formatDate(empDOB),
-  //     emp_is_login: "0",
-  //     state_id: selectedStateId,
-  //     dist_id: selectedDistrictId,
-  //     tahsil_id: selectedTehsilId,
-  //     city_id: selectedCityID,
-  //     emp_is_deleted: "0",
-  //     emp_added_by: "1",
-  //     emp_modified_by: "1",
-  //     password: "DMS@Spero",
-  //     password2: "DMS@Spero"
-  //   };
-
-  //   try {
-  //     console.log("Sending employee data:", payload);
-  //     const res = await axios.post(`${port}/admin_web/employee_post/`, payload);
-  //     console.log("Employee Registered:", res.data);
-
-  //     setShowSuccessAlert(true);
-
-  //     // Optional: Auto-hide after 3 seconds
-  //     setTimeout(() => setShowSuccessAlert(false), 3000);
-
-  //     // Reset form after successful submission
-  //     setEmpName('');
-  //     setEmpContact('');
-  //     setEmpEmail('');
-  //     setEmpDOJ('');
-  //     setEmpDOB('');
-  //     setGroupId('');
-  //     setSelectedStateId('');
-  //     setSelectedDistrictId('');
-  //     setSelectedTehsilId('');
-  //     setSelectedCityId('');
-
-  //     // alert("Employee added successfully!");
-  //   } catch (err) {
-  //     console.error("Error creating employee:", err.response?.data || err.message);
-  //     alert("Failed to add employee. Please check the console for details.");
-  //   }
-  // };
-
   const initialEmployeeData = [
     {
       empName: "Akshata",
@@ -447,6 +393,7 @@ function Add_employee({ darkMode }) {
           fullData: emp,
         };
       });
+      console.log(`${port}/admin_web/employee_get/`);
 
       setEmployees(employeeData);
     } catch (error) {
@@ -460,6 +407,104 @@ function Add_employee({ darkMode }) {
   }, []);
 
 
+  // 6. Add handleUpdate function
+  const handleUpdate = async () => {
+    if (!empName || !empContact || !empEmail || !empDOJ || !empDOB || !groupId ||
+      !selectedStateId || !selectedDistrictId || !selectedTehsilId || !selectedCityID) {
+      alert("Please fill all required fields");
+      return;
+    }
+
+    const payload = {
+      emp_name: empName,
+      grp_id: groupId,
+      emp_email: empEmail,
+      emp_contact_no: empContact,
+      emp_doj: formatDate(empDOJ),
+      emp_dob: formatDate(empDOB),
+      state_id: selectedStateId,
+      dist_id: selectedDistrictId,
+      tahsil_id: selectedTehsilId,
+      city_id: selectedCityID,
+    };
+    
+
+    try {
+      const res = await axios.put(`${port}/admin_web/employee_put/${editingEmployeeId}/`, payload, {
+        headers: {
+          Authorization: `Bearer ${effectiveToken}`,
+        },
+      });
+
+      console.log("Employee Updated:", res.data);
+
+      // Show success message
+      setShowUpdateAlert(true);
+      setTimeout(() => setShowUpdateAlert(false), 3000);
+
+      // Reset form and editing state
+      handleCancel();
+
+      // Refresh employee list
+      await fetchEmployees();
+
+    } catch (err) {
+      console.error("Error updating employee:", err.response?.data || err.message);
+      alert("Failed to update employee. Please check the console for details.");
+    }
+  };
+
+  // 7. Add handleCancel function
+  const handleCancel = () => {
+    // Reset all form fields
+    setEmpName('');
+    setEmpContact('');
+    setEmpEmail('');
+    setEmpDOJ('');
+    setEmpDOB('');
+    setGroupId('');
+    setSelectedStateId('');
+    setSelectedDistrictId('');
+    setSelectedTehsilId('');
+    setSelectedCityId('');
+
+    // Reset editing state
+    setIsEditing(false);
+    setEditingEmployeeId(null);
+  };
+
+
+  
+// 1. Add this useEffect after your existing useEffects to handle dependent dropdowns in edit mode
+useEffect(() => {
+  if (isEditing && selectedStateId) {
+    // This will trigger district loading when state is selected in edit mode
+    console.log("State selected in edit mode:", selectedStateId);
+  }
+}, [selectedStateId, isEditing]);
+
+useEffect(() => {
+  if (isEditing && selectedDistrictId) {
+    // This will trigger tehsil loading when district is selected in edit mode
+    console.log("District selected in edit mode:", selectedDistrictId);
+  }
+}, [selectedDistrictId, isEditing]);
+
+useEffect(() => {
+  if (isEditing && selectedTehsilId) {
+    // This will trigger city loading when tehsil is selected in edit mode
+    console.log("Tehsil selected in edit mode:", selectedTehsilId);
+  }
+}, [selectedTehsilId, isEditing]);
+
+useEffect(() => {
+  if (isEditing && selectedCityID) {
+    // This will ensure city is properly selected in edit mode
+    console.log("City selected in edit mode:", selectedCityID);
+  }
+}, [selectedCityID, isEditing]);
+
+
 
   return (
     <div style={{ marginLeft: "3.5rem" }}>
@@ -468,15 +513,47 @@ function Add_employee({ darkMode }) {
         anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
         autoHideDuration={3000}
         onClose={() => setShowSuccessAlert(false)}
-      
+
       >
         <Alert
           onClose={() => setShowSuccessAlert(false)}
           severity="success"
           variant="filled"
-          sx={{ width: '100%'}}
+          sx={{ width: '100%' }}
         >
           Employee added successfully!
+        </Alert>
+      </Snackbar>
+
+      <Snackbar
+        open={showDeleteAlert}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+        autoHideDuration={3000}
+        onClose={() => setShowDeleteAlert(false)}
+      >
+        <Alert
+          onClose={() => setShowDeleteAlert(false)}
+          severity="success"
+          variant="filled"
+          sx={{ width: '100%' }}
+        >
+          Employee deleted successfully!
+        </Alert>
+      </Snackbar>
+
+      <Snackbar
+        open={showUpdateAlert}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+        autoHideDuration={3000}
+        onClose={() => setShowUpdateAlert(false)}
+      >
+        <Alert
+          onClose={() => setShowUpdateAlert(false)}
+          severity="success"
+          variant="filled"
+          sx={{ width: '100%' }}
+        >
+          Employee updated successfully!
         </Alert>
       </Snackbar>
 
@@ -496,14 +573,6 @@ function Add_employee({ darkMode }) {
         </IconButton>
 
         {/* Label */}
-        <Typography variant="h6" sx={{
-          color: labelColor,
-          fontWeight: 600,
-          fontFamily,
-          fontSize: 16,
-        }}>
-          Add Employee
-        </Typography>
 
         <TextField
           variant="outlined"
@@ -826,7 +895,7 @@ function Add_employee({ darkMode }) {
                 >
                   &#8249;
                 </Box>
-                <Box>{page}</Box>
+                <Box>{page}/ {Math.ceil(employees.length / rowsPerPage)}</Box>
                 <Box
                   onClick={() =>
                     page < Math.ceil(employees.length / rowsPerPage) &&
@@ -875,55 +944,77 @@ function Add_employee({ darkMode }) {
           <Button
             fullWidth
             variant="outlined"
-            color="warning"
-            startIcon={<EditOutlined />}
-            onClick={() => {
-              if (selectedEmployee) {
-                // Populate form with employee data
-                setEmpName(selectedEmployee.empName);
-                setEmpContact(selectedEmployee.empContact);
-                setEmpEmail(selectedEmployee.empEmail);
-                // Convert display date format back to YYYY-MM-DD for the input field
-                const dateParts = selectedEmployee.empDOJ.split('-');
-                if (dateParts.length === 3) {
-                  const formattedDate = `20${dateParts[2]}-${dateParts[1]}-${dateParts[0]}`;
-                  setEmpDOJ(formattedDate);
-                }
-                setGroupId(selectedEmployee.groupID);
-
-                // If you have the full data stored in fullData property:
-                if (selectedEmployee.fullData) {
-                  setSelectedStateId(selectedEmployee.fullData.state_id);
-                  setSelectedDistrictId(selectedEmployee.fullData.dist_id);
-                  setSelectedTehsilId(selectedEmployee.fullData.tahsil_id);
-                  setSelectedCityId(selectedEmployee.fullData.city_id);
-                  setEmpDOB(selectedEmployee.fullData.emp_dob);
-                }
-              }
-              handleClose();
-            }}
-          >
-            Edit
-          </Button>
-
-// 9. Implement the delete functionality in the Popover
-          <Button
-            fullWidth
-            variant="outlined"
             color="error"
             startIcon={<DeleteOutline />}
-            onClick={() => {
-              if (selectedEmployee) {
-                // Filter out the selected employee from the employees array
-                setEmployees(prev => prev.filter(emp =>
-                  emp.empName !== selectedEmployee.empName ||
-                  emp.empContact !== selectedEmployee.empContact));
+            onClick={async () => {
+              if (selectedEmployee && selectedEmployee.fullData) {
+                try {
+                  await axios.delete(`${port}/admin_web/employee_delete/${selectedEmployee.fullData.emp_id}/`, {
+                    headers: {
+                      Authorization: `Bearer ${effectiveToken}`,
+                    },
+                  });
+
+                  // Show success message
+                  setShowDeleteAlert(true);
+                  setTimeout(() => setShowDeleteAlert(false), 3000);
+
+                  // Refresh employee list
+                  await fetchEmployees();
+                } catch (error) {
+                  console.error("Error deleting employee:", error);
+                  alert("Failed to delete employee");
+                }
               }
               handleClose();
             }}
           >
             Delete
           </Button>
+
+   
+        <Button
+  fullWidth
+  variant="outlined"
+  color="warning"
+  startIcon={<EditOutlined />}
+  onClick={async () => {
+    if (selectedEmployee && selectedEmployee.fullData) {
+      const empData = selectedEmployee.fullData;
+
+      // First populate basic fields
+      setEmpName(empData.emp_name);
+      setEmpContact(empData.emp_contact_no);
+      setEmpEmail(empData.emp_email);
+      setEmpDOJ(empData.emp_doj);
+      setEmpDOB(empData.emp_dob);
+      setGroupId(empData.grp_id);
+
+      // Set editing mode first
+      setIsEditing(true);
+      setEditingEmployeeId(empData.emp_id);
+
+      // Then set location IDs in sequence to trigger dependent loading
+      setSelectedStateId(empData.state_id);
+      
+      // Use setTimeout to ensure state is set before setting district
+      setTimeout(() => {
+        setSelectedDistrictId(empData.dist_id);
+      }, 100);
+      
+      setTimeout(() => {
+        setSelectedTehsilId(empData.tahsil_id);
+      }, 200);
+      
+      setTimeout(() => {
+        setSelectedCityId(empData.city_id);
+      }, 300);
+    }
+    handleClose();
+  }}
+>
+  Edit
+</Button>
         </Popover>
 
         <Grid item xs={12} md={4.9}>
@@ -935,12 +1026,11 @@ function Add_employee({ darkMode }) {
                 color: labelColor,
                 fontWeight: 600,
                 fontSize: 16,
-
                 mb: 2,
                 fontFamily,
               }}
             >
-              Add Employee
+              {isEditing ? "Edit Employee" : "Add Employee"}
             </Typography>
 
             <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
@@ -1113,11 +1203,16 @@ function Add_employee({ darkMode }) {
 
             </Box>
 
-            <Box sx={{ display: 'flex', justifyContent: 'center', mt: 3, mb: 1 }}>
-              <Button
-                variant="contained"
-                onClick={handleSubmit}
-                sx={{
+            
+
+              <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, mt: 3, mb: 1 }}>
+                {isEditing ? (
+                  <>
+                    <Button
+                  variant="contained"
+                  onClick={handleUpdate}
+                  disabled={loading}
+                  sx={{
                   mt: 2,
                   width: "40%",
                   backgroundColor: "#00f0c0",
@@ -1129,9 +1224,51 @@ function Add_employee({ darkMode }) {
                     color: "white !important",
                   },
                 }}
-              >Submit
-              </Button>
-            </Box>
+                  >
+                   Update
+                    </Button>
+                    <Button
+                      variant="outlined"
+                      onClick={handleCancel}
+                      disabled={loading}
+                  sx={{
+                  mt: 2,
+                  width: "40%",
+                  // backgroundColor: "#00f0c0",
+                  color: "white",
+                  fontWeight: "bold",
+                  borderRadius: "12px",
+                  "&:hover": {
+                    backgroundColor: bgColor,
+                    color: "white !important",
+                  },
+                }}
+                    >
+                      Cancel
+                    </Button>
+                  </>
+                ) : (
+                  <Button
+                  variant="contained"
+                  onClick={handleSubmit}
+                  disabled={loading}
+                  sx={{
+                  mt: 2,
+                     width: "40%",
+                  backgroundColor: "#00f0c0",
+                  color: "black",
+                  fontWeight: "bold",
+                  borderRadius: "12px",
+                  "&:hover": {
+                    backgroundColor: bgColor,
+                    color: "white !important",
+                  },
+                }}
+                  >
+                    Submit
+                  </Button>
+                )}
+              </Box>
 
           </Paper>
 
