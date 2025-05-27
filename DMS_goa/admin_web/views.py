@@ -598,8 +598,7 @@ class DMS_Comments_Post_api(APIView):
         return Response(serializers.errors,status=status.HTTP_400_BAD_REQUEST)
 
 class alerts_get_api(APIView):
-    def get(self, request, alert_id):
-        sop_responses = DMS_SOP.objects.filter(alert_id=alert_id)
+    def get(self, request, disaster_id):
+        sop_responses = DMS_SOP.objects.filter(disaster_id=disaster_id)
         sop_serializer = Sop_Response_Procedure_Serializer(sop_responses, many=True)
-
         return Response(sop_serializer.data, status=status.HTTP_200_OK)
