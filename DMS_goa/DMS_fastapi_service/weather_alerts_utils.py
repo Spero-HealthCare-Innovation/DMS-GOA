@@ -1,6 +1,7 @@
 # ------------------------------Nikita---------------------------------------
 from asgiref.sync import sync_to_async
-from admin_web.models import Weather_alerts
+from admin_web.models import Weather_alerts, DMS_Disaster_Type
+from asgiref.sync import sync_to_async
 import logging
 import asyncio
 import asyncpg
@@ -62,15 +63,30 @@ async def pg_listener(conn, pid, channel, payload):
             connected_clients.remove(ws)
 
 
+@sync_to_async
+def get_disaster_name(disaster_id):
+    try:
+        disaster_obj = DMS_Disaster_Type.objects.get(disaster_id=disaster_id)
+        return disaster_obj.disaster_name
+    except DMS_Disaster_Type.DoesNotExist:
+        return None
+
+
 
 async def on_notify(conn, pid, channel, payload):
     # print("New payload:", payload)
 
     data = json.loads(payload)
+
+    disaster_name = await get_disaster_name(data['disaster_id_id'])
+    data['disaster_name'] = disaster_name
+    print("Updated payload:", data)
+
     # Broadcast to all clients (if you want old behavior)
     for ws in connected_clients.copy():
         try:
-            await ws.send_text(payload)
+            # await ws.send_text(payload)
+            await ws.send_text(json.dumps(data))
         except Exception as e:
             print(f"Error sending to client: {e}")
             connected_clients.discard(ws)
@@ -79,7 +95,8 @@ async def on_notify(conn, pid, channel, payload):
     if data.get("triger_status") == 2:
         for ws in connected_clients_trigger2.copy():
             try:
-                await ws.send_text(payload)
+                # await ws.send_text(payload)
+                await ws.send_text(json.dumps(data))
             except Exception as e:
                 print(f"Error sending to trigger2 client: {e}")
                 connected_clients_trigger2.discard(ws)
