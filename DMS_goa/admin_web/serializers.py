@@ -333,6 +333,7 @@ class manual_Comments_Serializer(serializers.ModelSerializer):
         fields = ['comments','comm_added_by','comm_modified_by','incident_id'] 
         
 class Responder_Scope_Serializer(serializers.ModelSerializer):
+    responder_name = serializers.CharField(source='res_id.responder_name', read_only=True)
     class Meta:
         model = DMS_Disaster_Responder
-        fields = ['pk_id','res_id']
+        fields = ['pk_id','res_id','responder_name']

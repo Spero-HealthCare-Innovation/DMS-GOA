@@ -3,6 +3,7 @@ import { lazy, Suspense } from "react";
 import { CircularProgress, Box } from "@mui/material";
 import PrivateRoute from "./PrivateRoute";
 import Incident from "../Componenets/DispatchModule/IncidentCreate/Incident";
+import SopRegister from "../Componenets/SuperAdmin/SOP/SopRegister";
 
 // Lazy-loaded components
 const Login = lazy(() => import("../Componenets/Login/Login"));
@@ -96,6 +97,14 @@ const AppRoutes = ({ darkMode, setIsLoggedIn }) => {
           element={
             <PrivateRoute>
               <Incident darkMode={darkMode} />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/register sop"
+          element={
+            <PrivateRoute>
+              <SopRegister darkMode={darkMode} />
             </PrivateRoute>
           }
         />
