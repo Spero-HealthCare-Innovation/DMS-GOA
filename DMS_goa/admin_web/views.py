@@ -606,3 +606,48 @@ class alerts_get_api(APIView):
         sop_responses = DMS_SOP.objects.filter(disaster_id=disaster_id)
         sop_serializer = Sop_Response_Procedure_Serializer(sop_responses, many=True)
         return Response(sop_serializer.data, status=status.HTTP_200_OK)
+    
+    
+
+class Manual_Call_Incident_api(APIView):
+    def post(self, request, *args, **kwargs):
+        data = request.data
+
+        incident_fields = ['inc_type', 'disaster_type', 'alert_type', 'location', 'summary', 'responder_scope', 'latitude', 'longitude','caller_id', 'inc_added_by', 'inc_modified_by']
+        caller_fields = ['caller_no', 'caller_name', 'caller_added_by', 'caller_modified_by']
+        comments_fields = ['comments', 'comm_added_by', 'comm_modified_by']
+
+        incident_data = {field: data.get(field) for field in incident_fields}
+        caller_data = {field: data.get(field) for field in caller_fields}
+        comments_data = {field: data.get(field) for field in comments_fields}
+
+        caller_serializer = Manual_call_data_Serializer(data=caller_data)
+        if not caller_serializer.is_valid():
+            return Response({"caller_errors": caller_serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+
+        caller_instance = caller_serializer.save()  
+
+        incident_data['caller_id'] = caller_instance.pk
+
+        incident_serializer = Manual_call_incident_dispatch_Serializer(data=incident_data)
+        if not incident_serializer.is_valid():
+            return Response({"incident_errors": incident_serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+
+        incident_instance = incident_serializer.save() 
+
+        comments_data['incident_id'] = incident_instance.pk
+        comments_serializer = manual_Comments_Serializer(data=comments_data)
+
+        if comments_serializer.is_valid():
+            comments_serializer.save()
+        else:
+            return Response({"comments_errors": comments_serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+
+        return Response({
+            "message": "Manual call, caller, and comment data created successfully.",
+            "incident": incident_serializer.data,
+            "caller": caller_serializer.data,
+            "comments": comments_serializer.data
+        }, status=status.HTTP_201_CREATED)
+
+
