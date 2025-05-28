@@ -98,13 +98,15 @@ class DMS_Employee_GET_serializer(serializers.ModelSerializer):
     dis_name = serializers.SerializerMethodField()
     tah_name = serializers.SerializerMethodField()
     cit_name = serializers.SerializerMethodField()
+    grp_name = serializers.SerializerMethodField()
+    
 
     class Meta:
         model = DMS_Employee
         fields = [
             'emp_id', 'emp_username', 'grp_id', 'emp_name', 'emp_email',
             'emp_contact_no', 'emp_dob', 'emp_doj', 'emp_is_login',
-            'state_id', 'state_name', 'dist_id','dis_name','tahsil_id','tah_name','city_id','cit_name',
+            'state_id', 'state_name', 'dist_id','dis_name','tahsil_id','tah_name','city_id','cit_name','grp_name',
             'emp_is_deleted', 'emp_added_by', 'emp_modified_by', 'password'
         ]
 
@@ -130,6 +132,12 @@ class DMS_Employee_GET_serializer(serializers.ModelSerializer):
         try:
             return DMS_City.objects.get(cit_id=obj.city_id).cit_name
         except (DMS_City.DoesNotExist, ValueError, TypeError):
+            return None
+        
+    def get_grp_name(self, obj):
+        try:
+            return DMS_Group.objects.get(grp_id=obj.grp_id).grp_name
+        except (DMS_Group.DoesNotExist, ValueError, TypeError):
             return None
         
     
@@ -307,3 +315,25 @@ class Alert_Type_Serializer(serializers.ModelSerializer):
     class Meta:
         model = DMS_Alert_Type
         fields = ['alert_name']
+        
+
+class Manual_call_incident_dispatch_Serializer(serializers.ModelSerializer):
+    class Meta:
+        model = DMS_Incident
+        fields = ['inc_type','disaster_type','alert_type','location','summary','responder_scope','latitude','longitude','caller_id','inc_added_by','inc_modified_by']
+
+class Manual_call_data_Serializer(serializers.ModelSerializer):
+    class Meta:
+        model = DMS_Caller
+        fields = ['caller_no','caller_name','caller_added_by','caller_modified_by']
+        
+class manual_Comments_Serializer(serializers.ModelSerializer):
+    class Meta:
+        model = DMS_Comments
+        fields = ['comments','comm_added_by','comm_modified_by','incident_id'] 
+        
+class Responder_Scope_Serializer(serializers.ModelSerializer):
+    responder_name = serializers.CharField(source='res_id.responder_name', read_only=True)
+    class Meta:
+        model = DMS_Disaster_Responder
+        fields = ['pk_id','res_id','responder_name']
