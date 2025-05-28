@@ -421,7 +421,7 @@ class DMS_Notify(models.Model):
     not_added_date = models.DateTimeField(auto_now=True)
     not_modified_by = models.CharField(max_length=255, null=True, blank=True)
     not_modified_date = models.DateTimeField(auto_now=True,null=True, blank=True)
-
+    
 
 class DMS_Responder(models.Model):
     responder_id = models.AutoField(primary_key=True)
@@ -431,4 +431,17 @@ class DMS_Responder(models.Model):
     responder_added_by = models.CharField(max_length=255, null=True, blank=True)
     responder_modified_by = models.CharField(max_length=255, null=True, blank=True)
     responder_modified_date = models.DateTimeField(null=True, blank=True)
+    
+    
+class DMS_Disaster_Responder(models.Model):
+    pk_id = models.AutoField(primary_key=True)
+    res_id = models.ForeignKey(DMS_Responder,on_delete=models.CASCADE,null=True, blank=True)
+    dis_id = models.ForeignKey(DMS_Disaster_Type,on_delete=models.CASCADE,null=True, blank=True)
+    dr_is_deleted = models.BooleanField(default=False)
+    dr_added_date = models.DateTimeField(auto_now=True,null=True, blank=True)
+    dr_added_by = models.CharField(max_length=255, null=True, blank=True)
+    dr_modified_by = models.CharField(max_length=255, null=True, blank=True)
+    dr_modified_date = models.DateTimeField(null=True, blank=True)
+    
+    
     
