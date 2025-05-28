@@ -156,7 +156,7 @@ AUTH_USER_MODEL = 'admin_web.DMS_Employee'
 
 SIMPLE_JWT = {
     # "ACCESS_TOKEN_LIFETIME": timedelta(minutes=5),
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=50),  # Short-lived access token
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=500),  # Short-lived access token
     'REFRESH_TOKEN_LIFETIME': timedelta(days=2), # Long-lived refresh token
 
 
