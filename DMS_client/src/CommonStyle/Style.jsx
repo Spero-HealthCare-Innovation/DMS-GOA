@@ -58,10 +58,10 @@ export const TableDataCardBody = styled("tr")(({ theme, status }) => ({
   height: "45px",
   "&:hover": {
     boxShadow: `0 0 8px ${status === "Completed"
-        ? "#00e67699"
-        : status === "Pending"
-          ? "#f4433699"
-          : "#88888855"
+      ? "#00e67699"
+      : status === "Pending"
+        ? "#f4433699"
+        : "#88888855"
       }`,
   },
 }));
@@ -112,7 +112,7 @@ export const CustomTextField = {
 export const inputStyle = {
   height: "3rem",
   "& .MuiInputBase-input": {
-    color: `${textColor} !important`,
+    color: `#9e9e9e !important`,
   },
   "& .MuiInputBase-root": {
     height: "100%",
@@ -181,13 +181,13 @@ export const getCustomSelectStyles = (isDarkMode) => {
     "& .MuiSelect-select": {
       color: "#C0C0C0",
       fontSize: "13px",
-       fontFamily: "Roboto",
+      fontFamily: "Roboto",
     },
-       '& input': {
-      fontSize: '12px', 
-        color: '#C0C0C0',
-         fontFamily: "Roboto",
-     
+    '& input': {
+      fontSize: '12px',
+      color: '#C0C0C0',
+      fontFamily: "Roboto",
+
     },
     "& .MuiSelect-displayEmpty": {
       color: placeholderColor,
@@ -200,10 +200,45 @@ export const getCustomSelectStyles = (isDarkMode) => {
       padding: "0 12px",
       display: "flex",
       alignItems: "center",
-      color:"grey"
+      color: "grey"
     },
     "& fieldset": {
       border: "none",
     },
   };
 };
+
+export const EnquiryCardBody = styled("tr")(({ theme, status }) => ({
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "space-between",
+  background: theme.palette.mode === "dark" ? "#112240" : "#fff",
+  color: theme.palette.mode === "dark" ? "#fff" : "#000",
+  marginTop: "0.5em",
+  borderRadius: "8px",
+  padding: "10px 12px",
+  transition: "all 0.3s ease",
+  cursor: "pointer",
+  "&:hover": {
+    boxShadow: `0 0 8px ${status === "Completed"
+      ? "#00e67699"
+      : status === "Pending"
+        ? "#f4433699"
+        : "#88888855"
+      }`,
+  },
+  height: "45px",
+}));
+
+export const EnquiryCard = styled("div")(() => ({
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "space-between",
+  background: "#5FECC8",
+  borderRadius: "8px 10px 0 0",
+  padding: "6px 12px",
+  color: "black",
+  height: "40px",
+}));
+
+
