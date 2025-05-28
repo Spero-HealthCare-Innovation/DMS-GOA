@@ -50,6 +50,7 @@ class DMS_Department(models.Model):
     dis_id = models.ForeignKey(DMS_District, on_delete=models.CASCADE)
     tah_id = models.ForeignKey(DMS_Tahsil, on_delete=models.CASCADE)
     cit_id = models.ForeignKey(DMS_City, on_delete=models.CASCADE)
+    disaster_id = models.ForeignKey('DMS_Disaster_Type', on_delete=models.CASCADE)
     dep_is_deleted = models.BooleanField(default=False)
     dep_added_by = models.CharField(max_length=255, null=True, blank=True)
     dep_added_date = models.DateTimeField(auto_now=True)
