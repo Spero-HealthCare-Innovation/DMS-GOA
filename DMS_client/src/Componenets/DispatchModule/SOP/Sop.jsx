@@ -6,23 +6,23 @@ import { useEffect, useState } from "react";
 
 function Sop({ darkMode, setDarkMode }) {
   // initStorageLogoutSync.js
-  window.addEventListener('storage', (e) => {
-    if (e.key === 'logout') {
-      location.href = '/login';
+  window.addEventListener("storage", (e) => {
+    if (e.key === "logout") {
+      location.href = "/login";
     }
-  });;
+  });
 
   useEffect(() => {
     document.title = "DMS|Sop";
   }, []);
   const location = useLocation();
   const flagFromState = location?.state?.triggerStatus ?? 0;
-  console.log(flagFromState, 'flagFromState');
+  console.log(flagFromState, "flagFromState");
 
   const [flag, setFlag] = useState(flagFromState);
   const [selectedIncident, setSelectedIncident] = useState(null);
 
-  console.log(selectedIncident, 'selectedIncident');
+  console.log(selectedIncident, "selectedIncident");
 
   return (
     <Box
@@ -35,11 +35,10 @@ function Sop({ darkMode, setDarkMode }) {
         backgroundColor: darkMode ? "#0a1929" : "#f5f5f5",
         minHeight: "100vh",
         transition: "background-color 0.5s ease-in-out, color 0.5s ease-in-out",
-
       }}
     >
       <Grid container spacing={2}>
-        <Grid item xs={12} >
+        <Grid item xs={12}>
           <SopTask
             darkMode={darkMode}
             setDarkMode={setDarkMode}
