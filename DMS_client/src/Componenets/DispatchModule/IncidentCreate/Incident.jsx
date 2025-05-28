@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useState } from 'react';
 import {
     Box,
     Grid,
@@ -13,7 +13,6 @@ import {
 } from "@mui/material";
 import { useAuth } from "../../../Context/ContextAPI";
 import IncidentCreateMap from "./IncidentCreateMap";
-
 
 const inputStyle = {
     mb: 2,
@@ -33,17 +32,18 @@ const Incident = ({ darkMode }) => {
     const handleEmergencyChange = (event) => {
         setSelectedEmergencyValue(event.target.value);
     };
+
     return (
-        <Box sx={{ minHeight: "100vh", backgroundColor: darkMode ? "#0a1929" : "#f5f5f5", px: 2, py: 3 }}>
+        <Box sx={{ minHeight: "100vh", backgroundColor: darkMode ? "#0a1929" : "#f5f5f5", px: 2, py: 2 }}>
             <Grid container spacing={2}>
                 <Grid item xs={12} md={8}>
                     <Grid container spacing={2}>
                         <Grid item xs={12} md={8}>
-                            <Paper elevation={3} sx={{ ...inputStyle, p: 3, borderRadius: 3, backgroundColor: bgColor, height: "100%" }}>
+                            <Paper elevation={3} sx={{ ...inputStyle, p: 2, borderRadius: 3, backgroundColor: bgColor, height: "100%" }}>
                                 <Typography variant="h6" gutterBottom>
                                     Create Incident
                                 </Typography>
-                                <Grid container spacing={2}>
+                                <Grid container spacing={1}>
                                     <Grid item xs={12} sm={6}>
                                         <TextField select fullWidth size="small" label="Incident Type" variant="outlined" sx={inputStyle}
                                             value={selectedEmergencyValue}
@@ -68,18 +68,15 @@ const Incident = ({ darkMode }) => {
                                         </TextField>
                                     </Grid>
                                     <Grid item xs={12} sm={6}>
+                                        <TextField fullWidth size="small" label="Caller Number" variant="outlined" sx={inputStyle} />
+                                    </Grid>
+                                    <Grid item xs={12} sm={6}>
                                         <TextField fullWidth size="small" label="Caller Name" variant="outlined" sx={inputStyle} />
-                                    </Grid>
-                                    <Grid item xs={12} sm={6}>
-                                        <TextField fullWidth size="small" label="Contact Number" variant="outlined" sx={inputStyle} />
-                                    </Grid>
-                                    <Grid item xs={12} sm={6}>
-                                        <TextField fullWidth size="small" label="Date & Time" type="datetime-local" InputLabelProps={{ shrink: true }} variant="outlined" sx={inputStyle} />
                                     </Grid>
                                     <Grid item xs={12} sm={6}>
                                         <TextField fullWidth size="small" label="Location" variant="outlined" sx={inputStyle} />
                                     </Grid>
-                                    <Grid item xs={12} sm={6}>
+                                    <Grid item xs={12} sm={12}>
                                         <TextField
                                             fullWidth size="small"
                                             label="Summary"
@@ -93,7 +90,7 @@ const Incident = ({ darkMode }) => {
                         </Grid>
 
                         <Grid item xs={12} md={4}>
-                            <Paper elevation={3} sx={{ ...inputStyle, p: 2, borderRadius: 3, backgroundColor: bgColor, height: "100%" }}>
+                            <Paper elevation={3} sx={{ ...inputStyle, p: 2, color: labelColor, borderRadius: 3, backgroundColor: bgColor, height: "100%" }}>
                                 <Typography variant="h6">Comments</Typography>
                                 <TextField
                                     fullWidth size="small"
@@ -210,8 +207,32 @@ const Incident = ({ darkMode }) => {
                                         </Grid>
                                     </Grid>
                                 </Paper>
+
+                                <Grid
+                                    item
+                                    xs={12}
+                                    md={9}
+                                    sx={{ marginLeft: '6em' }}
+                                >
+                                    <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+                                        <Button
+                                            variant="contained"
+                                            sx={{
+                                                mb: '3em',
+                                                width: "30%",
+                                                backgroundColor: "white",
+                                                color: "black",
+                                                fontWeight: "bold",
+                                                borderRadius: "12px",
+                                            }}
+                                        >
+                                            Submit
+                                        </Button>
+                                    </Box>
+                                </Grid>
                             </Grid>
                         )}
+
                     </Grid>
                 </Grid>
 
