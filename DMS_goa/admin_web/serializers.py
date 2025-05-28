@@ -337,3 +337,8 @@ class manual_Comments_Serializer(serializers.ModelSerializer):
     class Meta:
         model = DMS_Comments
         fields = ['comments','comm_added_by','comm_modified_by','incident_id'] 
+        
+class Responder_Scope_Serializer(serializers.ModelSerializer):
+    class Meta:
+        model = DMS_Disaster_Responder
+        fields = ['pk_id','res_id']

@@ -681,3 +681,9 @@ class Manual_Call_Incident_api(APIView):
         }, status=status.HTTP_201_CREATED)
 
 
+
+class Responder_Scope_Get_api(APIView):
+    def get(self,request,dis_id):
+        snippet = DMS_Disaster_Responder.objects.filter(dr_is_deleted=False,dis_id=dis_id)
+        serializers = Responder_Scope_Serializer(snippet,many=True)
+        return Response(serializers.data,status=status.HTTP_200_OK)
