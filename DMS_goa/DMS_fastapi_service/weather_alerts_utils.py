@@ -111,8 +111,12 @@ async def listen_to_postgres():
             print("Listening to PostgreSQL channel...")
 
             while True:
-                # await asyncio.sleep(1)
-                await asyncio.sleep(60)
+                try:
+                    await conn.execute("SELECT 1")  # Ping to keep alive
+                    await asyncio.sleep(60)
+                except (asyncpg.PostgresConnectionError, ConnectionResetError) as inner_error:
+                    print(f"⚠️ Inner loop connection lost: {inner_error}")
+                    break  # break inner loop to reconnect
 
         except Exception as e:
             print(f"PostgreSQL listen error: {e}")
