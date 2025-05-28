@@ -61,10 +61,17 @@ from rest_framework_simplejwt.exceptions import TokenError
 
 
 def get_user_from_token(token: str):
+    print("get_user_from_token*******")
     try:
+        print("in try block")
         access_token = AccessToken(token)  # This checks signature and expiration
+        print("access_token*******")
         user_id = access_token["user_id"]  # Or "emp_id" if you've added it
-        return DMS_Employee.objects.get(id=user_id)
+        print("access_token, user_id------ ",access_token, user_id)
+        print(type(user_id))
+        # dms_emp_obj = DMS_Employee.objects.get(emp_id='4')
+        # print("dms_emp_obj-- ", dms_emp_obj)
+        return user_id
     except (TokenError, DMS_Employee.DoesNotExist):
         return None
 
@@ -318,38 +325,8 @@ async def startup_event():
 
 
 
-# -----------------------------------------NIKITA------------------------------------------------------
 # -----------------------------------------Nikita----------------------------------------------
 
-# from fastapi import FastAPI, WebSocket, WebSocketDisconnect
-# import json
-# from django_setup import *
-# from asgiref.sync import sync_to_async
-# from admin_web.models import Weather_alerts  # Django model
-# from weather_alerts_utils import get_old_weather_alerts, listen_to_postgres, connected_clients, connected_clients_trigger2
-# from contextlib import asynccontextmanager
-# from starlette.applications import Starlette
-# from starlette.routing import WebSocketRoute
-# from starlette.websockets import WebSocket
-# import asyncio
-# ------------------------------------###Nikita###--------------------------------------
-
-# @asynccontextmanager
-# async def lifespan(app: FastAPI):
-#     # Called on startup
-#     task = asyncio.create_task(listen_to_postgres())
-
-#     yield  # Application runs here
-
-#     # Called on shutdown
-#     task.cancel()
-#     try:
-#         await task
-#     except asyncio.CancelledError:
-#         pass
-
-
-# app = FastAPI(lifespan=lifespan)
 
 @app.websocket("/ws/weather_alerts")
 async def websocket_endpoint(websocket: WebSocket):
@@ -416,145 +393,26 @@ async def websocket_endpoint(websocket: WebSocket):
         background_task.cancel()  # Stop the background polling
 
 
+from asgiref.sync import sync_to_async
 
-
-
-
-
-
-
-
-
-
-
-# @app.websocket("/ws/weather_alerts")
-# async def websocket_endpoint(websocket: WebSocket):
-#     await websocket.accept()
-#     connected_clients_trigger2.add(websocket)
-#     print(f"WebSocket connected: {websocket.client}")
-
-#     last_sent_pk = 0  # Keep track of the last pk_id sent to this client
-
-#     try:
-#         # Send old messages on connect
-#         old_messages = await get_old_weather_alerts()
-#         for msg in old_messages:
-#             await websocket.send_text(json.dumps(msg))
-#             await asyncio.sleep(0.05)
-
-#         # Get latest pk_id after old messages
-#         if old_messages:
-#             last_sent_pk = max(msg["pk_id"] for msg in old_messages if "pk_id" in msg)
-
-#         # Background task to check for new entries
-#         async def send_new_alerts():
-#             nonlocal last_sent_pk
-#             while True:
-#                 try:
-#                     new_alerts = await sync_to_async(list)(
-#                         Weather_alerts.objects.filter(pk_id__gt=last_sent_pk)
-#                         .order_by("pk_id")
-#                         .values("pk_id", "latitude", "longitude", "elevation", "time", 
-#                                 "temperature_2m", "rain", "precipitation", 
-#                                 "weather_code", "triger_status")
-#                     )
-
-#                     for alert in new_alerts:
-#                         if alert["time"]:
-#                             alert["time"] = alert["time"].isoformat()
-#                         await websocket.send_text(json.dumps({"type": "new_alert", "data": alert}))
-#                         last_sent_pk = max(last_sent_pk, alert["pk_id"])
-#                         await asyncio.sleep(0.05)
-
-#                     await asyncio.sleep(5)  # Check for new data every 5 seconds
-#                 except Exception as e:
-#                     print(f"Error in background task: {e}")
-#                     break
-
-#         # Start the background task
-#         background_task = asyncio.create_task(send_new_alerts())
-
-#         # Keep the connection alive (optional: handle incoming messages)
-#         while True:
-#             try:
-#                 msg = await asyncio.wait_for(websocket.receive_text(), timeout=30.0)
-#                 print(f"Received message from client: {msg}")
-#             except asyncio.TimeoutError:
-#                 pass  # Just keep alive
-
-#     except WebSocketDisconnect:
-#         print(f"WebSocket disconnected by client: {websocket.client}")
-#     except Exception as e:
-#         print(f"WebSocket error: {e}")
-#     finally:
-#         connected_clients_trigger2.remove(websocket)
-#         print(f"WebSocket removed: {websocket.client}")
-#         background_task.cancel()  # Stop the background polling
-
-
-
-
-
-
-
-
-
-
-
-# connected_clients_weather_alerts= set()
-# @app.websocket("/ws/weather_alerts")
-# async def websocket_endpoint(websocket: WebSocket):
-#     await websocket.accept()
-#     connected_clients_trigger2.add(websocket)  # Add client to global set
-#     print(f"WebSocket connected: {websocket.client}")
-
-#     try:
-#         # Send old messages once on connect
-#         old_messages = await get_old_weather_alerts()
-#         for msg in old_messages:
-#             await websocket.send_text(json.dumps(msg))
-#             await asyncio.sleep(0.05)
-
-#         # Send current data once on connect
-#         alerts = await sync_to_async(list)(Weather_alerts.objects.all().values(
-#             "pk_id", "latitude", "longitude", "elevation", "time", "temperature_2m",
-#             "rain", "precipitation", "weather_code", "triger_status"
-#         ).order_by('pk_id'))
-#         for alert in alerts:
-#             if alert["time"]:
-#                 alert["time"] = alert["time"].isoformat()
-#         # await websocket.send_text(json.dumps({"type": "all_alerts", "data": alerts}))
-
-#         # Keep the connection alive to receive messages (if any)
-#         while True:
-#             # Wait for any message from client or just keep alive
-#             try:
-#                 msg = await asyncio.wait_for(websocket.receive_text(), timeout=30.0)
-#                 print(f"Received message from client: {msg}")
-#             except asyncio.TimeoutError:
-#                 # No message received in 30 seconds, send heartbeat to keep connection alive
-#                 # await websocket.send_text(json.dumps({"type": "heartbeat"}))
-#                 pass
-
-#     except WebSocketDisconnect:
-#         print(f"WebSocket disconnected by client: {websocket.client}")
-
-#     except Exception as e:
-#         print(f"WebSocket error: {e}")
-
-#     finally:
-#         connected_clients_trigger2.remove(websocket)
-#         print(f"WebSocket removed: {websocket.client}")
+# Wrap ORM in async-safe way
+@sync_to_async
+def get_user_by_emp_id(emp_id):
+    return DMS_Employee.objects.get(emp_id=emp_id)
 
 
 
 @app.websocket("/ws/weather_alerts_trigger2")
 async def websocket_trigger2(websocket: WebSocket):
+    # user_exist = 0
     # token = websocket.query_params.get("token")
     # print("tokennnnnnn----", token)
-    # user = get_user_from_token(token)
-    # print("user-----", user)
-    # if not user:
+    # user_id = get_user_from_token(token)
+    # user_obj = await get_user_by_emp_id(user_id)
+    # user_exist = user_obj.emp_id
+    # print("user obj-----", user_obj.emp_id)
+    
+    # if user_exist == 0:
     #     await websocket.close(code=1008)
     #     return
     
@@ -576,57 +434,4 @@ async def websocket_trigger2(websocket: WebSocket):
         print(f"Trigger2 WebSocket removed: {websocket.client}")
 
 
-
-# @sync_to_async
-# def get_updated_weather_alerts():
-#     recent_time = timezone.now() - timedelta(minutes=2)
-#     return list(
-#         Weather_alerts.objects.filter(updated_at__gte=recent_time)
-#         .values("pk_id", "latitude", "longitude", "time", "temperature_2m", "rain", "weather_code", "triger_status")
-#     )
-
-# last_known_alert_statuses = {}
-# # app.include_router(websocket_router)
-# async def push_updated_weather_alerts():
-#     global last_known_alert_statuses
-
-#     while True:
-#         try:
-#             alerts = await sync_to_async(list)(Weather_alerts.objects.all().values(
-#                 "pk_id", "latitude", "longitude", "elevation", "time", "temperature_2m",
-#                 "rain", "precipitation", "weather_code", "triger_status"
-#             ))
-
-#             changed_alerts = []
-
-#             for alert in alerts:
-#                 pk_id = alert["pk_id"]
-#                 current_status = alert["triger_status"]
-
-#                 # Compare with cache
-#                 if pk_id not in last_known_alert_statuses or last_known_alert_statuses[pk_id] != current_status:
-#                     # Detected change
-#                     changed_alerts.append(alert)
-#                     last_known_alert_statuses[pk_id] = current_status  # Update the cache
-
-#             if changed_alerts:
-#                 # Format the time field
-#                 for alert in changed_alerts:
-#                     if alert["time"]:
-#                         alert["time"] = alert["time"].isoformat()
-
-#                 message = json.dumps(changed_alerts)
-
-#                 # Send to all connected clients
-#                 for ws in connected_clients_weather_alerts.copy():
-#                     try:
-#                         await ws.send_text(message)
-#                     except Exception as e:
-#                         print(f"[❌] Send error: {e}")
-#                         connected_clients_weather_alerts.discard(ws)
-
-#         except Exception as e:
-#             print(f"[❌] Error in update task: {e}")
-
-#         await asyncio.sleep(0.5)  # check interval
 # # --------------------------------------####NIKITA###-------------------------------------

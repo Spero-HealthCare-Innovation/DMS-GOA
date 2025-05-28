@@ -32,6 +32,8 @@ def get_old_weather_alerts():
                 "precipitation": alert.precipitation,
                 "weather_code": alert.weather_code,
                 "triger_status": alert.triger_status,
+                "disaster_id": alert.disaster_id.disaster_id,
+                "disaster_name": alert.disaster_id.disaster_name
             }
             for alert in alerts
         ]
@@ -92,13 +94,21 @@ async def listen_to_postgres():
             print("Listening to PostgreSQL channel...")
 
             while True:
-                await asyncio.sleep(1)
+                # await asyncio.sleep(1)
+                await asyncio.sleep(60)
 
         except Exception as e:
             print(f"PostgreSQL listen error: {e}")
             await asyncio.sleep(10)  # wait and retry
         finally:
-            if 'conn' in locals():
-                await conn.close()
+            # if 'conn' in locals():
+            #     await conn.close()
+            if conn:
+                try:
+                    await conn.remove_listener('weather_alerts_channel', on_notify)
+                    await conn.close()
+                    print("🔌 PostgreSQL connection closed and listener removed.")
+                except Exception as cleanup_error:
+                    print(f"⚠️ Cleanup error: {cleanup_error}")
 
 # -------------------------------###NIKITA###-----------------------------------------
