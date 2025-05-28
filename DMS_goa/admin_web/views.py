@@ -119,7 +119,7 @@ class DMS_Group_delete_api(APIView):
 
 class DMS_Employee_get_api(APIView):
     def get(self,request):
-        snippet = DMS_Employee.objects.filter(emp_is_deleted=False)
+        snippet = DMS_Employee.objects.filter(emp_is_deleted=False).order_by('-emp_added_date')
         serializers = DMS_Employee_GET_serializer(snippet,many=True)
         return Response(serializers.data,status=status.HTTP_200_OK)
 
@@ -230,7 +230,7 @@ class DMS_City_idwise_get_api(APIView):
 class DMS_Group_get_api(APIView):
     permission_classes = [IsAuthenticated]
     def get(self,request):
-        snippet = DMS_Group.objects.filter(grp_is_deleted=False)
+        snippet = DMS_Group.objects.filter(grp_is_deleted=False).order_by('-grp_added_date')
         serializers = DMS_Group_Serializer(snippet,many=True)
         return Response(serializers.data,status=status.HTTP_200_OK)
     
