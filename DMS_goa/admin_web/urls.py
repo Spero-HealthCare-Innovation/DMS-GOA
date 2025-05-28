@@ -1,5 +1,5 @@
 from django.urls import path
-from . import views
+# from . import views
 from rest_framework_simplejwt.views import TokenRefreshView
 from .views import *
 
@@ -56,7 +56,10 @@ urlpatterns = [
     path('DMS_Incident_Post/',DMS_Incident_Post_api.as_view(), name='DMS_Incident_Post'),
     path('DMS_Comments_Post/',DMS_Comments_Post_api.as_view(), name='DMS_Comments_Post'),
     
-    path('alerts_get_api/<int:disaster_id>/',alerts_get_api.as_view(), name='alerts_get_api'),    
+    path('alerts_get_api/<int:disaster_id>/',alerts_get_api.as_view(), name='alerts_get_api'),  
+    
+    
+    path('manual_call_incident/', Manual_Call_Incident_api.as_view(), name='manual-call-create'),  
     
     #===================================Mohin==================================================
     
