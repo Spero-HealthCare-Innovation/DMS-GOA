@@ -299,7 +299,7 @@ class Comments_Serializer(serializers.ModelSerializer):
 class Sop_Response_Procedure_Serializer(serializers.ModelSerializer):
     class Meta:
         model = DMS_SOP
-        fields = ['sop_description','alert_id']
+        fields = ['sop_id','sop_description']
 
 # class Responder_Scope_Serializer(serializers.ModelSerializer):
 #     class Meta:
