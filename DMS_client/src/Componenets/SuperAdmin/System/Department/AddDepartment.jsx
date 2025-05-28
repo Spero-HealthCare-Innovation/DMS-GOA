@@ -22,6 +22,8 @@ import {
   Select,
   Popover,
   Tooltip,
+  Snackbar,
+  Alert,
 } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 
@@ -56,6 +58,7 @@ import {
 } from "../../../../CommonStyle/Style";
 import { useAuth } from "../../../../Context/ContextAPI";
 import axios from "axios";
+import { select } from "framer-motion/client";
 
 const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
   const [modalOpen, setModalOpen] = useState(false);
@@ -67,22 +70,26 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
     districts,
     Tehsils,
     Citys,
-    setFormValues,
-    disasterIds,
-    disaster,
-    formValues,
     selectedStateId,
     setSelectedStateId,
     setSelectedDistrictId,
     selectedDistrictId,
     selectedTehsilId,
     setSelectedTehsilId,
-    setSelectedDisasterIds,
     selectedCityID,
+    setSelectedCityId,
     loading,
     error,
   } = useAuth();
-  console.log(Citys, "Citys");
+  console.log(
+    "disaster",
+    Citys,
+    selectedCityID,
+    selectedStateId,
+    selectedDistrictId,
+    selectedTehsilId,
+    selectedCityID
+  );
 
   const handleStateChange = (e) => {
     const id = e.target.value;
@@ -106,77 +113,17 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
     setAnchorEl(null);
   };
   const navigate = useNavigate();
-  const [disasterId, selectedDisasterId] = useState("");
+  const [disasterIds, setDisasterIds] = useState([]);
+  const [disaster, setdisaster] = useState([]);
+  const [selectedDisasterId, setSelectedDisasterId] = useState("");
   const [departments, setDepartments] = useState([]);
-
+  const itemsPerPage = 5;
   const [page, setPage] = useState(1);
+  const [submitted, setSubmitted] = useState(false);
+
+  const [showSuccessAlert, setShowSuccessAlert] = useState(false);
+  const [disasterList, setDisasterList] = useState([]);
   const [rowsPerPage, setRowsPerPage] = useState(5);
-  const [alertData, setAlertData] = useState([
-    {
-      departmentName: "000095643228282",
-      disasterId: "D-123",
-      state: "Maharashtra",
-      district: "Pune",
-      tehsil: "Talegaon",
-      city: "Lohgaon",
-    },
-    {
-      departmentName: "000095643228282",
-      disasterId: "D-123",
-      state: "Maharashtra",
-      district: "Pune",
-      tehsil: "Talegaon",
-      city: "Lohgaon",
-    },
-    {
-      departmentName: "000095643228282",
-      disasterId: "D-123",
-      state: "Maharashtra",
-      district: "Pune",
-      tehsil: "Talegaon",
-      city: "Lohgaon",
-    },
-    {
-      departmentName: "000095643228282",
-      disasterId: "D-123",
-      state: "Maharashtra",
-      district: "Pune",
-      tehsil: "Talegaon",
-      city: "Lohgaon",
-    },
-    {
-      departmentName: "000095643228282",
-      disasterId: "D-123",
-      state: "Maharashtra",
-      district: "Pune",
-      tehsil: "Talegaon",
-      city: "Lohgaon",
-    },
-    {
-      departmentName: "000095643228282",
-      disasterId: "D-123",
-      state: "Maharashtra",
-      district: "Pune",
-      tehsil: "Talegaon",
-      city: "Lohgaon",
-    },
-    {
-      departmentName: "0000956432282",
-      disasterId: "D-123",
-      state: "Maharashtra",
-      district: "Pune",
-      tehsil: "Talegaon",
-      city: "Lohgaon",
-    },
-    // Add more dummy objects...
-  ]);
-
-  const paginatedData = useMemo(() => {
-    const start = (page - 1) * rowsPerPage;
-    const end = start + rowsPerPage;
-    return departments.slice(start, end);
-  }, [page, rowsPerPage, departments]);
-
   const labelColor = darkMode ? "#5FECC8" : "#1976d2";
   const borderColor = darkMode ? "#7F7F7F" : "#ccc";
   const fontFamily = "Roboto, sans-serif";
@@ -190,71 +137,171 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
     ? "rgba(255, 255, 255, 0.16)"
     : "rgba(0, 0, 0, 0.04)";
 
-  const disasterOptions = [
-    { id: 1, name: "Flood" },
-    { id: 2, name: "Earthquake" },
-    { id: 3, name: "Fire" },
-  ];
+  const [formValues, setFormValues] = useState({
+    dep_name: "",
+    dis_id: "",
+    state_id: "",
+    tah_id: "",
+    cit_id: "",
+    dis_district_id: "",
+  });
 
+  const paginatedData = useMemo(() => {
+    if (!departments?.length) return [];
 
-  const saveDepartment = async () => {
-    const payload = {
-      dep_name: formValues.dep_name.trim(),
-      dis_id: selectedDistrictId,
-      state_id: selectedStateId,
-      tah_id: selectedTehsilId,
-      cit_id: selectedCityID || (Citys.length > 0 ? Citys[0].cit_id : ""),
-    };
+    const start = (page - 1) * rowsPerPage;
+    const end = start + rowsPerPage;
+    const paginated = departments.slice(start, end);
 
-    // Check for duplicate entry before calling the API
-  
+    // Optional fallback to first page if none match (rare if no filtering)
+    return paginated.length > 0 ? paginated : departments.slice(0, rowsPerPage);
+  }, [page, rowsPerPage, departments]);
 
+  const fetchDepartments = async () => {
     try {
-      const res = await axios.post(
-        `${port}/admin_web/department_post/`,
-        payload,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
+      const response = await fetch(`${port}/admin_web/Department_get/`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
-      const newDepartment = {
-        departmentName: res.data.dep_name,
-        disasterId: getNameById(
-          disasterIds,
-          "dis_id",
-          "dis_name",
-          res.data.dis_id
-        ),
-        state: getNameById(states, "state_id", "state_name", res.data.state_id),
-        city: getNameById(Citys, "cit_id", "cit_name", res.data.cit_id),
-        tehsil: getNameById(Tehsils, "tah_id", "tah_name", res.data.tah_id),
-        district: getNameById(districts, "dis_id", "dis_name", res.data.dis_id),
-      };
-
-      // Append to the state so no need to re-fetch entire list
-      setDepartments((prev) => [newDepartment, ...prev]);
-
-      // Optional: clear form
-      setFormValues({ dep_name: "" });
-      setSelectedStateId("");
-      setSelectedDistrictId("");
-      setSelectedTehsilId("");
-      selectedCityID("");
+      if (response.ok) {
+        const data = await response.json();
+        setDepartments(data);
+        console.log("Departments fetched:", data);
+      } else {
+        const errorText = await response.text();
+        console.error(
+          "Failed to fetch departments:",
+          response.status,
+          errorText
+        );
+      }
     } catch (error) {
-      console.error("Save Error:", error.response?.data || error.message);
+      console.error("Error fetching departments:", error);
     }
   };
 
-  const getNameById = (list, idField, nameField, id) => {
-    if (!Array.isArray(list) || id == null) return "-";
-    const found = list.find((item) => item[idField] === id);
-    return found ? found[nameField] : "-";
+  // Call on component mount
+  useEffect(() => {
+    fetchDepartments();
+  }, []);
+
+  const saveDepartment = async () => {
+    const payload = {
+      dep_name: formValues.dep_name,
+      dis_id: selectedDisasterId,
+      state_id: selectedStateId,
+      dis_district_id: selectedDistrictId,
+      tah_id: selectedTehsilId,
+      cit_id: selectedCityID || (Citys.length > 0 ? Citys[0].cit_id : null),
+    };
+
+    console.log("Payload before POST:", payload);
+
+    try {
+      const response = await fetch(`${port}/admin_web/department_post/`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (response.ok) {
+        const resData = await response.json();
+        console.log("Department saved:", resData);
+
+        const newDepartment = {
+          departmentName: resData.dep_name,
+          disasterId: getNameById(
+            disasterList,
+            resData.dis_id,
+            "disaster_name"
+          ),
+          state: getNameById(states, resData.state_id, "state_name"),
+          city: getNameById(Citys, resData.cit_id, "cit_name"),
+          tehsil: getNameById(Tehsils, resData.tah_id, "tah_name"),
+          district: getNameById(districts, resData.dis_district_id, "dis_name"),
+        };
+
+        setDepartments((prev) => [newDepartment, ...prev]);
+        setShowSuccessAlert(true);
+
+        // Optional: Auto-hide after 3 seconds
+        setTimeout(() => setShowSuccessAlert(false), 3000);
+
+        // Reset form
+        setFormValues({ dep_name: "" });
+        setSelectedDisasterId("");
+        setSelectedStateId("");
+        setSelectedDistrictId("");
+        setSelectedTehsilId("");
+        setSelectedCityId("");
+      } else {
+        const errorData = await response.json();
+        if (
+          errorData?.detail === "Department with this dep_name already exists."
+        ) {
+          alert("Department name already exists. Please choose another name.");
+        } else {
+          console.error("Failed to save department:", errorData);
+        }
+      }
+    } catch (error) {
+      console.error("Error posting department:", error);
+    }
   };
+
+  const getNameById = (arr, id, labelKey = "name") => {
+    const item = arr.find((el) => el.id === id || el[`${labelKey}_id`] === id);
+    return item ? item[labelKey] : "N/A";
+  };
+
+  useEffect(() => {
+    const fetchDisasters = async () => {
+      try {
+        const response = await fetch(
+          `${port}/admin_web/DMS_Disaster_Type_Get/`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`, // Include token if required
+            },
+          }
+        );
+        if (response.ok) {
+          const data = await response.json();
+          setDisasterList(data);
+        } else {
+          console.error("Failed to fetch disaster types");
+        }
+      } catch (error) {
+        console.error("Error fetching disasters:", error);
+      }
+    };
+
+    fetchDisasters();
+  }, []);
 
   return (
     // ..
-    <Box sx={{ p: 2 }}>
+    <Box sx={{ p: 2, marginLeft: "3rem" }}>
+      <Snackbar
+        open={showSuccessAlert}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+        autoHideDuration={3000}
+        onClose={() => setShowSuccessAlert(false)}
+      >
+        <Alert
+          onClose={() => setShowSuccessAlert(false)}
+          severity="success"
+          variant="filled"
+          sx={{ width: "100%" }}
+        >
+          Department added successfully!
+        </Alert>
+      </Snackbar>
       <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
         <Box
           sx={{
@@ -291,7 +338,7 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
                 fontSize: 16,
               }}
             >
-              Add Employee
+              Add Department
             </Typography>
             <TextField
               // variant="outlined"
@@ -477,7 +524,7 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
                             }}
                           >
                             <Typography variant="subtitle2">
-                              {item.departmentName}
+                              {item.dep_name}
                             </Typography>
                           </StyledCardContent>
                           {/* <StyledCardContent
@@ -499,7 +546,7 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
                             }}
                           >
                             <Typography variant="subtitle2">
-                              {item.state}
+                              {item.state_name}
                             </Typography>
                           </StyledCardContent>
                           <StyledCardContent
@@ -510,7 +557,7 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
                             }}
                           >
                             <Typography variant="subtitle2">
-                              {item.district}
+                              {item.dst_name}
                             </Typography>
                           </StyledCardContent>
                           <StyledCardContent
@@ -521,7 +568,7 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
                             }}
                           >
                             <Typography variant="subtitle2">
-                              {item.tehsil}
+                              {item.tah_name}
                             </Typography>
                           </StyledCardContent>
                           <StyledCardContent
@@ -532,7 +579,7 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
                             }}
                           >
                             <Typography variant="subtitle2">
-                              {item.city}
+                              {item.city_name}
                             </Typography>
                           </StyledCardContent>
                           <StyledCardContent
@@ -730,7 +777,7 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
                 // fontFamily,
               }}
             >
-              Add User
+              Add Department
             </Typography>
 
             <Grid container spacing={2}>
@@ -845,13 +892,8 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
                   fullWidth
                   displayEmpty
                   defaultValue=""
-                  value={formValues.dis_id || ""}
-                  onChange={(e) =>
-                    setFormValues((prev) => ({
-                      ...prev,
-                      dis_id: e.target.value,
-                    }))
-                  }
+                  value={selectedDisasterId}
+                  onChange={(e) => setSelectedDisasterId(e.target.value)}
                   inputProps={{ "aria-label": "Select Disaster" }}
                   sx={selectStyles}
                 >
@@ -860,11 +902,11 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
                     disabled
                     sx={{ backgroundColor: inputStyle }}
                   >
-                    Select Disaster ID
+                    Select Disaster 
                   </MenuItem>
-                  {disaster.map((d) => (
-                    <MenuItem key={d.dis_id} value={d.dis_id}>
-                      {d.dis_id}
+                  {disasterList.map((d) => (
+                    <MenuItem key={d.disaster_id} value={d.disaster_id}>
+                      {d.disaster_name} {/* Use disaster name here */}
                     </MenuItem>
                   ))}
                 </Select>
@@ -881,7 +923,8 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
                   }}
                 >
                   <Button
-                    variant="contained"
+                    variant="outlined"
+                    color="warning"
                     sx={{
                       mt: 2,
                       width: "40%",
@@ -889,10 +932,7 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
                       color: "black",
                       fontWeight: "bold",
                       borderRadius: "12px",
-                      "&:hover": {
-                        backgroundColor: bgColor,
-                        color: "white !important",
-                      },
+                     
                     }}
                     onClick={saveDepartment}
                   >

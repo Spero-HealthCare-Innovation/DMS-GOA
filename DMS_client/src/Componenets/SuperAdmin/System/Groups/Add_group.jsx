@@ -3,7 +3,6 @@ import axios from "axios";
 import { Box, Typography, TextField, Button, Paper, InputAdornment, Grid, Popover, Snackbar } from "@mui/material";
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
-import TableCell from '@mui/material/TableCell';
 import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
@@ -28,7 +27,10 @@ import {
   fontsTableHeading,
   StyledCardContent,
   inputStyle,
-} from "../../../../CommonStyle/Style";
+  EnquiryCardBody,
+  EnquiryCard,
+
+} from "./../../../../CommonStyle/Style";
 
 
 function Add_group({ darkMode }) {
@@ -44,6 +46,9 @@ function Add_group({ darkMode }) {
   const [groups, setGroups] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+
+  // Search state
+  const [searchTerm, setSearchTerm] = useState("");
 
   // States for edit functionality
   const [isEditing, setIsEditing] = useState(false);
@@ -99,66 +104,27 @@ function Add_group({ darkMode }) {
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [anchorEl, setAnchorEl] = useState(null);
 
-  const EnquiryCard = styled("div")(() => ({
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "space-between",
-    background: "#5FECC8",
-    borderRadius: "8px 10px 0 0",
-    padding: "6px 12px",
-    color: "black",
-    height: "40px",
-  }));
-
-  const EnquiryCardBody = styled("tr")(({ theme, status }) => ({
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "space-between",
-    background: theme.palette.mode === "dark" ? "#112240" : "#fff",
-    color: theme.palette.mode === "dark" ? "#fff" : "#000",
-    marginTop: "0.5em",
-    borderRadius: "8px",
-    padding: "10px 12px",
-    transition: "all 0.3s ease",
-    cursor: "pointer",
-    "&:hover": {
-      boxShadow: `0 0 8px ${status === "Completed"
-        ? "#00e67699"
-        : status === "Pending"
-          ? "#f4433699"
-          : "#88888855"
-        }`,
-    },
-    height: "45px",
-  }));
-
-  const StyledCardContent = styled("td")({
-    padding: "0 8px",
-    display: "flex",
-    alignItems: "center",
-  });
-
-  const fontsTableHeading = {
-    fontFamily: "Roboto",
-    fontWeight: 500,
-    fontSize: 14,
-    letterSpacing: 0,
-    textAlign: "center",
-  };
-
   const inputBgColor = darkMode
     ? "rgba(255, 255, 255, 0.16)"
     : "rgba(0, 0, 0, 0.04)";
 
-  const fontsTableBody = {
-    fontFamily: "Roboto",
-    fontWeight: 400,
-    fontSize: 13,
-    letterSpacing: 0,
-    textAlign: "center",
-  };
+  // Filter groups based on search term
+  const filteredGroups = useMemo(() => {
+    if (!searchTerm) return groups;
+    
+    return groups.filter(group => 
+      group.groupName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      group.departmentID.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  }, [groups, searchTerm]);
 
-  const paginatedData = groups.slice((page - 1) * rowsPerPage, page * rowsPerPage);
+  // Use filtered groups for pagination
+  const paginatedData = filteredGroups.slice((page - 1) * rowsPerPage, page * rowsPerPage);
+
+  // Reset page to 1 when search term changes
+  useEffect(() => {
+    setPage(1);
+  }, [searchTerm]);
 
   const open = Boolean(anchorEl);
   const handleOpen = (event, item) => {
@@ -178,6 +144,7 @@ function Add_group({ darkMode }) {
     setShowSuccessAlert(true);
     setTimeout(() => setShowSuccessAlert(false), 3000);
   };
+  
   const resetForm = () => {
     setGroupName("");
     setDepartmentId("");
@@ -263,16 +230,17 @@ function Add_group({ darkMode }) {
         },
       });
 
-      console.log("Groups fetched:", response.data); // Debug log
+      console.log("Groups fetched:", response.data);
 
       const formattedGroups = response.data.map(group => ({
-        id: group.grp_id, // Make sure this matches your API response
-        departmentID: group.dep_id,
+        id: group.grp_id,
+        departmentID: group.dep_name, // Display  name
+        departmentIdValue: group.dep_id, // Edit  ID
         groupName: group.grp_name,
-        fullData: group // Store complete group data for reference
+        fullData: group
       }));
 
-      console.log("Formatted groups:", formattedGroups); // Debug log
+      console.log("Formatted groups:", formattedGroups);
       setGroups(formattedGroups);
     } catch (error) {
       console.error("Failed to fetch groups:", error);
@@ -285,11 +253,12 @@ function Add_group({ darkMode }) {
 
   // Handle Edit functionality
   const handleEdit = (group) => {
-    console.log("Editing group:", group); // Debug log
+    console.log("Editing group:", group);
     setIsEditing(true);
     setEditingGroupId(group.id);
-    // Make sure to set the department ID properly
-    setDepartmentId(group.fullData?.dep_id?.toString() || group.departmentID?.toString() || "");
+    
+    // direct departmentIdValue use 
+    setDepartmentId(group.departmentIdValue?.toString() || group.fullData?.dep_id?.toString() || "");
     setGroupName(group.groupName || "");
     handleClose();
   };
@@ -369,10 +338,14 @@ function Add_group({ darkMode }) {
           {isEditing ? 'Edit Group' : 'Add Group'}
         </Typography>
 
+        {/* Search Field with Filter */}
+  
         <TextField
           variant="outlined"
           size="small"
-          placeholder="Search"
+          placeholder="Search by group name"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
           InputProps={{
             startAdornment: (
               <InputAdornment position="start">
@@ -429,22 +402,9 @@ function Add_group({ darkMode }) {
                         </Typography>
                       </StyledCardContent>
 
-                      <StyledCardContent
+                       <StyledCardContent
                         sx={{
-                          flex: 1.9,
-                          borderRight: "1px solid black",
-                          justifyContent: "center",
-                          ...fontsTableHeading,
-                        }}
-                      >
-                        <Typography variant="subtitle2">
-                          Department Name
-                        </Typography>
-                      </StyledCardContent>
-
-                      <StyledCardContent
-                        sx={{
-                          flex: 2,
+                          flex: 1.5,
                           borderRight: "1px solid black",
                           justifyContent: "center",
                           ...fontsTableHeading,
@@ -457,22 +417,25 @@ function Add_group({ darkMode }) {
 
                       <StyledCardContent
                         sx={{
-                          flex: 0.2,
+                          flex: 1.6,
+                          borderRight: "1px solid black",
+                          justifyContent: "center",
+                          ...fontsTableHeading,
+                        }}
+                      >
+                        <Typography variant="subtitle2">
+                          Department Name
+                        </Typography>
+                      </StyledCardContent>
+
+                      <StyledCardContent
+                        sx={{
+                          flex: 1,
                           justifyContent: "center",
                           ...fontsTableHeading,
                         }}
                       >
                         <Typography variant="subtitle2">Actions</Typography>
-                      </StyledCardContent>
-
-                      <StyledCardContent sx={{ flex: 1, justifyContent: "center" }}>
-                        <MoreHorizIcon
-                          sx={{
-                            color: "#00f0c0",
-                            cursor: "pointer",
-                            fontSize: 28,
-                          }}
-                        />
                       </StyledCardContent>
                     </EnquiryCard>
                   </TableRow>
@@ -482,7 +445,7 @@ function Add_group({ darkMode }) {
                   {paginatedData.length === 0 ? (
                     <Box p={2}>
                       <Typography align="center" color="textSecondary">
-                        No groups available.
+                        {searchTerm ? 'No groups found matching your search.' : 'No groups available.'}
                       </Typography>
                     </Box>
                   ) : (
@@ -504,16 +467,17 @@ function Add_group({ darkMode }) {
                             {(page - 1) * rowsPerPage + index + 1}
                           </Typography>
                         </StyledCardContent>
+                         <StyledCardContent sx={{ flex: 2, justifyContent: "center", ...fontsTableBody }}>
+                          <Typography variant="subtitle2">{item.groupName}</Typography>
+                        </StyledCardContent>
+
 
                         <StyledCardContent sx={{ flex: 2, justifyContent: "center", ...fontsTableBody }}>
                           <Typography variant="subtitle2">{item.departmentID}</Typography>
                         </StyledCardContent>
 
-                        <StyledCardContent sx={{ flex: 2, justifyContent: "center", ...fontsTableBody }}>
-                          <Typography variant="subtitle2">{item.groupName}</Typography>
-                        </StyledCardContent>
-
-                        <StyledCardContent sx={{ flex: 1.5, justifyContent: "center", ...fontsTableBody }}>
+                       
+                        <StyledCardContent sx={{ flex: 1.2, justifyContent: "center", ...fontsTableBody }}>
                           <MoreHorizIcon
                             onClick={(e) => handleOpen(e, item)}
                             sx={{
@@ -573,7 +537,7 @@ function Add_group({ darkMode }) {
                 </Select>
               </Box>
 
-              {/* Page Navigation */}
+              {/* Page Navigation - Updated to use filteredGroups */}
               <Box
                 sx={{
                   border: "1px solid #ffffff",
@@ -597,15 +561,15 @@ function Add_group({ darkMode }) {
                 >
                   &#8249;
                 </Box>
-                <Box>{page}</Box>
+                <Box>{page}/ {Math.ceil(filteredGroups.length / rowsPerPage)}</Box>
                 <Box
                   onClick={() =>
-                    page < Math.ceil(groups.length / rowsPerPage) &&
+                    page < Math.ceil(filteredGroups.length / rowsPerPage) &&
                     setPage(page + 1)
                   }
                   sx={{
                     cursor:
-                      page < Math.ceil(groups.length / rowsPerPage)
+                      page < Math.ceil(filteredGroups.length / rowsPerPage)
                         ? "pointer"
                         : "not-allowed",
                     userSelect: "none",
@@ -641,7 +605,6 @@ function Add_group({ darkMode }) {
             },
           }}
         >
-
 
           <Button
             fullWidth
@@ -683,6 +646,16 @@ function Add_group({ darkMode }) {
             </Typography>
 
             <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
+   {/* Group Name TextField */}
+                <TextField
+                fullWidth
+                placeholder="Group Name"
+                label={groupName ? "" : "Group Name"} // Show placeholder only when empty
+                InputLabelProps={{ shrink: false }}
+                sx={inputStyle}
+                value={groupName}
+                onChange={(e) => setGroupName(e.target.value)}
+              />
               {/* Department Select */}
               <Select
                 fullWidth
@@ -705,17 +678,7 @@ function Add_group({ darkMode }) {
                   </MenuItem>
                 ))}
               </Select>
-
-              {/* Group Name TextField */}
-              <TextField
-                fullWidth
-                placeholder="Group Name"
-                label={groupName ? "" : "Group Name"} // Show placeholder only when empty
-                InputLabelProps={{ shrink: false }}
-                sx={inputStyle}
-                value={groupName}
-                onChange={(e) => setGroupName(e.target.value)}
-              />
+            
             </Box>
 
             <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, mt: 3, mb: 1 }}>
