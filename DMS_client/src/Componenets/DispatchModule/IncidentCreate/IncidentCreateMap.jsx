@@ -1,5 +1,5 @@
-import React, { useState, useRef } from 'react';
-import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
+import React, { useState, useRef, useEffect } from 'react';
+import { MapContainer, TileLayer, Marker, Popup, useMap, GeoJSON } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 import axios from 'axios';
@@ -17,16 +17,34 @@ const HERE_API_KEY = 'FscCo6SQsrummInzClxlkdETkvx5T1r8VVI25XMGnyY'; // 🔁 Repl
 
 const PanToLocation = ({ position }) => {
   const map = useMap();
-  if (position) map.panTo(position, 14);
+  if (position) map.panTo(position, 5);
   return null;
 };
 
 const IncidentCreateMap = () => {
   const [query, setQuery] = useState('');
   const [suggestions, setSuggestions] = useState([]);
-  const [selectedPosition, setSelectedPosition] = useState([15.414965044599617, 74.0364962305364]); // Default: Goa
-  const [popupText, setPopupText] = useState();
+  const [selectedPosition, setSelectedPosition] = useState([15.298430295875988, 74.08868128835907]); // Default: Goa
+  const [popupText, setPopupText] = useState('You are here!');
+  const [stateData, setStateData] = useState();
   const mapRef = useRef();
+  
+  console.log("Query",query)
+
+  useEffect(() => {
+      fetch('/Boundaries/Goa_State.geojson')
+        .then(res => res.json())
+        .then(data => {
+          setStateData(data);
+        });
+    }, []);
+
+  const geoJsonStyle = {
+    weight: 2,
+    color: 'Orange',
+    fillOpacity: 0.1,
+  };
+
 
   const handleSearchChange = async (e) => {
     const value = e.target.value;
@@ -43,13 +61,14 @@ const IncidentCreateMap = () => {
     });
 
     setSuggestions(response.data.items.filter(item => item.position));
+    
   };
 
   const handleSelectSuggestion = async (item) => {
     const { position, address } = item;
     setSelectedPosition([position.lat, position.lng]);
     setPopupText(address.label);
-    setQuery('');
+    setQuery(address.label);
     setSuggestions([]);
   };
 
@@ -84,37 +103,38 @@ const IncidentCreateMap = () => {
       }}
     >
       <input
-        type="text"
-        placeholder="Search for a place..."
-        value={query}
-        onChange={handleSearchChange}
-        style={{ width: "100%", padding: "8px" }}
-      />
-      {suggestions.length > 0 && (
-        <ul style={{ listStyle: 'none', padding: 0, margin: 0, background: 'white' }}>
-          {suggestions.map((item, idx) => (
-            <li key={idx} onClick={() => handleSelectSuggestion(item)} style={{ padding: '5px', cursor: 'pointer', borderBottom: '1px solid #ccc' }}>
-              {item.address.label}
-            </li>
-          ))}
-        </ul>
+          type="text"
+          placeholder="Search for a place..."
+          value={query}
+          onChange={handleSearchChange}
+          style={{ width: '100%', padding: '8px' }}
+        />
+          {suggestions.length > 0 && (
+          <ul style={{ listStyle: 'none', padding: 0, margin: 0, background: 'white', color: 'black', fontFamily: 'initial'}}>
+            {suggestions.map((item, idx) => (
+              <li key={idx} onClick={() => handleSelectSuggestion(item)} style={{ padding: '5px', cursor: 'pointer', borderBottom: '1px solid #ccc' }}>
+                {item.address.label}
+              </li>
+            ))}
+          </ul>
       )}
     </div>
 
     {/* Leaflet Map */}
     <MapContainer
       center={selectedPosition}
-      zoom={10}
-      style={{ height: "100%", width: "100%", borderRadius: 10 }}
+      zoom={9}
+      style={{ height: "90vh", width: "100%", borderRadius: 10 }}
       whenCreated={(mapInstance) => {
         mapRef.current = mapInstance;
       }}
       onClick={handleMapClick}
     >
       <TileLayer
-        attribution='&copy; <a href="https://osm.org/copyright">OpenStreetMap</a>'
-        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-      />
+          url="https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}"
+          attribution='&copy; Google Maps'
+        />
+      {stateData && <GeoJSON data={stateData} style={geoJsonStyle} />}
       <PanToLocation position={selectedPosition} />
       <Marker
         position={selectedPosition}
@@ -131,7 +151,7 @@ const IncidentCreateMap = () => {
                 "https://revgeocode.search.hereapi.com/v1/revgeocode",
                 {
                   params: {
-                    apiKey: HERE_API_KEY,
+                    apiKey: 'FscCo6SQsrummInzClxlkdETkvx5T1r8VVI25XMGnyY',
                     at: `${position.lat},${position.lng}`,
                   },
                 }
