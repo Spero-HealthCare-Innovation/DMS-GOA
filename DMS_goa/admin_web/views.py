@@ -668,6 +668,15 @@ class Manual_Call_Incident_api(APIView):
 
         incident_instance = incident_serializer.save()
 
+        base_code = incident_instance.incident_id  
+
+        total_calls = DMS_Incident.objects.filter(alert_code__icontains='CALL-').count()
+        new_call_number = total_calls + 1
+        alert_code = f"{base_code}-CALL-{str(new_call_number).zfill(2)}"
+
+        incident_instance.alert_code = alert_code
+        incident_instance.save()
+
         comments_data['incident_id'] = incident_instance.pk
         comments_serializer = manual_Comments_Serializer(data=comments_data)
         if not comments_serializer.is_valid():
@@ -678,6 +687,7 @@ class Manual_Call_Incident_api(APIView):
         incident_instance.comment_id = comments_instance
         incident_instance.save()
 
+        # Step 4: Save Weather Alert
         weather_alert_data = {
             "alert_code": incident_instance.alert_code,
             "disaster_id": incident_instance.disaster_type.pk if incident_instance.disaster_type else None,
@@ -716,6 +726,9 @@ class Manual_Call_Incident_api(APIView):
             "weather_alert": weather_alert_serializer.data,
             "dms_notify": dms_notify_serializer.data
         }, status=status.HTTP_201_CREATED)
+
+
+
 
 
 

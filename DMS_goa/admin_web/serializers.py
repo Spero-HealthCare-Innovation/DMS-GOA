@@ -267,7 +267,7 @@ class WeatherAlertSerializer(serializers.ModelSerializer):
 class CommentsSerializer(serializers.ModelSerializer):
     class Meta:
         model = DMS_Comments
-        exclude = ['incident_id','alert_id','comm_modified_by','comm_modified_date']
+        exclude = ['alert_id','comm_modified_by','comm_modified_date']
 
 class Incident_Serializer(serializers.ModelSerializer):
     comments = CommentsSerializer(write_only=True)
@@ -279,15 +279,19 @@ class Incident_Serializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         comments_data = validated_data.pop('comments')
+
         incident = DMS_Incident.objects.create(**validated_data)
 
-        DMS_Comments.objects.create(
+        comment = DMS_Comments.objects.create(
             alert_id=incident.alert_id,
-            incident_id=incident,
             **comments_data
         )
+        incident.comment_id = comment 
+        incident.save(update_fields=['comment_id'])
 
         return incident
+
+
 
         
 class Comments_Serializer(serializers.ModelSerializer):
@@ -336,7 +340,7 @@ class Manual_call_data_Serializer(serializers.ModelSerializer):
 class manual_Comments_Serializer(serializers.ModelSerializer):
     class Meta:
         model = DMS_Comments
-        fields = ['comments','comm_added_by','comm_modified_by','incident_id'] 
+        fields = ['comments','comm_added_by','comm_modified_by'] 
         
 class Responder_Scope_Serializer(serializers.ModelSerializer):
     responder_name = serializers.CharField(source='res_id.responder_name', read_only=True)
