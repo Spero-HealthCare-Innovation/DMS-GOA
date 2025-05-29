@@ -337,3 +337,9 @@ class Responder_Scope_Serializer(serializers.ModelSerializer):
     class Meta:
         model = DMS_Disaster_Responder
         fields = ['pk_id','res_id','responder_name']
+        
+        
+class DMS_NotifySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DMS_Notify
+        fields = '__all__'
