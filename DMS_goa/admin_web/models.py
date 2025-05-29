@@ -447,5 +447,13 @@ class DMS_Disaster_Responder(models.Model):
     dr_modified_by = models.CharField(max_length=255, null=True, blank=True)
     dr_modified_date = models.DateTimeField(null=True, blank=True)
     
-    
+
+class DMS_Summary(models.Model):
+    sum_id = models.AutoField(primary_key=True)
+    summary = models.CharField(max_length=5555, null=True, blank=True)
+    sum_is_deleted = models.BooleanField(default=False)
+    sum_added_date = models.DateTimeField(auto_now=True,null=True, blank=True)
+    sum_added_by = models.CharField(max_length=255, null=True, blank=True)
+    sum_modified_by = models.CharField(max_length=255, null=True, blank=True)
+    sum_modified_date = models.DateTimeField(null=True, blank=True)
     
