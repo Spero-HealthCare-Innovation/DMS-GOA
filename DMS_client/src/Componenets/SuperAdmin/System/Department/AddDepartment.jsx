@@ -4,36 +4,29 @@ import {
   Grid,
   Typography,
   Button,
-  Checkbox,
-  FormControlLabel,
   Box,
-  Stack,
   TextField,
   MenuItem,
   Table,
   TableBody,
   TableContainer,
-  CardContent,
   TableHead,
   TableRow,
-  IconButton,
-  Modal,
   InputAdornment,
   Select,
   Popover,
-  Tooltip,
   Snackbar,
   Alert,
   Autocomplete,
+  FormHelperText,
+  FormControl,
+  InputLabel,
 } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import SearchIcon from "@mui/icons-material/Search";
 
 import {
-  Search,
-  Visibility,
   AddCircleOutline,
-  EditNotifications,
   DeleteOutline,
   EditOutlined,
 } from "@mui/icons-material";
@@ -63,7 +56,6 @@ import axios from "axios";
 import { select } from "framer-motion/client";
 
 const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
-  const [modalOpen, setModalOpen] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
   const port = import.meta.env.VITE_APP_API_KEY;
   const { newToken } = useAuth();
@@ -95,7 +87,6 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
   const [departmentName, setDepartmentName] = useState("");
   const [departments, setDepartments] = useState([]);
   const [allEditData, setAllEditData] = useState([]);
-  const itemsPerPage = 5;
   const [page, setPage] = useState(1);
 
   const [isEditMode, setIsEditMode] = useState(false);
@@ -114,6 +105,16 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
   const fontFamily = "Roboto, sans-serif";
   const textColor = darkMode ? "#ffffff" : "#000000";
   const bgColor = darkMode ? "#0a1929" : "#ffffff";
+  const [stateError, setStateError] = useState(false);
+  const [districtError, setDistrictError] = useState(false);
+  const [tehsilError, setTehsilError] = useState(false);
+  const [cityError, setCityError] = useState(false);
+  const [disasterError, setDisasterError] = useState(false);
+  const [departmentError, setDepartmentError] = useState(false);
+  const [departmentErrorMsg, setDepartmentErrorMsg] = useState("");
+  const [snackbarmsgAddDept, setSnackbarMessageAdded] = useState("");
+  const [snackbarupdate, setSnackbarMessageUpdated] = useState("");
+
   const TableDataColor = darkMode
     ? "rgba(0, 0, 0, 0.04)"
     : "rgba(255, 255, 255, 0.16)";
@@ -181,7 +182,7 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
           },
         }
       );
-            console.log(
+      console.log(
         `Fetching ID Wise Data`,
         res.data[0].dep_name,
         res.data[0].state_id,
@@ -190,21 +191,76 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
         res.data[0].cit_id,
         res.data[0].disaster_id
       );
+      setIsEditMode(true); // This enables buttons that depend on isEditMode
       setAllEditData(res.data);
 
       setDepartmentName(res.data[0].dep_name || "");
       setSelectedStateId(res.data[0].state_id || "");
-
-      
     } catch (err) {
       console.error("Error fetching department data:", err);
 
       setError(err);
     }
-  
   };
 
-  
+  const handleUpdate = async () => {
+    const payload = {
+      dep_name: departmentName,
+      dis_id: selectedDisasterId,
+      state_id: selectedStateId,
+      dis_district_id: selectedDistrictId,
+      tah_id: selectedTehsilId,
+      cit_id: selectedCityID,
+      disaster_id: selectedDisasterId,
+    };
+
+    try {
+      const response = await fetch(
+        `${port}/admin_web/department_put/${deptFetchId}/`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token || newToken}`,
+          },
+          body: JSON.stringify(payload),
+        }
+      );
+
+      if (response.ok) {
+        const resData = await response.json();
+        console.log("Updated Department:", resData);
+
+        // Refresh department list
+        await fetchDepartments();
+
+        // Show snackbar
+        setSnackbarMessageUpdated("Department updated successfully!");
+
+        // Clear form
+        setDepartmentName("");
+        setSelectedStateId("");
+        setSelectedDistrictId("");
+        setSelectedTehsilId("");
+        setSelectedCityId("");
+        setSelectedDisasterId("");
+
+        // Exit edit mode
+        setIsEditMode(false);
+        setEditId(null);
+
+        // Auto hide snackbar
+        setTimeout(() => setShowSuccessAlert(false), 3000);
+      } else {
+        const errorData = await response.json();
+        console.error("Update failed:", errorData);
+        alert("Failed to update department.");
+      }
+    } catch (err) {
+      console.error("Update error:", err);
+    }
+  };
+
   const handleCloseSnackbar = () => {
     setSnackbar({ ...snackbar, open: false });
   };
@@ -304,7 +360,45 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
     fetchDepartments();
   }, []);
 
-  const saveDepartment = async () => {
+  const saveDepartment = async (e) => {
+    if (e) e.preventDefault(); // Prevent form refresh
+
+    // Field validations
+    let isValid = true;
+
+    if (!departmentName.trim()) {
+      setDepartmentError(true);
+      setDepartmentErrorMsg("Department name is required.");
+      isValid = false;
+    }
+
+    if (!selectedStateId) {
+      setStateError(true);
+      isValid = false;
+    }
+
+    if (!selectedDistrictId) {
+      setDistrictError(true);
+      isValid = false;
+    }
+
+    if (!selectedTehsilId) {
+      setTehsilError(true);
+      isValid = false;
+    }
+
+    if (!selectedCityID) {
+      setCityError(true);
+      isValid = false;
+    }
+
+    if (!selectedDisasterId) {
+      setDisasterError(true);
+      isValid = false;
+    }
+
+    if (!isValid) return; // Stop submission if any validation fails
+
     const payload = {
       dep_name: departmentName,
       dis_id: selectedDisasterId,
@@ -312,6 +406,7 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
       dis_district_id: selectedDistrictId,
       tah_id: selectedTehsilId,
       cit_id: selectedCityID,
+      disaster_id: selectedDisasterId,
     };
 
     console.log("Payload before POST:", payload);
@@ -330,26 +425,36 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
         const resData = await response.json();
         console.log("Department saved:", resData);
 
-        await departments();
+        await fetchDepartments(); // Refresh department list
+        setSnackbarMessageAdded("Department added successfully!");
         setShowSuccessAlert(true);
-
-        // Optional: Auto-hide after 3 seconds
         setTimeout(() => setShowSuccessAlert(false), 3000);
 
-        // Reset form
-        setFormValues({ dep_name: "" });
+        // ✅ Clear form fields
+        setDepartmentName("");
         setSelectedDisasterId("");
         setSelectedStateId("");
         setSelectedDistrictId("");
         setSelectedTehsilId("");
         setSelectedCityId("");
+
+        // ✅ Clear errors
+        setDepartmentError(false);
+        setDepartmentErrorMsg("");
+        setStateError(false);
+        setDistrictError(false);
+        setTehsilError(false);
+        setCityError(false);
+        setDisasterError(false);
+
         setDeptId(null);
       } else {
         const errorData = await response.json();
         if (
           errorData?.detail === "Department with this dep_name already exists."
         ) {
-          alert("Department name already exists. Please choose another name.");
+          setDepartmentError(true);
+          // setDepartmentErrorMsg("Department name already exists.");
         } else {
           console.error("Failed to save department:", errorData);
         }
@@ -418,20 +523,22 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
     // ..
     <Box sx={{ p: 2, marginLeft: "3rem" }}>
       <Snackbar
-        open={showSuccessAlert}
+        open={Boolean(snackbarmsgAddDept)}
         anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
         autoHideDuration={3000}
-        onClose={() => setShowSuccessAlert(false)}
-      >
-        <Alert
+        onClose={() => setSnackbarMessageAdded(null)}
+        message={snackbarmsgAddDept}
+      />
+
+      {/* <Alert
           onClose={() => setShowSuccessAlert(false)}
           severity="success"
           variant="filled"
           sx={{ width: "100%" }}
         >
           Department added successfully!
-        </Alert>
-      </Snackbar>
+        </Alert> */}
+      {/* </Snackbar> */}
       <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
         <Box
           sx={{
@@ -949,18 +1056,27 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
                   size="small"
                   placeholder="Department Name"
                   value={departmentName}
-                  onChange={(e) => setDepartmentName(e.target.value)}
+                  onChange={(e) => {
+                    setDepartmentName(e.target.value);
+                    setDepartmentError(false);
+                    setDepartmentErrorMsg("");
+                  }}
+                  // error={departmentError}
+                  // helperText={departmentError ? departmentErrorMsg : ""}
                   InputLabelProps={{ shrink: false }}
                   sx={selectStyles}
                 />
               </Grid>
 
-              {/* State - Dropdown */}
               <Grid item xs={12} sm={6}>
                 <Select
-                  fullWidth
                   value={selectedStateId}
-                  onChange={(e) => setSelectedStateId(e.target.value)}
+                  onChange={(e) => {
+                    setSelectedStateId(e.target.value);
+                    setStateError(false);
+                  }}
+                  fullWidth
+                  error={stateError}
                   displayEmpty
                   inputProps={{ "aria-label": "Select State" }}
                   sx={selectStyles}
@@ -974,16 +1090,22 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
                     </MenuItem>
                   ))}
                 </Select>
+                {stateError && (
+                  <FormHelperText>Please select a state</FormHelperText>
+                )}
               </Grid>
 
               {/* District - Dropdown */}
               <Grid item xs={12} sm={6}>
                 <Select
-                  fullWidth
                   value={selectedDistrictId}
-                  onChange={(e) => setSelectedDistrictId(e.target.value)}
+                  onChange={(e) => {
+                    setSelectedDistrictId(e.target.value);
+                    setDistrictError(false);
+                  }}
+                  fullWidth
+                  error={districtError}
                   displayEmpty
-                  defaultValue=""
                   inputProps={{ "aria-label": "Select District" }}
                   disabled={!selectedStateId}
                   sx={selectStyles}
@@ -991,42 +1113,54 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
                   <MenuItem value="" disabled>
                     Select District
                   </MenuItem>
-                  {districts.map((districts) => (
-                    <MenuItem key={districts.dis_id} value={districts.dis_id}>
-                      {districts.dis_name}
+                  {districts.map((d) => (
+                    <MenuItem key={d.dis_id} value={d.dis_id}>
+                      {d.dis_name}
                     </MenuItem>
                   ))}
                 </Select>
+                {districtError && (
+                  <FormHelperText>Please select a district</FormHelperText>
+                )}
               </Grid>
 
               <Grid item xs={12} sm={6}>
                 <Select
-                  fullWidth
-                  displayEmpty
                   value={selectedTehsilId}
-                  onChange={(e) => setSelectedTehsilId(e.target.value)}
-                  defaultValue=""
+                  onChange={(e) => {
+                    setSelectedTehsilId(e.target.value);
+                    setTehsilError(false);
+                  }}
+                  fullWidth
+                  error={tehsilError}
+                  displayEmpty
                   inputProps={{ "aria-label": "Select Tehsil" }}
                   sx={selectStyles}
                 >
                   <MenuItem value="" disabled>
                     Select Tehsil
                   </MenuItem>
-                  {Tehsils.map((Tehsils) => (
-                    <MenuItem key={Tehsils.tah_id} value={Tehsils.tah_id}>
-                      {Tehsils.tah_name}
+                  {Tehsils.map((t) => (
+                    <MenuItem key={t.tah_id} value={t.tah_id}>
+                      {t.tah_name}
                     </MenuItem>
                   ))}
                 </Select>
+                {tehsilError && (
+                  <FormHelperText>Please select a tehsil</FormHelperText>
+                )}
               </Grid>
 
-              {/* City - Dropdown */}
               <Grid item xs={12} sm={6}>
                 <Select
-                  fullWidth
-                  displayEmpty
                   value={selectedCityID}
-                  onChange={(e) => setSelectedCityId(e.target.value)}
+                  onChange={(e) => {
+                    setSelectedCityId(e.target.value);
+                    setCityError(false);
+                  }}
+                  fullWidth
+                  error={cityError}
+                  displayEmpty
                   inputProps={{ "aria-label": "Select City" }}
                   sx={selectStyles}
                 >
@@ -1039,61 +1173,41 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
                     </MenuItem>
                   ))}
                 </Select>
+                {cityError && (
+                  <FormHelperText>Please select a city</FormHelperText>
+                )}
               </Grid>
 
-              {/* Disaster ID - Dropdown */}
               <Grid item xs={12} sm={6}>
                 <Select
-                  fullWidth
-                  displayEmpty
-                  defaultValue=""
                   value={selectedDisasterId}
-                  onChange={(e) => setSelectedDisasterId(e.target.value)}
+                  onChange={(e) => {
+                    setSelectedDisasterId(e.target.value);
+                    setDisasterError(false);
+                  }}
+                  error={disasterError}
+                  displayEmpty
+                  fullWidth
                   inputProps={{ "aria-label": "Select Disaster" }}
                   sx={selectStyles}
                 >
-                  <MenuItem
-                    value=""
-                    disabled
-                    sx={{ backgroundColor: inputStyle }}
-                  >
+                  <MenuItem value="" disabled>
                     Select Disaster
                   </MenuItem>
                   {disasterList.map((d) => (
                     <MenuItem key={d.disaster_id} value={d.disaster_id}>
-                      {d.disaster_name} {/* Use disaster name here */}
+                      {d.disaster_name}
                     </MenuItem>
                   ))}
                 </Select>
+                {disasterError && (
+                  <FormHelperText>Please select a disaster</FormHelperText>
+                )}
               </Grid>
 
               {/* Submit Button */}
 
               <Grid item xs={12}>
-                {/* <Box
-                  sx={{
-                    display: "flex",
-                    justifyContent: "center",
-                    mt: 3,
-                    mb: 1,
-                  }}
-                >
-                  <Button
-                    variant="outlined"
-                    color="warning"
-                    sx={{
-                      mt: 2,
-                      width: "40%",
-                      backgroundColor: "#00f0c0",
-                      color: "black",
-                      fontWeight: "bold",
-                      borderRadius: "12px",
-                    }}
-                    onClick={saveDepartment}
-                  >
-                    Submit
-                  </Button>
-                </Box> */}
                 {isEditMode ? (
                   <Box display="flex" gap={2} mt={2}>
                     <Button
@@ -1122,7 +1236,7 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
                         fontWeight: "bold",
                         borderRadius: "12px",
                       }}
-                      onClick={handleEdit}
+                      onClick={() => handleUpdate(editId)} // Pass the editId here
                     >
                       Update
                     </Button>
@@ -1138,6 +1252,8 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
                       color: "black",
                       fontWeight: "bold",
                       borderRadius: "12px",
+                      mx: "auto", // centers the button horizontally
+                      display: "block",
                     }}
                     onClick={saveDepartment}
                   >
@@ -1146,19 +1262,11 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
                 )}
               </Grid>
               <Snackbar
-                open={snackbar.open}
+                open={snackbarupdate}
                 autoHideDuration={3000}
-                onClose={handleCloseSnackbar}
-                anchorOrigin={{ vertical: "top", horizontal: "center" }}
-              >
-                <Alert
-                  onClose={handleCloseSnackbar}
-                  severity={snackbar.severity}
-                  sx={{ width: "100%" }}
-                >
-                  {snackbar.message}
-                </Alert>
-              </Snackbar>
+                onClose={() => setSnackbarMessageUpdated(false)}
+                message={snackbarupdate}
+              />
             </Grid>
           </Paper>
         </Grid>
