@@ -643,7 +643,10 @@ class Manual_Call_Incident_api(APIView):
         if not comments_serializer.is_valid():
             return Response({"comments_errors": comments_serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
 
-        comments_serializer.save()
+        comments_instance = comments_serializer.save()
+
+        incident_instance.comment_id = comments_instance
+        incident_instance.save()
 
         weather_alert_data = {
             "alert_code": incident_instance.alert_code,
