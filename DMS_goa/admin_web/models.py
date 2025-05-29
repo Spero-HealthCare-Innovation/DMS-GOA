@@ -53,7 +53,7 @@ class DMS_Department(models.Model):
     disaster_id = models.ForeignKey('DMS_Disaster_Type', on_delete=models.CASCADE)
     dep_is_deleted = models.BooleanField(default=False)
     dep_added_by = models.CharField(max_length=255, null=True, blank=True)
-    dep_added_date = models.DateTimeField(auto_now=True)
+    dep_added_date =  models.DateTimeField(auto_now=True)
     dep_modified_by = models.CharField(max_length=255, null=True, blank=True)
     dep_modified_date = models.DateTimeField(auto_now=True,null=True, blank=True)
     
@@ -446,6 +446,25 @@ class DMS_Disaster_Responder(models.Model):
     dr_added_by = models.CharField(max_length=255, null=True, blank=True)
     dr_modified_by = models.CharField(max_length=255, null=True, blank=True)
     dr_modified_date = models.DateTimeField(null=True, blank=True)
+
+
+class DMS_incident_closure(models.Model):
+    closure_id=models.AutoField(primary_key=True)
+    incident_id=models.ForeignKey(DMS_Incident,on_delete=models.CASCADE,null=True,blank=True)
+    closure_acknowledge=models.DateTimeField(null=True, blank=True)
+    closure_start_base_location=models.DateTimeField(null=True, blank=True)
+    closure_at_scene=models.DateTimeField(null=True, blank=True)
+    closure_from_scene=models.DateTimeField(null=True, blank=True)
+    closure_back_to_base=models.DateTimeField(null=True, blank=True)
+    closure_is_deleted = models.BooleanField(default=False)
+    closure_added_by = models.CharField(max_length=255, null=True, blank=True)
+    closure_added_date = models.DateTimeField(auto_now=True,null=True, blank=True)
+    closure_modified_by = models.CharField(max_length=255, null=True, blank=True)
+    closure_modified_date = models.DateTimeField(null=True, blank=True)
+    closure_remark=models.CharField(max_length=255, null=True, blank=True)
+
+
+
     
 
 class DMS_Summary(models.Model):
