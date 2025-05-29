@@ -358,46 +358,45 @@ class DMS_Incident(models.Model):
     inc_modified_by = models.CharField(max_length=255, null=True, blank=True)
     inc_modified_date = models.DateTimeField(auto_now=True,null=True, blank=True)
     
-    # def save(self, *args, **kwargs):
-    #     is_new = self.pk is None
-    #     super().save(*args, **kwargs)  
-
-    #     if is_new and not self.incident_id:
-    #         date_prefix = now().strftime('%Y%m%d')
-    #         self.incident_id = f"{date_prefix}{str(self.inc_id).zfill(5)}"
-    #         super().save(update_fields=['incident_id'])
-    
-
     def save(self, *args, **kwargs):
         is_new = self.pk is None
-        super().save(*args, **kwargs)
+        super().save(*args, **kwargs)  
 
         if is_new and not self.incident_id:
             date_prefix = now().strftime('%Y%m%d')
             self.incident_id = f"{date_prefix}{str(self.inc_id).zfill(5)}"
             super().save(update_fields=['incident_id'])
+    
 
-        if is_new and not self.alert_code:
-            timestamp = now().strftime('%Y%m%d%H%M%S')
+    # def save(self, *args, **kwargs):
+    #     is_new = self.pk is None
+    #     super().save(*args, **kwargs)
+
+    #     if is_new and not self.incident_id:
+    #         date_prefix = now().strftime('%Y%m%d')
+    #         self.incident_id = f"{date_prefix}{str(self.inc_id).zfill(5)}"
+    #         super().save(update_fields=['incident_id'])
+
+    #     if is_new and not self.alert_code:
+    #         timestamp = now().strftime('%Y%m%d%H%M%S')
             
-            latest_alert = DMS_Incident.objects.filter(alert_code__icontains='CALL-').order_by('-inc_id').first()
-            if latest_alert and latest_alert.alert_code and 'CALL-' in latest_alert.alert_code:
-                try:
-                    last_number = int(latest_alert.alert_code.split('CALL-')[1])
-                except:
-                    last_number = 0
-            else:
-                last_number = 0
+    #         latest_alert = DMS_Incident.objects.filter(alert_code__icontains='CALL-').order_by('-inc_id').first()
+    #         if latest_alert and latest_alert.alert_code and 'CALL-' in latest_alert.alert_code:
+    #             try:
+    #                 last_number = int(latest_alert.alert_code.split('CALL-')[1])
+    #             except:
+    #                 last_number = 0
+    #         else:
+    #             last_number = 0
 
-            next_number = last_number + 1
-            self.alert_code = f"{timestamp}-CALL-{next_number:02d}"
-            super().save(update_fields=['alert_code'])
+    #         next_number = last_number + 1
+    #         self.alert_code = f"{timestamp}-CALL-{next_number:02d}"
+    #         super().save(update_fields=['alert_code'])
 
             
 class DMS_Comments(models.Model):
     comm_id = models.AutoField(primary_key=True)
     alert_id = models.ForeignKey(Weather_alerts,on_delete=models.CASCADE,null=True,blank=True)
-    incident_id = models.ForeignKey(DMS_Incident,on_delete=models.CASCADE,null=True,blank=True)
     comments = models.TextField(null=True, blank=True)
     comm_chat = models.BooleanField(default=False)
     comm_is_deleted= models.BooleanField(default=False)
