@@ -757,3 +757,137 @@ class DMS_Summary_Get_API(APIView):
         snippet = DMS_Summary.objects.all()
         serializers = DMS_Summary_Serializer(snippet,many=True)
         return Response(serializers.data,status=status.HTTP_200_OK)
+# class DMS_responder_post_api(APIView):
+#     def post(self,request):
+#         serializers=Responder_serializer(data=request.data)
+#         if serializers.is_valid():
+#             serializers.save()
+#             return Response(serializers.data,status=status.HTTP_201_CREATED)
+#         return Response(serializers.errors,status=status.HTTP_400_BAD_REQUEST)
+
+
+# class DMS_responder_put_api(APIView):
+#     def get(self, request, responder_id):
+#         snippet = DMS_Responder.objects.filter(responder_id=responder_id,responder_is_deleted=False)
+#         serializers = Responder_Serializer(snippet, many=True)
+#         return Response(serializers.data)
+
+#     def put(self, request, responder_id):
+#         try:
+#             instance = DMS_Responder.objects.get(responder_id=responder_id)
+#         except DMS_Responder.DoesNotExist:
+#             return Response({"error": "Responder not found."}, status=status.HTTP_404_NOT_FOUND)
+
+#         serializer = Responder_serializer(instance, data=request.data, partial=True)
+
+#         if serializer.is_valid():
+#             serializer.save()
+#             return Response(serializer.data, status=status.HTTP_200_OK)
+#         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    
+# class DMS_responder_delete_api(APIView):
+#     def get(self, request, responder_id):
+#         try:
+#             instance = DMS_Responder.objects.get(responder_id=responder_id, responder_is_deleted=False)
+#         except DMS_SOP.DoesNotExist:
+#             return Response({"error": "Responder not found or already deleted."}, status=status.HTTP_404_NOT_FOUND)
+#         serializer = Responder_Serializer(instance)
+#         return Response(serializer.data, status=status.HTTP_200_OK)
+
+#     def delete(self, request, sop_id):
+#         try:
+#             instance = DMS_Responder.objects.get(responder_id=responder_id, responder_is_deleted=False)
+#         except DMS_Responder.DoesNotExist:
+#             return Response({"error": "Responder not found or already deleted."}, status=status.HTTP_404_NOT_FOUND)
+
+#         instance.responder_is_deleted = True
+#         instance.save()
+#         return Response({"message": "Responder soft deleted successfully."}, status=status.HTTP_200_OK)
+
+class GetResponderList_api(APIView):
+    def get(self, request):
+        responders = DMS_Responder.objects.filter(responder_is_deleted=False)
+        serializer = Responder_Serializer(responders, many=True)
+        return Response(serializer.data)
+
+
+class Disaster_Responder_post_api(APIView):
+    def post(self,request):
+        serializers=SopSerializer(data=request.data)
+        if serializers.is_valid():
+            serializers.save()
+            return Response(serializers.data,status=status.HTTP_201_CREATED)
+        return Response(serializers.errors,status=status.HTTP_400_BAD_REQUEST)
+
+
+class Disaster_Responder_put(APIView):
+    def get(self, request, pk_id):
+        snippet = DMS_Disaster_Responder.objects.filter(pk_id=pk_id,dr_is_deleted=False)
+        serializers = DisasterResponderSerializer(snippet, many=True)
+        return Response(serializers.data)
+    def put(self,request,pk_id):
+        try:
+            instance =DMS_Disaster_Responder.objects.get(pk_id=pk_id)
+        except DMS_Disaster_Responder.DoesNotExist:
+            return Response({"error": "record not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        serializer = DisasterResponderSerializer(instance, data=request.data, partial=True)
+
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class Disaster_responder_delete_api(APIView):
+    def get(self, request, pk_id):
+        try:
+            instance = DMS_Disaster_Responder.objects.get(pk_id=pk_id, dr_is_deleted=False)
+        except DMS_Disaster_Responder.DoesNotExist:
+            return Response({"error": "record not found or already deleted."}, status=status.HTTP_404_NOT_FOUND)
+        serializer = Responder_Serializer(instance)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def delete(self, request, pk_id):
+        try:
+            instance = DMS_Disaster_Responder.objects.get(pk_id=pk_id, dr_is_deleted=False)
+        except DMS_Disaster_Responder.DoesNotExist:
+            return Response({"error": "record not found or already deleted."}, status=status.HTTP_404_NOT_FOUND)
+
+        instance.dr_is_deleted = True
+        instance.save()
+        return Response({"message": "Record soft deleted successfully."}, status=status.HTTP_200_OK)
+
+
+class disaster_responder_Post_api(APIView):
+    def post(self,request):
+        serializers=DisasterResponderPostSerializer(data=request.data)
+        if serializers.is_valid():
+            serializers.save()
+            return Response(serializers.data,status=status.HTTP_201_CREATED)
+        return Response(serializers.errors,status=status.HTTP_400_BAD_REQUEST)
+
+
+class DMS_Disaster_Responder_GET_API(APIView):
+     
+    def get(self, request):
+        pk_id = request.query_params.get('pk_id')
+
+        queryset = DMS_Disaster_Responder.objects.all()
+ 
+        if pk_id is not None:
+            queryset = queryset.filter(pk_id=pk_id)
+ 
+        serializer = DisasterResponderSerializer(queryset, many=True)
+        return Response(serializer.data)
+
+
+class closure_Post_api(APIView):
+    def post(self,request):
+        serializers=ClosureSerializer(data=request.data)
+        if serializers.is_valid():
+            serializers.save()
+            return Response(serializers.data,status=status.HTTP_201_CREATED)
+        return Response(serializers.errors,status=status.HTTP_400_BAD_REQUEST)
+
