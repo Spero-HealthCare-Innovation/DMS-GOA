@@ -264,7 +264,12 @@ class WeatherAlertSerializer(serializers.ModelSerializer):
 #         model = DMS_Incident
 #         fields = '__all__' 
 
+class NotifySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DMS_Notify
+        fields = ['alert_type_id','disaster_type','alert_code']
 
+        
 class CommentsSerializer(serializers.ModelSerializer):
     class Meta:
         model = DMS_Comments
@@ -272,26 +277,40 @@ class CommentsSerializer(serializers.ModelSerializer):
 
 class Incident_Serializer(serializers.ModelSerializer):
     comments = CommentsSerializer(write_only=True)
+    responder_scope = serializers.ListField(child=serializers.CharField(), write_only=True)
 
     class Meta:
         model = DMS_Incident
-        fields = '__all__'  
-        extra_fields = ['comments']
+        fields = '__all__'
+        extra_fields = ['comments', 'responder_scope']
 
     def create(self, validated_data):
         comments_data = validated_data.pop('comments')
+        responder_scope = validated_data.pop('responder_scope', [])
 
-        incident = DMS_Incident.objects.create(**validated_data)
+        # Step 1: Create DMS_Notify
+        notify = DMS_Notify.objects.create(
+            alert_type_id=responder_scope,
+            disaster_type=validated_data.get('disaster_type'),
+            not_added_by=validated_data.get('inc_added_by'),
+        )
 
+        # Step 2: Create DMS_Incident with notify_id and responder_scope
+        incident = DMS_Incident.objects.create(
+            responder_scope=responder_scope,
+            notify_id=notify,
+            **validated_data
+        )
+
+        # Step 3: Create DMS_Comments and assign to comment_id
         comment = DMS_Comments.objects.create(
             alert_id=incident.alert_id,
             **comments_data
         )
-        incident.comment_id = comment 
+        incident.comment_id = comment
         incident.save(update_fields=['comment_id'])
 
         return incident
-
 
 
         
