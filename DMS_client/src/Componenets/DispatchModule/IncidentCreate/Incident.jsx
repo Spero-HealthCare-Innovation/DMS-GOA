@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useContext, useEffect } from 'react';
 import {
     Box,
     Grid,
@@ -23,11 +23,37 @@ const boxStyle = {
 };
 
 const Incident = ({ darkMode }) => {
+    const port = import.meta.env.VITE_APP_API_KEY;
+    const token = localStorage.getItem("access_token");
     const { newToken } = useAuth();
     const bgColor = darkMode ? "#0a1929" : "#ffffff";
     const labelColor = darkMode ? "#5FECC8" : "#1976d2";
     const fontFamily = "Roboto, sans-serif";
     const [selectedEmergencyValue, setSelectedEmergencyValue] = useState('');
+    const { responderScope } = useAuth();
+    console.log(responderScope, 'Fetching Scope Data');
+    const [disaster, setDisaster] = useState([]);
+    const [selectedDisaster, setSelectedDisaster] = useState('');
+    const { setDisasterIncident } = useAuth();
+
+    useEffect(() => {
+        if (selectedDisaster) {
+            setDisasterIncident(selectedDisaster);
+        }
+    }, [selectedDisaster]);;
+
+    useEffect(() => {
+        const fetchDisaster = async () => {
+            const disaster = await fetch(`${port}/admin_web/DMS_Disaster_Type_Get/`, {
+                headers: {
+                    Authorization: `Bearer ${token || newToken}`,
+                }
+            })
+            const disasterData = await disaster.json();
+            setDisaster(disasterData);
+        };
+        fetchDisaster()
+    }, [])
 
     const handleEmergencyChange = (event) => {
         setSelectedEmergencyValue(event.target.value);
@@ -54,10 +80,24 @@ const Incident = ({ darkMode }) => {
                                         </TextField>
                                     </Grid>
                                     <Grid item xs={12} sm={6}>
-                                        <TextField select fullWidth size="small" label="Disaster Type" variant="outlined" sx={inputStyle}>
-                                            <MenuItem value="Flood">Flood</MenuItem>
-                                            <MenuItem value="Fire">Fire</MenuItem>
-                                            <MenuItem value="Cyclone">Cyclone</MenuItem>
+                                        <TextField
+                                            select
+                                            fullWidth
+                                            size="small"
+                                            label="Disaster Type"
+                                            variant="outlined"
+                                            sx={inputStyle}
+                                            value={selectedDisaster}
+                                            onChange={(e) => setSelectedDisaster(e.target.value)}
+                                        >
+                                            <MenuItem disabled value="">
+                                                Select Disaster Type
+                                            </MenuItem>
+                                            {disaster.map((item) => (
+                                                <MenuItem key={item.disaster_id} value={item.disaster_id}>
+                                                    {item.disaster_name}
+                                                </MenuItem>
+                                            ))}
                                         </TextField>
                                     </Grid>
                                     <Grid item xs={12} sm={6}>

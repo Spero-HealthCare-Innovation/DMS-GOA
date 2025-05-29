@@ -27,7 +27,15 @@ export const AuthProvider = ({ children }) => {
 
   const [departments, setDepartments] = useState([]);
   const [disaterid, setDisaterid] = useState(null);
-  console.log(disaterid, "disateridddddd");
+  const [disasterIncident, setDisasterIncident] = useState(null);
+  console.log(disasterIncident, 'disasterIncident');
+
+  useEffect(() => {
+    const disasterValue = disaterid && disasterIncident;
+    if (disasterValue) {
+      fetchResponderScope(disasterValue);
+    }
+  }, [disaterid, disasterIncident]);
 
   // 🔹 sop page
   const [responderScope, setResponderScope] = useState([]);
@@ -157,12 +165,12 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const fetchResponderScope = async (disasterId) => {
-    if (!disasterId) return;
+  const fetchResponderScope = async (disasterValue) => {
+    if (!disasterValue) return;
     try {
       setLoading(true);
       const res = await axios.get(
-        `${port}/admin_web/Responder_Scope_Get/${disasterId}/`,
+        `${port}/admin_web/Responder_Scope_Get/${disasterValue}/`,
         {
           headers: {
             Authorization: `Bearer ${newToken || token}`,
@@ -252,7 +260,9 @@ export const AuthProvider = ({ children }) => {
         disaterid,
         setDisaterid,
         responderScope,
-        setResponderScope
+        setResponderScope,
+        disasterIncident,
+        setDisasterIncident
       }}
     >
       {children}
