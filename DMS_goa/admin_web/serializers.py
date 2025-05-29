@@ -276,37 +276,38 @@ class CommentsSerializer(serializers.ModelSerializer):
         exclude = ['alert_id','comm_modified_by','comm_modified_date']
 
 class Incident_Serializer(serializers.ModelSerializer):
-    comments = CommentsSerializer(write_only=True)
     responder_scope = serializers.ListField(child=serializers.CharField(), write_only=True)
+    comments = serializers.CharField(write_only=True)
+    comm_added_by = serializers.CharField(write_only=True)
 
     class Meta:
         model = DMS_Incident
         fields = '__all__'
-        extra_fields = ['comments', 'responder_scope']
+        extra_fields = ['responder_scope', 'comments', 'comm_added_by']
 
     def create(self, validated_data):
-        comments_data = validated_data.pop('comments')
         responder_scope = validated_data.pop('responder_scope', [])
+        comments_text = validated_data.pop('comments')
+        comm_added_by = validated_data.pop('comm_added_by')
 
-        # Step 1: Create DMS_Notify
         notify = DMS_Notify.objects.create(
             alert_type_id=responder_scope,
             disaster_type=validated_data.get('disaster_type'),
             not_added_by=validated_data.get('inc_added_by'),
         )
 
-        # Step 2: Create DMS_Incident with notify_id and responder_scope
         incident = DMS_Incident.objects.create(
             responder_scope=responder_scope,
             notify_id=notify,
             **validated_data
         )
 
-        # Step 3: Create DMS_Comments and assign to comment_id
         comment = DMS_Comments.objects.create(
             alert_id=incident.alert_id,
-            **comments_data
+            comments=comments_text,
+            comm_added_by=comm_added_by
         )
+
         incident.comment_id = comment
         incident.save(update_fields=['comment_id'])
 
