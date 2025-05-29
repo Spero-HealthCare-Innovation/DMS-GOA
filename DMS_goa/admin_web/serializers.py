@@ -367,3 +367,8 @@ class DMS_NotifySerializer(serializers.ModelSerializer):
     class Meta:
         model = DMS_Notify
         fields = '__all__'
+        
+class DMS_Summary_Serializer(serializers.ModelSerializer):
+    class Meta:
+        model = DMS_Summary
+        fields = ['sum_id','summary']

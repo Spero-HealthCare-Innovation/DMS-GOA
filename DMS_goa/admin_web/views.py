@@ -711,11 +711,9 @@ class Manual_Call_Incident_api(APIView):
 
 class Responder_Scope_Get_api(APIView):
     def get(self, request, disaster_id):
-        # SOP Responses
         sop_responses = DMS_SOP.objects.filter(disaster_id=disaster_id)
         sop_serializer = Sop_Response_Procedure_Serializer(sop_responses, many=True)
 
-        # Responder Scope
         responders = DMS_Disaster_Responder.objects.filter(dr_is_deleted=False, dis_id=disaster_id)
         responder_serializer = Responder_Scope_Serializer(responders, many=True)
 
@@ -723,3 +721,9 @@ class Responder_Scope_Get_api(APIView):
             "sop_responses": sop_serializer.data,
             "responder_scope": responder_serializer.data
         }, status=status.HTTP_200_OK)
+        
+class DMS_Summary_Get_API(APIView):
+    def get(self,request):
+        snippet = DMS_Summary.objects.all()
+        serializers = DMS_Summary_Serializer(snippet,many=True)
+        return Response(serializers.data,status=status.HTTP_200_OK)
