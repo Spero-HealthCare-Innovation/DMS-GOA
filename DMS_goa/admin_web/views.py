@@ -613,7 +613,11 @@ class Manual_Call_Incident_api(APIView):
     def post(self, request, *args, **kwargs):
         data = request.data
 
-        incident_fields = ['inc_type', 'disaster_type', 'alert_type', 'location', 'summary', 'responder_scope', 'latitude', 'longitude','caller_id', 'inc_added_by', 'inc_modified_by']
+        incident_fields = [
+            'inc_type', 'disaster_type', 'alert_type', 'location', 'summary',
+            'responder_scope', 'latitude', 'longitude', 'caller_id',
+            'inc_added_by', 'inc_modified_by'
+        ]
         caller_fields = ['caller_no', 'caller_name', 'caller_added_by', 'caller_modified_by']
         comments_fields = ['comments', 'comm_added_by', 'comm_modified_by']
 
@@ -625,29 +629,59 @@ class Manual_Call_Incident_api(APIView):
         if not caller_serializer.is_valid():
             return Response({"caller_errors": caller_serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
 
-        caller_instance = caller_serializer.save()  
-
+        caller_instance = caller_serializer.save()
         incident_data['caller_id'] = caller_instance.pk
 
         incident_serializer = Manual_call_incident_dispatch_Serializer(data=incident_data)
         if not incident_serializer.is_valid():
             return Response({"incident_errors": incident_serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
 
-        incident_instance = incident_serializer.save() 
+        incident_instance = incident_serializer.save()
 
         comments_data['incident_id'] = incident_instance.pk
         comments_serializer = manual_Comments_Serializer(data=comments_data)
-
-        if comments_serializer.is_valid():
-            comments_serializer.save()
-        else:
+        if not comments_serializer.is_valid():
             return Response({"comments_errors": comments_serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
 
+        comments_serializer.save()
+
+        weather_alert_data = {
+            "alert_code": incident_instance.alert_code,
+            "disaster_id": incident_instance.disaster_type.pk if incident_instance.disaster_type else None,
+            "latitude": incident_instance.latitude,
+            "longitude": incident_instance.longitude,
+            "added_by": incident_instance.inc_added_by,
+            "modified_by": incident_instance.inc_modified_by
+        }
+
+        weather_alert_serializer = WeatherAlertSerializer(data=weather_alert_data)
+        if not weather_alert_serializer.is_valid():
+            return Response({"weather_alert_errors": weather_alert_serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+
+        weather_alert_instance = weather_alert_serializer.save()
+
+        dms_notify_data = {
+            "disaster_type": incident_instance.disaster_type.pk if incident_instance.disaster_type else None,
+            "alert_type_id": incident_instance.responder_scope,
+            "added_by": incident_instance.inc_added_by
+        }
+
+        dms_notify_serializer = DMS_NotifySerializer(data=dms_notify_data)
+        if not dms_notify_serializer.is_valid():
+            return Response({"dms_notify_errors": dms_notify_serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+
+        dms_notify_instance = dms_notify_serializer.save()
+
+        incident_instance.notify_id = dms_notify_instance
+        incident_instance.save()
+
         return Response({
-            "message": "Manual call, caller, and comment data created successfully.",
+            "message": "Manual call, caller, comment, weather alert, and DMS notify created successfully.",
             "incident": incident_serializer.data,
             "caller": caller_serializer.data,
-            "comments": comments_serializer.data
+            "comments": comments_serializer.data,
+            "weather_alert": weather_alert_serializer.data,
+            "dms_notify": dms_notify_serializer.data
         }, status=status.HTTP_201_CREATED)
 
 
