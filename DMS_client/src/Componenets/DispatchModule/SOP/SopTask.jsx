@@ -253,7 +253,8 @@ function SopTask({ darkMode, flag, setFlag, setSelectedIncident }) {
             >
               {[
                 "Alert ID",
-                "Disaster ID",
+                // "Disaster ID",
+                "Disaster Type",
                 "Latitude",
                 "Longitude",
                 "Temperature",
@@ -271,7 +272,7 @@ function SopTask({ darkMode, flag, setFlag, setSelectedIncident }) {
                     padding: "8px",
                   }}
                 >
-                  <Typography variant="subtitle2" fontWeight={600}>
+                  <Typography variant="subtitle2" fontWeight={400}>
                     {label}
                   </Typography>
                 </StyledCardContent>
@@ -299,8 +300,13 @@ function SopTask({ darkMode, flag, setFlag, setSelectedIncident }) {
                   <StyledCardContent sx={{ flex: 1, justifyContent: "center" }}>
                     <Typography variant="subtitle2">{item.pk_id}</Typography>
                   </StyledCardContent>
-                   <StyledCardContent sx={{ flex: 1, justifyContent: "center" }}>
+                  {/* <StyledCardContent sx={{ flex: 1, justifyContent: "center" }}>
                     <Typography variant="subtitle2">{item.disaster_id_id}</Typography>
+                  </StyledCardContent> */}
+                  <StyledCardContent sx={{ flex: 1, justifyContent: "center" }}>
+                    <Typography variant="subtitle2">
+                      {item.disaster_name}
+                    </Typography>
                   </StyledCardContent>
                   <StyledCardContent sx={{ flex: 1, justifyContent: "center" }}>
                     <Typography variant="subtitle2">{item.latitude}</Typography>

@@ -9,7 +9,7 @@ export const AuthProvider = ({ children }) => {
   const [states, setStates] = useState([]);
 
   const [districts, setDistricts] = useState([]);
-    console.log(districts, "districts");
+  console.log(districts, "districts");
 
   const [Tehsils, setTehsils] = useState([]);
   const [Citys, setCitys] = useState([]);
@@ -20,12 +20,13 @@ export const AuthProvider = ({ children }) => {
   console.log(Citys, "selectedCityID");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [departmentName, setDepartmentName] = useState("");
+
   const [departments, setDepartments] = useState([]);
-  const [disasterIds, setDisasterIds] = useState([]);
-  const [disaster, setdisaster] = useState([]);
-  const [selectedDisasterId, setSelectedDisasterIds] = useState("");
- 
+  const [disaterid, setDisaterid] = useState(null);
+  console.log(disaterid, "disateridddddd");
+
+  // 🔹 sop page
+  const [responderScope, setResponderScope] = useState([]);
 
   const port = import.meta.env.VITE_APP_API_KEY;
   const token = localStorage.getItem("access_token");
@@ -95,7 +96,6 @@ export const AuthProvider = ({ children }) => {
         {
           headers: {
             Authorization: `Bearer ${token || newToken}`,
-
           },
         }
       );
@@ -153,7 +153,29 @@ export const AuthProvider = ({ children }) => {
       setLoading(false);
     }
   };
-  
+
+  const fetchResponderScope = async (disasterId) => {
+    if (!disasterId) return;
+    try {
+      setLoading(true);
+      const res = await axios.get(
+        `${port}/admin_web/Responder_Scope_Get/${disasterId}/`,
+        {
+          headers: {
+            Authorization: `Bearer ${newToken || token}`,
+          },
+        }
+      );
+      console.log("Responder Scope:", res.data);
+      setResponderScope(res.data || []);
+    } catch (err) {
+      console.error("Error fetching responder scope:", err);
+      setError(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // 🔹 Effects
   useEffect(() => {
     fetchStates();
@@ -220,10 +242,15 @@ export const AuthProvider = ({ children }) => {
         setSelectedDistrictId,
         setSelectedTehsilId,
         setSelectedCityId,
-        
+
         loading,
         error,
         newToken,
+
+        fetchResponderScope,
+        responderScope,
+        disaterid,
+        setDisaterid
       }}
     >
       {children}

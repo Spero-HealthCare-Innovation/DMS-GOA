@@ -3,6 +3,7 @@ import SopTask from "../SOP/SopTask";
 import IncidentDetails from "../SOP/IncidentDetails";
 import { useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
+import { useAuth } from "../../../Context/ContextAPI";
 
 function Sop({ darkMode, setDarkMode }) {
   // initStorageLogoutSync.js
@@ -21,8 +22,25 @@ function Sop({ darkMode, setDarkMode }) {
 
   const [flag, setFlag] = useState(flagFromState);
   const [selectedIncident, setSelectedIncident] = useState(null);
+  const { responderScope, fetchResponderScope } = useAuth();
+    const { setDisaterid } = useAuth();
 
-  console.log(selectedIncident, "selectedIncident");
+
+
+useEffect(() => {
+  if (selectedIncident?.disaster_id_id) {
+    console.log(
+      "Setting disaster id in context:",
+      selectedIncident.disaster_id_id
+    );
+    setDisaterid(selectedIncident.disaster_id_id);
+
+    // Pass the ID to fetchResponderScope
+    fetchResponderScope(selectedIncident.disaster_id_id);
+  }
+}, [selectedIncident]);;
+
+  console.log(selectedIncident?.disaster_id_id, "selectedIncident");
 
   return (
     <Box
@@ -55,6 +73,8 @@ function Sop({ darkMode, setDarkMode }) {
             flag={flag}
             setFlag={setFlag}
             selectedIncident={selectedIncident}
+            responderScope={responderScope}
+            fetchResponderScope={fetchResponderScope} // <-- Pass it here
           />
         </Grid>
       </Grid>
