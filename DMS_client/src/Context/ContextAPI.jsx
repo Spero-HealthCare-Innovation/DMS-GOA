@@ -1,13 +1,17 @@
-import React, { createContext, useContext, useState, useEffect } from "react";
+import { createContext, useContext, useState, useEffect } from "react";
 import axios from "axios";
-import { s } from "framer-motion/client";
 
 const AuthContext = createContext();
 export const useAuth = () => useContext(AuthContext);
 
 export const AuthProvider = ({ children }) => {
-  const [states, setStates] = useState([]);
+  const port = import.meta.env.VITE_APP_API_KEY;
+  const token = localStorage.getItem("access_token");
+  const refresh = localStorage.getItem("refresh_token");
+  console.log(refresh, "refreshhhhhhhhh");
 
+  const [newToken, setNewToken] = useState("");
+  const [states, setStates] = useState([]);
   const [districts, setDistricts] = useState([]);
   console.log(districts, "districts");
 
@@ -27,13 +31,6 @@ export const AuthProvider = ({ children }) => {
 
   // 🔹 sop page
   const [responderScope, setResponderScope] = useState([]);
-
-  const port = import.meta.env.VITE_APP_API_KEY;
-  const token = localStorage.getItem("access_token");
-  const refresh = localStorage.getItem("refresh_token");
-  console.log(refresh, "refreshhhhhhhhh");
-
-  const [newToken, setNewToken] = useState("");
 
   const refreshAuthToken = async () => {
     const refresh = localStorage.getItem("refresh_token");
@@ -76,7 +73,13 @@ export const AuthProvider = ({ children }) => {
   const fetchStates = async () => {
     try {
       setLoading(true);
-      const res = await axios.get(`${port}/admin_web/state_get/`);
+      const res = await axios.get(`${port}/admin_web/state_get/`,
+        {
+          headers: {
+            Authorization: `Bearer ${token || newToken}`,
+          },
+        }
+      );
       setStates(res.data);
     } catch (err) {
       console.error("Error fetching states:", err);
@@ -118,7 +121,7 @@ export const AuthProvider = ({ children }) => {
         `${port}/admin_web/Tahsil_get_idwise/${districtId}/`,
         {
           headers: {
-            Authorization: `Bearer ${token}`,
+            Authorization: `Bearer ${newToken || token}`,
           },
         }
       );
@@ -140,7 +143,7 @@ export const AuthProvider = ({ children }) => {
         `${port}/admin_web/City_get_idwise/${tehshilId}/`,
         {
           headers: {
-            Authorization: `Bearer ${token}`,
+            Authorization: `Bearer ${newToken || token}`,
           },
         }
       );
@@ -242,15 +245,14 @@ export const AuthProvider = ({ children }) => {
         setSelectedDistrictId,
         setSelectedTehsilId,
         setSelectedCityId,
-
         loading,
         error,
         newToken,
-
         fetchResponderScope,
-        responderScope,
         disaterid,
-        setDisaterid
+        setDisaterid,
+        responderScope,
+        setResponderScope
       }}
     >
       {children}
