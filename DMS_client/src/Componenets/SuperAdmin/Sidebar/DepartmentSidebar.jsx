@@ -28,7 +28,7 @@ const screenConfig = {
     icon: <AccountCircleIcon />,
     screens: [],
   },
-  "Register Responder": {
+  "Responder": {
     icon: <AccountCircleIcon />,
     screens: [],
   },
