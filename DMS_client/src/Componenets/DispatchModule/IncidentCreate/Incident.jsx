@@ -1,4 +1,4 @@
-import { useState, useContext, useEffect } from 'react';
+import { useState, useContext, useEffect, useRef } from 'react';
 import {
     Box,
     Grid,
@@ -9,10 +9,15 @@ import {
     Button,
     Checkbox,
     FormControlLabel,
-    Stack
+    Stack,
+    List,
+    ListItem,
+    ListItemButton
 } from "@mui/material";
 import { useAuth } from "../../../Context/ContextAPI";
 import IncidentCreateMap from "./IncidentCreateMap";
+import Snackbar from '@mui/material/Snackbar';
+import { useJsApiLoader, Autocomplete } from "@react-google-maps/api";
 
 const inputStyle = {
     mb: 2,
@@ -22,19 +27,129 @@ const boxStyle = {
     pb: 1.5,
 };
 
+const libraries = ['places'];
+
 const Incident = ({ darkMode }) => {
     const port = import.meta.env.VITE_APP_API_KEY;
+    const googleKey = import.meta.env.VITE_APP_GOOGLE_MAPS_API_KEY;
+    console.log(googleKey, 'googleKey');
+
     const token = localStorage.getItem("access_token");
-    const { newToken } = useAuth();
+    const { newToken, responderScope, setDisasterIncident } = useAuth();
     const bgColor = darkMode ? "#0a1929" : "#ffffff";
     const labelColor = darkMode ? "#5FECC8" : "#1976d2";
     const fontFamily = "Roboto, sans-serif";
     const [selectedEmergencyValue, setSelectedEmergencyValue] = useState('');
-    const { responderScope } = useAuth();
     console.log(responderScope, 'Fetching Scope Data');
     const [disaster, setDisaster] = useState([]);
+    const [summary, setSummary] = useState([]);
     const [selectedDisaster, setSelectedDisaster] = useState('');
-    const { setDisasterIncident } = useAuth();
+    const [alertType, setAlertType] = useState('');
+
+    // POST API
+    const [callerNumber, setCallerNumber] = useState('');
+    const [callerName, setCallerName] = useState('');
+    const [location, setLocation] = useState('');
+    const [summaryId, setSummaryId] = useState('');
+    const [comments, setComments] = useState('');
+    const [sopId, setSopId] = useState([]);
+
+    /// snackbar
+    const [snackbarOpen, setSnackbarOpen] = useState(false);
+    const [snackbarMessage, setSnackbarMessage] = useState('');
+
+    // Google API Start
+    const { isLoaded } = useJsApiLoader({
+        googleMapsApiKey: googleKey,
+        libraries: libraries,
+    });
+
+    const addressRef = useRef();
+
+    const handlePlaceChanged = () => {
+        console.log("place select function hitting...");
+        if (addressRef.current) {
+            const place = addressRef.current.getPlace();
+            console.log("place object", place);
+
+            if (!place.geometry || !place.geometry.location) {
+                console.warn("No geometry found for the selected place");
+                return;
+            }
+
+            const lat = place.geometry.location.lat();
+            const lng = place.geometry.location.lng();
+
+            const formattedLat = parseFloat(lat.toFixed(6));
+            const formattedLng = parseFloat(lng.toFixed(6));
+
+            console.log("Selected Address:", place.formatted_address);
+            console.log("Latitude:", formattedLat);
+            console.log("Longitude:", formattedLng);
+        }
+    };
+
+    // Google API End
+
+    const handleCheckboxChange = (pk_id) => {
+        setSopId((prev) =>
+            prev.includes(pk_id)
+                ? prev.filter((id) => id !== pk_id)
+                : [...prev, pk_id]
+        );
+    };
+
+    const handleSubmit = async () => {
+        const payload = {
+            inc_type: selectedEmergencyValue,
+            disaster_type: selectedDisaster,
+            alert_type: alertType,
+            location: location,
+            latitude: 12344444444454.45,
+            longitude: 1234532.34,
+            summary: summaryId,
+            caller_no: callerNumber,
+            caller_name: callerName,
+            comments: comments,
+            responder_scope: sopId,
+            inc_added_by: "admin",
+            inc_modified_by: "admin",
+            caller_added_by: "admin",
+            caller_modified_by: "admin",
+            comm_added_by: "admin",
+            comm_modified_by: "admin",
+        };
+
+        try {
+            const response = await fetch(`${port}/admin_web/manual_call_incident/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${token || newToken}`,
+                },
+                body: JSON.stringify(payload),
+            });
+
+            const data = await response.json();
+            if (response.status === 200) {
+                setSnackbarMessage("Incident Created Successfully");
+                setSnackbarOpen(true);
+                console.log(data);
+            } else {
+                console.error('Error:', data);
+            }
+        } catch (error) {
+            console.error('Error:', error);
+        }
+    };
+
+    const handleAlertTypeChange = (event) => {
+        setAlertType(event.target.value);
+    };
+
+    const handleEmergencyChange = (event) => {
+        setSelectedEmergencyValue(event.target.value);
+    };
 
     useEffect(() => {
         if (selectedDisaster) {
@@ -55,9 +170,18 @@ const Incident = ({ darkMode }) => {
         fetchDisaster()
     }, [])
 
-    const handleEmergencyChange = (event) => {
-        setSelectedEmergencyValue(event.target.value);
-    };
+    useEffect(() => {
+        const fetchSummary = async () => {
+            const res = await fetch(`${port}/admin_web/DMS_Summary_Get/`, {
+                headers: {
+                    Authorization: `Bearer ${token || newToken}`,
+                }
+            });
+            const data = await res.json();
+            setSummary(data);
+        };
+        fetchSummary();
+    }, []);
 
     return (
         <Box sx={{ minHeight: "100vh", backgroundColor: darkMode ? "#0a1929" : "#f5f5f5", px: 2, py: 2 }}>
@@ -101,29 +225,79 @@ const Incident = ({ darkMode }) => {
                                         </TextField>
                                     </Grid>
                                     <Grid item xs={12} sm={6}>
-                                        <TextField select fullWidth size="small" label="Alert Type" variant="outlined" sx={inputStyle}>
-                                            <MenuItem value="Coast Guard">High</MenuItem>
-                                            <MenuItem value="Police">Medium</MenuItem>
-                                            <MenuItem value="Media">Low</MenuItem>
+                                        <TextField
+                                            select
+                                            fullWidth
+                                            size="small"
+                                            label="Alert Type"
+                                            variant="outlined"
+                                            value={alertType}
+                                            onChange={handleAlertTypeChange}
+                                            sx={inputStyle}
+                                        >
+                                            <MenuItem value={1}>High</MenuItem>
+                                            <MenuItem value={2}>Medium</MenuItem>
+                                            <MenuItem value={3}>Low</MenuItem>
                                         </TextField>
                                     </Grid>
+
                                     <Grid item xs={12} sm={6}>
-                                        <TextField fullWidth size="small" label="Caller Number" variant="outlined" sx={inputStyle} />
+                                        <TextField fullWidth size="small" label="Caller Number" variant="outlined" sx={inputStyle}
+                                            value={callerNumber} onChange={(e) => setCallerNumber(e.target.value)} />
                                     </Grid>
+
                                     <Grid item xs={12} sm={6}>
-                                        <TextField fullWidth size="small" label="Caller Name" variant="outlined" sx={inputStyle} />
+                                        <TextField fullWidth size="small" label="Caller Name" variant="outlined" sx={inputStyle}
+                                            value={callerName} onChange={(e) => setCallerName(e.target.value)} />
                                     </Grid>
-                                    <Grid item xs={12} sm={6}>
-                                        <TextField fullWidth size="small" label="Location" variant="outlined" sx={inputStyle} />
+
+                                    <Grid item xs={12} sm={6} sx={{ position: 'relative' }}>
+                                        {isLoaded && (
+                                            <Autocomplete
+                                                onLoad={(autocomplete) =>
+                                                    (addressRef.current = autocomplete)
+                                                }
+                                                onPlaceChanged={handlePlaceChanged}
+                                            >
+                                                <TextField
+                                                    label="Location"
+                                                    name="location"
+                                                    placeholder="Location"
+                                                    size="small"
+                                                    fullWidth
+                                                    value={location}
+                                                    onChange={(e) => setLocation(e.target.value)}
+                                                    ref={addressRef}
+                                                    sx={{
+                                                        "& input": {
+                                                            fontSize: "14px",
+                                                        },
+                                                    }}
+                                                />
+                                            </Autocomplete>
+                                        )}
                                     </Grid>
+
                                     <Grid item xs={12} sm={12}>
                                         <TextField
-                                            fullWidth size="small"
+                                            select
+                                            fullWidth
+                                            size="small"
                                             label="Summary"
-                                            multiline
                                             variant="outlined"
                                             sx={inputStyle}
-                                        />
+                                            value={summaryId}
+                                            onChange={(e) => setSummaryId(e.target.value)}
+                                        >
+                                            <MenuItem disabled value="">
+                                                Select Summary
+                                            </MenuItem>
+                                            {summary.map((item) => (
+                                                <MenuItem key={item.sum_id} value={item.sum_id}>
+                                                    {item.summary}
+                                                </MenuItem>
+                                            ))}
+                                        </TextField>
                                     </Grid>
                                 </Grid>
                             </Paper>
@@ -135,9 +309,11 @@ const Incident = ({ darkMode }) => {
                                 <TextField
                                     fullWidth size="small"
                                     multiline
-                                    rows={8}
+                                    rows={10}
                                     variant="outlined"
                                     sx={inputStyle}
+                                    value={comments}
+                                    onChange={(e) => setComments(e.target.value)}
                                 />
                             </Paper>
                         </Grid>
@@ -158,22 +334,26 @@ const Incident = ({ darkMode }) => {
                                         >
                                             <Box sx={boxStyle}>
                                                 <Typography
-                                                    sx={{ color: labelColor, fontWeight: 500, fontFamily }}
+                                                    sx={{ color: labelColor, fontWeight: 500, fontFamily, }}
                                                 >
-                                                    Alert ID
+                                                    Incident Type
                                                 </Typography>
                                                 <Typography variant="subtitle2" sx={{ fontFamily }}>
+                                                    {selectedEmergencyValue === 1 ? "Emergency" : "Non-Emergency"}
                                                 </Typography>
                                             </Box>
 
-                                            <Box>
+                                            <Typography variant="subtitle2" sx={{ fontFamily, borderBottom: { md: `1px solid white` }, mb: 2 }}>
+                                            </Typography>
+
+                                            <Box sx={boxStyle}>
                                                 <Typography
-                                                    variant="subtitle2"
                                                     sx={{ color: labelColor, fontWeight: 500, fontFamily }}
                                                 >
                                                     Alert Type
                                                 </Typography>
                                                 <Typography variant="subtitle2" sx={{ fontFamily }}>
+                                                    {alertType}
                                                 </Typography>
                                             </Box>
                                         </Grid>
@@ -195,9 +375,17 @@ const Incident = ({ darkMode }) => {
                                                     Response Procedure
                                                 </Typography>
                                                 <Typography variant="subtitle2" sx={{ fontFamily }}>
-                                                    Mass intimation to public, Media, Boat, Fisheries
+                                                    {responderScope?.sop_responses?.map((sop) => (
+                                                        <div key={sop.sop_id}>
+                                                            {sop?.sop_description || "No SOP description"}
+                                                        </div>
+                                                    ))}
                                                 </Typography>
                                             </Box>
+
+                                            <Typography variant="subtitle2" sx={{ fontFamily, borderBottom: { md: `1px solid white` }, mb: 3 }}>
+                                            </Typography>
+
                                             <Box>
                                                 <Typography
                                                     variant="subtitle2"
@@ -207,78 +395,71 @@ const Incident = ({ darkMode }) => {
                                                 </Typography>
                                                 <Stack spacing={1} mt={1}>
                                                     <Box display="flex" flexWrap="wrap" gap={1}>
-                                                        <FormControlLabel
-                                                            control={
-                                                                <Checkbox defaultChecked sx={{ color: labelColor }} />
-                                                            }
-                                                            label={
-                                                                <Typography variant="subtitle2" sx={{ fontFamily }}>
-                                                                    Police
-                                                                </Typography>
-                                                            }
-                                                        />
-                                                        <FormControlLabel
-                                                            control={<Checkbox sx={{ color: labelColor }} />}
-                                                            label={
-                                                                <Typography variant="subtitle2" sx={{ fontFamily }}>
-                                                                    Fire
-                                                                </Typography>
-                                                            }
-                                                        />
-                                                        <FormControlLabel
-                                                            control={<Checkbox sx={{ color: labelColor }} />}
-                                                            label={
-                                                                <Typography variant="subtitle2" sx={{ fontFamily }}>
-                                                                    Marine
-                                                                </Typography>
-                                                            }
-                                                        />
-                                                        <FormControlLabel
-                                                            control={<Checkbox sx={{ color: labelColor }} />}
-                                                            label={
-                                                                <Typography variant="subtitle2" sx={{ fontFamily }}>
-                                                                    Fisheries
-                                                                </Typography>
-                                                            }
-                                                        />
+                                                        {responderScope?.responder_scope?.map((responder) => (
+                                                            <FormControlLabel
+                                                                key={responder.pk_id}
+                                                                control={
+                                                                    <Checkbox
+                                                                        checked={sopId.includes(responder.pk_id)}
+                                                                        onChange={() => handleCheckboxChange(responder.pk_id)}
+                                                                        sx={{ color: labelColor }}
+                                                                    />
+                                                                }
+                                                                label={
+                                                                    <Typography variant="subtitle2" sx={{ fontFamily }}>
+                                                                        {responder.responder_name}
+                                                                    </Typography>
+                                                                }
+                                                            />
+                                                        ))}
                                                     </Box>
                                                 </Stack>
                                             </Box>
                                         </Grid>
                                     </Grid>
                                 </Paper>
-
-                                <Grid
-                                    item
-                                    xs={12}
-                                    md={9}
-                                    sx={{ marginLeft: '6em' }}
-                                >
-                                    <Box sx={{ display: 'flex', justifyContent: 'center' }}>
-                                        <Button
-                                            variant="contained"
-                                            sx={{
-                                                mb: '3em',
-                                                width: "30%",
-                                                backgroundColor: "white",
-                                                color: "black",
-                                                fontWeight: "bold",
-                                                borderRadius: "12px",
-                                            }}
-                                        >
-                                            Submit
-                                        </Button>
-                                    </Box>
-                                </Grid>
                             </Grid>
                         )}
 
+                        <Grid
+                            item
+                            xs={12}
+                            md={9}
+                            sx={{ marginLeft: '4em' }}
+                        >
+                            <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+                                <Button
+                                    variant="contained"
+                                    sx={{
+                                        mb: '3em',
+                                        width: "30%",
+                                        backgroundColor: "white",
+                                        color: "black",
+                                        fontWeight: "bold",
+                                        borderRadius: "12px",
+                                    }}
+                                    onClick={handleSubmit}
+                                >
+                                    Submit
+                                </Button>
+                            </Box>
+                        </Grid>
                     </Grid>
                 </Grid>
 
                 <Grid item xs={12} md={4} style={{ position: "relative" }}>
                     <IncidentCreateMap />
                 </Grid>
+
+                {/* Snackbar */}
+                <Snackbar
+                    open={snackbarOpen}
+                    autoHideDuration={3000}
+                    onClose={() => setSnackbarOpen(false)}
+                    message={snackbarMessage}
+                    anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+                />
+
             </Grid>
         </Box>
     );

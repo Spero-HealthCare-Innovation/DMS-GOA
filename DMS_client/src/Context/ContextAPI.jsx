@@ -39,14 +39,13 @@ export const AuthProvider = ({ children }) => {
 
 
   useEffect(() => {
-    const disasterValue = disaterid && disasterIncident;
+    const disasterValue = disaterid || disasterIncident;
+    console.log(disasterValue,'passingValue');
+    
     if (disasterValue) {
       fetchResponderScope(disasterValue);
     }
   }, [disaterid, disasterIncident]);
-
-  // 🔹 sop page
-  const [responderScope, setResponderScope] = useState([]);
 
   const refreshAuthToken = async () => {
     const refresh = localStorage.getItem("refresh_token");
@@ -185,6 +184,8 @@ export const AuthProvider = ({ children }) => {
           },
         }
       );
+      console.log(res,'resssssss');
+      
       console.log("Responder Scope:", res.data);
       setResponderScope(res.data || []);
     } catch (err) {

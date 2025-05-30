@@ -39,12 +39,12 @@ const IncidentCreateMap = () => {
     }, [query,suggestions,selectedPosition,popupText]);
 
   useEffect(() => {
-      fetch('/Boundaries/Goa_State.geojson')
-        .then(res => res.json())
-        .then(data => {
-          setStateData(data);
-        });
-    }, []);
+    fetch('/Boundaries/Goa_State.geojson')
+      .then(res => res.json())
+      .then(data => {
+        setStateData(data);
+      });
+  }, []);
 
   const geoJsonStyle = {
     weight: 2,
@@ -95,38 +95,38 @@ const IncidentCreateMap = () => {
   // };
 
   return (
-  <div style={{ position: "relative", width: "100%", height: "92.5vh" }}>
-    {/* Search input & suggestions */}
-    <div
-      style={{
-        position: "absolute",
-        top: 12,
-        right: 10,
-        zIndex: 1000,
-        backgroundColor: "white",
-        borderRadius: 5,
-        padding: 0,
-        width: 300,
-        boxShadow: "0px 2px 6px rgba(249, 246, 246, 1)"
-      }}
-    >
-      <input
+    <div style={{ position: "relative", width: "100%", height: "92.5vh" }}>
+      {/* Search input & suggestions */}
+      <div
+        style={{
+          position: "absolute",
+          top: 12,
+          right: 10,
+          zIndex: 1000,
+          backgroundColor: "white",
+          borderRadius: 5,
+          padding: 0,
+          width: 300,
+          boxShadow: "0px 2px 6px rgba(249, 246, 246, 1)"
+        }}
+      >
+        <input
           type="text"
           placeholder="Search for a place..."
           value={queryMap}
           onChange={handleSearchChange}
           style={{ width: '100%', padding: '8px' }}
         />
-          {suggestions.length > 0 && (
-          <ul style={{ listStyle: 'none', padding: 0, margin: 0, background: 'white', color: 'black', fontFamily: 'initial'}}>
+        {suggestions.length > 0 && (
+          <ul style={{ listStyle: 'none', padding: 0, margin: 0, background: 'white', color: 'black', fontFamily: 'initial' }}>
             {suggestions.map((item, idx) => (
               <li key={idx} onClick={() => handleSelectSuggestion(item)} style={{ padding: '5px', cursor: 'pointer', borderBottom: '1px solid #ccc' }}>
                 {item.address.label}
               </li>
             ))}
           </ul>
-      )}
-    </div>
+        )}
+      </div>
 
     {/* Leaflet Map */}
     <MapContainer

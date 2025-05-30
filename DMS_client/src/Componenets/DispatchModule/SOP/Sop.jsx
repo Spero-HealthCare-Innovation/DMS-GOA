@@ -4,6 +4,7 @@ import IncidentDetails from "../SOP/IncidentDetails";
 import { useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { useAuth } from "../../../Context/ContextAPI";
+import CaseClosureDetails from "./CaseClosureDetails";
 
 function Sop({ darkMode, setDarkMode }) {
   // initStorageLogoutSync.js
@@ -23,22 +24,22 @@ function Sop({ darkMode, setDarkMode }) {
   const [flag, setFlag] = useState(flagFromState);
   const [selectedIncident, setSelectedIncident] = useState(null);
   const { responderScope, fetchResponderScope } = useAuth();
-    const { setDisaterid } = useAuth();
+  const { setDisaterid } = useAuth();
+  const [viewmode, setViewmode] = useState("incident");
+  console.log(viewmode, "viewmode");
 
+  useEffect(() => {
+    if (selectedIncident?.disaster_id_id) {
+      console.log(
+        "Setting disaster id in context:",
+        selectedIncident.disaster_id_id
+      );
+      setDisaterid(selectedIncident.disaster_id_id);
 
-
-useEffect(() => {
-  if (selectedIncident?.disaster_id_id) {
-    console.log(
-      "Setting disaster id in context:",
-      selectedIncident.disaster_id_id
-    );
-    setDisaterid(selectedIncident.disaster_id_id);
-
-    // Pass the ID to fetchResponderScope
-    fetchResponderScope(selectedIncident.disaster_id_id);
-  }
-}, [selectedIncident]);;
+      // Pass the ID to fetchResponderScope
+      fetchResponderScope(selectedIncident.disaster_id_id);
+    }
+  }, [selectedIncident]);
 
   console.log(selectedIncident?.disaster_id_id, "selectedIncident");
 
@@ -63,20 +64,35 @@ useEffect(() => {
             flag={flag}
             setFlag={setFlag}
             setSelectedIncident={setSelectedIncident}
+            setViewmode={setViewmode}
           />
         </Grid>
 
         {/* Always render IncidentDetails */}
-        <Grid item xs={12}>
-          <IncidentDetails
-            darkMode={darkMode}
-            flag={flag}
-            setFlag={setFlag}
-            selectedIncident={selectedIncident}
-            responderScope={responderScope}
-            fetchResponderScope={fetchResponderScope} // <-- Pass it here
-          />
-        </Grid>
+        
+         {viewmode !== "closure" ? (
+          <Grid item xs={12}>
+            <IncidentDetails
+              darkMode={darkMode}
+              flag={flag}
+              setFlag={setFlag}
+              selectedIncident={selectedIncident}
+              responderScope={responderScope}
+              fetchResponderScope={fetchResponderScope}
+            />
+          </Grid>
+        ) : (
+          <Grid item xs={12}>
+            <CaseClosureDetails
+              darkMode={darkMode}
+              flag={flag}
+              setFlag={setFlag}
+              selectedIncident={selectedIncident}
+              responderScope={responderScope}
+              fetchResponderScope={fetchResponderScope}
+            />
+          </Grid>
+        )}
       </Grid>
     </Box>
   );
