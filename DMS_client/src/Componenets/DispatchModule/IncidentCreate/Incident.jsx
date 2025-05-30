@@ -35,13 +35,12 @@ const Incident = ({ darkMode }) => {
     console.log(googleKey, 'googleKey');
 
     const token = localStorage.getItem("access_token");
-    const { newToken, responderScope, setDisasterIncident } = useAuth();
+    const { newToken, responderScope, setDisasterIncident, disaster } = useAuth();
     const bgColor = darkMode ? "#0a1929" : "#ffffff";
     const labelColor = darkMode ? "#5FECC8" : "#1976d2";
     const fontFamily = "Roboto, sans-serif";
     const [selectedEmergencyValue, setSelectedEmergencyValue] = useState('');
     console.log(responderScope, 'Fetching Scope Data');
-    const [disaster, setDisaster] = useState([]);
     const [summary, setSummary] = useState([]);
     const [selectedDisaster, setSelectedDisaster] = useState('');
     const [alertType, setAlertType] = useState('');
@@ -156,19 +155,6 @@ const Incident = ({ darkMode }) => {
             setDisasterIncident(selectedDisaster);
         }
     }, [selectedDisaster]);;
-
-    useEffect(() => {
-        const fetchDisaster = async () => {
-            const disaster = await fetch(`${port}/admin_web/DMS_Disaster_Type_Get/`, {
-                headers: {
-                    Authorization: `Bearer ${token || newToken}`,
-                }
-            })
-            const disasterData = await disaster.json();
-            setDisaster(disasterData);
-        };
-        fetchDisaster()
-    }, [])
 
     useEffect(() => {
         const fetchSummary = async () => {
@@ -353,7 +339,7 @@ const Incident = ({ darkMode }) => {
                                                     Alert Type
                                                 </Typography>
                                                 <Typography variant="subtitle2" sx={{ fontFamily }}>
-                                                    {alertType}
+                                                    {alertType === 1 ? "High" : alertType === 2 ? "Medium" : "Low"}
                                                 </Typography>
                                             </Box>
                                         </Grid>
