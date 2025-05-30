@@ -4,34 +4,29 @@ import {
   Grid,
   Typography,
   Button,
-  Checkbox,
-  FormControlLabel,
   Box,
-  Stack,
   TextField,
   MenuItem,
   Table,
   TableBody,
   TableContainer,
-  CardContent,
   TableHead,
   TableRow,
-  IconButton,
-  Modal,
   InputAdornment,
   Select,
   Popover,
-  Tooltip,
   Snackbar,
   Alert,
+  Autocomplete,
+  FormHelperText,
+  FormControl,
+  InputLabel,
 } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
+import SearchIcon from "@mui/icons-material/Search";
 
 import {
-  Search,
-  Visibility,
   AddCircleOutline,
-  EditNotifications,
   DeleteOutline,
   EditOutlined,
 } from "@mui/icons-material";
@@ -61,9 +56,10 @@ import axios from "axios";
 import { select } from "framer-motion/client";
 
 const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
-  const [modalOpen, setModalOpen] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
   const port = import.meta.env.VITE_APP_API_KEY;
+  const { newToken } = useAuth();
+  const group = localStorage.getItem("user_group");
   const token = localStorage.getItem("access_token");
   const {
     states,
@@ -78,49 +74,29 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
     setSelectedTehsilId,
     selectedCityID,
     setSelectedCityId,
-    loading,
-    error,
   } = useAuth();
-  console.log(
-    "disaster",
-    Citys,
-    selectedCityID,
-    selectedStateId,
-    selectedDistrictId,
-    selectedTehsilId,
-    selectedCityID
-  );
-
-  const handleStateChange = (e) => {
-    const id = e.target.value;
-    setSelectedStateId(id);
-  };
-
-  const handleDistrictChange = (e) => {
-    const id = e.target.value;
-    setSelectedDistrictId(id);
-  };
 
   const theme = useTheme();
   const isDarkMode = theme.palette.mode === "dark";
   const selectStyles = getCustomSelectStyles(isDarkMode);
   const open = Boolean(anchorEl);
-  const handleOpen = (event, item) => {
-    setAnchorEl(event.currentTarget);
-    // Optionally store item in state if needed
-  };
-  const handleClose = () => {
-    setAnchorEl(null);
-  };
-  const navigate = useNavigate();
-  const [disasterIds, setDisasterIds] = useState([]);
-  const [disaster, setdisaster] = useState([]);
-  const [selectedDisasterId, setSelectedDisasterId] = useState("");
-  const [departments, setDepartments] = useState([]);
-  const itemsPerPage = 5;
-  const [page, setPage] = useState(1);
-  const [submitted, setSubmitted] = useState(false);
 
+  const navigate = useNavigate();
+  const [selectedItem, setSelectedItem] = useState(null);
+  const [selectedDisasterId, setSelectedDisasterId] = useState("");
+  const [departmentName, setDepartmentName] = useState("");
+  const [departments, setDepartments] = useState([]);
+  const [allEditData, setAllEditData] = useState([]);
+  const [page, setPage] = useState(1);
+
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [editId, setEditId] = useState(null);
+  const [deptId, setDeptId] = useState(null);
+  const [deptFetchId, setDeptFetchId] = useState(null);
+  console.log(deptFetchId, "deptFetchId");
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState("");
+  const [snackbarSeverity, setSnackbarSeverity] = useState("success");
   const [showSuccessAlert, setShowSuccessAlert] = useState(false);
   const [disasterList, setDisasterList] = useState([]);
   const [rowsPerPage, setRowsPerPage] = useState(5);
@@ -129,6 +105,16 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
   const fontFamily = "Roboto, sans-serif";
   const textColor = darkMode ? "#ffffff" : "#000000";
   const bgColor = darkMode ? "#0a1929" : "#ffffff";
+  const [stateError, setStateError] = useState(false);
+  const [districtError, setDistrictError] = useState(false);
+  const [tehsilError, setTehsilError] = useState(false);
+  const [cityError, setCityError] = useState(false);
+  const [disasterError, setDisasterError] = useState(false);
+  const [departmentError, setDepartmentError] = useState(false);
+  const [departmentErrorMsg, setDepartmentErrorMsg] = useState("");
+  const [snackbarmsgAddDept, setSnackbarMessageAdded] = useState("");
+  const [snackbarupdate, setSnackbarMessageUpdated] = useState("");
+
   const TableDataColor = darkMode
     ? "rgba(0, 0, 0, 0.04)"
     : "rgba(255, 255, 255, 0.16)";
@@ -137,31 +123,218 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
     ? "rgba(255, 255, 255, 0.16)"
     : "rgba(0, 0, 0, 0.04)";
 
-  const [formValues, setFormValues] = useState({
-    dep_name: "",
-    dis_id: "",
-    state_id: "",
-    tah_id: "",
-    cit_id: "",
-    dis_district_id: "",
+  const [searchQuery, setSearchQuery] = useState("");
+  const [suggestions, setSuggestions] = useState([]);
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: "",
+    severity: "success", // or "error"
   });
 
+  const searchData = [
+    ...departments.map((dep) => ({ label: dep.dep_name, type: "Department" })),
+    ...states.map((st) => ({ label: st.state_name, type: "State" })),
+    ...districts.map((dist) => ({
+      label: dist.district_name,
+      type: "District",
+    })),
+    ...Tehsils.map((teh) => ({ label: teh.tehsil_name, type: "Tehsil" })),
+    ...Citys.map((city) => ({ label: city.city_name, type: "City" })),
+  ];
+
+  const handleSearch = (e) => {
+    const value = e.target.value;
+    setSearchQuery(value);
+
+    if (!value) {
+      setSuggestions([]);
+      return;
+    }
+
+    const filtered = searchData.filter((item) =>
+      item.label.toLowerCase().includes(value.toLowerCase())
+    );
+
+    setSuggestions(filtered);
+  };
+
+  const handleOpen = (event, item) => {
+    setAnchorEl(event.currentTarget);
+    setSelectedItem(item);
+  };
+
+  const handleClose = () => {
+    setAnchorEl(null);
+    setSelectedItem(null);
+  };
+
+  const handleEdit = async (selectedItem) => {
+    const depId = selectedItem.dep_id;
+    console.log("Editing Department ID:", depId);
+    setDeptFetchId(depId);
+
+    try {
+      const res = await axios.get(
+        `${port}/admin_web/Department_get_idwise/${depId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token || newToken}`,
+          },
+        }
+      );
+      console.log(
+        `Fetching ID Wise Data`,
+        res.data[0].dep_name,
+        res.data[0].state_id,
+        res.data[0].dis_id,
+        res.data[0].tah_id,
+        res.data[0].cit_id,
+        res.data[0].disaster_id
+      );
+      setIsEditMode(true); // This enables buttons that depend on isEditMode
+      setAllEditData(res.data);
+
+      setDepartmentName(res.data[0].dep_name || "");
+      setSelectedStateId(res.data[0].state_id || "");
+    } catch (err) {
+      console.error("Error fetching department data:", err);
+
+      setError(err);
+    }
+  };
+
+  const handleUpdate = async () => {
+    const payload = {
+      dep_name: departmentName,
+      dis_id: selectedDisasterId,
+      state_id: selectedStateId,
+      dis_district_id: selectedDistrictId,
+      tah_id: selectedTehsilId,
+      cit_id: selectedCityID,
+      disaster_id: selectedDisasterId,
+    };
+
+    try {
+      const response = await fetch(
+        `${port}/admin_web/department_put/${deptFetchId}/`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token || newToken}`,
+          },
+          body: JSON.stringify(payload),
+        }
+      );
+
+      if (response.ok) {
+        const resData = await response.json();
+        console.log("Updated Department:", resData);
+
+        // Refresh department list
+        await fetchDepartments();
+
+        // Show snackbar
+        setSnackbarMessageUpdated("Department updated successfully!");
+
+        // Clear form
+        setDepartmentName("");
+        setSelectedStateId("");
+        setSelectedDistrictId("");
+        setSelectedTehsilId("");
+        setSelectedCityId("");
+        setSelectedDisasterId("");
+
+        // Exit edit mode
+        setIsEditMode(false);
+        setEditId(null);
+
+        // Auto hide snackbar
+        setTimeout(() => setShowSuccessAlert(false), 3000);
+      } else {
+        const errorData = await response.json();
+        console.error("Update failed:", errorData);
+        alert("Failed to update department.");
+      }
+    } catch (err) {
+      console.error("Update error:", err);
+    }
+  };
+
+  const handleCloseSnackbar = () => {
+    setSnackbar({ ...snackbar, open: false });
+  };
+  // Set District after districts are loaded
+  useEffect(() => {
+    if (selectedStateId && allEditData.length > 0) {
+      const disId = allEditData[0]?.dis_id;
+      if (districts.find((d) => d.dis_id === disId)) {
+        setSelectedDistrictId(disId);
+      }
+    }
+  }, [districts, selectedStateId]);
+
+  useEffect(() => {
+    if (selectedDistrictId && allEditData.length > 0) {
+      const tahId = allEditData[0]?.tah_id;
+      if (Tehsils.find((t) => t.tah_id === tahId)) {
+        setSelectedTehsilId(tahId);
+      }
+    }
+  }, [Tehsils, selectedDistrictId]);
+
+  useEffect(() => {
+    if (selectedTehsilId && allEditData.length > 0) {
+      const citId = allEditData[0]?.cit_id;
+      if (Citys.find((c) => c.cit_id === citId)) {
+        setSelectedCityId(citId);
+      }
+    }
+  }, [Citys, selectedTehsilId]);
+
+  useEffect(() => {
+    if (allEditData.length > 0 && disasterList.length > 0) {
+      const disasterId = allEditData[0]?.disaster_id;
+      const foundDisaster = disasterList.find(
+        (d) => d.disaster_id === disasterId
+      );
+      if (foundDisaster) {
+        setSelectedDisasterId(disasterId);
+      }
+    }
+  }, [allEditData, disasterList]);
+
+  const filteredDepartments = useMemo(() => {
+    if (!searchQuery) return departments;
+
+    return departments.filter(
+      (item) =>
+        item.dep_name?.toLowerCase().includes(searchQuery) ||
+        item.state_name?.toLowerCase().includes(searchQuery) ||
+        item.dst_name?.toLowerCase().includes(searchQuery) ||
+        item.tah_name?.toLowerCase().includes(searchQuery) ||
+        item.city_name?.toLowerCase().includes(searchQuery)
+    );
+  }, [departments, searchQuery]);
+
   const paginatedData = useMemo(() => {
-    if (!departments?.length) return [];
+    if (!filteredDepartments?.length) return [];
 
     const start = (page - 1) * rowsPerPage;
     const end = start + rowsPerPage;
-    const paginated = departments.slice(start, end);
+    const paginated = filteredDepartments.slice(start, end);
 
     // Optional fallback to first page if none match (rare if no filtering)
-    return paginated.length > 0 ? paginated : departments.slice(0, rowsPerPage);
-  }, [page, rowsPerPage, departments]);
+    return paginated.length > 0
+      ? paginated
+      : filteredDepartments.slice(0, rowsPerPage);
+  }, [page, rowsPerPage, filteredDepartments]);
 
   const fetchDepartments = async () => {
     try {
       const response = await fetch(`${port}/admin_web/Department_get/`, {
         headers: {
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${token || newToken}`,
         },
       });
 
@@ -187,14 +360,53 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
     fetchDepartments();
   }, []);
 
-  const saveDepartment = async () => {
+  const saveDepartment = async (e) => {
+    if (e) e.preventDefault(); // Prevent form refresh
+
+    // Field validations
+    let isValid = true;
+
+    if (!departmentName.trim()) {
+      setDepartmentError(true);
+      setDepartmentErrorMsg("Department name is required.");
+      isValid = false;
+    }
+
+    if (!selectedStateId) {
+      setStateError(true);
+      isValid = false;
+    }
+
+    if (!selectedDistrictId) {
+      setDistrictError(true);
+      isValid = false;
+    }
+
+    if (!selectedTehsilId) {
+      setTehsilError(true);
+      isValid = false;
+    }
+
+    if (!selectedCityID) {
+      setCityError(true);
+      isValid = false;
+    }
+
+    if (!selectedDisasterId) {
+      setDisasterError(true);
+      isValid = false;
+    }
+
+    if (!isValid) return; // Stop submission if any validation fails
+
     const payload = {
-      dep_name: formValues.dep_name,
+      dep_name: departmentName,
       dis_id: selectedDisasterId,
       state_id: selectedStateId,
       dis_district_id: selectedDistrictId,
       tah_id: selectedTehsilId,
-      cit_id: selectedCityID || (Citys.length > 0 ? Citys[0].cit_id : null),
+      cit_id: selectedCityID,
+      disaster_id: selectedDisasterId,
     };
 
     console.log("Payload before POST:", payload);
@@ -204,7 +416,7 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${token || newToken}`,
         },
         body: JSON.stringify(payload),
       });
@@ -213,38 +425,36 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
         const resData = await response.json();
         console.log("Department saved:", resData);
 
-        const newDepartment = {
-          departmentName: resData.dep_name,
-          disasterId: getNameById(
-            disasterList,
-            resData.dis_id,
-            "disaster_name"
-          ),
-          state: getNameById(states, resData.state_id, "state_name"),
-          city: getNameById(Citys, resData.cit_id, "cit_name"),
-          tehsil: getNameById(Tehsils, resData.tah_id, "tah_name"),
-          district: getNameById(districts, resData.dis_district_id, "dis_name"),
-        };
-
-        setDepartments((prev) => [newDepartment, ...prev]);
+        await fetchDepartments(); // Refresh department list
+        setSnackbarMessageAdded("Department added successfully!");
         setShowSuccessAlert(true);
-
-        // Optional: Auto-hide after 3 seconds
         setTimeout(() => setShowSuccessAlert(false), 3000);
 
-        // Reset form
-        setFormValues({ dep_name: "" });
+        // ✅ Clear form fields
+        setDepartmentName("");
         setSelectedDisasterId("");
         setSelectedStateId("");
         setSelectedDistrictId("");
         setSelectedTehsilId("");
         setSelectedCityId("");
+
+        // ✅ Clear errors
+        setDepartmentError(false);
+        setDepartmentErrorMsg("");
+        setStateError(false);
+        setDistrictError(false);
+        setTehsilError(false);
+        setCityError(false);
+        setDisasterError(false);
+
+        setDeptId(null);
       } else {
         const errorData = await response.json();
         if (
           errorData?.detail === "Department with this dep_name already exists."
         ) {
-          alert("Department name already exists. Please choose another name.");
+          setDepartmentError(true);
+          // setDepartmentErrorMsg("Department name already exists.");
         } else {
           console.error("Failed to save department:", errorData);
         }
@@ -254,11 +464,6 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
     }
   };
 
-  const getNameById = (arr, id, labelKey = "name") => {
-    const item = arr.find((el) => el.id === id || el[`${labelKey}_id`] === id);
-    return item ? item[labelKey] : "N/A";
-  };
-
   useEffect(() => {
     const fetchDisasters = async () => {
       try {
@@ -266,7 +471,7 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
           `${port}/admin_web/DMS_Disaster_Type_Get/`,
           {
             headers: {
-              Authorization: `Bearer ${token}`, // Include token if required
+              Authorization: `Bearer ${token || newToken}`,
             },
           }
         );
@@ -284,24 +489,56 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
     fetchDisasters();
   }, []);
 
+  const handleDelete = async (depId) => {
+    if (!window.confirm("Are you sure you want to delete this department?"))
+      return;
+
+    try {
+      const res = await axios.delete(
+        `${port}/admin_web/department_delete/${depId}/`,
+        {
+          headers: {
+            Authorization: `Bearer ${token || newToken}`,
+          },
+        }
+      );
+
+      console.log("Delete success:", res.data);
+      setDepartments((prev) => prev.filter((item) => item.dep_id !== depId));
+      setSnackbarMessage(
+        res.data.message || "Department deleted successfully."
+      );
+      setSnackbarSeverity("success");
+      setSnackbarOpen(true);
+      handleClose(); // close popover
+    } catch (err) {
+      console.error("Error deleting department:", err);
+      setSnackbarMessage("Failed to delete department. Please try again.");
+      setSnackbarSeverity("error");
+      setSnackbarOpen(true);
+    }
+  };
+
   return (
     // ..
     <Box sx={{ p: 2, marginLeft: "3rem" }}>
       <Snackbar
-        open={showSuccessAlert}
-        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+        open={Boolean(snackbarmsgAddDept)}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
         autoHideDuration={3000}
-        onClose={() => setShowSuccessAlert(false)}
-      >
-        <Alert
+        onClose={() => setSnackbarMessageAdded(null)}
+        message={snackbarmsgAddDept}
+      />
+
+      {/* <Alert
           onClose={() => setShowSuccessAlert(false)}
           severity="success"
           variant="filled"
           sx={{ width: "100%" }}
         >
           Department added successfully!
-        </Alert>
-      </Snackbar>
+        </Alert> */}
+      {/* </Snackbar> */}
       <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
         <Box
           sx={{
@@ -340,36 +577,48 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
             >
               Add Department
             </Typography>
-            <TextField
-              // variant="outlined"
-              size="small"
-              placeholder="Search"
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <Search sx={{ color: "gray", fontSize: 18 }} />
-                  </InputAdornment>
-                ),
+            <Autocomplete
+              freeSolo
+              options={suggestions}
+              getOptionLabel={(option) => option.label}
+              onInputChange={handleSearch}
+              onChange={(e, value) => {
+                setSearchQuery(value?.label?.toLowerCase() || "");
               }}
-              sx={{
-                width: "200px",
-                ml: 5,
-                "& .MuiOutlinedInput-root": {
-                  borderRadius: "25px",
-                  backgroundColor: darkMode ? "#1e293b" : "#fff",
-                  color: darkMode ? "#fff" : "#000",
-                  px: 1,
-                  py: 0.2,
-                },
-                "& .MuiOutlinedInput-notchedOutline": {
-                  borderColor: darkMode ? "#444" : "#ccc",
-                },
-                "& input": {
-                  color: darkMode ? "#fff" : "#000",
-                  padding: "6px 8px",
-                  fontSize: "13px",
-                },
-              }}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  placeholder="Search "
+                  size="small"
+                  InputProps={{
+                    ...params.InputProps,
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <SearchIcon sx={{ color: "gray", fontSize: 18 }} />
+                      </InputAdornment>
+                    ),
+                  }}
+                  sx={{
+                    width: "200px",
+                    ml: 5,
+                    "& .MuiOutlinedInput-root": {
+                      borderRadius: "25px",
+                      backgroundColor: darkMode ? "#1e293b" : "#fff",
+                      color: darkMode ? "#fff" : "#000",
+                      px: 1,
+                      py: 0.2,
+                    },
+                    "& .MuiOutlinedInput-notchedOutline": {
+                      borderColor: darkMode ? "#444" : "#ccc",
+                    },
+                    "& input": {
+                      color: darkMode ? "#fff" : "#000",
+                      padding: "6px 8px",
+                      fontSize: "13px",
+                    },
+                  }}
+                />
+              )}
             />
           </Box>{" "}
         </Box>
@@ -495,7 +744,7 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
                     </Box>
                   ) : (
                     paginatedData
-                      .slice((page - 1) * rowsPerPage, page * rowsPerPage)
+                      // .slice((page - 1) * rowsPerPage, page * rowsPerPage)
                       .map((item, index) => (
                         <TableDataCardBody
                           key={index}
@@ -600,6 +849,67 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
                               }}
                             />
                           </StyledCardContent>
+                          <Popover
+                            open={open}
+                            anchorEl={anchorEl}
+                            onClose={handleClose}
+                            anchorOrigin={{
+                              vertical: "center",
+                              horizontal: "right",
+                            }}
+                            transformOrigin={{
+                              vertical: "center",
+                              horizontal: "left",
+                            }}
+                            PaperProps={{
+                              sx: {
+                                p: 2,
+                                display: "flex",
+                                flexDirection: "column",
+                                gap: 1.5,
+                                borderRadius: 2,
+                                minWidth: 120,
+                              },
+                            }}
+                          >
+                            <Button
+                              fullWidth
+                              variant="outlined"
+                              color="warning"
+                              startIcon={<EditOutlined />}
+                              onClick={() => handleEdit(selectedItem)}
+                            >
+                              Edit
+                            </Button>
+
+                            <Button
+                              fullWidth
+                              variant="outlined"
+                              color="error"
+                              startIcon={<DeleteOutline />}
+                              onClick={() => handleDelete(selectedItem.dep_id)}
+                            >
+                              Delete
+                            </Button>
+                          </Popover>
+                          <Snackbar
+                            open={snackbarOpen}
+                            autoHideDuration={3000}
+                            onClose={() => setSnackbarOpen(false)}
+                            anchorOrigin={{
+                              vertical: "bottom",
+                              horizontal: "center",
+                            }}
+                          >
+                            <Alert
+                              onClose={() => setSnackbarOpen(false)}
+                              severity={snackbarSeverity}
+                              variant="filled"
+                              sx={{ width: "100%" }}
+                            >
+                              {snackbarMessage}
+                            </Alert>
+                          </Snackbar>
                         </TableDataCardBody>
                       ))
                   )}
@@ -672,7 +982,12 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
                 >
                   &#8249;
                 </Box>
-                <Box>{page}</Box>
+                <Box>
+                  {page}/ {Math.ceil(departments.length / rowsPerPage)}
+                </Box>
+
+                {/* <Box>{page}</Box> */}
+
                 <Box
                   onClick={() =>
                     page < Math.ceil(departments.length / rowsPerPage) &&
@@ -693,69 +1008,6 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
           </Paper>
         </Grid>
 
-        <Popover
-          open={open}
-          anchorEl={anchorEl}
-          onClose={handleClose}
-          anchorOrigin={{
-            vertical: "center",
-            horizontal: "right",
-          }}
-          transformOrigin={{
-            vertical: "center",
-            horizontal: "left",
-          }}
-          PaperProps={{
-            sx: {
-              p: 2,
-              display: "flex",
-              flexDirection: "column",
-              gap: 1.5,
-              borderRadius: 2,
-              minWidth: 120,
-            },
-          }}
-        >
-          <Button
-            fullWidth
-            variant="outlined"
-            color="primary"
-            startIcon={<VisibilityIcon />}
-            onClick={() => {
-              alert("View clicked");
-              handleClose();
-            }}
-          >
-            View
-          </Button>
-
-          <Button
-            fullWidth
-            variant="outlined"
-            color="warning"
-            startIcon={<EditOutlined />}
-            onClick={() => {
-              alert("Edit clicked");
-              handleClose();
-            }}
-          >
-            Edit
-          </Button>
-
-          <Button
-            fullWidth
-            variant="outlined"
-            color="error"
-            startIcon={<DeleteOutline />}
-            onClick={() => {
-              alert("Delete clicked");
-              handleClose();
-            }}
-          >
-            Delete
-          </Button>
-        </Popover>
-
         {/* Department Registration Form */}
         <Grid item xs={12} md={5}>
           <Paper
@@ -767,44 +1019,64 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
               transition: "all 0.3s ease-in-out",
             }}
           >
-            <Typography
-              sx={{
-                color: labelColor,
-                fontWeight: 600,
-                fontSize: 16,
-                fontFamily: "Roboto",
-                mb: 2,
-                // fontFamily,
-              }}
+            <Box
+              display="flex"
+              justifyContent="space-between"
+              alignItems="center"
+              mb={2}
             >
-              Add Department
-            </Typography>
+              <Typography
+                sx={{ fontWeight: 500, fontSize: "18px", fontFamily: "Roboto" }}
+              >
+                Add User{" "}
+              </Typography>
+              <Button
+                variant="contained"
+                startIcon={<AddCircleOutline />}
+                disabled={!isEditMode} // 👈 disables button if not in edit mode
+                sx={{
+                  backgroundColor: "#5FECC8",
+                  color: "#000",
+                  fontWeight: 600,
+                  fontFamily: "Roboto",
+                  textTransform: "none",
+                  "&:hover": {
+                    backgroundColor: "#4ddbb6",
+                  },
+                }}
+              >
+                Add New Department
+              </Button>
+            </Box>
 
             <Grid container spacing={2}>
-              {/* Department Name - TextField */}
               <Grid item xs={12} sm={6}>
                 <TextField
                   fullWidth
                   size="small"
                   placeholder="Department Name"
-                  value={formValues.dep_name}
-                  onChange={(e) =>
-                    setFormValues((prev) => ({
-                      ...prev,
-                      dep_name: e.target.value,
-                    }))
-                  }
+                  value={departmentName}
+                  onChange={(e) => {
+                    setDepartmentName(e.target.value);
+                    setDepartmentError(false);
+                    setDepartmentErrorMsg("");
+                  }}
+                  // error={departmentError}
+                  // helperText={departmentError ? departmentErrorMsg : ""}
                   InputLabelProps={{ shrink: false }}
                   sx={selectStyles}
                 />
               </Grid>
 
-              {/* State - Dropdown */}
               <Grid item xs={12} sm={6}>
                 <Select
-                  fullWidth
                   value={selectedStateId}
-                  onChange={(e) => setSelectedStateId(e.target.value)}
+                  onChange={(e) => {
+                    setSelectedStateId(e.target.value);
+                    setStateError(false);
+                  }}
+                  fullWidth
+                  error={stateError}
                   displayEmpty
                   inputProps={{ "aria-label": "Select State" }}
                   sx={selectStyles}
@@ -818,16 +1090,22 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
                     </MenuItem>
                   ))}
                 </Select>
+                {stateError && (
+                  <FormHelperText>Please select a state</FormHelperText>
+                )}
               </Grid>
 
               {/* District - Dropdown */}
               <Grid item xs={12} sm={6}>
                 <Select
-                  fullWidth
                   value={selectedDistrictId}
-                  onChange={(e) => setSelectedDistrictId(e.target.value)}
+                  onChange={(e) => {
+                    setSelectedDistrictId(e.target.value);
+                    setDistrictError(false);
+                  }}
+                  fullWidth
+                  error={districtError}
                   displayEmpty
-                  defaultValue=""
                   inputProps={{ "aria-label": "Select District" }}
                   disabled={!selectedStateId}
                   sx={selectStyles}
@@ -835,43 +1113,54 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
                   <MenuItem value="" disabled>
                     Select District
                   </MenuItem>
-                  {districts.map((districts) => (
-                    <MenuItem key={districts.dis_id} value={districts.dis_id}>
-                      {districts.dis_name}
+                  {districts.map((d) => (
+                    <MenuItem key={d.dis_id} value={d.dis_id}>
+                      {d.dis_name}
                     </MenuItem>
                   ))}
                 </Select>
+                {districtError && (
+                  <FormHelperText>Please select a district</FormHelperText>
+                )}
               </Grid>
 
-              {/* Tehsil - Dropdown */}
               <Grid item xs={12} sm={6}>
                 <Select
-                  fullWidth
-                  displayEmpty
                   value={selectedTehsilId}
-                  onChange={(e) => setSelectedTehsilId(e.target.value)}
-                  defaultValue=""
+                  onChange={(e) => {
+                    setSelectedTehsilId(e.target.value);
+                    setTehsilError(false);
+                  }}
+                  fullWidth
+                  error={tehsilError}
+                  displayEmpty
                   inputProps={{ "aria-label": "Select Tehsil" }}
                   sx={selectStyles}
-                  disabled={!selectedDistrictId} // 🔒 Disable when no district selected
                 >
                   <MenuItem value="" disabled>
                     Select Tehsil
                   </MenuItem>
-                  {Tehsils.map((Tehsils) => (
-                    <MenuItem key={Tehsils.tah_id} value={Tehsils.tah_id}>
-                      {Tehsils.tah_name}
+                  {Tehsils.map((t) => (
+                    <MenuItem key={t.tah_id} value={t.tah_id}>
+                      {t.tah_name}
                     </MenuItem>
                   ))}
                 </Select>
+                {tehsilError && (
+                  <FormHelperText>Please select a tehsil</FormHelperText>
+                )}
               </Grid>
 
-              {/* City - Dropdown */}
               <Grid item xs={12} sm={6}>
                 <Select
+                  value={selectedCityID}
+                  onChange={(e) => {
+                    setSelectedCityId(e.target.value);
+                    setCityError(false);
+                  }}
                   fullWidth
+                  error={cityError}
                   displayEmpty
-                  defaultValue=""
                   inputProps={{ "aria-label": "Select City" }}
                   sx={selectStyles}
                 >
@@ -884,44 +1173,78 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
                     </MenuItem>
                   ))}
                 </Select>
+                {cityError && (
+                  <FormHelperText>Please select a city</FormHelperText>
+                )}
               </Grid>
 
-              {/* Disaster ID - Dropdown */}
               <Grid item xs={12} sm={6}>
                 <Select
-                  fullWidth
-                  displayEmpty
-                  defaultValue=""
                   value={selectedDisasterId}
-                  onChange={(e) => setSelectedDisasterId(e.target.value)}
+                  onChange={(e) => {
+                    setSelectedDisasterId(e.target.value);
+                    setDisasterError(false);
+                  }}
+                  error={disasterError}
+                  displayEmpty
+                  fullWidth
                   inputProps={{ "aria-label": "Select Disaster" }}
                   sx={selectStyles}
                 >
-                  <MenuItem
-                    value=""
-                    disabled
-                    sx={{ backgroundColor: inputStyle }}
-                  >
-                    Select Disaster 
+                  <MenuItem value="" disabled>
+                    Select Disaster
                   </MenuItem>
                   {disasterList.map((d) => (
                     <MenuItem key={d.disaster_id} value={d.disaster_id}>
-                      {d.disaster_name} {/* Use disaster name here */}
+                      {d.disaster_name}
                     </MenuItem>
                   ))}
                 </Select>
+                {disasterError && (
+                  <FormHelperText>Please select a disaster</FormHelperText>
+                )}
               </Grid>
 
               {/* Submit Button */}
+
               <Grid item xs={12}>
-                <Box
-                  sx={{
-                    display: "flex",
-                    justifyContent: "center",
-                    mt: 3,
-                    mb: 1,
-                  }}
-                >
+                {isEditMode ? (
+                  <Box display="flex" gap={2} mt={2}>
+                    {/* <Button
+                      variant="outlined"
+                      color="error"
+                      sx={{
+                        width: "40%",
+                        fontWeight: "bold",
+                        borderRadius: "12px",
+                      }}
+                      onClick={() => {
+                        setIsEditMode(false);
+                        setEditId(null);
+                        resetForm(); // Clear the form function, reset all fields
+                      }}
+                    >
+                      Cancel
+                    </Button> */}
+                    <Button
+                      variant="outlined"
+                      color="warning"
+                      sx={{
+                      mt: 2,
+                      width: "40%",
+                      backgroundColor: "#00f0c0",
+                      color: "black",
+                      fontWeight: "bold",
+                      borderRadius: "12px",
+                      mx: "auto", // centers the button horizontally
+                      display: "block",
+                    }}
+                      onClick={() => handleUpdate(editId)} // Pass the editId here
+                    >
+                      Update
+                    </Button>
+                  </Box>
+                ) : (
                   <Button
                     variant="outlined"
                     color="warning"
@@ -932,14 +1255,21 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
                       color: "black",
                       fontWeight: "bold",
                       borderRadius: "12px",
-                     
+                      mx: "auto", // centers the button horizontally
+                      display: "block",
                     }}
                     onClick={saveDepartment}
                   >
                     Submit
                   </Button>
-                </Box>
+                )}
               </Grid>
+              <Snackbar
+                open={snackbarupdate}
+                autoHideDuration={3000}
+                onClose={() => setSnackbarMessageUpdated(false)}
+                message={snackbarupdate}
+              />
             </Grid>
           </Paper>
         </Grid>

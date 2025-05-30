@@ -8,7 +8,7 @@ import { useNavigate } from 'react-router-dom';
 import MapView from './Map';
 import { useAuth } from './../../../Context/ContextAPI';
 import Sidebar from '../Sidebar/Sidebar';
-import { Search, Visibility, AddCircleOutline } from "@mui/icons-material";
+import { Search } from "@mui/icons-material";
 import { IconButton } from "@mui/material";
 import { Add } from "@mui/icons-material";
 
@@ -56,6 +56,7 @@ const AlertPanel = ({ darkMode }) => {
     const socketUrl = import.meta.env.VITE_SOCKET_API_KEY;
     const group = localStorage.getItem('user_group');
     const token = localStorage.getItem('access_token');
+    const userName = localStorage.getItem('userId');
     const [isHovered, setIsHovered] = useState(false);
     const handleClick = () => {
         navigate("/Incident");
@@ -247,11 +248,11 @@ const AlertPanel = ({ darkMode }) => {
                                         <StyledCardContent style={{ flex: 0.5, borderRight: "1px solid black" }}>
                                             <Typography variant="subtitle2">Alert Id</Typography>
                                         </StyledCardContent>
-                                        <StyledCardContent style={{ flex: 1.2, borderRight: "1px solid black" }}>
+                                        <StyledCardContent style={{ flex: 1.5, borderRight: "1px solid black" }}>
                                             <Typography variant="subtitle2">Time</Typography>
                                         </StyledCardContent>
                                         <StyledCardContent style={{ flex: 1, borderRight: "1px solid black" }}>
-                                            <Typography variant="subtitle2">Temperature (°C)</Typography>
+                                            <Typography variant="subtitle2">Temps (°C)</Typography>
                                         </StyledCardContent>
                                         <StyledCardContent style={{ flex: 1, borderRight: "1px solid black" }}>
                                             <Typography variant="subtitle2">Rain (mm)</Typography>
@@ -276,7 +277,7 @@ const AlertPanel = ({ darkMode }) => {
                                     paginatedData.map((item, index) => (
                                         <EnquiryCardBody
                                             key={startIndex + index}
-                                            onClick={() => handleTriggeredData(item.pk_id, item.triger_status)} // Add row click
+                                            onClick={() => handleTriggeredData(item.pk_id, item.triger_status)}
                                             sx={{
                                                 backgroundColor: darkMode ? "#1C223C" : "#FFFFFF",
                                                 color: darkMode ? "white" : "black",
@@ -289,7 +290,7 @@ const AlertPanel = ({ darkMode }) => {
                                             <StyledCardContent style={{ flex: 0.5 }}>
                                                 <Typography variant="subtitle2">{item.pk_id}</Typography>
                                             </StyledCardContent>
-                                            <StyledCardContent style={{ flex: 1.2 }}>
+                                            <StyledCardContent style={{ flex: 1.5 }}>
                                                 <Typography variant="subtitle2">{new Date(item.time).toLocaleString()}</Typography>
                                             </StyledCardContent>
                                             <StyledCardContent style={{ flex: 1 }}>
@@ -305,13 +306,13 @@ const AlertPanel = ({ darkMode }) => {
                                                         handleTriggerClick(item.pk_id, item.triger_status);
                                                     }}
                                                     style={{
-                                                        width: '60%',
+                                                        width: '62%',
                                                         backgroundColor: item.triger_status === 1 ? '#FF4C4C' : '#00BFA6',
                                                         color: darkMode ? 'white' : 'black',
                                                         borderRadius: '10px',
                                                         height: '30px',
                                                         marginTop: '15px',
-                                                        fontSize: '12px',
+                                                        fontSize: '11px',
                                                     }}
                                                 >
                                                     {item.triger_status === 1 ? "Trigger" : "Triggered"}

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import {
   Drawer,
   List,
@@ -8,7 +8,6 @@ import {
   Box,
   Grid,
   Typography,
-  Collapse,
 } from "@mui/material";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
@@ -25,6 +24,14 @@ const screenConfig = {
       { id: 3, text: "Add Employee", path: "/add-employee" },
     ],
   },
+  "Register SOP": {
+    icon: <AccountCircleIcon />,
+    screens: [],
+  },
+  "Responder": {
+    icon: <AccountCircleIcon />,
+    screens: [],
+  },
   Permission: {
     icon: <LockIcon />,
     screens: [
@@ -36,14 +43,14 @@ const screenConfig = {
 
 const Departmentsidebar = ({ darkMode }) => {
   const [open, setOpen] = useState(false);
-  const [dropdowns, setDropdowns] = useState({
-    systemUser: false,
-    permission: false,
-  });
+  const [dropdowns, setDropdowns] = useState({});
   const navigate = useNavigate();
 
   const toggleDropdown = (key) => {
-    setDropdowns((prev) => ({ ...prev, [key]: !prev[key] }));
+    setDropdowns((prev) => ({
+      ...prev,
+      [key]: !prev[key],
+    }));
   };
 
   return (
@@ -63,76 +70,84 @@ const Departmentsidebar = ({ darkMode }) => {
               position: "absolute",
               top: "50%",
               transform: "translateY(-50%)",
-              // background: "linear-gradient(to bottom, #5FECC8, #5FECC80D)",
               background: darkMode
                 ? "linear-gradient(to bottom, #5FECC8, rgba(95, 236, 200, 0.05))"
                 : "radial-gradient(6035.71% 72.44% at 0% 50%, #00BFA6 0%, #292D45 100%)",
               borderRadius: "30px",
               transition: "width 0.5s ease-in-out",
               display: "flex",
-              alignItems: "center",
+              alignItems: open ? "flex-start" : "center",
               justifyContent: "center",
-              overflow: "hidden", // ✅ Prevent scrollbars
-              height: "50vh", // ✅ Height will grow with content
-              maxHeight: "90vh", // ✅ Prevent overflow from screen
-              marginLeft:"0.2em"
+              overflow: "hidden",
+              height: "50vh",
+              maxHeight: "90vh",
+              marginLeft: "0.2em",
             },
           }}
         >
           <Box sx={{ width: "100%", overflow: "hidden" }}>
             <List>
               {Object.entries(screenConfig).map(
-                ([sectionName, { icon, screens }]) => (
-                  <Box key={sectionName} sx={{ width: "100%" }}>
-                    <ListItemButton
-                      onClick={() => toggleDropdown(sectionName)}
-                      sx={{
-                        flexDirection: open ? "row" : "column",
-                        justifyContent: "center",
-                        py: 1,
-                        gap: 1,
-                      }}
-                    >
-                      <ListItemIcon sx={{ minWidth: 0 }}>{icon}</ListItemIcon>
+                ([sectionName, { icon, screens }]) => {
+                  const hasSubmenus = screens && screens.length > 0;
 
-                      {open && (
-                        <Box
-                          sx={{
-                            display: "flex",
-                            alignItems: "center",
-                            gap: 0.5,
-                          }}
-                        >
-                          <Typography variant="caption">
-                            {sectionName === "" ? "System User" : sectionName}
-                          </Typography>
-                          {dropdowns[sectionName] ? (
-                            <ArrowDropUpIcon fontSize="small" />
-                          ) : (
-                            <ArrowDropDownIcon fontSize="small" />
-                          )}
+                  return (
+                    <Box key={sectionName} sx={{ width: "100%" }}>
+                      <ListItemButton
+                        onClick={() =>
+                          hasSubmenus
+                            ? toggleDropdown(sectionName)
+                            : navigate("/" + sectionName.toLowerCase())
+                        }
+                        sx={{
+                          flexDirection: open ? "row" : "column",
+                          justifyContent: "center",
+                          py: 1,
+                          gap: 1,
+                        }}
+                      >
+                        <ListItemIcon sx={{ minWidth: 0 }}>{icon}</ListItemIcon>
+
+                        {open && (
+                          <Box
+                            sx={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: 0.5,
+                            }}
+                          >
+                            <Typography variant="caption">
+                              {sectionName}
+                            </Typography>
+                            {hasSubmenus &&
+                              (dropdowns[sectionName] ? (
+                                <ArrowDropUpIcon fontSize="small" />
+                              ) : (
+                                <ArrowDropDownIcon fontSize="small" />
+                              ))}
+                          </Box>
+                        )}
+                      </ListItemButton>
+
+                      {open && dropdowns[sectionName] && hasSubmenus && (
+                        <Box sx={{ mt: 1, pl: 3 }}>
+                          {screens.map((screen) => (
+                            <ListItemButton
+                              key={screen.id}
+                              onClick={() => navigate(screen.path)}
+                              sx={{ py: 0.5 }}
+                            >
+                              <ListItemText
+                                primary={screen.text}
+                                primaryTypographyProps={{ fontSize: 12 }}
+                              />
+                            </ListItemButton>
+                          ))}
                         </Box>
                       )}
-                    </ListItemButton>
-
-                    {open && dropdowns[sectionName] && (
-                      <Box sx={{ mt: 1, pl: 3 }}>
-                        {screens.map((screen) => (
-                          <ListItemButton
-                            key={screen.id}
-                            onClick={() => navigate(screen.path)}
-                            sx={{ py: 0.5 }}
-                          >
-                            <ListItemText
-                              primary={screen.text}
-                              primaryTypographyProps={{ fontSize: 12 }}
-                            />
-                          </ListItemButton>
-                        ))}
-                      </Box>
-                    )}
-                  </Box>
-                )
+                    </Box>
+                  );
+                }
               )}
             </List>
           </Box>

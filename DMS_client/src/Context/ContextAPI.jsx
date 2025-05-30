@@ -1,15 +1,19 @@
-import React, { createContext, useContext, useState, useEffect } from "react";
+import { createContext, useContext, useState, useEffect } from "react";
 import axios from "axios";
-import { s } from "framer-motion/client";
 
 const AuthContext = createContext();
 export const useAuth = () => useContext(AuthContext);
 
 export const AuthProvider = ({ children }) => {
-  const [states, setStates] = useState([]);
+  const port = import.meta.env.VITE_APP_API_KEY;
+  const token = localStorage.getItem("access_token");
+  const refresh = localStorage.getItem("refresh_token");
+  console.log(refresh, "refreshhhhhhhhh");
 
+  const [newToken, setNewToken] = useState("");
+  const [states, setStates] = useState([]);
   const [districts, setDistricts] = useState([]);
-    console.log(districts, "districts");
+  console.log(districts, "districts");
 
   const [Tehsils, setTehsils] = useState([]);
   const [Citys, setCitys] = useState([]);
@@ -20,19 +24,22 @@ export const AuthProvider = ({ children }) => {
   console.log(Citys, "selectedCityID");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [departmentName, setDepartmentName] = useState("");
+
   const [departments, setDepartments] = useState([]);
-  const [disasterIds, setDisasterIds] = useState([]);
-  const [disaster, setdisaster] = useState([]);
-  const [selectedDisasterId, setSelectedDisasterIds] = useState("");
- 
-
-  const port = import.meta.env.VITE_APP_API_KEY;
-  const token = localStorage.getItem("access_token");
-  const refresh = localStorage.getItem("refresh_token");
-  console.log(refresh, "refreshhhhhhhhh");
-
-  const [newToken, setNewToken] = useState("");
+  const [disaterid, setDisaterid] = useState(null);
+  const [disasterIncident, setDisasterIncident] = useState(null);
+  console.log(disasterIncident, 'disasterIncident');
+  // 🔹 sop page
+  const [responderScope, setResponderScope] = useState([]);
+  
+  useEffect(() => {
+    const disasterValue = disaterid || disasterIncident;
+    console.log(disasterValue,'passingValue');
+    
+    if (disasterValue) {
+      fetchResponderScope(disasterValue);
+    }
+  }, [disaterid, disasterIncident]);
 
   const refreshAuthToken = async () => {
     const refresh = localStorage.getItem("refresh_token");
@@ -75,7 +82,13 @@ export const AuthProvider = ({ children }) => {
   const fetchStates = async () => {
     try {
       setLoading(true);
-      const res = await axios.get(`${port}/admin_web/state_get/`);
+      const res = await axios.get(`${port}/admin_web/state_get/`,
+        {
+          headers: {
+            Authorization: `Bearer ${token || newToken}`,
+          },
+        }
+      );
       setStates(res.data);
     } catch (err) {
       console.error("Error fetching states:", err);
@@ -95,7 +108,6 @@ export const AuthProvider = ({ children }) => {
         {
           headers: {
             Authorization: `Bearer ${token || newToken}`,
-
           },
         }
       );
@@ -118,7 +130,7 @@ export const AuthProvider = ({ children }) => {
         `${port}/admin_web/Tahsil_get_idwise/${districtId}/`,
         {
           headers: {
-            Authorization: `Bearer ${token}`,
+            Authorization: `Bearer ${newToken || token}`,
           },
         }
       );
@@ -140,7 +152,7 @@ export const AuthProvider = ({ children }) => {
         `${port}/admin_web/City_get_idwise/${tehshilId}/`,
         {
           headers: {
-            Authorization: `Bearer ${token}`,
+            Authorization: `Bearer ${newToken || token}`,
           },
         }
       );
@@ -153,7 +165,31 @@ export const AuthProvider = ({ children }) => {
       setLoading(false);
     }
   };
-  
+
+  const fetchResponderScope = async (disasterValue) => {
+    if (!disasterValue) return;
+    try {
+      setLoading(true);
+      const res = await axios.get(
+        `${port}/admin_web/Responder_Scope_Get/${disasterValue}/`,
+        {
+          headers: {
+            Authorization: `Bearer ${newToken || token}`,
+          },
+        }
+      );
+      console.log(res,'resssssss');
+      
+      console.log("Responder Scope:", res.data);
+      setResponderScope(res.data || []);
+    } catch (err) {
+      console.error("Error fetching responder scope:", err);
+      setError(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // 🔹 Effects
   useEffect(() => {
     fetchStates();
@@ -220,10 +256,16 @@ export const AuthProvider = ({ children }) => {
         setSelectedDistrictId,
         setSelectedTehsilId,
         setSelectedCityId,
-        
         loading,
         error,
         newToken,
+        fetchResponderScope,
+        disaterid,
+        setDisaterid,
+        responderScope,
+        setResponderScope,
+        disasterIncident,
+        setDisasterIncident
       }}
     >
       {children}
