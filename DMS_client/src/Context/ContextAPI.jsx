@@ -328,7 +328,8 @@ export const AuthProvider = ({ children }) => {
         query,
         suggestions,
         selectedPosition,
-        popupText
+        popupText,
+        setPopupText
       }}
     >
       {children}
