@@ -4,6 +4,7 @@ import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 import axios from 'axios';
 import customIconUrl from '../../../assets/Rectangle.png';
+import { useAuth } from '../../../Context/ContextAPI';
 
 const customIcon = new L.Icon({
   iconUrl: customIconUrl,
@@ -22,14 +23,20 @@ const PanToLocation = ({ position }) => {
 };
 
 const IncidentCreateMap = () => {
-  const [query, setQuery] = useState('');
-  const [suggestions, setSuggestions] = useState([]);
-  const [selectedPosition, setSelectedPosition] = useState([15.298430295875988, 74.08868128835907]); // Default: Goa
-  const [popupText, setPopupText] = useState('You are here!');
+  const {query,suggestions,selectedPosition,popupText,handleSearchChange,handleSelectSuggestion,} = useAuth();
+  const [queryMap, setQueryMap] = useState('');
+  const [suggestionsMap, setSuggestionsMap] = useState([]);
+  const [selectedPositionMap, setSelectedPositionMap] = useState([15.298430295875988, 74.08868128835907]); // Default: Goa
+  const [popupTextMap, setPopupTextMap] = useState('You are here!');
   const [stateData, setStateData] = useState();
   const mapRef = useRef();
   
-  console.log("Query",query)
+  useEffect(() => {
+      setQueryMap(query);
+      setSuggestionsMap(suggestions);
+      setSelectedPositionMap(selectedPosition);
+      setPopupTextMap(popupText);
+    }, [query,suggestions,selectedPosition,popupText]);
 
   useEffect(() => {
       fetch('/Boundaries/Goa_State.geojson')
@@ -46,45 +53,46 @@ const IncidentCreateMap = () => {
   };
 
 
-  const handleSearchChange = async (e) => {
-    const value = e.target.value;
-    setQuery(value);
-    if (value.length < 3) return;
+  // const handleSearchChange = async (e) => {
+  //   const value = e.target.value;
+  //   setQuery(value);
+  //   if (value.length < 3) return;
 
-    const response = await axios.get('https://autosuggest.search.hereapi.com/v1/autosuggest', {
-      params: {
-        apiKey: 'FscCo6SQsrummInzClxlkdETkvx5T1r8VVI25XMGnyY',
-        q: value,
-        at: `${selectedPosition[0]},${selectedPosition[1]}`,
-        limit: 5
-      }
-    });
+  //   const response = await axios.get('https://autosuggest.search.hereapi.com/v1/autosuggest', {
+  //     params: {
+  //       apiKey: HERE_API_KEY,
+  //       q: value,
+  //       at: `${selectedPosition[0]},${selectedPosition[1]}`,
+  //       limit: 5
+  //     }
+  //   });
 
-    setSuggestions(response.data.items.filter(item => item.position));
+  //   setSuggestions(response.data.items.filter(item => item.position));
     
-  };
+  // };
 
-  const handleSelectSuggestion = async (item) => {
-    const { position, address } = item;
-    setSelectedPosition([position.lat, position.lng]);
-    setPopupText(address.label);
-    setQuery(address.label);
-    setSuggestions([]);
-  };
+  // const handleSelectSuggestion = async (item) => {
+  //   const { position, address } = item;
+  //   setSelectedPosition([position.lat, position.lng]);
+  //   setPopupText(address.label);
+  //   setQuery(address.label);
+  //   setSuggestions([]);
+  // };
 
-  const handleMapClick = async (e) => {
-    const { lat, lng } = e.latlng;
-    const response = await axios.get('https://revgeocode.search.hereapi.com/v1/revgeocode', {
-      params: {
-        apiKey: 'FscCo6SQsrummInzClxlkdETkvx5T1r8VVI25XMGnyY',
-        at: `${lat},${lng}`,
-      }
-    });
+  // const handleMapClick = async (e) => {
+  //   console.log("I am called")
+  //   const { lat, lng } = e.latlng;
+  //   const response = await axios.get('https://revgeocode.search.hereapi.com/v1/revgeocode', {
+  //     params: {
+  //       apiKey: HERE_API_KEY,
+  //       at: `${lat},${lng}`,
+  //     }
+  //   });
 
-    const label = response.data.items[0]?.address?.label || 'No address found';
-    setSelectedPosition([lat, lng]);
-    setPopupText(label);
-  };
+  //   const label = response.data.items[0]?.address?.label || 'No address found';
+  //   setSelectedPosition([lat, lng]);
+  //   setPopupText(label);
+  // };
 
   return (
   <div style={{ position: "relative", width: "100%", height: "92.5vh" }}>
@@ -105,7 +113,7 @@ const IncidentCreateMap = () => {
       <input
           type="text"
           placeholder="Search for a place..."
-          value={query}
+          value={queryMap}
           onChange={handleSearchChange}
           style={{ width: '100%', padding: '8px' }}
         />
@@ -128,7 +136,7 @@ const IncidentCreateMap = () => {
       whenCreated={(mapInstance) => {
         mapRef.current = mapInstance;
       }}
-      onClick={handleMapClick}
+      // onClick={handleMapClick}
     >
       <TileLayer
           url="https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}"
@@ -144,14 +152,14 @@ const IncidentCreateMap = () => {
           dragend: async (e) => {
             const marker = e.target;
             const position = marker.getLatLng();
-            setSelectedPosition([position.lat, position.lng]);
+            setSelectedPositionMap([position.lat, position.lng]);
 
             try {
               const response = await axios.get(
                 "https://revgeocode.search.hereapi.com/v1/revgeocode",
                 {
                   params: {
-                    apiKey: 'FscCo6SQsrummInzClxlkdETkvx5T1r8VVI25XMGnyY',
+                    apiKey: HERE_API_KEY,
                     at: `${position.lat},${position.lng}`,
                   },
                 }
@@ -159,11 +167,11 @@ const IncidentCreateMap = () => {
 
               const label =
                 response.data.items[0]?.address?.label || "No address found";
-              setPopupText(label);
-              setQuery(label);
+              setPopupTextMap(label);
+              setQueryMap(label);
             } catch (error) {
               console.error("Reverse geocoding failed:", error);
-              setPopupText("Failed to fetch address");
+              setPopupTextMap("Failed to fetch address");
             }
           },
         }}
