@@ -864,9 +864,13 @@ class closure_Post_api(APIView):
 
 class comment_idwise_get_api(APIView):
     def get(self, request, incident_id):
-        comments = DMS_Comments.objects.filter(incident_id=incident_id, comm_is_deleted=False)
-        serializer = CommentSerializer(comments, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        comments_qs = DMS_Comments.objects.filter(incident_id=incident_id, comm_is_deleted=False)
+        comment_texts = comments_qs.values_list('comments', flat=True)
+        data = {
+            "incident_id": incident_id,
+            "comments": list(comment_texts)
+        }
+        return Response(data, status=status.HTTP_200_OK)
 
 class DMS_comment_Get_API(APIView):
     def get(self,request):

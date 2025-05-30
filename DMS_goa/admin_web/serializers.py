@@ -397,4 +397,4 @@ class ClosureSerializer(serializers.ModelSerializer):
 class CommentSerializer(serializers.ModelSerializer):
     class Meta:
         model = DMS_Comments
-        fields = ['comm_id', 'comments']
+        fields = ['incident_id','comments']
