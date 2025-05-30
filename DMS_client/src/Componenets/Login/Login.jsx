@@ -268,11 +268,13 @@ function Login() {
                 localStorage.setItem('refresh_token', data.token.refresh);
                 localStorage.setItem('user', JSON.stringify(data.token.colleague));
                 localStorage.setItem('user_group', data.token.user_group);
+                localStorage.setItem('userId', data.token.colleague.emp_name);
 
                 console.log('Access Token:', data.token.access);
                 console.log('Refresh Token:', data.token.refresh);
                 console.log('User Group:', data.token.user_group);
                 console.log('User Info:', data.token.colleague);
+                console.log('Iddddd:', data.token.colleague?.emp_name);
                 const group = data.token.user_group;
                 console.log('Stored group from localStorage:', localStorage.getItem('user_group'));
 
