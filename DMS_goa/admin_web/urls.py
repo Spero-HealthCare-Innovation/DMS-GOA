@@ -42,6 +42,12 @@ urlpatterns = [
     path('comment_get_idwise/<int:incident_id>/',comment_idwise_get_api.as_view(),name='comment_get_idwise'),
     path('comment_get',DMS_comment_Get_API.as_view(),name='comment_get'),
 
+
+
+    path('dispatch_get/',dispatch_sop_Get_API.as_view(),name='disapatch_get'),
+    path('dispatch_get_idwise/',dispatch_sop_Idwise_Get_API.as_view(),name='disapatch_get_idwise'),
+
+
     
     
 

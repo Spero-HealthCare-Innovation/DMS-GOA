@@ -407,3 +407,9 @@ class Comment_Post_Serializer(serializers.ModelSerializer):
     class Meta:
         model = DMS_Comments
         fields = ['incident_id','comments','comm_added_by','comm_modified_by']
+
+class dispatchsopserializer(serializers.ModelSerializer):
+    disaster_name=serializers.CharField(source='disaster_type.disaster_name', read_only=True)
+    class Meta:
+        model = DMS_Incident
+        fields = ['incident_id','alert_id','disaster_type','inc_added_by','inc_added_date','disaster_name']
