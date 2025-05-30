@@ -83,7 +83,7 @@ const Alerts = [
 ];
 
 const Dispatch = [
-  "Alert ID",
+  "Incident ID",
   "Disaster ID",
   "Date & Time",
   "Disaster Type",
@@ -163,11 +163,11 @@ function SopTask({
     setViewmode("incident"); // Reset view mode to incident
   };
 
-  const handleForward = () => {
-    setFlag(1);
-    setSelectedIncident(); // Clear selected incident
-    setViewmode("incident"); // Reset view mode to incident
-  };
+  // const handleForward = () => {
+  //   setFlag(1);
+  //   setSelectedIncident(); // Clear selected incident
+  //   setViewmode("incident"); // Reset view mode to incident
+  // };
 
   const textColor = darkMode ? "#ffffff" : "#000000";
   const bgColor = darkMode ? "#0a1929" : "#ffffff";
@@ -195,7 +195,7 @@ function SopTask({
           </Tooltip>
         )}
         {/* Forward Button */}
-        {flag === 0 && (
+        {/* {flag === 0 && (
           <Tooltip title="Go Forward to Dispatch SOP">
             <ArrowForwardIcon
               onClick={handleForward}
@@ -209,7 +209,7 @@ function SopTask({
               }}
             />
           </Tooltip>
-        )}
+        )} */}
 
         {/* Title */}
         <Typography
