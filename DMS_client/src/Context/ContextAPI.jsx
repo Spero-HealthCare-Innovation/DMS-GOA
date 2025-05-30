@@ -25,17 +25,18 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
+  
   const [departments, setDepartments] = useState([]);
   const [disaterid, setDisaterid] = useState(null);
   const [disasterIncident, setDisasterIncident] = useState(null);
   console.log(disasterIncident, 'disasterIncident');
   // 🔹 sop page
   const [responderScope, setResponderScope] = useState([]);
-  
+
   useEffect(() => {
     const disasterValue = disaterid || disasterIncident;
-    console.log(disasterValue,'passingValue');
-    
+    console.log(disasterValue, 'passingValue');
+
     if (disasterValue) {
       fetchResponderScope(disasterValue);
     }
@@ -178,8 +179,8 @@ export const AuthProvider = ({ children }) => {
           },
         }
       );
-      console.log(res,'resssssss');
-      
+      console.log(res, 'resssssss');
+
       console.log("Responder Scope:", res.data);
       setResponderScope(res.data || []);
     } catch (err) {
@@ -240,6 +241,21 @@ export const AuthProvider = ({ children }) => {
     }
   }, [selectedTehsilId]);
 
+  // DISASTER GET API
+  const [disaster, setDisaster] = useState([]);
+  useEffect(() => {
+    const fetchDisaster = async () => {
+      const disaster = await fetch(`${port}/admin_web/DMS_Disaster_Type_Get/`, {
+        headers: {
+          Authorization: `Bearer ${token || newToken}`,
+        }
+      })
+      const disasterData = await disaster.json();
+      setDisaster(disasterData);
+    };
+    fetchDisaster()
+  }, [])
+
   return (
     <AuthContext.Provider
       value={{
@@ -265,7 +281,9 @@ export const AuthProvider = ({ children }) => {
         responderScope,
         setResponderScope,
         disasterIncident,
-        setDisasterIncident
+        setDisasterIncident,
+        disaster,
+        setDisaster
       }}
     >
       {children}
