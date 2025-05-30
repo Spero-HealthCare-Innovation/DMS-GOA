@@ -3,88 +3,25 @@ import axios from "axios";
 import { Box, Typography, TextField, Button, Paper, InputAdornment, Grid, Popover, Snackbar } from "@mui/material";
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
-import TableCell from '@mui/material/TableCell';
 import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
-import { Search, ArrowBack, DeleteOutline, EditOutlined, } from "@mui/icons-material";
+import { Search, DeleteOutline, EditOutlined, Description, } from "@mui/icons-material";
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 import { styled } from "@mui/material/styles";
 import { Alert } from '@mui/material';
-import { Select, MenuItem, IconButton, Popper } from "@mui/material";
-import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
-import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
-import VisibilityIcon from "@mui/icons-material/Visibility";
+import { Select, MenuItem } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import { useAuth } from "../../../Context/ContextAPI";
 import {
-    TableDataCardBody,
-    TableHeadingCard,
-    CustomTextField,
-    getThemeBgColors,
-    textfieldInputFonts,
-    fontsTableBody,
     getCustomSelectStyles,
-    fontsTableHeading,
-    StyledCardContent,
-    inputStyle,
 } from "../../../CommonStyle/Style";
-
 
 function SopRegister({ darkMode }) {
     const port = import.meta.env.VITE_APP_API_KEY;
-
-    const { newToken } = useAuth();
-    const [departmentList, setDepartmentList] = useState([]);
-    const [departmentId, setDepartmentId] = useState("");
-    const [groupName, setGroupName] = useState("");
+    const { newToken, disaster } = useAuth();
+    const token = localStorage.getItem("access_token");
     const [showSuccessAlert, setShowSuccessAlert] = useState(false);
-    const [alertMessage, setAlertMessage] = useState('');
-    const [alertType, setAlertType] = useState('success');
-    const [groups, setGroups] = useState([]);
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState(null);
-
-    // States for edit functionality
-    const [isEditing, setIsEditing] = useState(false);
-    const [editingGroupId, setEditingGroupId] = useState(null);
-    const [selectedGroup, setSelectedGroup] = useState(null);
-
-    // Determine effective token (context token takes priority)
-    const effectiveToken = newToken || localStorage.getItem("access_token");
-
-    const fetchDepartments = async () => {
-        try {
-            setLoading(true);
-            console.log("Using token:", effectiveToken);
-
-            const response = await axios.get(`${port}/admin_web/Department_get/`, {
-                headers: {
-                    Authorization: `Bearer ${effectiveToken}`,
-                },
-            });
-
-            console.log(" Departments fetched:", response.data);
-            setDepartmentList(response.data);
-        } catch (err) {
-            console.error(" Error fetching departments:", err);
-            if (err.response) {
-                console.error("Server Response:", err.response.data);
-            }
-            setError(err);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    useEffect(() => {
-        if (effectiveToken) {
-            fetchDepartments();
-        } else {
-            console.warn("No token found for department fetch.");
-        }
-    }, [effectiveToken]);
-
     const textColor = darkMode ? "#ffffff" : "#000000";
     const bgColor = darkMode ? "#0a1929" : "#0a1929";
     const labelColor = darkMode ? "#5FECC8" : "#1976d2";
@@ -98,6 +35,10 @@ function SopRegister({ darkMode }) {
     const [page, setPage] = useState(1);
     const [rowsPerPage, setRowsPerPage] = useState(5);
     const [anchorEl, setAnchorEl] = useState(null);
+
+    const [description, setDescription] = useState("");
+    const [selectedDisaster, setSelectedDisaster] = useState(null);
+    const userName = localStorage.getItem('userId');
 
     const EnquiryCard = styled("div")(() => ({
         display: "flex",
@@ -158,18 +99,37 @@ function SopRegister({ darkMode }) {
         textAlign: "center",
     };
 
-    const paginatedData = groups.slice((page - 1) * rowsPerPage, page * rowsPerPage);
+    const handleSubmit = async () => {
+        const payload = {
+            sop_description: description,
+            disaster_id: selectedDisaster,
+            sop_added_by: userName,
+            sop_modified_by: userName
+        };
 
-    const open = Boolean(anchorEl);
-    const handleOpen = (event, item) => {
-        setAnchorEl(event.currentTarget);
-        setSelectedGroup(item);
+        try {
+            const response = await fetch(`${port}/admin_web/sop_post`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${token || newToken}`,
+                },
+                body: JSON.stringify(payload),
+            });
+
+            const data = await response.json();
+            if (response.status === 200) {
+                console.log(data);
+            } else {
+                console.error('Error:', data);
+            }
+        } catch (error) {
+            console.error('Error:', error);
+        }
     };
 
-    const handleClose = () => {
-        setAnchorEl(null);
-        setSelectedGroup(null);
-    };
+    const [alertMessage, setAlertMessage] = useState('');
+    const [alertType, setAlertType] = useState('success');
 
     const showAlert = (message, type = 'success') => {
         setAlertMessage(message);
@@ -177,12 +137,7 @@ function SopRegister({ darkMode }) {
         setShowSuccessAlert(true);
         setTimeout(() => setShowSuccessAlert(false), 3000);
     };
-    const resetForm = () => {
-        setGroupName("");
-        setDepartmentId("");
-        setIsEditing(false);
-        setEditingGroupId(null);
-    };
+
 
     return (
         <div style={{ marginLeft: "3.5rem" }}>
@@ -415,96 +370,32 @@ function SopRegister({ darkMode }) {
                                 >
                                     &#8249;
                                 </Box>
-                                <Box>{page}/ {Math.ceil(groups.length / rowsPerPage)}</Box>
-                                <Box
-                                    onClick={() =>
-                                        page < Math.ceil(groups.length / rowsPerPage) &&
-                                        setPage(page + 1)
-                                    }
-                                    sx={{
-                                        cursor:
-                                            page < Math.ceil(groups.length / rowsPerPage)
-                                                ? "pointer"
-                                                : "not-allowed",
-                                        userSelect: "none",
-                                    }}
-                                >
-                                    &#8250;
-                                </Box>
                             </Box>
                         </Box>
                     </Paper>
                 </Grid>
 
-                <Popover
-                    open={open}
-                    anchorEl={anchorEl}
-                    onClose={handleClose}
-                    anchorOrigin={{
-                        vertical: "center",
-                        horizontal: "right",
-                    }}
-                    transformOrigin={{
-                        vertical: "center",
-                        horizontal: "left",
-                    }}
-                    PaperProps={{
-                        sx: {
-                            p: 2,
-                            display: "flex",
-                            flexDirection: "column",
-                            gap: 1.5,
-                            borderRadius: 2,
-                            minWidth: 120,
-                        },
-                    }}
-                >
-
-
-                    <Button
-                        fullWidth
-                        variant="outlined"
-                        color="warning"
-                        startIcon={<EditOutlined />}
-                    >
-                        Edit
-                    </Button>
-
-                    <Button
-                        fullWidth
-                        variant="outlined"
-                        color="error"
-                        startIcon={<DeleteOutline />}
-                    >
-                        Delete
-                    </Button>
-                </Popover>
-
                 <Grid item xs={12} md={4.9}>
                     <Paper elevation={3} sx={{ padding: 2, borderRadius: 3, backgroundColor: bgColor, mt: 1, mb: 5 }}>
-                        <Typography
-                            sx={{
-                                color: labelColor,
-                                fontWeight: 600,
-                                fontSize: 16,
-                                mb: 2,
-                                fontFamily,
-                            }}
-                        >
-                            {isEditing ? 'Edit SOP' : 'Add SOP'}
-                        </Typography>
-
                         <Box sx={{ display: 'flex', gap: 1, mb: 2 }}>
                             <Select
+                                select
                                 fullWidth
-                                displayEmpty
-                                defaultValue=""
-                                inputProps={{ "aria-label": "Select Disaster" }}
+                                size="small"
+                                label="Disaster Type"
+                                variant="outlined"
                                 sx={selectStyles}
+                                value={selectedDisaster}
+                                onChange={(e) => setSelectedDisaster(e.target.value)}
                             >
-                                <MenuItem value="" disabled>
+                                <MenuItem disabled value="">
                                     Select Disaster Type
                                 </MenuItem>
+                                {disaster.map((item) => (
+                                    <MenuItem key={item.disaster_id} value={item.disaster_id}>
+                                        {item.disaster_name}
+                                    </MenuItem>
+                                ))}
                             </Select>
 
                             <TextField
@@ -513,13 +404,14 @@ function SopRegister({ darkMode }) {
                                 placeholder="Discription"
                                 InputLabelProps={{ shrink: false }}
                                 sx={selectStyles}
+                                value={description}
+                                onChange={(e) => setDescription(e.target.value)}
                             />
                         </Box>
 
                         <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, mt: 3, mb: 1 }}>
                             <Button
                                 variant="contained"
-                                disabled={loading}
                                 sx={{
                                     mt: 2,
                                     width: "40%",
@@ -532,6 +424,7 @@ function SopRegister({ darkMode }) {
                                         color: "white !important",
                                     },
                                 }}
+                                onClick={handleSubmit}
                             >
                                 Submit
                             </Button>

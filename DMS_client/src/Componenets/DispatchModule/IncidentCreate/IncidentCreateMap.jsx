@@ -14,7 +14,7 @@ const customIcon = new L.Icon({
   shadowUrl: null
 });
 
-const HERE_API_KEY = 'FscCo6SQsrummInzClxlkdETkvx5T1r8VVI25XMGnyY'; // 🔁 Replace with your actual HERE API Key
+const HERE_API_KEY = import.meta.env.VITE_APP_GOOGLE_MAPS_API_KEY;
 
 const PanToLocation = ({ position }) => {
   const map = useMap();
@@ -23,20 +23,20 @@ const PanToLocation = ({ position }) => {
 };
 
 const IncidentCreateMap = () => {
-  const {query,suggestions,selectedPosition,popupText,handleSearchChange,handleSelectSuggestion,} = useAuth();
+  const { query, suggestions, selectedPosition, popupText, handleSearchChange, handleSelectSuggestion, } = useAuth();
   const [queryMap, setQueryMap] = useState('');
   const [suggestionsMap, setSuggestionsMap] = useState([]);
   const [selectedPositionMap, setSelectedPositionMap] = useState([15.298430295875988, 74.08868128835907]); // Default: Goa
   const [popupTextMap, setPopupTextMap] = useState('You are here!');
   const [stateData, setStateData] = useState();
   const mapRef = useRef();
-  
+
   useEffect(() => {
-      setQueryMap(query);
-      setSuggestionsMap(suggestions);
-      setSelectedPositionMap(selectedPosition);
-      setPopupTextMap(popupText);
-    }, [query,suggestions,selectedPosition,popupText]);
+    setQueryMap(query);
+    setSuggestionsMap(suggestions);
+    setSelectedPositionMap(selectedPosition);
+    setPopupTextMap(popupText);
+  }, [query, suggestions, selectedPosition, popupText]);
 
   useEffect(() => {
     fetch('/Boundaries/Goa_State.geojson')
@@ -68,7 +68,7 @@ const IncidentCreateMap = () => {
   //   });
 
   //   setSuggestions(response.data.items.filter(item => item.position));
-    
+
   // };
 
   // const handleSelectSuggestion = async (item) => {
@@ -128,59 +128,59 @@ const IncidentCreateMap = () => {
         )}
       </div>
 
-    {/* Leaflet Map */}
-    <MapContainer
-      center={selectedPosition}
-      zoom={9}
-      style={{ height: "90vh", width: "100%", borderRadius: 10 }}
-      whenCreated={(mapInstance) => {
-        mapRef.current = mapInstance;
-      }}
+      {/* Leaflet Map */}
+      <MapContainer
+        center={selectedPosition}
+        zoom={9}
+        style={{ height: "90vh", width: "100%", borderRadius: 10 }}
+        whenCreated={(mapInstance) => {
+          mapRef.current = mapInstance;
+        }}
       // onClick={handleMapClick}
-    >
-      <TileLayer
+      >
+        <TileLayer
           url="https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}"
           attribution='&copy; Google Maps'
         />
-      {stateData && <GeoJSON data={stateData} style={geoJsonStyle} />}
-      <PanToLocation position={selectedPosition} />
-      <Marker
-        position={selectedPosition}
-        draggable={true}
-        icon={customIcon}
-        eventHandlers={{
-          dragend: async (e) => {
-            const marker = e.target;
-            const position = marker.getLatLng();
-            setSelectedPositionMap([position.lat, position.lng]);
+        {stateData && <GeoJSON data={stateData} style={geoJsonStyle} />}
+        <PanToLocation position={selectedPosition} />
+        <Marker
+          position={selectedPosition}
+          draggable={true}
+          icon={customIcon}
+          eventHandlers={{
+            dragend: async (e) => {
+              const marker = e.target;
+              const position = marker.getLatLng();
+              setSelectedPositionMap([position.lat, position.lng]);
 
-            try {
-              const response = await axios.get(
-                "https://revgeocode.search.hereapi.com/v1/revgeocode",
-                {
-                  params: {
-                    apiKey: HERE_API_KEY,
-                    at: `${position.lat},${position.lng}`,
-                  },
-                }
-              );
+              try {
+                const response = await axios.get(
+                  "https://revgeocode.search.hereapi.com/v1/revgeocode",
+                  {
+                    params: {
+                      apiKey: HERE_API_KEY,
+                      at: `${position.lat},${position.lng}`,
+                    },
+                  }
+                );
 
-              const label =
-                response.data.items[0]?.address?.label || "No address found";
-              setPopupTextMap(label);
-              setQueryMap(label);
-            } catch (error) {
-              console.error("Reverse geocoding failed:", error);
-              setPopupTextMap("Failed to fetch address");
-            }
-          },
-        }}
-      >
-        <Popup>{popupText}</Popup>
-      </Marker>
-    </MapContainer>
-  </div>
-);
+                const label =
+                  response.data.items[0]?.address?.label || "No address found";
+                setPopupTextMap(label);
+                setQueryMap(label);
+              } catch (error) {
+                console.error("Reverse geocoding failed:", error);
+                setPopupTextMap("Failed to fetch address");
+              }
+            },
+          }}
+        >
+          <Popup>{popupText}</Popup>
+        </Marker>
+      </MapContainer>
+    </div>
+  );
 
 };
 

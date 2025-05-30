@@ -13,7 +13,7 @@ import {
 } from "@mui/material";
 import { useAuth } from "../../../Context/ContextAPI";
 import IncidentCreateMap from "./IncidentCreateMap";
-
+import { Snackbar, Alert } from '@mui/material';
 
 const inputStyle = {
     mb: 2,
@@ -30,7 +30,7 @@ const Incident = ({ darkMode }) => {
 
     const token = localStorage.getItem("access_token");
     const { newToken, responderScope, setDisasterIncident, disaster } = useAuth();
-    const {  handleSearchChange, handleSelectSuggestion, query } = useAuth();
+    const { handleSearchChange, handleSelectSuggestion, query } = useAuth();
     const bgColor = darkMode ? "#0a1929" : "#ffffff";
     const labelColor = darkMode ? "#5FECC8" : "#1976d2";
     const fontFamily = "Roboto, sans-serif";
@@ -51,6 +51,7 @@ const Incident = ({ darkMode }) => {
     /// snackbar
     const [snackbarOpen, setSnackbarOpen] = useState(false);
     const [snackbarMessage, setSnackbarMessage] = useState('');
+    const [snackbarSeverity, setSnackbarSeverity] = useState('success'); 
 
     // Google API Start
     // const { isLoaded } = useJsApiLoader({
@@ -84,7 +85,6 @@ const Incident = ({ darkMode }) => {
     };
 
     // Google API End
-
     const handleCheckboxChange = (pk_id) => {
         setSopId((prev) =>
             prev.includes(pk_id)
@@ -125,15 +125,21 @@ const Incident = ({ darkMode }) => {
             });
 
             const data = await response.json();
-            if (response.status === 200) {
+
+            if (response.status === 201) {
                 setSnackbarMessage("Incident Created Successfully");
                 setSnackbarOpen(true);
-                console.log(data);
+            } else if (response.status === 500) {
+                setSnackbarMessage("Internal Server Error");
+                setSnackbarOpen(true);
             } else {
-                console.error('Error:', data);
+                setSnackbarMessage(data?.detail || "Something went wrong");
+                setSnackbarOpen(true);
             }
         } catch (error) {
             console.error('Error:', error);
+            setSnackbarMessage("Network error or server not reachable");
+            setSnackbarOpen(true);
         }
     };
 
@@ -166,6 +172,18 @@ const Incident = ({ darkMode }) => {
 
     return (
         <Box sx={{ minHeight: "100vh", backgroundColor: darkMode ? "#0a1929" : "#f5f5f5", px: 2, py: 3 }}>
+
+            <Snackbar
+                open={snackbarOpen}
+                autoHideDuration={3000}
+                onClose={() => setSnackbarOpen(false)}
+                anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+            >
+                <Alert onClose={() => setSnackbarOpen(false)} severity="success" sx={{ width: '100%' }}>
+                    {snackbarMessage}
+                </Alert>
+            </Snackbar>
+
             <Grid container spacing={2}>
                 <Grid item xs={12} md={8}>
                     <Grid container spacing={2}>
@@ -185,40 +203,75 @@ const Incident = ({ darkMode }) => {
                                         </TextField>
                                     </Grid>
                                     <Grid item xs={12} sm={6}>
-                                        <TextField select fullWidth size="small" label="Disaster Type" variant="outlined" sx={inputStyle}>
-                                            <MenuItem value="Flood">Flood</MenuItem>
-                                            <MenuItem value="Fire">Fire</MenuItem>
-                                            <MenuItem value="Cyclone">Cyclone</MenuItem>
+                                        <TextField
+                                            select
+                                            fullWidth
+                                            size="small"
+                                            label="Disaster Type"
+                                            variant="outlined"
+                                            sx={inputStyle}
+                                            value={selectedDisaster}
+                                            onChange={(e) => setSelectedDisaster(e.target.value)}
+                                        >
+                                            <MenuItem disabled value="">
+                                                Select Disaster Type
+                                            </MenuItem>
+                                            {disaster.map((item) => (
+                                                <MenuItem key={item.disaster_id} value={item.disaster_id}>
+                                                    {item.disaster_name}
+                                                </MenuItem>
+                                            ))}
                                         </TextField>
-                                    </Grid>
-                                    <Grid item xs={12} sm={6}>
-                                        <TextField select fullWidth size="small" label="Alert Type" variant="outlined" sx={inputStyle}>
-                                            <MenuItem value="Coast Guard">High</MenuItem>
-                                            <MenuItem value="Police">Medium</MenuItem>
-                                            <MenuItem value="Media">Low</MenuItem>
-                                        </TextField>
-                                    </Grid>
-                                    <Grid item xs={12} sm={6}>
-                                        <TextField fullWidth size="small" label="Caller Name" variant="outlined" sx={inputStyle} />
-                                    </Grid>
-                                    <Grid item xs={12} sm={6}>
-                                        <TextField fullWidth size="small" label="Contact Number" variant="outlined" sx={inputStyle} />
-                                    </Grid>
-                                    <Grid item xs={12} sm={6}>
-                                        <TextField fullWidth size="small" label="Date & Time" type="datetime-local" InputLabelProps={{ shrink: true }} variant="outlined" sx={inputStyle} />
-                                    </Grid>
-                                    <Grid item xs={12} sm={6}>
-                                        <TextField fullWidth size="small" label="Location" variant="outlined" sx={inputStyle} onChange={handleSearchChange} onClick={() => handleSelectSuggestion(item)} value={query}/>
                                     </Grid>
                                     <Grid item xs={12} sm={6}>
                                         <TextField
-                                            fullWidth size="small"
+                                            select
+                                            fullWidth
+                                            size="small"
+                                            label="Alert Type"
+                                            variant="outlined"
+                                            value={alertType}
+                                            onChange={handleAlertTypeChange}
+                                            sx={inputStyle}
+                                        >
+                                            <MenuItem value={1}>High</MenuItem>
+                                            <MenuItem value={2}>Medium</MenuItem>
+                                            <MenuItem value={3}>Low</MenuItem>
+                                        </TextField>
+                                    </Grid>
+
+                                    <Grid item xs={12} sm={6}>
+                                        <TextField fullWidth size="small" label="Caller Number" variant="outlined" sx={inputStyle}
+                                            value={callerNumber} onChange={(e) => setCallerNumber(e.target.value)} />
+                                    </Grid>
+
+                                    <Grid item xs={12} sm={6}>
+                                        <TextField fullWidth size="small" label="Caller Name" variant="outlined" sx={inputStyle}
+                                            value={callerName} onChange={(e) => setCallerName(e.target.value)} />
+                                    </Grid>
+                                    <Grid item xs={12} sm={6}>
+                                        <TextField fullWidth size="small" label="Location" variant="outlined" sx={inputStyle} onChange={handleSearchChange} onClick={() => handleSelectSuggestion(item)} value={query} />
+                                    </Grid>
+                                    <Grid item xs={12} sm={12}>
+                                        <TextField
+                                            select
+                                            fullWidth
+                                            size="small"
                                             label="Summary"
-                                            multiline
                                             variant="outlined"
                                             sx={inputStyle}
-                                            
-                                        />
+                                            value={summaryId}
+                                            onChange={(e) => setSummaryId(e.target.value)}
+                                        >
+                                            <MenuItem disabled value="">
+                                                Select Summary
+                                            </MenuItem>
+                                            {summary.map((item) => (
+                                                <MenuItem key={item.sum_id} value={item.sum_id}>
+                                                    {item.summary}
+                                                </MenuItem>
+                                            ))}
+                                        </TextField>
                                     </Grid>
                                 </Grid>
                             </Paper>
@@ -253,13 +306,17 @@ const Incident = ({ darkMode }) => {
                                         >
                                             <Box sx={boxStyle}>
                                                 <Typography
-                                                    sx={{ color: labelColor, fontWeight: 500, fontFamily }}
+                                                    sx={{ color: labelColor, fontWeight: 500, fontFamily, }}
                                                 >
-                                                    Alert ID
+                                                    Incident Type
                                                 </Typography>
                                                 <Typography variant="subtitle2" sx={{ fontFamily }}>
+                                                    {selectedEmergencyValue === 1 ? "Emergency" : "Non-Emergency"}
                                                 </Typography>
                                             </Box>
+
+                                            <Typography variant="subtitle2" sx={{ fontFamily, borderBottom: { md: `1px solid white` }, mb: 2 }}>
+                                            </Typography>
 
                                             <Box>
                                                 <Typography
@@ -291,7 +348,11 @@ const Incident = ({ darkMode }) => {
                                                     Response Procedure
                                                 </Typography>
                                                 <Typography variant="subtitle2" sx={{ fontFamily }}>
-                                                    Mass intimation to public, Media, Boat, Fisheries
+                                                    {responderScope?.sop_responses?.map((sop) => (
+                                                        <div key={sop.sop_id}>
+                                                            {sop?.sop_description || "No SOP description"}
+                                                        </div>
+                                                    ))}
                                                 </Typography>
                                             </Box>
                                             <Box>
@@ -303,40 +364,23 @@ const Incident = ({ darkMode }) => {
                                                 </Typography>
                                                 <Stack spacing={1} mt={1}>
                                                     <Box display="flex" flexWrap="wrap" gap={1}>
-                                                        <FormControlLabel
-                                                            control={
-                                                                <Checkbox defaultChecked sx={{ color: labelColor }} />
-                                                            }
-                                                            label={
-                                                                <Typography variant="subtitle2" sx={{ fontFamily }}>
-                                                                    Police
-                                                                </Typography>
-                                                            }
-                                                        />
-                                                        <FormControlLabel
-                                                            control={<Checkbox sx={{ color: labelColor }} />}
-                                                            label={
-                                                                <Typography variant="subtitle2" sx={{ fontFamily }}>
-                                                                    Fire
-                                                                </Typography>
-                                                            }
-                                                        />
-                                                        <FormControlLabel
-                                                            control={<Checkbox sx={{ color: labelColor }} />}
-                                                            label={
-                                                                <Typography variant="subtitle2" sx={{ fontFamily }}>
-                                                                    Marine
-                                                                </Typography>
-                                                            }
-                                                        />
-                                                        <FormControlLabel
-                                                            control={<Checkbox sx={{ color: labelColor }} />}
-                                                            label={
-                                                                <Typography variant="subtitle2" sx={{ fontFamily }}>
-                                                                    Fisheries
-                                                                </Typography>
-                                                            }
-                                                        />
+                                                        {responderScope?.responder_scope?.map((responder) => (
+                                                            <FormControlLabel
+                                                                key={responder.pk_id}
+                                                                control={
+                                                                    <Checkbox
+                                                                        checked={sopId.includes(responder.pk_id)}
+                                                                        onChange={() => handleCheckboxChange(responder.pk_id)}
+                                                                        sx={{ color: labelColor }}
+                                                                    />
+                                                                }
+                                                                label={
+                                                                    <Typography variant="subtitle2" sx={{ fontFamily }}>
+                                                                        {responder.responder_name}
+                                                                    </Typography>
+                                                                }
+                                                            />
+                                                        ))}
                                                     </Box>
                                                 </Stack>
                                             </Box>
@@ -345,6 +389,30 @@ const Incident = ({ darkMode }) => {
                                 </Paper>
                             </Grid>
                         )}
+
+                        <Grid
+                            item
+                            xs={12}
+                            md={9}
+                            sx={{ marginLeft: '4em' }}
+                        >
+                            <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+                                <Button
+                                    variant="contained"
+                                    sx={{
+                                        mb: '3em',
+                                        width: "30%",
+                                        backgroundColor: "white",
+                                        color: "black",
+                                        fontWeight: "bold",
+                                        borderRadius: "12px",
+                                    }}
+                                    onClick={handleSubmit}
+                                >
+                                    Submit
+                                </Button>
+                            </Box>
+                        </Grid>
                     </Grid>
                 </Grid>
 
