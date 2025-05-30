@@ -699,7 +699,7 @@ function Add_group({ darkMode }) {
                 startIcon={<AddCircleOutline />}
                 onClick={handleAddNewGroup}
                 disabled={!isEditing} // Show only when in edit mode
-                sx={{
+               sx={{
                   backgroundColor: "#5FECC8",
                   color: "#000",
                   fontWeight: 600,
@@ -707,9 +707,6 @@ function Add_group({ darkMode }) {
                   textTransform: "none",
                   "&:hover": {
                     backgroundColor: "#4ddbb6",
-                  },
-                  "&:disabled": {
-                    display: "none", // Hide button when disabled
                   },
                 }}
               >
