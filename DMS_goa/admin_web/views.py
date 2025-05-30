@@ -861,3 +861,22 @@ class closure_Post_api(APIView):
             return Response(serializers.data,status=status.HTTP_201_CREATED)
         return Response(serializers.errors,status=status.HTTP_400_BAD_REQUEST)
 
+
+class comment_idwise_get_api(APIView):
+    def get(self, request, incident_id):
+        comments = DMS_Comments.objects.filter(incident_id=incident_id, comm_is_deleted=False)
+        serializer = CommentSerializer(comments, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+class DMS_comment_Get_API(APIView):
+    def get(self,request):
+        snippet = DMS_Comments.objects.all()
+        serializers = CommentSerializer(snippet,many=True)
+        return Response(serializers.data,status=status.HTTP_200_OK)
+
+
+
+
+
+
+
