@@ -57,6 +57,8 @@ const AlertPanel = ({ darkMode }) => {
     const group = localStorage.getItem('user_group');
     const token = localStorage.getItem('access_token');
     const userName = localStorage.getItem('userId');
+    console.log(userName,'userName');
+    
     const [isHovered, setIsHovered] = useState(false);
     const handleClick = () => {
         navigate("/Incident");
