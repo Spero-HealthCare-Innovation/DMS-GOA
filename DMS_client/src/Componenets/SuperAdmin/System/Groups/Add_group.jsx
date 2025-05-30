@@ -6,7 +6,7 @@ import TableBody from '@mui/material/TableBody';
 import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
-import { Search, ArrowBack, DeleteOutline, EditOutlined, } from "@mui/icons-material";
+import { Search, ArrowBack, DeleteOutline, EditOutlined, AddCircleOutline } from "@mui/icons-material";
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 import { styled } from "@mui/material/styles";
 import { Alert } from '@mui/material';
@@ -46,6 +46,7 @@ function Add_group({ darkMode }) {
   const [groups, setGroups] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [isEditMode, setIsEditMode] = useState(false);
 
   // Search state
   const [searchTerm, setSearchTerm] = useState("");
@@ -54,6 +55,12 @@ function Add_group({ darkMode }) {
   const [isEditing, setIsEditing] = useState(false);
   const [editingGroupId, setEditingGroupId] = useState(null);
   const [selectedGroup, setSelectedGroup] = useState(null);
+  const [groupNameError, setGroupNameError] = useState("");
+  const [departmentError, setDepartmentError] = useState("");
+
+
+  const userName = localStorage.getItem("userId");
+  console.log(userName, "userName");
 
   // Determine effective token (context token takes priority)
   const effectiveToken = newToken || localStorage.getItem("access_token");
@@ -111,8 +118,8 @@ function Add_group({ darkMode }) {
   // Filter groups based on search term
   const filteredGroups = useMemo(() => {
     if (!searchTerm) return groups;
-    
-    return groups.filter(group => 
+
+    return groups.filter(group =>
       group.groupName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       group.departmentID.toLowerCase().includes(searchTerm.toLowerCase())
     );
@@ -144,15 +151,50 @@ function Add_group({ darkMode }) {
     setShowSuccessAlert(true);
     setTimeout(() => setShowSuccessAlert(false), 3000);
   };
-  
+
   const resetForm = () => {
     setGroupName("");
     setDepartmentId("");
     setIsEditing(false);
     setEditingGroupId(null);
+    setGroupNameError("");
+    setDepartmentError("");
+
+  };
+
+  const validateForm = () => {
+    let isValid = true;
+
+    // Reset errors
+    setGroupNameError("");
+    setDepartmentError("");
+
+    // Validate group name
+    if (!groupName.trim()) {
+      setGroupNameError("Group name is required");
+      isValid = false;
+    }
+
+    // Validate department selection
+    if (!departmentId) {
+      setDepartmentError("Please select a department");
+      isValid = false;
+    }
+
+    return isValid;
+  };
+
+
+  const handleAddNewGroup = () => {
+    resetForm();
   };
 
   const handleSubmit = async () => {
+
+    if (!validateForm()) {
+      return;
+    }
+
     if (!departmentId || !groupName) {
       alert("Please fill all required fields.");
       return;
@@ -164,8 +206,8 @@ function Add_group({ darkMode }) {
       grp_name: groupName,
       dep_id: parseInt(departmentId), // dynamic
       grp_is_deleted: false,
-      grp_added_by: "admin_user",
-      grp_modified_by: "admin_user",
+      grp_added_by: userName,
+      grp_modified_by: userName,
     };
 
     try {
@@ -256,7 +298,7 @@ function Add_group({ darkMode }) {
     console.log("Editing group:", group);
     setIsEditing(true);
     setEditingGroupId(group.id);
-    
+
     // direct departmentIdValue use 
     setDepartmentId(group.departmentIdValue?.toString() || group.fullData?.dep_id?.toString() || "");
     setGroupName(group.groupName || "");
@@ -339,7 +381,7 @@ function Add_group({ darkMode }) {
         </Typography>
 
         {/* Search Field with Filter */}
-  
+
         <TextField
           variant="outlined"
           size="small"
@@ -402,7 +444,7 @@ function Add_group({ darkMode }) {
                         </Typography>
                       </StyledCardContent>
 
-                       <StyledCardContent
+                      <StyledCardContent
                         sx={{
                           flex: 1.5,
                           borderRight: "1px solid black",
@@ -467,7 +509,7 @@ function Add_group({ darkMode }) {
                             {(page - 1) * rowsPerPage + index + 1}
                           </Typography>
                         </StyledCardContent>
-                         <StyledCardContent sx={{ flex: 2, justifyContent: "center", ...fontsTableBody }}>
+                        <StyledCardContent sx={{ flex: 2, justifyContent: "center", ...fontsTableBody }}>
                           <Typography variant="subtitle2">{item.groupName}</Typography>
                         </StyledCardContent>
 
@@ -476,7 +518,7 @@ function Add_group({ darkMode }) {
                           <Typography variant="subtitle2">{item.departmentID}</Typography>
                         </StyledCardContent>
 
-                       
+
                         <StyledCardContent sx={{ flex: 1.2, justifyContent: "center", ...fontsTableBody }}>
                           <MoreHorizIcon
                             onClick={(e) => handleOpen(e, item)}
@@ -633,21 +675,55 @@ function Add_group({ darkMode }) {
 
         <Grid item xs={12} md={4.9}>
           <Paper elevation={3} sx={{ padding: 2, borderRadius: 3, backgroundColor: bgColor, mt: 1, mb: 5 }}>
-            <Typography
-              sx={{
-                color: labelColor,
-                fontWeight: 600,
-                fontSize: 16,
-                mb: 2,
-                fontFamily,
-              }}
+
+            <Box
+              display="flex"
+              justifyContent="space-between"
+              alignItems="center"
+              mb={2}
             >
-              {isEditing ? 'Edit Group' : 'Add Group'}
-            </Typography>
+              <Typography
+                sx={{
+                  color: labelColor,
+                  fontWeight: 600,
+                  fontSize: 18,
+
+                  fontFamily,
+                }}
+              >
+                {isEditing ? 'Edit Group' : 'Add Group'}
+              </Typography>
+
+              <Button
+                variant="contained"
+                startIcon={<AddCircleOutline />}
+                onClick={handleAddNewGroup}
+                disabled={!isEditing} // Show only when in edit mode
+                sx={{
+                  backgroundColor: "#5FECC8",
+                  color: "#000",
+                  fontWeight: 600,
+                  fontFamily: "Roboto",
+                  textTransform: "none",
+                  "&:hover": {
+                    backgroundColor: "#4ddbb6",
+                  },
+                  "&:disabled": {
+                    display: "none", // Hide button when disabled
+                  },
+                }}
+              >
+                Add New Group
+              </Button>
+
+
+
+            </Box>
+
 
             <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
-   {/* Group Name TextField */}
-                <TextField
+              {/* Group Name TextField */}
+              {/* <TextField
                 fullWidth
                 placeholder="Group Name"
                 label={groupName ? "" : "Group Name"} // Show placeholder only when empty
@@ -655,19 +731,58 @@ function Add_group({ darkMode }) {
                 sx={inputStyle}
                 value={groupName}
                 onChange={(e) => setGroupName(e.target.value)}
-              />
+              /> */}
               {/* Department Select */}
+              <TextField
+                fullWidth
+                placeholder="Group Name"
+                label={groupName ? "" : "Group Name"}
+                InputLabelProps={{ shrink: false }}
+                sx={inputStyle}
+                value={groupName}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  // Only allow letters, spaces, and common punctuation for group names
+                  const regex = /^[a-zA-Z\s]*$/;
+                  if (regex.test(value) || value === '') {
+                    setGroupName(value);
+                    if (groupNameError) setGroupNameError(""); // Clear error on change
+                  }
+                }}
+                onKeyPress={(e) => {
+                  // Prevent numbers and special characters except space
+                  const regex = /^[a-zA-Z\s]$/;
+                  if (!regex.test(e.key)) {
+                    e.preventDefault();
+                  }
+                }}
+
+              />
+
+
+              {/* // 8. Update Department Select with validation */}
               <Select
                 fullWidth
                 displayEmpty
                 placeholder="Select Department"
                 value={departmentId}
-                onChange={(e) => setDepartmentId(e.target.value)}
+                onChange={(e) => {
+                  setDepartmentId(e.target.value);
+                  if (departmentError) setDepartmentError(""); // Clear error on change
+                }}
                 inputProps={{
                   "aria-label": "Select Department",
                 }}
-                sx={selectStyles}
+                sx={{
+                  ...selectStyles,
+                  ...(departmentError && {
+                    "& .MuiOutlinedInput-notchedOutline": {
+                      borderColor: "#d32f2f !important",
+                    },
+                  }),
+                }}
                 IconComponent={KeyboardArrowDownIcon}
+                error={!!departmentError}
               >
                 <MenuItem value="" disabled>
                   Select Department
@@ -678,7 +793,7 @@ function Add_group({ darkMode }) {
                   </MenuItem>
                 ))}
               </Select>
-            
+
             </Box>
 
             <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, mt: 3, mb: 1 }}>
