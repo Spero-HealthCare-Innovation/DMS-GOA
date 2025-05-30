@@ -834,7 +834,7 @@ class disaster_responder_Post_api(APIView):
         serializers=DisasterResponderPostSerializer(data=request.data)
         if serializers.is_valid():
             serializers.save()
-            return Response(serializers.data,status=status.HTTP_201_CREATED)
+            return Response([serializers.data], status=status.HTTP_201_CREATED)  # <- Wrapped in list
         return Response(serializers.errors,status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -876,6 +876,20 @@ class DMS_comment_Get_API(APIView):
         snippet = DMS_Comments.objects.all()
         serializers = CommentSerializer(snippet,many=True)
         return Response(serializers.data,status=status.HTTP_200_OK)
+
+class dispatch_sop_Get_API(APIView):
+    def get(self,request):
+        snippet = DMS_Incident.objects.all()
+        serializers = dispatchsopserializer(snippet,many=True)
+        return Response(serializers.data,status=status.HTTP_200_OK)
+
+class dispatch_sop_Idwise_Get_API(APIView):
+    def get(self,request, inc_id):
+        snippet = DMS_Incident.objects.filter(inc_is_deleted=False,inc_id=inc_id)
+        serializers = dispatchsopserializer(snippet,many=True)
+        return Response(serializers.data,status=status.HTTP_200_OK)
+    
+
 
 
 
