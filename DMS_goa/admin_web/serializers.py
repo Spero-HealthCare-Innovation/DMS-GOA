@@ -252,6 +252,11 @@ class SopSerializer(serializers.ModelSerializer):
     class Meta:
         model = DMS_SOP
         fields = '__all__'
+        
+class Sop_Put_Serializer(serializers.ModelSerializer):
+    class Meta:
+        model = DMS_SOP
+        fields = ['sop_description','disaster_id']
 
 class WeatherAlertSerializer(serializers.ModelSerializer):
     class Meta:

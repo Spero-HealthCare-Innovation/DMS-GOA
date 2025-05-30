@@ -530,7 +530,7 @@ class DMS_Sop_put_api(APIView):
         except DMS_SOP.DoesNotExist:
             return Response({"error": "Sop not found."}, status=status.HTTP_404_NOT_FOUND)
 
-        serializer = SopSerializer(instance, data=request.data, partial=True)  # partial=True allows partial updates
+        serializer = Sop_Put_Serializer(instance, data=request.data, partial=True)
 
         if serializer.is_valid():
             serializer.save()
