@@ -21,6 +21,11 @@ import {
   FormHelperText,
   FormControl,
   InputLabel,
+  IconButton,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
 } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import SearchIcon from "@mui/icons-material/Search";
@@ -39,6 +44,8 @@ import VisibilityIcon from "@mui/icons-material/Visibility";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
 import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
+import CloseIcon from "@mui/icons-material/Close";
+
 import {
   TableDataCardBody,
   TableHeadingCard,
@@ -82,11 +89,17 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
   const open = Boolean(anchorEl);
 
   const navigate = useNavigate();
+  const userName = localStorage.getItem("userId");
+  console.log(userName, "userName");
+
   const [selectedItem, setSelectedItem] = useState(null);
   const [selectedDisasterId, setSelectedDisasterId] = useState("");
   const [departmentName, setDepartmentName] = useState("");
   const [departments, setDepartments] = useState([]);
   const [allEditData, setAllEditData] = useState([]);
+  const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
+  const [deleteDepId, setDeleteDepId] = useState(null);
+
   const [page, setPage] = useState(1);
 
   const [isEditMode, setIsEditMode] = useState(false);
@@ -114,6 +127,7 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
   const [departmentErrorMsg, setDepartmentErrorMsg] = useState("");
   const [snackbarmsgAddDept, setSnackbarMessageAdded] = useState("");
   const [snackbarupdate, setSnackbarMessageUpdated] = useState("");
+  const [filteredResults, setFilteredResults] = useState([]);
 
   const TableDataColor = darkMode
     ? "rgba(0, 0, 0, 0.04)"
@@ -148,6 +162,7 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
 
     if (!value) {
       setSuggestions([]);
+      setFilteredResults([]); // Clear the results if input is empty
       return;
     }
 
@@ -156,6 +171,7 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
     );
 
     setSuggestions(filtered);
+    setFilteredResults(filtered); // ← Show matched results directly
   };
 
   const handleOpen = (event, item) => {
@@ -212,6 +228,7 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
       tah_id: selectedTehsilId,
       cit_id: selectedCityID,
       disaster_id: selectedDisasterId,
+      dep_modified_by: userName,
     };
 
     try {
@@ -304,30 +321,43 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
     }
   }, [allEditData, disasterList]);
 
+  useEffect(() => {
+    setPage(1);
+  }, [searchQuery]);
+
   const filteredDepartments = useMemo(() => {
     if (!searchQuery) return departments;
+    const query = searchQuery.toLowerCase();
 
     return departments.filter(
       (item) =>
-        item.dep_name?.toLowerCase().includes(searchQuery) ||
-        item.state_name?.toLowerCase().includes(searchQuery) ||
-        item.dst_name?.toLowerCase().includes(searchQuery) ||
-        item.tah_name?.toLowerCase().includes(searchQuery) ||
-        item.city_name?.toLowerCase().includes(searchQuery)
+        item.dep_name?.toLowerCase().includes(query) ||
+        item.state_name?.toLowerCase().includes(query) ||
+        item.dst_name?.toLowerCase().includes(query) ||
+        item.tah_name?.toLowerCase().includes(query) ||
+        item.city_name?.toLowerCase().includes(query)
     );
   }, [departments, searchQuery]);
+
+  // const paginatedData = useMemo(() => {
+  //   if (!filteredDepartments?.length) return [];
+
+  //   const start = (page - 1) * rowsPerPage;
+  //   const end = start + rowsPerPage;
+  //   const paginated = filteredDepartments.slice(start, end);
+
+  //   // Optional fallback to first page if none match (rare if no filtering)
+  //   return paginated.length > 0
+  //     ? paginated
+  //     : filteredDepartments.slice(0, rowsPerPage);
+  // }, [page, rowsPerPage, filteredDepartments]);
 
   const paginatedData = useMemo(() => {
     if (!filteredDepartments?.length) return [];
 
     const start = (page - 1) * rowsPerPage;
     const end = start + rowsPerPage;
-    const paginated = filteredDepartments.slice(start, end);
-
-    // Optional fallback to first page if none match (rare if no filtering)
-    return paginated.length > 0
-      ? paginated
-      : filteredDepartments.slice(0, rowsPerPage);
+    return filteredDepartments.slice(start, end);
   }, [page, rowsPerPage, filteredDepartments]);
 
   const fetchDepartments = async () => {
@@ -407,6 +437,8 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
       tah_id: selectedTehsilId,
       cit_id: selectedCityID,
       disaster_id: selectedDisasterId,
+      dep_modified_by: userName,
+      dep_added_by: userName,
     };
 
     console.log("Payload before POST:", payload);
@@ -488,14 +520,10 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
 
     fetchDisasters();
   }, []);
-
-  const handleDelete = async (depId) => {
-    if (!window.confirm("Are you sure you want to delete this department?"))
-      return;
-
+  const handleDelete = async () => {
     try {
       const res = await axios.delete(
-        `${port}/admin_web/department_delete/${depId}/`,
+        `${port}/admin_web/department_delete/${deleteDepId}/`,
         {
           headers: {
             Authorization: `Bearer ${token || newToken}`,
@@ -504,19 +532,46 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
       );
 
       console.log("Delete success:", res.data);
-      setDepartments((prev) => prev.filter((item) => item.dep_id !== depId));
-      setSnackbarMessage(
-        res.data.message || "Department deleted successfully."
+      setDepartments((prev) =>
+        prev.filter((item) => item.dep_id !== deleteDepId)
       );
+      setSnackbarMessage("Department deleted successfully.");
       setSnackbarSeverity("success");
       setSnackbarOpen(true);
+      setOpenDeleteDialog(false);
+      setDeleteDepId(null);
       handleClose(); // close popover
     } catch (err) {
       console.error("Error deleting department:", err);
       setSnackbarMessage("Failed to delete department. Please try again.");
       setSnackbarSeverity("error");
       setSnackbarOpen(true);
+      setOpenDeleteDialog(false);
     }
+  };
+
+  const handleAddNewDepartment = () => {
+    // Clear all form fields
+    setDepartmentName("");
+    setSelectedDisasterId("");
+    setSelectedStateId("");
+    setSelectedDistrictId("");
+    setSelectedTehsilId("");
+    setSelectedCityId("");
+
+    // Clear validation errors
+    setDepartmentError(false);
+    setDepartmentErrorMsg("");
+    setStateError(false);
+    setDistrictError(false);
+    setTehsilError(false);
+    setCityError(false);
+    setDisasterError(false);
+
+    // Exit edit mode and reset edit ID
+    setIsEditMode(false);
+    setEditId(null);
+    setDeptId(null); // if used
   };
 
   return (
@@ -577,48 +632,50 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
             >
               Add Department
             </Typography>
-            <Autocomplete
-              freeSolo
-              options={suggestions}
-              getOptionLabel={(option) => option.label}
-              onInputChange={handleSearch}
-              onChange={(e, value) => {
-                setSearchQuery(value?.label?.toLowerCase() || "");
+            <TextField
+              placeholder="Search by name"
+              value={searchQuery}
+              onChange={handleSearch}
+              size="small"
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <SearchIcon sx={{ color: "gray", fontSize: 18 }} />
+                  </InputAdornment>
+                ),
+                endAdornment: searchQuery && (
+                  <InputAdornment position="end">
+                    <IconButton
+                      size="small"
+                      onClick={() => {
+                        setSearchQuery("");
+                        setFilteredResults([]);
+                      }}
+                    >
+                      <CloseIcon fontSize="small" sx={{ color: "gray" }} />
+                    </IconButton>
+                  </InputAdornment>
+                ),
               }}
-              renderInput={(params) => (
-                <TextField
-                  {...params}
-                  placeholder="Search "
-                  size="small"
-                  InputProps={{
-                    ...params.InputProps,
-                    startAdornment: (
-                      <InputAdornment position="start">
-                        <SearchIcon sx={{ color: "gray", fontSize: 18 }} />
-                      </InputAdornment>
-                    ),
-                  }}
-                  sx={{
-                    width: "200px",
-                    ml: 5,
-                    "& .MuiOutlinedInput-root": {
-                      borderRadius: "25px",
-                      backgroundColor: darkMode ? "#1e293b" : "#fff",
-                      color: darkMode ? "#fff" : "#000",
-                      px: 1,
-                      py: 0.2,
-                    },
-                    "& .MuiOutlinedInput-notchedOutline": {
-                      borderColor: darkMode ? "#444" : "#ccc",
-                    },
-                    "& input": {
-                      color: darkMode ? "#fff" : "#000",
-                      padding: "6px 8px",
-                      fontSize: "13px",
-                    },
-                  }}
-                />
-              )}
+              sx={{
+                width: "200px",
+                ml: 5,
+                "& .MuiOutlinedInput-root": {
+                  borderRadius: "25px",
+                  backgroundColor: darkMode ? "#1e293b" : "#fff",
+                  color: darkMode ? "#fff" : "#000",
+                  px: 1,
+                  py: 0.2,
+                },
+                "& .MuiOutlinedInput-notchedOutline": {
+                  borderColor: darkMode ? "#444" : "#ccc",
+                },
+                "& input": {
+                  color: darkMode ? "#fff" : "#000",
+                  padding: "6px 8px",
+                  fontSize: "13px",
+                },
+              }}
             />
           </Box>{" "}
         </Box>
@@ -662,7 +719,7 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
                       </StyledCardContent>
                       <StyledCardContent
                         sx={{
-                          flex: 1.2,
+                          flex: 2.5,
                           borderRight: "1px solid black",
                           justifyContent: "center",
                           ...fontsTableHeading,
@@ -694,7 +751,7 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
                       </StyledCardContent>
                       <StyledCardContent
                         sx={{
-                          flex: 1,
+                          flex: 0.6,
                           borderRight: "1px solid black",
                           justifyContent: "center",
                           ...fontsTableHeading,
@@ -702,7 +759,7 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
                       >
                         <Typography variant="subtitle2">District</Typography>
                       </StyledCardContent>
-                      <StyledCardContent
+                      {/* <StyledCardContent
                         sx={{
                           flex: 1,
                           borderRight: "1px solid black",
@@ -711,8 +768,8 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
                         }}
                       >
                         <Typography variant="subtitle2">Tehsil</Typography>
-                      </StyledCardContent>
-                      <StyledCardContent
+                      </StyledCardContent> */}
+                      {/* <StyledCardContent
                         sx={{
                           flex: 1,
                           justifyContent: "center",
@@ -721,10 +778,10 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
                         }}
                       >
                         <Typography variant="subtitle2">City</Typography>
-                      </StyledCardContent>
+                      </StyledCardContent> */}
                       <StyledCardContent
                         sx={{
-                          flex: 0.8,
+                          flex: 0.4,
                           justifyContent: "center",
                           ...fontsTableHeading,
                         }}
@@ -767,9 +824,14 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
                           </StyledCardContent>
                           <StyledCardContent
                             sx={{
-                              flex: 1.4,
+                              flex: 2.4,
                               justifyContent: "center",
                               ...fontsTableBody,
+                              display: "-webkit-box",
+                              WebkitLineClamp: 2,
+                              WebkitBoxOrient: "vertical",
+                              overflow: "hidden",
+                              textOverflow: "ellipsis",
                             }}
                           >
                             <Typography variant="subtitle2">
@@ -789,7 +851,7 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
                           </StyledCardContent> */}
                           <StyledCardContent
                             sx={{
-                              flex: 1,
+                              flex: 0.8,
                               justifyContent: "center",
                               ...fontsTableBody,
                             }}
@@ -800,7 +862,7 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
                           </StyledCardContent>
                           <StyledCardContent
                             sx={{
-                              flex: 1,
+                              flex: 0.8,
                               justifyContent: "center",
                               ...fontsTableBody,
                             }}
@@ -809,7 +871,8 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
                               {item.dst_name}
                             </Typography>
                           </StyledCardContent>
-                          <StyledCardContent
+
+                          {/* <StyledCardContent
                             sx={{
                               flex: 0.8,
                               justifyContent: "center",
@@ -819,8 +882,8 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
                             <Typography variant="subtitle2">
                               {item.tah_name}
                             </Typography>
-                          </StyledCardContent>
-                          <StyledCardContent
+                          </StyledCardContent> */}
+                          {/* <StyledCardContent
                             sx={{
                               flex: 1.3,
                               justifyContent: "center ",
@@ -830,10 +893,10 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
                             <Typography variant="subtitle2">
                               {item.city_name}
                             </Typography>
-                          </StyledCardContent>
+                          </StyledCardContent> */}
                           <StyledCardContent
                             sx={{
-                              flex: 1,
+                              flex: 0.3,
                               justifyContent: "center",
                               ...fontsTableBody,
                             }}
@@ -887,7 +950,11 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
                               variant="outlined"
                               color="error"
                               startIcon={<DeleteOutline />}
-                              onClick={() => handleDelete(selectedItem.dep_id)}
+                              // onClick={() => handleDelete(selectedItem.dep_id)}
+                              onClick={() => {
+                                setDeleteDepId(selectedItem.dep_id);
+                                setOpenDeleteDialog(true);
+                              }}
                             >
                               Delete
                             </Button>
@@ -915,6 +982,31 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
                   )}
                 </TableBody>
               </Table>
+              <Dialog
+                open={openDeleteDialog}
+                onClose={() => setOpenDeleteDialog(false)}
+                maxWidth="xs"
+                fullWidth
+              >
+                <DialogTitle>Confirm Deletion</DialogTitle>
+                <DialogContent>
+                  <Typography>
+                    Are you sure you want to delete this department?
+                  </Typography>
+                </DialogContent>
+                <DialogActions>
+                  <Button onClick={() => setOpenDeleteDialog(false)}>
+                    Cancel
+                  </Button>
+                  <Button
+                    onClick={handleDelete}
+                    color="error"
+                    variant="contained"
+                  >
+                    Delete
+                  </Button>
+                </DialogActions>
+              </Dialog>
             </TableContainer>
 
             <Box
@@ -982,20 +1074,20 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
                 >
                   &#8249;
                 </Box>
-                <Box>
-                  {page}/ {Math.ceil(departments.length / rowsPerPage)}
-                </Box>
 
-                {/* <Box>{page}</Box> */}
+                <Box>
+                  {page}/ {Math.ceil(filteredDepartments.length / rowsPerPage)}
+                </Box>
 
                 <Box
                   onClick={() =>
-                    page < Math.ceil(departments.length / rowsPerPage) &&
+                    page <
+                      Math.ceil(filteredDepartments.length / rowsPerPage) &&
                     setPage(page + 1)
                   }
                   sx={{
                     cursor:
-                      page < Math.ceil(departments.length / rowsPerPage)
+                      page < Math.ceil(filteredDepartments.length / rowsPerPage)
                         ? "pointer"
                         : "not-allowed",
                     userSelect: "none",
@@ -1025,21 +1117,24 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
               alignItems="center"
               mb={2}
             >
-              <Typography
+              {/* <Typography
                 sx={{ fontWeight: 500, fontSize: "18px", fontFamily: "Roboto" }}
               >
                 Add User{" "}
-              </Typography>
+              </Typography> */}
               <Button
                 variant="contained"
                 startIcon={<AddCircleOutline />}
                 disabled={!isEditMode} // 👈 disables button if not in edit mode
+                onClick={handleAddNewDepartment} // 👉 add handler
                 sx={{
                   backgroundColor: "#5FECC8",
                   color: "#000",
                   fontWeight: 600,
                   fontFamily: "Roboto",
                   textTransform: "none",
+                  left: "16rem",
+
                   "&:hover": {
                     backgroundColor: "#4ddbb6",
                   },
@@ -1230,15 +1325,15 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
                       variant="outlined"
                       color="warning"
                       sx={{
-                      mt: 2,
-                      width: "40%",
-                      backgroundColor: "#00f0c0",
-                      color: "black",
-                      fontWeight: "bold",
-                      borderRadius: "12px",
-                      mx: "auto", // centers the button horizontally
-                      display: "block",
-                    }}
+                        mt: 2,
+                        width: "40%",
+                        backgroundColor: "#00f0c0",
+                        color: "black",
+                        fontWeight: "bold",
+                        borderRadius: "12px",
+                        mx: "auto", // centers the button horizontally
+                        display: "block",
+                      }}
                       onClick={() => handleUpdate(editId)} // Pass the editId here
                     >
                       Update
