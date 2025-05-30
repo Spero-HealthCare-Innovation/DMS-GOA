@@ -22,58 +22,9 @@ import { Checkbox, ListItemText, FormControl, InputLabel } from '@mui/material';
 
 function RegisterResponder({ darkMode }) {
     const port = import.meta.env.VITE_APP_API_KEY;
-
-    const { newToken } = useAuth();
-    const [departmentList, setDepartmentList] = useState([]);
-    const [departmentId, setDepartmentId] = useState("");
-    const [groupName, setGroupName] = useState("");
+    const { newToken, disaster } = useAuth();
+    const token = localStorage.getItem("access_token");
     const [showSuccessAlert, setShowSuccessAlert] = useState(false);
-    const [alertMessage, setAlertMessage] = useState('');
-    const [alertType, setAlertType] = useState('success');
-    const [groups, setGroups] = useState([]);
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState(null);
-
-    // States for edit functionality
-    const [isEditing, setIsEditing] = useState(false);
-    const [editingGroupId, setEditingGroupId] = useState(null);
-    const [selectedGroup, setSelectedGroup] = useState(null);
-
-    // Determine effective token (context token takes priority)
-    const effectiveToken = newToken || localStorage.getItem("access_token");
-
-    const fetchDepartments = async () => {
-        try {
-            setLoading(true);
-            console.log("Using token:", effectiveToken);
-
-            const response = await axios.get(`${port}/admin_web/Department_get/`, {
-                headers: {
-                    Authorization: `Bearer ${effectiveToken}`,
-                },
-            });
-
-            console.log(" Departments fetched:", response.data);
-            setDepartmentList(response.data);
-        } catch (err) {
-            console.error(" Error fetching departments:", err);
-            if (err.response) {
-                console.error("Server Response:", err.response.data);
-            }
-            setError(err);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    useEffect(() => {
-        if (effectiveToken) {
-            fetchDepartments();
-        } else {
-            console.warn("No token found for department fetch.");
-        }
-    }, [effectiveToken]);
-
     const textColor = darkMode ? "#ffffff" : "#000000";
     const bgColor = darkMode ? "#0a1929" : "#0a1929";
     const labelColor = darkMode ? "#5FECC8" : "#1976d2";
@@ -87,6 +38,7 @@ function RegisterResponder({ darkMode }) {
     const [page, setPage] = useState(1);
     const [rowsPerPage, setRowsPerPage] = useState(5);
     const [anchorEl, setAnchorEl] = useState(null);
+    const userName = localStorage.getItem('userId');
 
     const EnquiryCard = styled("div")(() => ({
         display: "flex",
@@ -147,43 +99,52 @@ function RegisterResponder({ darkMode }) {
         textAlign: "center",
     };
 
-    const paginatedData = groups.slice((page - 1) * rowsPerPage, page * rowsPerPage);
-    const open = Boolean(anchorEl);
-    const handleClose = () => {
-        setAnchorEl(null);
-        setSelectedGroup(null);
-    };
-
     const [selectedResponders, setSelectedResponders] = useState([]);
+    const [selectedDisaster, setSelectedDisaster] = useState(null);
 
     const [responder] = useState([
         { id: 1, name: "Fire" },
         { id: 2, name: "Cyclone" },
         { id: 3, name: "Rain" },
+        { id: 3, name: "Thunderstrom" },
     ]);
 
     const handleChange = (event) => {
         setSelectedResponders(event.target.value);
     };
 
+    const handleSubmit = async () => {
+        const payload = {
+            res_id: selectedResponders,
+            dis_id: selectedDisaster,
+            sop_added_by: userName,
+            sop_modified_by: userName
+        };
+
+        try {
+            const response = await fetch(`${port}/admin_web/Disaster_Responder_post/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${token || newToken}`,
+                },
+                body: JSON.stringify(payload),
+            });
+
+            const data = await response.json();
+            if (response.status === 200) {
+                console.log(data);
+            } else {
+                console.error('Error:', data);
+            }
+        } catch (error) {
+            console.error('Error:', error);
+        }
+    };
+
+
     return (
         <div style={{ marginLeft: "3.5rem" }}>
-            <Snackbar
-                open={showSuccessAlert}
-                anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-                autoHideDuration={3000}
-                onClose={() => setShowSuccessAlert(false)}
-            >
-                <Alert
-                    onClose={() => setShowSuccessAlert(false)}
-                    severity={alertType}
-                    variant="filled"
-                    sx={{ width: '100%' }}
-                >
-                    {alertMessage}
-                </Alert>
-            </Snackbar>
-
             <Box sx={{ display: "flex", alignItems: "center", gap: 2, pb: 2, mt: 3 }}>
                 <Typography variant="h6" sx={{
                     color: labelColor,
@@ -397,8 +358,8 @@ function RegisterResponder({ darkMode }) {
                                 >
                                     &#8249;
                                 </Box>
-                                <Box>{page}/ {Math.ceil(groups.length / rowsPerPage)}</Box>
-                                <Box
+                                {/* <Box>{page}/ {Math.ceil(groups.length / rowsPerPage)}</Box> */}
+                                {/* <Box
                                     onClick={() =>
                                         page < Math.ceil(groups.length / rowsPerPage) &&
                                         setPage(page + 1)
@@ -412,81 +373,33 @@ function RegisterResponder({ darkMode }) {
                                     }}
                                 >
                                     &#8250;
-                                </Box>
+                                </Box> */}
                             </Box>
                         </Box>
                     </Paper>
                 </Grid>
 
-                <Popover
-                    open={open}
-                    anchorEl={anchorEl}
-                    onClose={handleClose}
-                    anchorOrigin={{
-                        vertical: "center",
-                        horizontal: "right",
-                    }}
-                    transformOrigin={{
-                        vertical: "center",
-                        horizontal: "left",
-                    }}
-                    PaperProps={{
-                        sx: {
-                            p: 2,
-                            display: "flex",
-                            flexDirection: "column",
-                            gap: 1.5,
-                            borderRadius: 2,
-                            minWidth: 120,
-                        },
-                    }}
-                >
-
-
-                    <Button
-                        fullWidth
-                        variant="outlined"
-                        color="warning"
-                        startIcon={<EditOutlined />}
-                    >
-                        Edit
-                    </Button>
-
-                    <Button
-                        fullWidth
-                        variant="outlined"
-                        color="error"
-                        startIcon={<DeleteOutline />}
-                    >
-                        Delete
-                    </Button>
-                </Popover>
-
                 <Grid item xs={12} md={4.9}>
                     <Paper elevation={3} sx={{ padding: 2, borderRadius: 3, backgroundColor: bgColor, mt: 1, mb: 5 }}>
-                        <Typography
-                            sx={{
-                                color: labelColor,
-                                fontWeight: 600,
-                                fontSize: 16,
-                                mb: 2,
-                                fontFamily,
-                            }}
-                        >
-                            {isEditing ? 'Edit SOP' : 'Add SOP'}
-                        </Typography>
-
                         <Box sx={{ display: 'flex', gap: 1, mb: 2 }}>
                             <Select
+                                select
                                 fullWidth
-                                displayEmpty
-                                defaultValue=""
-                                inputProps={{ "aria-label": "Select Disaster" }}
+                                size="small"
+                                label="Disaster Type"
+                                variant="outlined"
                                 sx={selectStyles}
+                                value={selectedDisaster}
+                                onChange={(e) => setSelectedDisaster(e.target.value)}
                             >
-                                <MenuItem value="" disabled>
+                                <MenuItem disabled value="">
                                     Select Disaster Type
                                 </MenuItem>
+                                {disaster.map((item) => (
+                                    <MenuItem key={item.disaster_id} value={item.disaster_id}>
+                                        {item.disaster_name}
+                                    </MenuItem>
+                                ))}
                             </Select>
 
                             <FormControl fullWidth>
@@ -523,7 +436,6 @@ function RegisterResponder({ darkMode }) {
                         <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, mt: 3, mb: 1 }}>
                             <Button
                                 variant="contained"
-                                disabled={loading}
                                 sx={{
                                     mt: 2,
                                     width: "40%",
@@ -536,6 +448,7 @@ function RegisterResponder({ darkMode }) {
                                         color: "white !important",
                                     },
                                 }}
+                                onClick={handleSubmit}
                             >
                                 Submit
                             </Button>

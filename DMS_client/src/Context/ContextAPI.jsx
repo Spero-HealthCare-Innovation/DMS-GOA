@@ -4,6 +4,8 @@ import axios from "axios";
 const AuthContext = createContext();
 export const useAuth = () => useContext(AuthContext);
 
+
+
 export const AuthProvider = ({ children }) => {
   const port = import.meta.env.VITE_APP_API_KEY;
   const token = localStorage.getItem("access_token");
@@ -14,6 +16,8 @@ export const AuthProvider = ({ children }) => {
   const [states, setStates] = useState([]);
   const [districts, setDistricts] = useState([]);
   console.log(districts, "districts");
+  // const HERE_API_KEY = 'FscCo6SQsrummInzClxlkdETkvx5T1r8VVI25XMGnyY'
+  const HERE_API_KEY = import.meta.env.VITE_APP_GOOGLE_MAPS_API_KEY;
 
   const [Tehsils, setTehsils] = useState([]);
   const [Citys, setCitys] = useState([]);
@@ -24,18 +28,26 @@ export const AuthProvider = ({ children }) => {
   console.log(Citys, "selectedCityID");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [lattitude, setLattitude] = useState(null);
+  const [longitude, setLongitude] = useState(null);
+
+  console.log(lattitude, longitude, "lattitude, longitude");
 
   const [departments, setDepartments] = useState([]);
   const [disaterid, setDisaterid] = useState(null);
   const [disasterIncident, setDisasterIncident] = useState(null);
+  const [query, setQuery] = useState('');
+  const [suggestions, setSuggestions] = useState([]);
+  const [selectedPosition, setSelectedPosition] = useState([15.298430295875988, 74.08868128835907]); // Default: Goa
+  const [popupText, setPopupText] = useState('');
   console.log(disasterIncident, 'disasterIncident');
   // 🔹 sop page
   const [responderScope, setResponderScope] = useState([]);
-  
+
   useEffect(() => {
     const disasterValue = disaterid || disasterIncident;
-    console.log(disasterValue,'passingValue');
-    
+    console.log(disasterValue, 'passingValue');
+
     if (disasterValue) {
       fetchResponderScope(disasterValue);
     }
@@ -178,8 +190,8 @@ export const AuthProvider = ({ children }) => {
           },
         }
       );
-      console.log(res,'resssssss');
-      
+      console.log(res, 'resssssss');
+
       console.log("Responder Scope:", res.data);
       setResponderScope(res.data || []);
     } catch (err) {
@@ -188,6 +200,34 @@ export const AuthProvider = ({ children }) => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleSearchChange = async (e) => {
+    const value = e.target.value;
+    setQuery(value);
+    if (value.length < 3) return;
+
+    const response = await axios.get('https://autosuggest.search.hereapi.com/v1/autosuggest', {
+      params: {
+        apiKey: HERE_API_KEY,
+        q: value,
+        at: `${selectedPosition[0]},${selectedPosition[1]}`,
+        limit: 5
+      }
+    });
+
+    setSuggestions(response.data.items.filter(item => item.position));
+
+  };
+
+  const handleSelectSuggestion = async (item) => {
+    const { position, address } = item;
+    setSelectedPosition([position.lat, position.lng]);
+    setLattitude(position.lat);
+    setLongitude(position.lng);
+    setPopupText(address.label);
+    setQuery(address.label);
+    setSuggestions([]);
   };
 
   // 🔹 Effects
@@ -240,6 +280,21 @@ export const AuthProvider = ({ children }) => {
     }
   }, [selectedTehsilId]);
 
+  // DISASTER GET API
+  const [disaster, setDisaster] = useState([]);
+  useEffect(() => {
+    const fetchDisaster = async () => {
+      const disaster = await fetch(`${port}/admin_web/DMS_Disaster_Type_Get/`, {
+        headers: {
+          Authorization: `Bearer ${token || newToken}`,
+        }
+      })
+      const disasterData = await disaster.json();
+      setDisaster(disasterData);
+    };
+    fetchDisaster()
+  }, [])
+
   return (
     <AuthContext.Provider
       value={{
@@ -265,7 +320,17 @@ export const AuthProvider = ({ children }) => {
         responderScope,
         setResponderScope,
         disasterIncident,
-        setDisasterIncident
+        setDisasterIncident,
+        handleSearchChange,
+        handleSelectSuggestion,
+        disaster,
+        setDisaster,
+        query,
+        suggestions,
+        selectedPosition,
+        popupText,
+        setPopupText,
+        setQuery
       }}
     >
       {children}

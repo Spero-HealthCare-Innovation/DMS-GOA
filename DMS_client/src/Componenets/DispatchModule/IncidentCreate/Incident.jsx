@@ -1,4 +1,4 @@
-import { useState, useContext, useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
     Box,
     Grid,
@@ -9,15 +9,12 @@ import {
     Button,
     Checkbox,
     FormControlLabel,
-    Stack,
-    List,
-    ListItem,
-    ListItemButton
+    Stack
 } from "@mui/material";
 import { useAuth } from "../../../Context/ContextAPI";
 import IncidentCreateMap from "./IncidentCreateMap";
-import Snackbar from '@mui/material/Snackbar';
-import { useJsApiLoader, Autocomplete } from "@react-google-maps/api";
+import { Snackbar, Alert } from '@mui/material';
+import { useNavigate } from 'react-router-dom';
 
 const inputStyle = {
     mb: 2,
@@ -27,21 +24,21 @@ const boxStyle = {
     pb: 1.5,
 };
 
-const libraries = ['places'];
-
 const Incident = ({ darkMode }) => {
     const port = import.meta.env.VITE_APP_API_KEY;
     const googleKey = import.meta.env.VITE_APP_GOOGLE_MAPS_API_KEY;
     console.log(googleKey, 'googleKey');
-
+   const navigate = useNavigate();
     const token = localStorage.getItem("access_token");
-    const { newToken, responderScope, setDisasterIncident } = useAuth();
+    const { newToken, responderScope, setDisasterIncident, disaster, popupText, setPopupText } = useAuth();
+    console.log(popupText,'popupTextpopupText');
+    
+    const { handleSearchChange, handleSelectSuggestion, query } = useAuth();
     const bgColor = darkMode ? "#0a1929" : "#ffffff";
     const labelColor = darkMode ? "#5FECC8" : "#1976d2";
     const fontFamily = "Roboto, sans-serif";
     const [selectedEmergencyValue, setSelectedEmergencyValue] = useState('');
     console.log(responderScope, 'Fetching Scope Data');
-    const [disaster, setDisaster] = useState([]);
     const [summary, setSummary] = useState([]);
     const [selectedDisaster, setSelectedDisaster] = useState('');
     const [alertType, setAlertType] = useState('');
@@ -49,7 +46,6 @@ const Incident = ({ darkMode }) => {
     // POST API
     const [callerNumber, setCallerNumber] = useState('');
     const [callerName, setCallerName] = useState('');
-    const [location, setLocation] = useState('');
     const [summaryId, setSummaryId] = useState('');
     const [comments, setComments] = useState('');
     const [sopId, setSopId] = useState([]);
@@ -57,12 +53,13 @@ const Incident = ({ darkMode }) => {
     /// snackbar
     const [snackbarOpen, setSnackbarOpen] = useState(false);
     const [snackbarMessage, setSnackbarMessage] = useState('');
+    const [snackbarSeverity, setSnackbarSeverity] = useState('success');
 
     // Google API Start
-    const { isLoaded } = useJsApiLoader({
-        googleMapsApiKey: googleKey,
-        libraries: libraries,
-    });
+    // const { isLoaded } = useJsApiLoader({
+    //     googleMapsApiKey: googleKey,
+    //     libraries: libraries,
+    // });
 
     const addressRef = useRef();
 
@@ -90,7 +87,6 @@ const Incident = ({ darkMode }) => {
     };
 
     // Google API End
-
     const handleCheckboxChange = (pk_id) => {
         setSopId((prev) =>
             prev.includes(pk_id)
@@ -104,7 +100,7 @@ const Incident = ({ darkMode }) => {
             inc_type: selectedEmergencyValue,
             disaster_type: selectedDisaster,
             alert_type: alertType,
-            location: location,
+            location: popupText || query,
             latitude: 12344444444454.45,
             longitude: 1234532.34,
             summary: summaryId,
@@ -131,15 +127,22 @@ const Incident = ({ darkMode }) => {
             });
 
             const data = await response.json();
-            if (response.status === 200) {
+
+            if (response.status === 201) {
                 setSnackbarMessage("Incident Created Successfully");
                 setSnackbarOpen(true);
-                console.log(data);
+                navigate('/sop');
+            } else if (response.status === 500) {
+                setSnackbarMessage("Internal Server Error");
+                setSnackbarOpen(true);
             } else {
-                console.error('Error:', data);
+                setSnackbarMessage(data?.detail || "Something went wrong");
+                setSnackbarOpen(true);
             }
         } catch (error) {
             console.error('Error:', error);
+            setSnackbarMessage("Network error or server not reachable");
+            setSnackbarOpen(true);
         }
     };
 
@@ -158,19 +161,6 @@ const Incident = ({ darkMode }) => {
     }, [selectedDisaster]);;
 
     useEffect(() => {
-        const fetchDisaster = async () => {
-            const disaster = await fetch(`${port}/admin_web/DMS_Disaster_Type_Get/`, {
-                headers: {
-                    Authorization: `Bearer ${token || newToken}`,
-                }
-            })
-            const disasterData = await disaster.json();
-            setDisaster(disasterData);
-        };
-        fetchDisaster()
-    }, [])
-
-    useEffect(() => {
         const fetchSummary = async () => {
             const res = await fetch(`${port}/admin_web/DMS_Summary_Get/`, {
                 headers: {
@@ -184,16 +174,28 @@ const Incident = ({ darkMode }) => {
     }, []);
 
     return (
-        <Box sx={{ minHeight: "100vh", backgroundColor: darkMode ? "#0a1929" : "#f5f5f5", px: 2, py: 2 }}>
+        <Box sx={{ minHeight: "100vh", backgroundColor: darkMode ? "#0a1929" : "#f5f5f5", px: 2, py: 3 }}>
+
+            <Snackbar
+                open={snackbarOpen}
+                autoHideDuration={3000}
+                onClose={() => setSnackbarOpen(false)}
+                anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+            >
+                <Alert onClose={() => setSnackbarOpen(false)} severity="success" sx={{ width: '100%' }}>
+                    {snackbarMessage}
+                </Alert>
+            </Snackbar>
+
             <Grid container spacing={2}>
                 <Grid item xs={12} md={8}>
                     <Grid container spacing={2}>
                         <Grid item xs={12} md={8}>
-                            <Paper elevation={3} sx={{ ...inputStyle, p: 2, borderRadius: 3, backgroundColor: bgColor, height: "100%" }}>
+                            <Paper elevation={3} sx={{ ...inputStyle, p: 3, borderRadius: 3, backgroundColor: bgColor, height: "100%" }}>
                                 <Typography variant="h6" gutterBottom>
                                     Create Incident
                                 </Typography>
-                                <Grid container spacing={1}>
+                                <Grid container spacing={2}>
                                     <Grid item xs={12} sm={6}>
                                         <TextField select fullWidth size="small" label="Incident Type" variant="outlined" sx={inputStyle}
                                             value={selectedEmergencyValue}
@@ -208,6 +210,7 @@ const Incident = ({ darkMode }) => {
                                             select
                                             fullWidth
                                             size="small"
+                                            
                                             label="Disaster Type"
                                             variant="outlined"
                                             sx={inputStyle}
@@ -250,34 +253,9 @@ const Incident = ({ darkMode }) => {
                                         <TextField fullWidth size="small" label="Caller Name" variant="outlined" sx={inputStyle}
                                             value={callerName} onChange={(e) => setCallerName(e.target.value)} />
                                     </Grid>
-
-                                    <Grid item xs={12} sm={6} sx={{ position: 'relative' }}>
-                                        {isLoaded && (
-                                            <Autocomplete
-                                                onLoad={(autocomplete) =>
-                                                    (addressRef.current = autocomplete)
-                                                }
-                                                onPlaceChanged={handlePlaceChanged}
-                                            >
-                                                <TextField
-                                                    label="Location"
-                                                    name="location"
-                                                    placeholder="Location"
-                                                    size="small"
-                                                    fullWidth
-                                                    value={location}
-                                                    onChange={(e) => setLocation(e.target.value)}
-                                                    ref={addressRef}
-                                                    sx={{
-                                                        "& input": {
-                                                            fontSize: "14px",
-                                                        },
-                                                    }}
-                                                />
-                                            </Autocomplete>
-                                        )}
+                                    <Grid item xs={12} sm={6}>
+                                        <TextField fullWidth size="small" label="Location" variant="outlined" sx={inputStyle} onChange={handleSearchChange} onClick={() => handleSelectSuggestion(item)} value={query} />
                                     </Grid>
-
                                     <Grid item xs={12} sm={12}>
                                         <TextField
                                             select
@@ -304,12 +282,12 @@ const Incident = ({ darkMode }) => {
                         </Grid>
 
                         <Grid item xs={12} md={4}>
-                            <Paper elevation={3} sx={{ ...inputStyle, p: 2, color: labelColor, borderRadius: 3, backgroundColor: bgColor, height: "100%" }}>
+                            <Paper elevation={3} sx={{ ...inputStyle, p: 2, borderRadius: 3, backgroundColor: bgColor, height: "100%" }}>
                                 <Typography variant="h6">Comments</Typography>
                                 <TextField
                                     fullWidth size="small"
                                     multiline
-                                    rows={10}
+                                    rows={8}
                                     variant="outlined"
                                     sx={inputStyle}
                                     value={comments}
@@ -346,14 +324,15 @@ const Incident = ({ darkMode }) => {
                                             <Typography variant="subtitle2" sx={{ fontFamily, borderBottom: { md: `1px solid white` }, mb: 2 }}>
                                             </Typography>
 
-                                            <Box sx={boxStyle}>
+                                            <Box>
                                                 <Typography
+                                                    variant="subtitle2"
                                                     sx={{ color: labelColor, fontWeight: 500, fontFamily }}
                                                 >
                                                     Alert Type
                                                 </Typography>
                                                 <Typography variant="subtitle2" sx={{ fontFamily }}>
-                                                    {alertType}
+                                                    {alertType === 1 ? "High" : alertType === 2 ? "Medium" : "Low"}
                                                 </Typography>
                                             </Box>
                                         </Grid>
@@ -382,10 +361,6 @@ const Incident = ({ darkMode }) => {
                                                     ))}
                                                 </Typography>
                                             </Box>
-
-                                            <Typography variant="subtitle2" sx={{ fontFamily, borderBottom: { md: `1px solid white` }, mb: 3 }}>
-                                            </Typography>
-
                                             <Box>
                                                 <Typography
                                                     variant="subtitle2"
@@ -450,16 +425,6 @@ const Incident = ({ darkMode }) => {
                 <Grid item xs={12} md={4} style={{ position: "relative" }}>
                     <IncidentCreateMap />
                 </Grid>
-
-                {/* Snackbar */}
-                <Snackbar
-                    open={snackbarOpen}
-                    autoHideDuration={3000}
-                    onClose={() => setSnackbarOpen(false)}
-                    message={snackbarMessage}
-                    anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-                />
-
             </Grid>
         </Box>
     );
