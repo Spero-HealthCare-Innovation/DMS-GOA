@@ -1210,7 +1210,7 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
               <Grid item xs={12}>
                 {isEditMode ? (
                   <Box display="flex" gap={2} mt={2}>
-                    <Button
+                    {/* <Button
                       variant="outlined"
                       color="error"
                       sx={{
@@ -1225,17 +1225,20 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
                       }}
                     >
                       Cancel
-                    </Button>
+                    </Button> */}
                     <Button
                       variant="outlined"
                       color="warning"
                       sx={{
-                        width: "40%",
-                        backgroundColor: "#00f0c0",
-                        color: "black",
-                        fontWeight: "bold",
-                        borderRadius: "12px",
-                      }}
+                      mt: 2,
+                      width: "40%",
+                      backgroundColor: "#00f0c0",
+                      color: "black",
+                      fontWeight: "bold",
+                      borderRadius: "12px",
+                      mx: "auto", // centers the button horizontally
+                      display: "block",
+                    }}
                       onClick={() => handleUpdate(editId)} // Pass the editId here
                     >
                       Update
