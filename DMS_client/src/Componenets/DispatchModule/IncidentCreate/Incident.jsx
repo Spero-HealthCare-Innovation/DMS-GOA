@@ -14,6 +14,7 @@ import {
 import { useAuth } from "../../../Context/ContextAPI";
 import IncidentCreateMap from "./IncidentCreateMap";
 import { Snackbar, Alert } from '@mui/material';
+import { useNavigate } from 'react-router-dom';
 
 const inputStyle = {
     mb: 2,
@@ -27,9 +28,11 @@ const Incident = ({ darkMode }) => {
     const port = import.meta.env.VITE_APP_API_KEY;
     const googleKey = import.meta.env.VITE_APP_GOOGLE_MAPS_API_KEY;
     console.log(googleKey, 'googleKey');
-
+   const navigate = useNavigate();
     const token = localStorage.getItem("access_token");
-    const { newToken, responderScope, setDisasterIncident, disaster } = useAuth();
+    const { newToken, responderScope, setDisasterIncident, disaster, popupText, setPopupText } = useAuth();
+    console.log(popupText,'popupTextpopupText');
+    
     const { handleSearchChange, handleSelectSuggestion, query } = useAuth();
     const bgColor = darkMode ? "#0a1929" : "#ffffff";
     const labelColor = darkMode ? "#5FECC8" : "#1976d2";
@@ -43,7 +46,6 @@ const Incident = ({ darkMode }) => {
     // POST API
     const [callerNumber, setCallerNumber] = useState('');
     const [callerName, setCallerName] = useState('');
-    const [location, setLocation] = useState('');
     const [summaryId, setSummaryId] = useState('');
     const [comments, setComments] = useState('');
     const [sopId, setSopId] = useState([]);
@@ -51,7 +53,7 @@ const Incident = ({ darkMode }) => {
     /// snackbar
     const [snackbarOpen, setSnackbarOpen] = useState(false);
     const [snackbarMessage, setSnackbarMessage] = useState('');
-    const [snackbarSeverity, setSnackbarSeverity] = useState('success'); 
+    const [snackbarSeverity, setSnackbarSeverity] = useState('success');
 
     // Google API Start
     // const { isLoaded } = useJsApiLoader({
@@ -98,7 +100,7 @@ const Incident = ({ darkMode }) => {
             inc_type: selectedEmergencyValue,
             disaster_type: selectedDisaster,
             alert_type: alertType,
-            location: location,
+            location: popupText || query,
             latitude: 12344444444454.45,
             longitude: 1234532.34,
             summary: summaryId,
@@ -129,6 +131,7 @@ const Incident = ({ darkMode }) => {
             if (response.status === 201) {
                 setSnackbarMessage("Incident Created Successfully");
                 setSnackbarOpen(true);
+                navigate('/sop');
             } else if (response.status === 500) {
                 setSnackbarMessage("Internal Server Error");
                 setSnackbarOpen(true);
@@ -286,6 +289,8 @@ const Incident = ({ darkMode }) => {
                                     rows={8}
                                     variant="outlined"
                                     sx={inputStyle}
+                                    value={comments}
+                                    onChange={(e) => setComments(e.target.value)}
                                 />
                             </Paper>
                         </Grid>
