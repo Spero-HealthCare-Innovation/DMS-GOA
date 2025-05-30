@@ -638,7 +638,6 @@ class alerts_get_api(APIView):
         return Response(sop_serializer.data, status=status.HTTP_200_OK)
     
     
-
 class Manual_Call_Incident_api(APIView):
     def post(self, request, *args, **kwargs):
         data = request.data
@@ -646,7 +645,7 @@ class Manual_Call_Incident_api(APIView):
         incident_fields = [
             'inc_type', 'disaster_type', 'alert_type', 'location', 'summary',
             'responder_scope', 'latitude', 'longitude', 'caller_id',
-            'inc_added_by', 'inc_modified_by'
+            'inc_added_by', 'inc_modified_by', 'incident_id', 'inc_id'
         ]
         caller_fields = ['caller_no', 'caller_name', 'caller_added_by', 'caller_modified_by']
         comments_fields = ['comments', 'comm_added_by', 'comm_modified_by']
@@ -655,33 +654,31 @@ class Manual_Call_Incident_api(APIView):
         caller_data = {field: data.get(field) for field in caller_fields}
         comments_data = {field: data.get(field) for field in comments_fields}
 
+        # Step 1: Save caller
         caller_serializer = Manual_call_data_Serializer(data=caller_data)
         if not caller_serializer.is_valid():
             return Response({"caller_errors": caller_serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
-
         caller_instance = caller_serializer.save()
         incident_data['caller_id'] = caller_instance.pk
 
+        # Step 2: Save incident
         incident_serializer = Manual_call_incident_dispatch_Serializer(data=incident_data)
         if not incident_serializer.is_valid():
             return Response({"incident_errors": incident_serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
-
         incident_instance = incident_serializer.save()
 
-        base_code = incident_instance.incident_id  
-
+        base_code = incident_instance.incident_id
         total_calls = DMS_Incident.objects.filter(alert_code__icontains='CALL-').count()
         new_call_number = total_calls + 1
-        alert_code = f"{base_code}-CALL-{str(new_call_number).zfill(2)}"
-
+        alert_code = f"CALL-{base_code}"
         incident_instance.alert_code = alert_code
         incident_instance.save()
 
-        comments_data['incident_id'] = incident_instance.pk
+        # Step 3: Save comments with incident_id = incident_instance.inc_id
+        comments_data['incident_id'] = incident_instance.inc_id  # IMPORTANT: assign inc_id
         comments_serializer = manual_Comments_Serializer(data=comments_data)
         if not comments_serializer.is_valid():
             return Response({"comments_errors": comments_serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
-
         comments_instance = comments_serializer.save()
 
         incident_instance.comment_id = comments_instance
@@ -696,14 +693,14 @@ class Manual_Call_Incident_api(APIView):
             "added_by": incident_instance.inc_added_by,
             "modified_by": incident_instance.inc_modified_by
         }
-
         weather_alert_serializer = WeatherAlertSerializer(data=weather_alert_data)
         if not weather_alert_serializer.is_valid():
             return Response({"weather_alert_errors": weather_alert_serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
-
         weather_alert_instance = weather_alert_serializer.save()
 
+        # views.py (inside Manual_Call_Incident_api)
         dms_notify_data = {
+            "incident_id": incident_instance.inc_id,  # <-- This line adds inc_id to the notify record
             "disaster_type": incident_instance.disaster_type.pk if incident_instance.disaster_type else None,
             "alert_type_id": incident_instance.responder_scope,
             "added_by": incident_instance.inc_added_by
@@ -717,6 +714,7 @@ class Manual_Call_Incident_api(APIView):
 
         incident_instance.notify_id = dms_notify_instance
         incident_instance.save()
+
 
         return Response({
             "message": "Manual call, caller, comment, weather alert, and DMS notify created successfully.",
@@ -757,6 +755,7 @@ class DMS_Summary_Get_API(APIView):
         snippet = DMS_Summary.objects.all()
         serializers = DMS_Summary_Serializer(snippet,many=True)
         return Response(serializers.data,status=status.HTTP_200_OK)
+    
 # class DMS_responder_post_api(APIView):
 #     def post(self,request):
 #         serializers=Responder_serializer(data=request.data)
@@ -914,3 +913,14 @@ class DMS_comment_Get_API(APIView):
 
 
 
+from django.shortcuts import get_object_or_404
+class CommentPostView(APIView):
+    def post(self, request, incident_id):
+        # Use correct PK field: inc_id
+        incident_instance = get_object_or_404(DMS_Incident, inc_id=incident_id)
+
+        serializer = Comment_Post_Serializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save(incident_id=incident_instance)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

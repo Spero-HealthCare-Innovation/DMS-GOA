@@ -2,6 +2,14 @@ from django.db import models
 from django.contrib.auth.models import(
 	BaseUserManager,AbstractBaseUser
 )
+from django_enumfield import enum
+
+
+
+class division_enum(enum.Enum):
+    South=1
+    North=2
+    Central=3
 
 class DMS_State(models.Model):
     state_id = models.AutoField(primary_key=True)
@@ -344,13 +352,14 @@ class DMS_Incident(models.Model):
     notify_id = models.ForeignKey('DMS_Notify',on_delete=models.CASCADE,null=True,blank=True)
     alert_type = models.IntegerField(null=True,blank=True)
     location = models.CharField(max_length=255,null=True,blank=True)  
-    summary = models.CharField(max_length=255,null=True,blank=True)  
+    summary = models.ForeignKey('DMS_Summary',on_delete=models.CASCADE,null=True,blank=True)
     latitude = models.FloatField(null=True,blank=True)
     longitude = models.FloatField(null=True,blank=True)
     inc_type =  models.IntegerField(null=True,blank=True)
     disaster_type = models.ForeignKey(DMS_Disaster_Type,on_delete=models.CASCADE,null=True,blank=True)
     # comment_id = models.ForeignKey('DMS_Comments',on_delete=models.CASCADE,null=True,blank=True)
     alert_code = models.CharField(max_length=255,null=True,blank=True)
+    alert_division=enum.EnumField(division_enum,null=True,blank=True)
     inc_datetime = models.DateTimeField(auto_now=True)
     inc_is_deleted = models.BooleanField(default=False)
     inc_added_by=models.CharField(max_length=255,null=True,blank=True)
@@ -396,7 +405,8 @@ class DMS_Incident(models.Model):
             
 class DMS_Comments(models.Model):
     comm_id = models.AutoField(primary_key=True)
-    incident_id = models.ForeignKey(DMS_Incident,on_delete=models.CASCADE,null=True,blank=True)
+    alert_id = models.ForeignKey(Weather_alerts,on_delete=models.CASCADE,null=True,blank=True)
+    incident_id=models.ForeignKey(DMS_Incident,on_delete=models.CASCADE,null=True,blank=True)
     comments = models.TextField(null=True, blank=True)
     comm_chat = models.BooleanField(default=False)
     comm_is_deleted= models.BooleanField(default=False)
@@ -419,6 +429,7 @@ class DMS_Alert_Type(models.Model):
 class DMS_Notify(models.Model):
     not_id = models.AutoField(primary_key=True)
     alert_type_id = models.JSONField(null=True,blank=True)
+    incident_id=models.ForeignKey(DMS_Incident,on_delete=models.CASCADE,null=True,blank=True)
     disaster_type = models.ForeignKey(DMS_Disaster_Type,on_delete=models.CASCADE,null=True,blank=True)
     not_is_deleted= models.BooleanField(default=False)
     not_added_by=models.CharField(max_length=255,null=True,blank=True)
@@ -463,9 +474,6 @@ class DMS_incident_closure(models.Model):
     closure_modified_date = models.DateTimeField(null=True, blank=True)
     closure_remark=models.CharField(max_length=255, null=True, blank=True)
 
-
-
-    
 
 class DMS_Summary(models.Model):
     sum_id = models.AutoField(primary_key=True)
