@@ -113,7 +113,7 @@ const IncidentCreateMap = () => {
         <input
           type="text"
           placeholder="Search for a place..."
-          value={queryMap}
+          value={query}
           onChange={handleSearchChange}
           style={{ width: '100%', padding: '8px' }}
         />

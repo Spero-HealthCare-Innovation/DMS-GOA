@@ -35,6 +35,7 @@ export const AuthProvider = ({ children }) => {
   const [suggestions, setSuggestions] = useState([]);
   const [selectedPosition, setSelectedPosition] = useState([15.298430295875988, 74.08868128835907]); // Default: Goa
   const [popupText, setPopupText] = useState('You are here!');
+  const [responderScope,setResponderScope] = useState();
   console.log(disasterIncident, 'disasterIncident');
 
 
@@ -197,6 +198,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   const handleSearchChange = async (e) => {
+    console.log("I was called")
       const value = e.target.value;
       setQuery(value);
       if (value.length < 3) return;
