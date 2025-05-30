@@ -283,7 +283,7 @@ class Incident_Serializer(serializers.ModelSerializer):
     class Meta:
         model = DMS_Incident
         fields = '__all__'
-        extra_fields = ['responder_scope', 'comments', 'comm_added_by']
+        extra_fields = ['latitude','longitude','responder_scope', 'comments', 'comm_added_by']
 
     def create(self, validated_data):
         responder_scope = validated_data.pop('responder_scope', [])
@@ -304,6 +304,7 @@ class Incident_Serializer(serializers.ModelSerializer):
 
         comment = DMS_Comments.objects.create(
             alert_id=incident.alert_id,
+            incident_id=incident,
             comments=comments_text,
             comm_added_by=comm_added_by
         )
@@ -312,6 +313,8 @@ class Incident_Serializer(serializers.ModelSerializer):
         incident.save(update_fields=['comment_id'])
 
         return incident
+
+
 
 
         
@@ -354,7 +357,7 @@ class Manual_call_data_Serializer(serializers.ModelSerializer):
 class manual_Comments_Serializer(serializers.ModelSerializer):
     class Meta:
         model = DMS_Comments
-        fields = ['comments','comm_added_by','comm_modified_by'] 
+        fields = ['incident_id','comments','comm_added_by','comm_modified_by'] 
         
 class Responder_Scope_Serializer(serializers.ModelSerializer):
     responder_name = serializers.CharField(source='res_id.responder_name', read_only=True)
@@ -398,3 +401,9 @@ class CommentSerializer(serializers.ModelSerializer):
     class Meta:
         model = DMS_Comments
         fields = ['incident_id','comments']
+
+
+class Comment_Post_Serializer(serializers.ModelSerializer):
+    class Meta:
+        model = DMS_Comments
+        fields = ['incident_id','comments','comm_added_by','comm_modified_by']
