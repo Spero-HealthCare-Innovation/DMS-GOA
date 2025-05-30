@@ -329,7 +329,11 @@ export const AuthProvider = ({ children }) => {
         suggestions,
         selectedPosition,
         popupText,
+<<<<<<< Updated upstream
         setPopupText
+=======
+        setQuery,
+>>>>>>> Stashed changes
       }}
     >
       {children}
