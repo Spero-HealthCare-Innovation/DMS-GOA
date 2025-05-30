@@ -372,7 +372,6 @@ class DMS_Summary_Serializer(serializers.ModelSerializer):
     class Meta:
         model = DMS_Summary
         fields = ['sum_id','summary']
-        fields = ['comments','comm_added_by','comm_modified_by','incident_id'] 
 
 
 class Responder_Serializer(serializers.ModelSerializer):
