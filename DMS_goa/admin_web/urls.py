@@ -39,6 +39,14 @@ urlpatterns = [
     path('closure_post_api/',closure_Post_api.as_view(),name='closure_post_api'),
 
 
+    path('comment_get_idwise/<int:incident_id>/',comment_idwise_get_api.as_view(),name='comment_get_idwise'),
+    path('comment_get',DMS_comment_Get_API.as_view(),name='comment_get'),
+
+    
+    
+
+
+
 
     
 
