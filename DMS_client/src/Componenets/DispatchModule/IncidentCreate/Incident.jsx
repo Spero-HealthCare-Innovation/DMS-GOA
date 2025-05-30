@@ -210,6 +210,7 @@ const Incident = ({ darkMode }) => {
                                             select
                                             fullWidth
                                             size="small"
+                                            
                                             label="Disaster Type"
                                             variant="outlined"
                                             sx={inputStyle}

@@ -323,6 +323,7 @@ export const AuthProvider = ({ children }) => {
         setDisasterIncident,
         handleSearchChange,
         handleSelectSuggestion,
+        
         disaster,
         setDisaster,
         query,

@@ -138,7 +138,6 @@ function SopRegister({ darkMode }) {
         setTimeout(() => setShowSuccessAlert(false), 3000);
     };
 
-
     return (
         <div style={{ marginLeft: "3.5rem" }}>
             <Snackbar
