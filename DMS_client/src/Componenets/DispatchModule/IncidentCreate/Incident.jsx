@@ -175,7 +175,6 @@ const Incident = ({ darkMode }) => {
 
     return (
         <Box sx={{ minHeight: "100vh", backgroundColor: darkMode ? "#0a1929" : "#f5f5f5", px: 2, py: 3 }}>
-
             <Snackbar
                 open={snackbarOpen}
                 autoHideDuration={3000}
@@ -210,7 +209,6 @@ const Incident = ({ darkMode }) => {
                                             select
                                             fullWidth
                                             size="small"
-                                            
                                             label="Disaster Type"
                                             variant="outlined"
                                             sx={inputStyle}
