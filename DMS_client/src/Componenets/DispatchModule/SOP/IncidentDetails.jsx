@@ -12,6 +12,7 @@ import CommentsPanel from "./CommentsPanel";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 
 import { useAuth } from "../../../Context/ContextAPI";
+import { useState } from "react";
 
 function IncidentDetails({
   darkMode,
@@ -26,22 +27,37 @@ function IncidentDetails({
     }
   });
 
-  console.log(responderScope, "responderScope in IncidentDetails");
+  const userName = localStorage.getItem('userId');
 
   const { disaterid } = useAuth();
-  console.log(disaterid, "wwwwwwwwwwww");
 
+
+  const [selectedResponders, setSelectedResponders] = useState(
+    responderScope?.responder_scope?.map((item) => item.pk_id) || []
+  );
+
+
+  
+  // Define colors and styles based on dark mode
   const labelColor = darkMode ? "#5FECC8" : "#1976d2";
   const textColor = darkMode ? "#ffffff" : "#000000";
   const borderColor = darkMode ? "#7F7F7F" : "#ccc";
   const fontFamily = "Roboto, sans-serif";
 
+
+
+
+  // Style for the box containing label and value
+  // This can be customized further based on your design requirements
   const boxStyle = {
     mb: 2,
     pb: 1.5,
     borderBottom: `1px solid ${borderColor}`,
   };
 
+
+
+  // Function to render text with label and value
   const renderText = (label, value) => (
     <Box sx={boxStyle}>
       <Typography sx={{ color: labelColor, fontWeight: 500, fontFamily }}>
@@ -150,7 +166,21 @@ function IncidentDetails({
                               key={pk_id}
                               control={
                                 <Checkbox
-                                  defaultChecked
+                                  checked={selectedResponders.includes(pk_id)}
+                                  onChange={(e) => {
+                                    if (e.target.checked) {
+                                      setSelectedResponders([
+                                        ...selectedResponders,
+                                        pk_id,
+                                      ]);
+                                    } else {
+                                      setSelectedResponders(
+                                        selectedResponders.filter(
+                                          (id) => id !== pk_id
+                                        )
+                                      );
+                                    }
+                                  }}
                                   sx={{ color: labelColor }}
                                 />
                               }
@@ -241,7 +271,14 @@ function IncidentDetails({
           {/* Right Column */}
           <Grid item xs={12} md={5} pl={{ md: 2 }}>
             {selectedIncident ? (
-              <CommentsPanel darkMode={darkMode} flag={flag} />
+              <CommentsPanel
+                darkMode={darkMode}
+                flag={flag}
+                setFlag={setFlag}
+                selectedResponders={selectedResponders}
+                setSelectedResponders={setSelectedResponders}
+                selectedIncident={selectedIncident}
+              />
             ) : (
               <>
                 <Skeleton variant="text" width="80%" height={24} />
