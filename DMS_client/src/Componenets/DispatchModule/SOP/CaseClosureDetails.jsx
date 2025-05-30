@@ -34,6 +34,41 @@ const CaseClosureDetails = ({ darkMode, flag, selectedIncident }) => {
   const textColor = darkMode ? "#ffffff" : "#000000";
   const fontFamily = "Roboto, sans-serif";
   const borderColor = darkMode ? "#7F7F7F" : "#e0e0e0";
+  const [remark, setRemark] = useState("");
+  const toISOString = (datetime) => {
+    if (!datetime) return null;
+    const date = new Date(datetime);
+    return date.toISOString(); // returns like "2025-05-29T10:00:00.000Z"
+  };
+
+  const [timestamps, setTimestamps] = useState({
+    acknowledge: "",
+    startBaseLocation: "",
+    atScene: "",
+    fromScene: "",
+    backToBase: "",
+  });
+  // Load initial values from props
+
+ 
+
+  // useEffect(() => {
+  //   if (selectedIncident) {
+  //     setTimestamps({
+  //       acknowledge: formatDateTimeLocal(selectedIncident.acknowledge),
+  //       startBaseLocation: formatDateTimeLocal(
+  //         selectedIncident.startBaseLocation
+  //       ),
+  //       atScene: formatDateTimeLocal(selectedIncident.atScene),
+  //       fromScene: formatDateTimeLocal(selectedIncident.fromScene),
+  //       backToBase: formatDateTimeLocal(selectedIncident.backToBase),
+  //     });
+  //   }
+  // }, [selectedIncident]);
+
+  // const handleChange = (key, value) => {
+  //   setTimestamps((prev) => ({ ...prev, [key]: value }));
+  // };
 
   const textFieldStyle = {
     "& .MuiInputLabel-root": { color: labelColor },

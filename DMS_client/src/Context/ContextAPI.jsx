@@ -4,6 +4,8 @@ import axios from "axios";
 const AuthContext = createContext();
 export const useAuth = () => useContext(AuthContext);
 
+
+
 export const AuthProvider = ({ children }) => {
   const port = import.meta.env.VITE_APP_API_KEY;
   const token = localStorage.getItem("access_token");
@@ -14,6 +16,7 @@ export const AuthProvider = ({ children }) => {
   const [states, setStates] = useState([]);
   const [districts, setDistricts] = useState([]);
   console.log(districts, "districts");
+  const HERE_API_KEY = 'FscCo6SQsrummInzClxlkdETkvx5T1r8VVI25XMGnyY'
 
   const [Tehsils, setTehsils] = useState([]);
   const [Citys, setCitys] = useState([]);
@@ -28,10 +31,13 @@ export const AuthProvider = ({ children }) => {
   const [departments, setDepartments] = useState([]);
   const [disaterid, setDisaterid] = useState(null);
   const [disasterIncident, setDisasterIncident] = useState(null);
+  const [query, setQuery] = useState('');
+  const [suggestions, setSuggestions] = useState([]);
+  const [selectedPosition, setSelectedPosition] = useState([15.298430295875988, 74.08868128835907]); // Default: Goa
+  const [popupText, setPopupText] = useState('You are here!');
   console.log(disasterIncident, 'disasterIncident');
-  // 🔹 sop page
-  const [responderScope, setResponderScope] = useState([]);
-  
+
+
   useEffect(() => {
     const disasterValue = disaterid || disasterIncident;
     console.log(disasterValue,'passingValue');
@@ -190,6 +196,32 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const handleSearchChange = async (e) => {
+      const value = e.target.value;
+      setQuery(value);
+      if (value.length < 3) return;
+  
+      const response = await axios.get('https://autosuggest.search.hereapi.com/v1/autosuggest', {
+        params: {
+          apiKey: HERE_API_KEY,
+          q: value,
+          at: `${selectedPosition[0]},${selectedPosition[1]}`,
+          limit: 5
+        }
+      });
+  
+      setSuggestions(response.data.items.filter(item => item.position));
+      
+    };
+  
+    const handleSelectSuggestion = async (item) => {
+      const { position, address } = item;
+      setSelectedPosition([position.lat, position.lng]);
+      setPopupText(address.label);
+      setQuery(address.label);
+      setSuggestions([]);
+    };
+
   // 🔹 Effects
   useEffect(() => {
     fetchStates();
@@ -265,7 +297,13 @@ export const AuthProvider = ({ children }) => {
         responderScope,
         setResponderScope,
         disasterIncident,
-        setDisasterIncident
+        setDisasterIncident,
+        handleSearchChange,
+        handleSelectSuggestion,
+        query,
+        suggestions,
+        selectedPosition,
+        popupText
       }}
     >
       {children}
