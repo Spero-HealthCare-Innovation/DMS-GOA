@@ -65,3 +65,4 @@ uiautomation
 sqlalchemy
 asyncpg
 openpyxl
+django_enumfield
