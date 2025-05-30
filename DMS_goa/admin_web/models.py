@@ -349,7 +349,7 @@ class DMS_Incident(models.Model):
     longitude = models.FloatField(null=True,blank=True)
     inc_type =  models.IntegerField(null=True,blank=True)
     disaster_type = models.ForeignKey(DMS_Disaster_Type,on_delete=models.CASCADE,null=True,blank=True)
-    comment_id = models.ForeignKey('DMS_Comments',on_delete=models.CASCADE,null=True,blank=True)
+    # comment_id = models.ForeignKey('DMS_Comments',on_delete=models.CASCADE,null=True,blank=True)
     alert_code = models.CharField(max_length=255,null=True,blank=True)
     inc_datetime = models.DateTimeField(auto_now=True)
     inc_is_deleted = models.BooleanField(default=False)
@@ -396,7 +396,7 @@ class DMS_Incident(models.Model):
             
 class DMS_Comments(models.Model):
     comm_id = models.AutoField(primary_key=True)
-    alert_id = models.ForeignKey(Weather_alerts,on_delete=models.CASCADE,null=True,blank=True)
+    incident_id = models.ForeignKey(DMS_Incident,on_delete=models.CASCADE,null=True,blank=True)
     comments = models.TextField(null=True, blank=True)
     comm_chat = models.BooleanField(default=False)
     comm_is_deleted= models.BooleanField(default=False)
