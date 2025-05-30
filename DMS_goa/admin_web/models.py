@@ -450,7 +450,7 @@ class DMS_Responder(models.Model):
     
 class DMS_Disaster_Responder(models.Model):
     pk_id = models.AutoField(primary_key=True)
-    res_id = models.ForeignKey(DMS_Responder,on_delete=models.CASCADE,null=True, blank=True)
+    res_id = models.JSONField(null=True,blank=True)
     dis_id = models.ForeignKey(DMS_Disaster_Type,on_delete=models.CASCADE,null=True, blank=True)
     dr_is_deleted = models.BooleanField(default=False)
     dr_added_date = models.DateTimeField(auto_now=True,null=True, blank=True)
