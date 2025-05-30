@@ -23,7 +23,7 @@ const PanToLocation = ({ position }) => {
 };
 
 const IncidentCreateMap = () => {
-  const { query, suggestions, selectedPosition, popupText, handleSearchChange, handleSelectSuggestion, } = useAuth();
+  const { query, suggestions, selectedPosition, popupText, handleSearchChange, handleSelectSuggestion, setQuery } = useAuth();
   const [queryMap, setQueryMap] = useState('');
   const [suggestionsMap, setSuggestionsMap] = useState([]);
   const [selectedPositionMap, setSelectedPositionMap] = useState([15.298430295875988, 74.08868128835907]); // Default: Goa
@@ -37,6 +37,10 @@ const IncidentCreateMap = () => {
     setSelectedPositionMap(selectedPosition);
     setPopupTextMap(popupText);
   }, [query, suggestions, selectedPosition, popupText]);
+
+  useEffect(() => {
+    setQuery(queryMap);  // send value to context
+  }, [queryMap]);
 
   useEffect(() => {
     fetch('/Boundaries/Goa_State.geojson')
