@@ -415,6 +415,15 @@ class Comment_Post_Serializer(serializers.ModelSerializer):
 
 class dispatchsopserializer(serializers.ModelSerializer):
     disaster_name=serializers.CharField(source='disaster_type.disaster_name', read_only=True)
+    alert_id = serializers.CharField(source='alert_id.disaster_name', read_only=True)
     class Meta:
         model = DMS_Incident
-        fields = ['incident_id','alert_id','disaster_type','inc_added_by','inc_added_date','disaster_name']
+        fields = ['incident_id','alert_id','disaster_type','inc_added_by','inc_added_date','disaster_name','inc_type']
+
+
+class incident_get_serializer(serializers.ModelSerializer):
+        class Meta:
+            model = DMS_Incident
+            fields=['incident_id','disaster_type','inc_type','responder_scope']
+
+
