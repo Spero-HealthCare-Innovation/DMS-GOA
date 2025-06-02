@@ -323,7 +323,7 @@ class Weather_alerts(models.Model):
 class DMS_SOP(models.Model):
     sop_id=models.AutoField(primary_key=True)
     sop_description=models.TextField(null=True,blank=True)
-    alert_id=models.ForeignKey(Weather_alerts,on_delete=models.CASCADE)
+    alert_id=models.ForeignKey(Weather_alerts,on_delete=models.CASCADE,null=True,blank=True)
     disaster_id = models.ForeignKey(DMS_Disaster_Type,on_delete=models.CASCADE)
     sop_is_deleted = models.BooleanField(default=False)
     sop_added_by=models.CharField(max_length=255,null=True,blank=True)
