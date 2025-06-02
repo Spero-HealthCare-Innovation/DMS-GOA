@@ -256,6 +256,28 @@ async def websocket_endpoint(websocket: WebSocket):
     except WebSocketDisconnect:
         print("Client disconnected")
         connected_clients.remove(websocket)
+        
+        
+        
+connected_clients_new: List[WebSocket] = []
+
+@app.websocket("/send_ip")
+async def websocket_endpoint(websocket: WebSocket):
+    await websocket.accept()
+    connected_clients_new.append(websocket)
+    print("Client connected")
+    try:
+        while True:
+            data = await websocket.receive_text()
+            print(f"Received from frontend: {data}")
+            # if data.strip().lower() == "true":
+                # Broadcast to all connected clients
+            for client in connected_clients_new:
+                if client != websocket:
+                    await client.send_text(data)
+    except WebSocketDisconnect:
+        print("Client disconnected")
+        connected_clients_new.remove(websocket)
 
 
 
