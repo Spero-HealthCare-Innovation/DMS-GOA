@@ -357,7 +357,7 @@ class DMS_Incident(models.Model):
     longitude = models.FloatField(null=True,blank=True)
     inc_type =  models.IntegerField(null=True,blank=True)
     disaster_type = models.ForeignKey(DMS_Disaster_Type,on_delete=models.CASCADE,null=True,blank=True)
-    # comment_id = models.ForeignKey('DMS_Comments',on_delete=models.CASCADE,null=True,blank=True)
+    comment_id = models.ForeignKey('DMS_Comments',on_delete=models.CASCADE,null=True,blank=True)
     alert_code = models.CharField(max_length=255,null=True,blank=True)
     alert_division=enum.EnumField(division_enum,null=True,blank=True)
     inc_datetime = models.DateTimeField(auto_now=True)
@@ -450,7 +450,7 @@ class DMS_Responder(models.Model):
     
 class DMS_Disaster_Responder(models.Model):
     pk_id = models.AutoField(primary_key=True)
-    res_id = models.ForeignKey(DMS_Responder,on_delete=models.CASCADE,null=True, blank=True)
+    res_id = models.JSONField(null=True,blank=True)
     dis_id = models.ForeignKey(DMS_Disaster_Type,on_delete=models.CASCADE,null=True, blank=True)
     dr_is_deleted = models.BooleanField(default=False)
     dr_added_date = models.DateTimeField(auto_now=True,null=True, blank=True)

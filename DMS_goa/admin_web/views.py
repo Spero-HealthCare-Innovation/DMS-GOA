@@ -561,7 +561,7 @@ class DMS_Sop_put_api(APIView):
         except DMS_SOP.DoesNotExist:
             return Response({"error": "Sop not found."}, status=status.HTTP_404_NOT_FOUND)
 
-        serializer = SopSerializer(instance, data=request.data, partial=True)  # partial=True allows partial updates
+        serializer = Sop_Put_Serializer(instance, data=request.data, partial=True)
 
         if serializer.is_valid():
             serializer.save()
@@ -869,17 +869,33 @@ class disaster_responder_Post_api(APIView):
 
 
 class DMS_Disaster_Responder_GET_API(APIView):
-     
     def get(self, request):
         pk_id = request.query_params.get('pk_id')
-
         queryset = DMS_Disaster_Responder.objects.all()
- 
+
         if pk_id is not None:
             queryset = queryset.filter(pk_id=pk_id)
- 
-        serializer = DisasterResponderSerializer(queryset, many=True)
-        return Response(serializer.data)
+
+        response_data = []
+
+        for obj in queryset:
+            serialized_data = DisasterResponderSerializer(obj).data
+
+            # Get responder details as a list of dicts
+            res_ids = obj.res_id or []
+
+            responder_details = list(
+                DMS_Responder.objects
+                .filter(responder_id__in=res_ids)
+                .values('responder_id', 'responder_name')
+            )
+
+            # Replace 'res_id' with actual responder details
+            serialized_data['res_id'] = responder_details
+
+            response_data.append(serialized_data)
+
+        return Response(response_data)
 
 
 class closure_Post_api(APIView):
@@ -907,6 +923,20 @@ class DMS_comment_Get_API(APIView):
         serializers = CommentSerializer(snippet,many=True)
         return Response(serializers.data,status=status.HTTP_200_OK)
 
+class dispatch_sop_Get_API(APIView):
+    def get(self,request):
+        snippet = DMS_Incident.objects.all()
+        serializers = dispatchsopserializer(snippet,many=True)
+        return Response(serializers.data,status=status.HTTP_200_OK)
+
+class dispatch_sop_Idwise_Get_API(APIView):
+    def get(self,request, inc_id):
+        snippet = DMS_Incident.objects.filter(inc_is_deleted=False,inc_id=inc_id)
+        serializers = dispatchsopserializer(snippet,many=True)
+        return Response(serializers.data,status=status.HTTP_200_OK)
+    
+
+
 
 
 
@@ -924,3 +954,35 @@ class CommentPostView(APIView):
             serializer.save(incident_id=incident_instance)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+
+class incident_get_Api(APIView):
+    def get(self, request, inc_id):
+        # Get incident details
+        incident_qs = DMS_Incident.objects.filter(inc_id=inc_id)
+        incident_serializer = incident_get_serializer(incident_qs, many=True)
+
+        # Extract responder IDs from the first incident
+        incident_data = incident_serializer.data
+        responder_ids = []
+        if incident_data:
+            responder_ids = incident_data[0].get('responder_scope', [])
+
+        # Get Responder Names
+        responders = DMS_Responder.objects.filter(responder_id__in=responder_ids).values('responder_id', 'responder_name')
+        responder_details = list(responders)
+
+        # Get related comments
+        comments_qs = DMS_Comments.objects.filter(incident_id=inc_id, comm_is_deleted=False)
+        comment_texts = comments_qs.values('comm_id', 'comments')
+
+        # Combine data
+        data = {
+            "incident_details": incident_data,
+            "incident_id": inc_id,
+            "comments": list(comment_texts),
+            "responders": responder_details
+        }
+        return Response(data, status=status.HTTP_200_OK)

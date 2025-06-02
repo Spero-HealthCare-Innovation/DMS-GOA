@@ -35,6 +35,9 @@ urlpatterns = [
     path('disaster_responder_put/<int:pk_id>/',Disaster_Responder_put.as_view(),name='disaster_responder_put'),
     path('Disaster_Responder_delete/<int:pk_id>/',Disaster_responder_delete_api.as_view(),name='Disaster_Responder_delete'),
     path('Disaster_Responder_post/',disaster_responder_Post_api.as_view(),name='Disaster_Responder_post'),
+    path('Disaster_Responder_get/',DMS_Disaster_Responder_GET_API.as_view(),name='Disaster_Responder_get'),
+
+
 
 
     path('closure_post_api/',closure_Post_api.as_view(),name='closure_post_api'),
@@ -42,6 +45,16 @@ urlpatterns = [
 
     path('comment_get_idwise/<int:incident_id>/',comment_idwise_get_api.as_view(),name='comment_get_idwise'),
     path('comment_get',DMS_comment_Get_API.as_view(),name='comment_get'),
+
+
+
+    path('dispatch_get/',dispatch_sop_Get_API.as_view(),name='disapatch_get'),
+    path('dispatch_get_idwise/<int:inc_id>/',dispatch_sop_Idwise_Get_API.as_view(),name='disapatch_get_idwise'),
+
+
+    path('incident_get/<int:inc_id>/',incident_get_Api.as_view(),name='incident_get'),
+
+
 
     
     
