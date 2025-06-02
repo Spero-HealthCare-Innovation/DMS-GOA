@@ -251,7 +251,8 @@ class ChangePasswordputSerializer(serializers.ModelSerializer):
 class SopSerializer(serializers.ModelSerializer):
     class Meta:
         model = DMS_SOP
-        fields = '__all__'
+        # fields = '__all__'
+        fields = ['sop_description','disaster_id','sop_added_by','sop_modified_by']
         
 class Sop_Put_Serializer(serializers.ModelSerializer):
     class Meta:
