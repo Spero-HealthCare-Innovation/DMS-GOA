@@ -506,7 +506,7 @@ class PasswordResetConfirmView(APIView):
 
 class DMS_Sop_get_api(APIView):
     def get(self,request):
-        snippet = DMS_SOP.objects.all()
+        snippet = DMS_SOP.objects.filter(sop_is_deleted=False)
         serializers = SopSerializer(snippet,many=True)
         return Response(serializers.data,status=status.HTTP_200_OK)
 
@@ -517,7 +517,6 @@ class DMS_Sop_post_api(APIView):
         if disaster_id is None:
             return Response({"error": "disaster_id is required."}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Filter only non-deleted SOPs
         existing = DMS_SOP.objects.filter(disaster_id=disaster_id, sop_is_deleted=False).first()
         
         if existing:
