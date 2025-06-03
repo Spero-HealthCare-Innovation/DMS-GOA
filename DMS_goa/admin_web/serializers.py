@@ -367,10 +367,25 @@ class manual_Comments_Serializer(serializers.ModelSerializer):
         fields = ['incident_id','comments','comm_added_by','comm_modified_by'] 
         
 class Responder_Scope_Serializer(serializers.ModelSerializer):
-    responder_name = serializers.CharField(source='res_id.responder_name', read_only=True)
+    responder_names = serializers.SerializerMethodField()
+
     class Meta:
         model = DMS_Disaster_Responder
-        fields = ['pk_id','res_id','responder_name']
+        fields = ['pk_id', 'res_id', 'responder_names']
+
+    def get_responder_names(self, obj):
+        if isinstance(obj.res_id, list):
+            responder_ids = obj.res_id
+        else:
+            try:
+                import json
+                responder_ids = json.loads(obj.res_id)
+            except:
+                responder_ids = []
+
+        responders = DMS_Responder.objects.filter(responder_id__in=responder_ids)
+        return [r.responder_name for r in responders]
+
         
         
 class DMS_NotifySerializer(serializers.ModelSerializer):
