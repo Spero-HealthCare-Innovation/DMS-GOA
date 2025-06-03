@@ -3,10 +3,11 @@ import axios from "axios";
 import { Box, Typography, TextField, Button, Paper, InputAdornment, Grid, Popover, Snackbar } from "@mui/material";
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
+import TableCell from '@mui/material/TableCell';
 import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
-import { Search, DeleteOutline, EditOutlined, Description, } from "@mui/icons-material";
+import { Search, DeleteOutline, EditOutlined, } from "@mui/icons-material";
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 import { styled } from "@mui/material/styles";
 import { Alert } from '@mui/material';
@@ -16,8 +17,10 @@ import { useAuth } from "../../../Context/ContextAPI";
 import {
     getCustomSelectStyles,
 } from "../../../CommonStyle/Style";
+import { Checkbox, ListItemText, FormControl, InputLabel } from '@mui/material';
 
-function SopRegister({ darkMode }) {
+
+function RegisterResponder({ darkMode }) {
     const port = import.meta.env.VITE_APP_API_KEY;
     const { newToken, disaster } = useAuth();
     const token = localStorage.getItem("access_token");
@@ -32,12 +35,10 @@ function SopRegister({ darkMode }) {
     const isDarkMode = theme.palette.mode === "dark";
     const selectStyles = getCustomSelectStyles(isDarkMode);
 
+    const [page, setPage] = useState(1);
+    const [rowsPerPage, setRowsPerPage] = useState(5);
     const [anchorEl, setAnchorEl] = useState(null);
-
-    const [description, setDescription] = useState("");
-    const [selectedDisaster, setSelectedDisaster] = useState(null);
     const userName = localStorage.getItem('userId');
-    const [sop, setSop] = useState([]);
 
     const EnquiryCard = styled("div")(() => ({
         display: "flex",
@@ -98,16 +99,30 @@ function SopRegister({ darkMode }) {
         textAlign: "center",
     };
 
+    const [selectedResponders, setSelectedResponders] = useState([]);
+    const [selectedDisaster, setSelectedDisaster] = useState(null);
+
+    const [responder] = useState([
+        { id: 1, name: "Fire" },
+        { id: 2, name: "Cyclone" },
+        { id: 3, name: "Rain" },
+        { id: 3, name: "Thunderstrom" },
+    ]);
+
+    const handleChange = (event) => {
+        setSelectedResponders(event.target.value);
+    };
+
     const handleSubmit = async () => {
         const payload = {
-            sop_description: description,
-            disaster_id: selectedDisaster,
+            res_id: selectedResponders,
+            dis_id: selectedDisaster,
             sop_added_by: userName,
-            sop_modified_by: userName,
+            sop_modified_by: userName
         };
 
         try {
-            const response = await fetch(`${port}/admin_web/sop_post`, {
+            const response = await fetch(`${port}/admin_web/Disaster_Responder_post/`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -117,70 +132,19 @@ function SopRegister({ darkMode }) {
             });
 
             const data = await response.json();
-            if (response.status === 201) {
-                setSnackbarMessage("SOP Registered Successfully");
-                setSnackbarOpen(true);
-            } else if (response.status === 500) {
-                setSnackbarMessage("Internal Server Error");
-                setSnackbarOpen(true);
+            if (response.status === 200) {
+                console.log(data);
             } else {
-                setSnackbarMessage(data?.detail || "Something went wrong");
-                setSnackbarOpen(true);
+                console.error('Error:', data);
             }
         } catch (error) {
             console.error('Error:', error);
         }
     };
 
-    const [snackbarOpen, setSnackbarOpen] = useState(false);
-    const [snackbarMessage, setSnackbarMessage] = useState('');
-
-    // GET API SOP
-    const [page, setPage] = useState(1);
-    const [rowsPerPage, setRowsPerPage] = useState(5);
-
-    useEffect(() => {
-        const fetchSop = async () => {
-            try {
-                const response = await fetch(`${port}/admin_web/sop_get`, {
-                    method: "GET",
-                    headers: {
-                        "Content-Type": "application/json",
-                        Authorization: `Bearer ${token || newToken}`,
-                    },
-                });
-
-                const data = await response.json();
-                if (response.status === 200) {
-                    setSop(data);
-                    console.log(data, "SOP");
-                    setPage(1); // reset page on new data
-                }
-            } catch (error) {
-                console.error("Error:", error);
-            }
-        };
-
-        fetchSop();
-    }, [port, token, newToken]);
-
-    // Calculate total pages and sliced data for pagination
-    const totalPages = Math.ceil(sop.length / rowsPerPage);
-    const paginatedData = sop.slice((page - 1) * rowsPerPage, page * rowsPerPage);
 
     return (
         <div style={{ marginLeft: "3.5rem" }}>
-            <Snackbar
-                open={snackbarOpen}
-                autoHideDuration={3000}
-                onClose={() => setSnackbarOpen(false)}
-                anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
-            >
-                <Alert onClose={() => setSnackbarOpen(false)} severity="success" sx={{ width: '100%' }}>
-                    {snackbarMessage}
-                </Alert>
-            </Snackbar>
-
             <Box sx={{ display: "flex", alignItems: "center", gap: 2, pb: 2, mt: 3 }}>
                 <Typography variant="h6" sx={{
                     color: labelColor,
@@ -188,7 +152,7 @@ function SopRegister({ darkMode }) {
                     fontFamily,
                     fontSize: 16,
                 }}>
-                    Register SOP
+                    Register Responder
                 </Typography>
 
                 <TextField
@@ -230,16 +194,14 @@ function SopRegister({ darkMode }) {
                             <Table>
                                 <TableHead>
                                     <TableRow>
-                                        <EnquiryCard
-                                            sx={{
-                                                backgroundColor: "#5FECC8",
-                                                color: "#000",
-                                                display: "flex",
-                                                width: "100%",
-                                                borderRadius: 2,
-                                                p: 2,
-                                            }}
-                                        >
+                                        <EnquiryCard sx={{
+                                            backgroundColor: "#5FECC8",
+                                            color: "#000",
+                                            display: "flex",
+                                            width: "100%",
+                                            borderRadius: 2,
+                                            p: 2,
+                                        }}>
                                             <StyledCardContent
                                                 sx={{
                                                     flex: 0.6,
@@ -260,7 +222,9 @@ function SopRegister({ darkMode }) {
                                                     ...fontsTableHeading,
                                                 }}
                                             >
-                                                <Typography variant="subtitle2">Disaster Name</Typography>
+                                                <Typography variant="subtitle2">
+                                                    Disaster Name
+                                                </Typography>
                                             </StyledCardContent>
 
                                             <StyledCardContent
@@ -271,7 +235,9 @@ function SopRegister({ darkMode }) {
                                                     ...fontsTableHeading,
                                                 }}
                                             >
-                                                <Typography variant="subtitle2">Description</Typography>
+                                                <Typography variant="subtitle2">
+                                                    Responder
+                                                </Typography>
                                             </StyledCardContent>
 
                                             <StyledCardContent
@@ -288,51 +254,54 @@ function SopRegister({ darkMode }) {
                                 </TableHead>
 
                                 <TableBody>
-                                    {paginatedData.map((item, index) => (
-                                        <EnquiryCardBody
-                                            key={(page - 1) * rowsPerPage + index}
-                                            sx={{
-                                                backgroundColor: inputBgColor,
-                                                p: 2,
-                                                borderRadius: 2,
-                                                color: textColor,
-                                                display: "flex",
-                                                width: "100%",
-                                                mb: 1,
-                                            }}
-                                        >
-                                            <StyledCardContent sx={{ flex: 0.6, justifyContent: "center" }}>
-                                                <Typography variant="subtitle2" sx={fontsTableBody}>
-                                                    {(page - 1) * rowsPerPage + index + 1}
-                                                </Typography>
-                                            </StyledCardContent>
+                                    <EnquiryCardBody
+                                        sx={{
+                                            backgroundColor: inputBgColor,
+                                            p: 2,
+                                            borderRadius: 2,
+                                            color: textColor,
+                                            display: "flex",
+                                            width: "100%",
+                                            mb: 1,
+                                        }}
+                                    >
+                                        <StyledCardContent sx={{ flex: 0.6, justifyContent: "center" }}>
+                                            <Typography variant="subtitle2" sx={fontsTableBody}>
+                                                1
+                                            </Typography>
+                                        </StyledCardContent>
 
-                                            <StyledCardContent sx={{ flex: 1.9, justifyContent: "center", ...fontsTableBody }}>
-                                                <Typography variant="subtitle2">{item.disaster_id}</Typography>
-                                            </StyledCardContent>
+                                        <StyledCardContent sx={{ flex: 1.9, justifyContent: "center", ...fontsTableBody }}>
+                                            <Typography variant="subtitle2">fffffffffffffffffffffff</Typography>
+                                        </StyledCardContent>
 
-                                            <StyledCardContent sx={{ flex: 2, justifyContent: "center", ...fontsTableBody }}>
-                                                <Typography variant="subtitle2">{item.sop_description || "No Description"}</Typography>
-                                            </StyledCardContent>
+                                        <StyledCardContent sx={{ flex: 2, justifyContent: "center", ...fontsTableBody }}>
+                                            <Typography variant="subtitle2">ffffffffffffffffffffffffff</Typography>
+                                        </StyledCardContent>
 
-                                            <StyledCardContent sx={{ flex: 0.5, justifyContent: "center", ...fontsTableBody }}>
-                                                <MoreHorizIcon
-                                                    sx={{
-                                                        color: "#00f0c0",
-                                                        cursor: "pointer",
-                                                        fontSize: 28,
-                                                        justifyContent: "center",
-                                                        ...fontsTableBody,
-                                                    }}
-                                                />
-                                            </StyledCardContent>
-                                        </EnquiryCardBody>
-                                    ))}
+                                        <StyledCardContent sx={{ flex: 0.5, justifyContent: "center", ...fontsTableBody }}>
+                                            <MoreHorizIcon
+                                                sx={{
+                                                    color: "#00f0c0",
+                                                    cursor: "pointer",
+                                                    fontSize: 28,
+                                                    justifyContent: "center",
+                                                    ...fontsTableBody,
+                                                }}
+                                            />
+                                        </StyledCardContent>
+                                    </EnquiryCardBody>
                                 </TableBody>
                             </Table>
                         </TableContainer>
 
-                        <Box display="flex" justifyContent="space-between" alignItems="center" mt={2} px={1}>
+                        <Box
+                            display="flex"
+                            justifyContent="space-between"
+                            alignItems="center"
+                            mt={2}
+                            px={1}
+                        >
                             <Box display="flex" alignItems="center" gap={1}>
                                 <Typography variant="body2" sx={{ color: textColor }}>
                                     Records per page:
@@ -340,7 +309,7 @@ function SopRegister({ darkMode }) {
                                 <Select
                                     value={rowsPerPage}
                                     onChange={(e) => {
-                                        setRowsPerPage(parseInt(e.target.value, 10));
+                                        setRowsPerPage(parseInt(e.target.value));
                                         setPage(1);
                                     }}
                                     size="small"
@@ -385,26 +354,26 @@ function SopRegister({ darkMode }) {
                                     sx={{
                                         cursor: page > 1 ? "pointer" : "not-allowed",
                                         userSelect: "none",
-                                        opacity: page > 1 ? 1 : 0.5,
                                     }}
                                 >
                                     &#8249;
                                 </Box>
-
-                                <Typography variant="body2">
-                                    {page} / {totalPages || 1}
-                                </Typography>
-
-                                <Box
-                                    onClick={() => page < totalPages && setPage(page + 1)}
+                                {/* <Box>{page}/ {Math.ceil(groups.length / rowsPerPage)}</Box> */}
+                                {/* <Box
+                                    onClick={() =>
+                                        page < Math.ceil(groups.length / rowsPerPage) &&
+                                        setPage(page + 1)
+                                    }
                                     sx={{
-                                        cursor: page < totalPages ? "pointer" : "not-allowed",
+                                        cursor:
+                                            page < Math.ceil(groups.length / rowsPerPage)
+                                                ? "pointer"
+                                                : "not-allowed",
                                         userSelect: "none",
-                                        opacity: page < totalPages ? 1 : 0.5,
                                     }}
                                 >
                                     &#8250;
-                                </Box>
+                                </Box> */}
                             </Box>
                         </Box>
                     </Paper>
@@ -433,15 +402,35 @@ function SopRegister({ darkMode }) {
                                 ))}
                             </Select>
 
-                            <TextField
-                                fullWidth
-                                size="small"
-                                placeholder="Discription"
-                                InputLabelProps={{ shrink: false }}
-                                sx={selectStyles}
-                                value={description}
-                                onChange={(e) => setDescription(e.target.value)}
-                            />
+                            <FormControl fullWidth>
+                                <Select
+                                    multiple
+                                    value={selectedResponders}
+                                    onChange={handleChange}
+                                    displayEmpty
+                                    renderValue={(selected) => {
+                                        if (selected.length === 0) {
+                                            return "Select Responder";
+                                        }
+                                        return responder
+                                            .filter((res) => selected.includes(res.id))
+                                            .map((res) => res.name)
+                                            .join(", ");
+                                    }}
+                                    inputProps={{ "aria-label": "Select Responder" }}
+                                    sx={selectStyles}
+                                >
+                                    <MenuItem value="" disabled>
+                                        Select Responder
+                                    </MenuItem>
+                                    {responder.map((res) => (
+                                        <MenuItem key={res.id} value={res.id}>
+                                            <Checkbox checked={selectedResponders.includes(res.id)} />
+                                            <ListItemText primary={res.name} />
+                                        </MenuItem>
+                                    ))}
+                                </Select>
+                            </FormControl>
                         </Box>
 
                         <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, mt: 3, mb: 1 }}>
@@ -471,4 +460,4 @@ function SopRegister({ darkMode }) {
     )
 }
 
-export default SopRegister
+export default RegisterResponder
