@@ -509,14 +509,30 @@ class DMS_Sop_get_api(APIView):
         snippet = DMS_SOP.objects.all()
         serializers = SopSerializer(snippet,many=True)
         return Response(serializers.data,status=status.HTTP_200_OK)
-    
+
 class DMS_Sop_post_api(APIView):
-    def post(self,request):
-        serializers=SopSerializer(data=request.data)
-        if serializers.is_valid():
-            serializers.save()
-            return Response(serializers.data,status=status.HTTP_201_CREATED)
-        return Response(serializers.errors,status=status.HTTP_400_BAD_REQUEST)
+    def post(self, request):
+        disaster_id = request.data.get('disaster_id')
+
+        if disaster_id is None:
+            return Response({"error": "disaster_id is required."}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Filter only non-deleted SOPs
+        existing = DMS_SOP.objects.filter(disaster_id=disaster_id, sop_is_deleted=False).first()
+        
+        if existing:
+            return Response(
+                {"error": "SOP for this disaster_id already exists."},
+                status=status.HTTP_409_CONFLICT
+            )
+        
+        serializer = SopSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 class DMS_Sop_put_api(APIView):
     def get(self, request, sop_id):
