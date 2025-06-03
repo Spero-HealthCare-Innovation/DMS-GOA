@@ -20,14 +20,14 @@ logger = logging.getLogger(__name__)
 @sync_to_async
 def get_old_weather_alerts():
     try:
-        alerts = Weather_alerts.objects.order_by("-time")
+        alerts = Weather_alerts.objects.order_by("-alert_datetime")
         return [
             {
                 "pk_id": alert.pk_id,
                 "latitude": alert.latitude,
                 "longitude": alert.longitude,
                 "elevation": alert.elevation,
-                "time": alert.time.isoformat() if alert.time else None,
+                "time": alert.alert_datetime.isoformat() if alert.alert_datetime else None,
                 "temperature_2m": alert.temperature_2m,
                 "rain": alert.rain,
                 "precipitation": alert.precipitation,
