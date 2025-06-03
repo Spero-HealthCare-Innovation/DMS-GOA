@@ -360,6 +360,8 @@ class DMS_Incident(models.Model):
     alert_code = models.CharField(max_length=255,null=True,blank=True)
     alert_division=enum.EnumField(division_enum,null=True,blank=True)
     inc_datetime = models.DateTimeField(auto_now=True)
+    mode = models.IntegerField(null=True,blank=True)
+    time = models.CharField(max_length=255,null=True,blank=True)
     inc_is_deleted = models.BooleanField(default=False)
     inc_added_by=models.CharField(max_length=255,null=True,blank=True)
     inc_added_date = models.DateTimeField(auto_now=True)
