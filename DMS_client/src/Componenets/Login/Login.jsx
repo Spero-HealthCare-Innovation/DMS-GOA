@@ -20,8 +20,7 @@ import CachedIcon from "@mui/icons-material/Cached";
 function Login() {
   const port = import.meta.env.VITE_APP_API_KEY;
   const socketUrl = import.meta.env.VITE_SOCKET_API_KEY;
-  console.log(socketUrl, "socketUrlsocketUrlsocketUrl");
-
+  console.log(socketUrl, "socketUrlsocketUrlsocketUrl")
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
   const navigate = useNavigate();
