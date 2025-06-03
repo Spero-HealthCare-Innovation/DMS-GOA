@@ -322,7 +322,7 @@ function Login() {
             //   console.error("WebSocket connection failed:", err);
             // }
 
-            fetch('http://localhost:8000/launch')
+            fetch('http://localhost:9000/launch')
                                 .then(res => res.text())
                                 .then(data => {
                                     console.log("Dashboard launched:", data);
