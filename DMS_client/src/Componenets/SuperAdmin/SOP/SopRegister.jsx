@@ -31,9 +31,6 @@ function SopRegister({ darkMode }) {
     const theme = useTheme();
     const isDarkMode = theme.palette.mode === "dark";
     const selectStyles = getCustomSelectStyles(isDarkMode);
-
-    const [anchorEl, setAnchorEl] = useState(null);
-
     const [description, setDescription] = useState("");
     const [selectedDisaster, setSelectedDisaster] = useState(null);
     const userName = localStorage.getItem('userId');
@@ -120,6 +117,15 @@ function SopRegister({ darkMode }) {
             if (response.status === 201) {
                 setSnackbarMessage("SOP Registered Successfully");
                 setSnackbarOpen(true);
+                await fetchSop();
+                setDescription("");
+                setSelectedDisaster("");
+            }
+            else if (response.status === 409) {
+                setSnackbarMessage("SOP already exists with this disaster type");
+                setSnackbarOpen(true);
+                setDescription("");
+                setSelectedDisaster("");
             } else if (response.status === 500) {
                 setSnackbarMessage("Internal Server Error");
                 setSnackbarOpen(true);
@@ -138,29 +144,43 @@ function SopRegister({ darkMode }) {
     // GET API SOP
     const [page, setPage] = useState(1);
     const [rowsPerPage, setRowsPerPage] = useState(5);
+    const [anchorEl, setAnchorEl] = useState(null);
+    const [selectedItem, setSelectedItem] = useState(null);
+    const open = Boolean(anchorEl);
+
+
+    const handleOpen = (event, item) => {
+        setAnchorEl(event.currentTarget);
+        setSelectedItem(item);
+    };
+
+    const handleClose = () => {
+        setAnchorEl(null);
+        setSelectedItem(null);
+    };
+
+    const fetchSop = async () => {
+        try {
+            const response = await fetch(`${port}/admin_web/sop_get`, {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token || newToken}`,
+                },
+            });
+
+            const data = await response.json();
+            if (response.status === 200) {
+                setSop(data);
+                console.log(data, "SOP");
+                setPage(1);
+            }
+        } catch (error) {
+            console.error("Error:", error);
+        }
+    };
 
     useEffect(() => {
-        const fetchSop = async () => {
-            try {
-                const response = await fetch(`${port}/admin_web/sop_get`, {
-                    method: "GET",
-                    headers: {
-                        "Content-Type": "application/json",
-                        Authorization: `Bearer ${token || newToken}`,
-                    },
-                });
-
-                const data = await response.json();
-                if (response.status === 200) {
-                    setSop(data);
-                    console.log(data, "SOP");
-                    setPage(1); // reset page on new data
-                }
-            } catch (error) {
-                console.error("Error:", error);
-            }
-        };
-
         fetchSop();
     }, [port, token, newToken]);
 
@@ -308,19 +328,25 @@ function SopRegister({ darkMode }) {
                                             </StyledCardContent>
 
                                             <StyledCardContent sx={{ flex: 1.9, justifyContent: "center", ...fontsTableBody }}>
-                                                <Typography variant="subtitle2">{item.disaster_id}</Typography>
+                                                <Typography variant="subtitle2">{item.disaster_name ? item.disaster_name : "-"}</Typography>
                                             </StyledCardContent>
 
                                             <StyledCardContent sx={{ flex: 2, justifyContent: "center", ...fontsTableBody }}>
                                                 <Typography variant="subtitle2">{item.sop_description || "No Description"}</Typography>
                                             </StyledCardContent>
 
-                                            <StyledCardContent sx={{ flex: 0.5, justifyContent: "center", ...fontsTableBody }}>
+                                            <StyledCardContent
+                                                sx={{
+                                                    flex: 0.3,
+                                                    justifyContent: "center",
+                                                    ...fontsTableBody,
+                                                }}
+                                            >
                                                 <MoreHorizIcon
+                                                    onClick={(e) => handleOpen(e, item)}
                                                     sx={{
                                                         color: "#00f0c0",
                                                         cursor: "pointer",
-                                                        fontSize: 28,
                                                         justifyContent: "center",
                                                         ...fontsTableBody,
                                                     }}
@@ -332,6 +358,53 @@ function SopRegister({ darkMode }) {
                             </Table>
                         </TableContainer>
 
+                        <Popover
+                            open={open}
+                            anchorEl={anchorEl}
+                            onClose={handleClose}
+                            anchorOrigin={{
+                                vertical: "center",
+                                horizontal: "right",
+                            }}
+                            transformOrigin={{
+                                vertical: "center",
+                                horizontal: "left",
+                            }}
+                            PaperProps={{
+                                sx: {
+                                    p: 2,
+                                    display: "flex",
+                                    flexDirection: "column",
+                                    gap: 1.5,
+                                    borderRadius: 2,
+                                    minWidth: 120,
+                                },
+                            }}
+                        >
+                            <Button
+                                fullWidth
+                                variant="outlined"
+                                color="warning"
+                                startIcon={<EditOutlined />}
+                                // onClick={() => handleEdit(selectedItem)}
+                            >
+                                Edit
+                            </Button>
+
+                            <Button
+                                fullWidth
+                                variant="outlined"
+                                color="error"
+                                startIcon={<DeleteOutline />}
+                                // onClick={() => handleDelete(selectedItem.dep_id)}
+                                // onClick={() => {
+                                //     setDeleteDepId(selectedItem.dep_id);
+                                //     setOpenDeleteDialog(true);
+                                // }}
+                            >
+                                Delete
+                            </Button>
+                        </Popover>
                         <Box display="flex" justifyContent="space-between" alignItems="center" mt={2} px={1}>
                             <Box display="flex" alignItems="center" gap={1}>
                                 <Typography variant="body2" sx={{ color: textColor }}>
@@ -412,36 +485,47 @@ function SopRegister({ darkMode }) {
 
                 <Grid item xs={12} md={4.9}>
                     <Paper elevation={3} sx={{ padding: 2, borderRadius: 3, backgroundColor: bgColor, mt: 1, mb: 5 }}>
-                        <Box sx={{ display: 'flex', gap: 1, mb: 2 }}>
-                            <Select
-                                select
-                                fullWidth
-                                size="small"
-                                label="Disaster Type"
-                                variant="outlined"
-                                sx={selectStyles}
-                                value={selectedDisaster}
-                                onChange={(e) => setSelectedDisaster(e.target.value)}
-                            >
-                                <MenuItem disabled value="">
-                                    Select Disaster Type
-                                </MenuItem>
-                                {disaster.map((item) => (
-                                    <MenuItem key={item.disaster_id} value={item.disaster_id}>
-                                        {item.disaster_name}
-                                    </MenuItem>
-                                ))}
-                            </Select>
+                        <Box sx={{ mb: 2 }}>
+                            <Grid container spacing={2}>
+                                <Grid item xs={6} sm={6}>
+                                    <TextField
+                                        select
+                                        fullWidth
+                                        size="small"
+                                        label="Disaster Type"
+                                        variant="outlined"
+                                        value={selectedDisaster}
+                                        onChange={(e) => setSelectedDisaster(e.target.value)}
+                                        SelectProps={{
+                                            MenuProps: {
+                                                PaperProps: {
+                                                    style: {
+                                                        maxHeight: 200,
+                                                        overflow: 'auto',
+                                                    },
+                                                },
+                                            },
+                                        }}
+                                    >
+                                        {disaster.map((item) => (
+                                            <MenuItem key={item.disaster_id} value={item.disaster_id}>
+                                                {item.disaster_name}
+                                            </MenuItem>
+                                        ))}
+                                    </TextField>
+                                </Grid>
 
-                            <TextField
-                                fullWidth
-                                size="small"
-                                placeholder="Discription"
-                                InputLabelProps={{ shrink: false }}
-                                sx={selectStyles}
-                                value={description}
-                                onChange={(e) => setDescription(e.target.value)}
-                            />
+                                <Grid item xs={6} sm={6}>
+                                    <TextField
+                                        fullWidth
+                                        size="small"
+                                        placeholder="Description"
+                                        InputLabelProps={{ shrink: false }}
+                                        value={description}
+                                        onChange={(e) => setDescription(e.target.value)}
+                                    />
+                                </Grid>
+                            </Grid>
                         </Box>
 
                         <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, mt: 3, mb: 1 }}>

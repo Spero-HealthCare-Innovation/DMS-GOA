@@ -15,6 +15,7 @@ import { useAuth } from "../../../Context/ContextAPI";
 import IncidentCreateMap from "./IncidentCreateMap";
 import { Snackbar, Alert } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
+import { useLocation } from "react-router-dom";
 
 const inputStyle = {
     mb: 2,
@@ -27,12 +28,41 @@ const boxStyle = {
 const Incident = ({ darkMode }) => {
     const port = import.meta.env.VITE_APP_API_KEY;
     const googleKey = import.meta.env.VITE_APP_GOOGLE_MAPS_API_KEY;
+    const location = useLocation();
+    const [secondsElapsed, setSecondsElapsed] = useState(0);
+    const [timerActive, setTimerActive] = useState(false);
+
+    useEffect(() => {
+        if (location.state?.startData) {
+            console.log("Received startData:", location.state.startData);
+            setSecondsElapsed(0);
+            setTimerActive(true);
+        }
+    }, [location.state]);
+
+    useEffect(() => {
+        let intervalId;
+        if (timerActive) {
+            intervalId = setInterval(() => {
+                setSecondsElapsed((prev) => prev + 1);
+            }, 1000);
+        }
+
+        return () => clearInterval(intervalId);
+    }, [timerActive]);
+
+    const minutes = Math.floor(secondsElapsed / 60);
+    const seconds = secondsElapsed % 60;
+    const formattedTime = `${minutes.toString().padStart(2, "0")}:${seconds
+        .toString()
+        .padStart(2, "0")}`;
+
     console.log(googleKey, 'googleKey');
-   const navigate = useNavigate();
+    const navigate = useNavigate();
     const token = localStorage.getItem("access_token");
     const { newToken, responderScope, setDisasterIncident, disaster, popupText, setPopupText } = useAuth();
-    console.log(popupText,'popupTextpopupText');
-    
+    console.log(popupText, 'popupTextpopupText');
+
     const { handleSearchChange, handleSelectSuggestion, query } = useAuth();
     const bgColor = darkMode ? "#0a1929" : "#ffffff";
     const labelColor = darkMode ? "#5FECC8" : "#1976d2";
@@ -53,8 +83,6 @@ const Incident = ({ darkMode }) => {
     /// snackbar
     const [snackbarOpen, setSnackbarOpen] = useState(false);
     const [snackbarMessage, setSnackbarMessage] = useState('');
-    const [snackbarSeverity, setSnackbarSeverity] = useState('success');
-
     // Google API Start
     // const { isLoaded } = useJsApiLoader({
     //     googleMapsApiKey: googleKey,
@@ -87,13 +115,16 @@ const Incident = ({ darkMode }) => {
     };
 
     // Google API End
-    const handleCheckboxChange = (pk_id) => {
-        setSopId((prev) =>
-            prev.includes(pk_id)
-                ? prev.filter((id) => id !== pk_id)
-                : [...prev, pk_id]
-        );
+    const handleCheckboxChange = (id) => {
+        setSopId((prev) => {
+            if (prev.includes(id)) {
+                return prev.filter(item => item !== id);
+            } else {
+                return [...prev, id];
+            }
+        });
     };
+
 
     const handleSubmit = async () => {
         const payload = {
@@ -114,6 +145,7 @@ const Incident = ({ darkMode }) => {
             caller_modified_by: "admin",
             comm_added_by: "admin",
             comm_modified_by: "admin",
+            mode: 1
         };
 
         try {
@@ -281,13 +313,16 @@ const Incident = ({ darkMode }) => {
 
                         <Grid item xs={12} md={4}>
                             <Paper elevation={3} sx={{ ...inputStyle, p: 2, borderRadius: 3, backgroundColor: bgColor, height: "100%" }}>
-                                <Typography variant="h6">Comments</Typography>
+                                <Typography variant="h6" sx={{ fontSize: '16px' }} gutterBottom>Time : {formattedTime}</Typography>
+
+                                <Typography variant="h6" sx={{ fontSize: '16px' }} gutterBottom>Comments</Typography>
                                 <TextField
-                                    fullWidth size="small"
+                                    fullWidth
+                                    size="small"
                                     multiline
-                                    rows={8}
+                                    rows={10}
                                     variant="outlined"
-                                    sx={inputStyle}
+                                    sx={{ ...inputStyle }}
                                     value={comments}
                                     onChange={(e) => setComments(e.target.value)}
                                 />
@@ -370,11 +405,11 @@ const Incident = ({ darkMode }) => {
                                                     <Box display="flex" flexWrap="wrap" gap={1}>
                                                         {responderScope?.responder_scope?.map((responder) => (
                                                             <FormControlLabel
-                                                                key={responder.pk_id}
+                                                                key={responder.res_id}
                                                                 control={
                                                                     <Checkbox
-                                                                        checked={sopId.includes(responder.pk_id)}
-                                                                        onChange={() => handleCheckboxChange(responder.pk_id)}
+                                                                        checked={sopId.includes(responder.res_id)}
+                                                                        onChange={() => handleCheckboxChange(responder.res_id)}
                                                                         sx={{ color: labelColor }}
                                                                     />
                                                                 }
@@ -387,6 +422,7 @@ const Incident = ({ darkMode }) => {
                                                         ))}
                                                     </Box>
                                                 </Stack>
+
                                             </Box>
                                         </Grid>
                                     </Grid>

@@ -94,7 +94,7 @@ const AppRoutes = ({ darkMode, setIsLoggedIn }) => {
           }
         />
         <Route
-          path="/Incident"
+          path="/create-incident"
           element={
             <PrivateRoute>
               <Incident darkMode={darkMode} />
@@ -102,7 +102,7 @@ const AppRoutes = ({ darkMode, setIsLoggedIn }) => {
           }
         />
         <Route
-          path="/register sop"
+          path="/register-sop"
           element={
             <PrivateRoute>
               <SopRegister darkMode={darkMode} />

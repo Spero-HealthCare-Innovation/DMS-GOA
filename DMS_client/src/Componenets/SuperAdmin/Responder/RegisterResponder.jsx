@@ -106,7 +106,7 @@ function RegisterResponder({ darkMode }) {
         { id: 1, name: "Fire" },
         { id: 2, name: "Cyclone" },
         { id: 3, name: "Rain" },
-        { id: 3, name: "Thunderstrom" },
+        { id: 4, name: "Thunderstrom" },
     ]);
 
     const handleChange = (event) => {

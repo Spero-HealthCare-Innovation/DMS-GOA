@@ -1072,7 +1072,7 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
                 <Box
                   onClick={() =>
                     page <
-                      Math.ceil(filteredDepartments.length / rowsPerPage) &&
+                    Math.ceil(filteredDepartments.length / rowsPerPage) &&
                     setPage(page + 1)
                   }
                   sx={{
