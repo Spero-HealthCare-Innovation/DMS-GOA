@@ -253,7 +253,7 @@ class SopSerializer(serializers.ModelSerializer):
     class Meta:
         model = DMS_SOP
         # fields = '__all__'
-        fields = ['sop_description','disaster_id','sop_added_by','sop_modified_by','disaster_name']
+        fields = ['sop_id','sop_description','disaster_id','sop_added_by','sop_modified_by','disaster_name']
         
 class Sop_Put_Serializer(serializers.ModelSerializer):
     class Meta:
@@ -441,7 +441,7 @@ class dispatchsopserializer(serializers.ModelSerializer):
     alert_id = serializers.CharField(source='alert_id.disaster_name', read_only=True)
     class Meta:
         model = DMS_Incident
-        fields = ['incident_id','alert_id','disaster_type','inc_added_by','inc_added_date','disaster_name','inc_type','mode']
+        fields = ['inc_id','incident_id','alert_id','disaster_type','inc_added_by','inc_added_date','disaster_name','inc_type','mode']
 
 
 class incident_get_serializer(serializers.ModelSerializer):
