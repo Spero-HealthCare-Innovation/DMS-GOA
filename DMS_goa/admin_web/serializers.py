@@ -249,10 +249,11 @@ class ChangePasswordputSerializer(serializers.ModelSerializer):
         fields = ['password']
 
 class SopSerializer(serializers.ModelSerializer):
+    disaster_name=serializers.CharField(source='disaster_id.disaster_name', read_only=True)
     class Meta:
         model = DMS_SOP
         # fields = '__all__'
-        fields = ['sop_description','disaster_id','sop_added_by','sop_modified_by']
+        fields = ['sop_description','disaster_id','sop_added_by','sop_modified_by','disaster_name']
         
 class Sop_Put_Serializer(serializers.ModelSerializer):
     class Meta:
@@ -359,7 +360,7 @@ class Alert_Type_Serializer(serializers.ModelSerializer):
 class Manual_call_incident_dispatch_Serializer(serializers.ModelSerializer):
     class Meta:
         model = DMS_Incident
-        fields = ['inc_type','disaster_type','alert_type','location','summary','responder_scope','latitude','longitude','caller_id','inc_added_by','inc_modified_by']
+        fields = ['inc_type','disaster_type','alert_type','location','summary','responder_scope','latitude','longitude','caller_id','inc_added_by','inc_modified_by','time','mode']
 
 class Manual_call_data_Serializer(serializers.ModelSerializer):
     class Meta:
@@ -425,12 +426,15 @@ class dispatchsopserializer(serializers.ModelSerializer):
     alert_id = serializers.CharField(source='alert_id.disaster_name', read_only=True)
     class Meta:
         model = DMS_Incident
-        fields = ['incident_id','alert_id','disaster_type','inc_added_by','inc_added_date','disaster_name','inc_type']
+        fields = ['incident_id','alert_id','disaster_type','inc_added_by','inc_added_date','disaster_name','inc_type','mode']
 
 
 class incident_get_serializer(serializers.ModelSerializer):
-        class Meta:
-            model = DMS_Incident
-            fields=['incident_id','disaster_type','inc_type','responder_scope']
+    caller_name=serializers.CharField(source='caller_id.caller_name', read_only=True)
+    caller_no=serializers.CharField(source='caller_id.caller_no', read_only=True)
+    summary_name = serializers.CharField(source='summary.summary', read_only=True)
+    class Meta:
+        model = DMS_Incident
+        fields=['incident_id','disaster_type','inc_type','responder_scope','caller_id','caller_name','caller_no','location','summary','summary_name']
 
 
