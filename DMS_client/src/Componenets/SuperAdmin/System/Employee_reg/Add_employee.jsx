@@ -7,12 +7,11 @@ import TableCell from '@mui/material/TableCell';
 import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
-import { Search, ArrowBack, DeleteOutline, EditOutlined, } from "@mui/icons-material";
+import { Search, ArrowBack, DeleteOutline, EditOutlined, AddCircleOutline, } from "@mui/icons-material";
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 import { Alert } from '@mui/material';
 import { styled } from "@mui/material/styles";
 import dayjs from 'dayjs';
-import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { Select, MenuItem, IconButton, Popper } from "@mui/material";
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
@@ -66,11 +65,11 @@ function Add_employee({ darkMode }) {
   const [page, setPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(5);
 
-    const inputBgColor = darkMode
+  const inputBgColor = darkMode
     ? "rgba(255, 255, 255, 0.16)"
     : "rgba(0, 0, 0, 0.04)";
 
-
+  const [isEditMode, setIsEditMode] = useState(false);
   const [empName, setEmpName] = useState('');
   const [empContact, setEmpContact] = useState('');
   const [empEmail, setEmpEmail] = useState('');
@@ -92,8 +91,12 @@ function Add_employee({ darkMode }) {
   const [anchorEl, setAnchorEl] = useState(null);
   const [selectedEmployee, setSelectedEmployee] = useState(null);
   const [showAlert, setShowAlert] = useState(false);
-const [alertMessage, setAlertMessage] = useState('');
-const [alertType, setAlertType] = useState('success'); // or 'error'
+  const [alertMessage, setAlertMessage] = useState('');
+  const [alertType, setAlertType] = useState('success'); // or 'error'
+
+  const userName = localStorage.getItem("userId");
+  console.log(userName, "userName");
+
 
 
   // Format date properly for API submission
@@ -107,7 +110,7 @@ const [alertType, setAlertType] = useState('success'); // or 'error'
       return '';
     }
   };
-    const formattedDOB = formatDate(empDOB);
+  const formattedDOB = formatDate(empDOB);
   const formattedDOJ = formatDate(empDOJ);
 
 
@@ -158,15 +161,22 @@ const [alertType, setAlertType] = useState('success'); // or 'error'
 
 
   // Function to show alert
-const showAlertMessage = (message, type = 'success') => {
-  setAlertMessage(message);
-  setAlertType(type); // "success" or "error"
-  setShowAlert(true);
-  setTimeout(() => setShowAlert(false), 3000);
-};
+  const showAlertMessage = (message, type = 'success') => {
+    setAlertMessage(message);
+    setAlertType(type); // "success" or "error"
+    setShowAlert(true);
+    setTimeout(() => setShowAlert(false), 3000);
+  };
 
 
   const handleSubmit = async () => {
+
+    if (!validateForm()) {
+      showAlertMessage("Please fix the form errors before submitting.", 'error');
+      return;
+    }
+
+
     if (!empName || !empContact || !empEmail || !empDOJ || !empDOB || !groupId ||
       !selectedStateId || !selectedDistrictId || !selectedTehsilId || !selectedCityID) {
       alert("Please fill all required fields");
@@ -175,7 +185,7 @@ const showAlertMessage = (message, type = 'success') => {
 
     // Generate a unique username based on name and timestamp
     const timestamp = new Date().getTime();
-    const uniqueUsername = `${empName.replace(/\s+/g, '_').toLowerCase()}_${timestamp}`;
+    const uniqueUsername = `${empName.replace(/\s+/g, '_').toLowerCase()}`;
 
     const payload = {
       emp_username: uniqueUsername, // Use unique username to avoid conflict
@@ -191,8 +201,8 @@ const showAlertMessage = (message, type = 'success') => {
       tahsil_id: selectedTehsilId,
       city_id: selectedCityID,
       emp_is_deleted: "0",
-      emp_added_by: "1",
-      emp_modified_by: "1",
+      emp_added_by: userName,
+      emp_modified_by: userName,
       password: "DMS@Spero",
       password2: "DMS@Spero"
     };
@@ -223,33 +233,33 @@ const showAlertMessage = (message, type = 'success') => {
       setSelectedTehsilId('');
       setSelectedCityId('');
 
-   } catch (err) {
-  console.error("Error creating employee:", err.response?.data || err.message);
+    } catch (err) {
+      console.error("Error creating employee:", err.response?.data || err.message);
 
-  if (err.response) {
-    const statusCode = err.response.status;
-    const errorData = err.response.data;
-    let errorMessage = "Failed to add employee:\n";
+      if (err.response) {
+        const statusCode = err.response.status;
+        const errorData = err.response.data;
+        let errorMessage = "Failed to add employee:\n";
 
-    if (statusCode === 409) {
-      if (errorData.emp_username) {
-        errorMessage += `- Username already exists\n`;
+        if (statusCode === 409) {
+          if (errorData.emp_username) {
+            errorMessage += `- Username already exists\n`;
+          }
+          if (errorData.emp_email) {
+            errorMessage += `- Email already exists\n`;
+          }
+          if (errorData.detail === "Employee with this emp_name already exists.") {
+            errorMessage += `- Employee name already exists\n`;
+          }
+        } else {
+          errorMessage += errorData.detail || "Unexpected server error.";
+        }
+
+        showAlertMessage(errorMessage, 'error');
+      } else {
+        showAlertMessage("Failed to add employee. Please check the console for details.", 'error');
       }
-      if (errorData.emp_email) {
-        errorMessage += `- Email already exists\n`;
-      }
-      if (errorData.detail === "Employee with this emp_name already exists.") {
-        errorMessage += `- Employee name already exists\n`;
-      }
-    } else {
-      errorMessage += errorData.detail || "Unexpected server error.";
     }
-
-    showAlertMessage(errorMessage, 'error');
-  } else {
-    showAlertMessage("Failed to add employee. Please check the console for details.", 'error');
-  }
-}
 
 
   };
@@ -289,55 +299,89 @@ const showAlertMessage = (message, type = 'success') => {
     fetchEmployees();
   }, []);
 
+  // 1. Add validation functions at the top of your component
+  const validateName = (value) => {
+    // Only allow letters, spaces, and common name characters
+    const nameRegex = /^[a-zA-Z\s.''-]+$/;
+    return nameRegex.test(value);
+  };
 
-  // 6. Add handleUpdate function
-  // const handleUpdate = async () => {
-  //   // if (!empName || !empContact || !empEmail || !empDOJ || !empDOB || !groupId ||
-  //   //   !selectedStateId || !selectedDistrictId || !selectedTehsilId || !selectedCityID) {
-  //   //   alert("Please fill all required fields");
-  //   //   return;
-  //   // }
+  const validateContact = (value) => {
+    // Only allow numbers and common phone formatting characters
+    const contactRegex = /^[0-9+\-\s()]+$/;
+    return contactRegex.test(value) && value.replace(/\D/g, '').length >= 10;
+  };
 
-  //   const payload = {
-  //     emp_name: empName,
-  //     grp_id: groupId,
-  //     emp_email: empEmail,
-  //     emp_contact_no: empContact,
-  //     emp_doj: formatDate(empDOJ),
-  //     emp_dob: formatDate(empDOB),
-  //     state_id: selectedStateId,
-  //     dist_id: selectedDistrictId,
-  //     tahsil_id: selectedDistrictId,
-  //     city_id: selectedCityID,
-  //   };
+  const validateEmail = (value) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(value);
+  };
 
+  // 2. Add new state for form validation
+  const [formErrors, setFormErrors] = useState({
+    empName: '',
+    empContact: '',
+    empEmail: ''
+  });
 
-  //   try {
-  //     const res = await axios.put(`${port}/admin_web/employee_put/${editingEmployeeId}/`, payload, {
-  //       headers: {
-  //         Authorization: `Bearer ${effectiveToken}`,
-  //       },
-  //     });
+  // 3. Add validation helper function
+  const validateForm = () => {
+    const errors = {};
 
-  //     console.log("Employee Updated:", res.data);
+    if (!empName.trim()) {
+      errors.empName = 'Employee name is required';
+    } else if (!validateName(empName)) {
+      errors.empName = 'Please enter a valid name (letters only)';
+    }
 
-  //     // Show success message
-  //     setShowUpdateAlert(true);
-  //     setTimeout(() => setShowUpdateAlert(false), 3000);
+    if (!empContact.trim()) {
+      errors.empContact = 'Contact number is required';
+    } else if (!validateContact(empContact)) {
+      errors.empContact = 'Please enter a valid contact number';
+    }
 
-  //     // Reset form and editing state
-  //     handleCancel();
+    if (!empEmail.trim()) {
+      errors.empEmail = 'Email is required';
+    } else if (!validateEmail(empEmail)) {
+      errors.empEmail = 'Please enter a valid email address';
+    }
 
-  //     // Refresh employee list
-  //     await fetchEmployees();
+    setFormErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
 
-  //   } catch (err) {
-  //     console.error("Error updating employee:", err.response?.data || err.message);
-  //     alert("Failed to update employee. Please check the console for details.");
-  //   }
-  // };
+  // / 4. Add new function to handle "Add New Employee" button click
+  const handleAddNewEmployee = () => {
+    // Reset form
+    setEmpName('');
+    setEmpContact('');
+    setEmpEmail('');
+    setEmpDOJ('');
+    setEmpDOB('');
+    setGroupId('');
+    setSelectedStateId('');
+    setSelectedDistrictId('');
+    setSelectedTehsilId('');
+    setSelectedCityId('');
+
+    // Reset editing state
+    setIsEditing(false);
+    setEditingEmployeeId(null);
+
+    // Clear form errors
+    setFormErrors({
+      empName: '',
+      empContact: '',
+      empEmail: ''
+    });
+  };
 
   const handleUpdate = async () => {
+
+    if (!validateForm()) {
+      showAlertMessage("Please fix the form errors before updating.", 'error');
+      return;
+    }
 
     // Create payload with only fields that have values
     const payload = {};
@@ -352,6 +396,9 @@ const showAlertMessage = (message, type = 'success') => {
     if (selectedDistrictId) payload.dist_id = selectedDistrictId;
     if (selectedTehsilId) payload.tahsil_id = selectedTehsilId;
     if (selectedCityID) payload.city_id = selectedCityID;
+
+    payload.emp_modified_by = userName;
+
 
     try {
       const res = await axios.put(`${port}/admin_web/employee_put/${editingEmployeeId}/`, payload, {
@@ -372,12 +419,12 @@ const showAlertMessage = (message, type = 'success') => {
       // Refresh employee list
       await fetchEmployees();
 
-   } catch (err) {
-  console.error("Error updating employee:", err.response?.data || err.message);
+    } catch (err) {
+      console.error("Error updating employee:", err.response?.data || err.message);
 
-  const errorMsg = err.response?.data?.detail || "Failed to update employee.";
-  showAlertMessage(errorMsg, 'error');
-}
+      const errorMsg = err.response?.data?.detail || "Failed to update employee.";
+      showAlertMessage(errorMsg, 'error');
+    }
 
   };
 
@@ -399,6 +446,12 @@ const showAlertMessage = (message, type = 'success') => {
     // Reset editing state
     setIsEditing(false);
     setEditingEmployeeId(null);
+
+    setFormErrors({
+      empName: '',
+      empContact: '',
+      empEmail: ''
+    });
   };
 
 
@@ -475,21 +528,21 @@ const showAlertMessage = (message, type = 'success') => {
 
   return (
     <div style={{ marginLeft: "3.5rem" }}>
-    <Snackbar
-  open={showAlert}
-  anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-  autoHideDuration={3000}
-  onClose={() => setShowAlert(false)}
->
-  <Alert
-    onClose={() => setShowAlert(false)}
-    severity={alertType} // "success" or "error"
-    variant="filled"
-    sx={{ width: '100%' }}
-  >
-    {alertMessage}
-  </Alert>
-</Snackbar>
+      <Snackbar
+        open={showAlert}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+        autoHideDuration={3000}
+        onClose={() => setShowAlert(false)}
+      >
+        <Alert
+          onClose={() => setShowAlert(false)}
+          severity={alertType} // "success" or "error"
+          variant="filled"
+          sx={{ width: '100%' }}
+        >
+          {alertMessage}
+        </Alert>
+      </Snackbar>
 
 
       <Box sx={{ display: "flex", alignItems: "center", gap: 2, pb: 2, mt: 3 }}>
@@ -920,25 +973,61 @@ const showAlertMessage = (message, type = 'success') => {
 
         <Grid item xs={12} md={4.9}>
           <Paper elevation={3} sx={{ padding: 2, borderRadius: 3, backgroundColor: bgColor, mt: 1, mb: 5 }}>
-            <Typography
-              sx={{
-                color: labelColor,
-                fontWeight: 600,
-                fontSize: 16,
-                mb: 2,
-                fontFamily,
-              }}
+            <Box
+              display="flex"
+              justifyContent="space-between"
+              alignItems="center"
+              mb={2}
             >
-              {isEditing ? "Edit Employee" : "Add Employee"}
-            </Typography>
+
+              <Typography
+                sx={{
+                  color: labelColor,
+                  fontWeight: 600,
+                  fontSize: 18,
+                  fontFamily,
+                }}
+              >
+                {isEditing ? "Edit Employee" : "Add Employee"}
+              </Typography>
+              <Button
+                variant="contained"
+                startIcon={<AddCircleOutline />}
+                disabled={!isEditing} // Show only when in editing mode
+                onClick={handleAddNewEmployee}
+                sx={{
+                  backgroundColor: "#5FECC8",
+                  color: "#000",
+                  fontWeight: 600,
+                  fontFamily: "Roboto",
+                  textTransform: "none",
+                  "&:hover": {
+                    backgroundColor: "#4ddbb6",
+                  },
+                }}
+              >
+                Add New Employee
+              </Button>
+            </Box>
+
+
 
             <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
               {/* First TextField */}
               <TextField
                 fullWidth
                 value={empName}
-                onChange={(e) => setEmpName(e.target.value)}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  if (value === '' || validateName(value)) {
+                    setEmpName(value);
+                    if (formErrors.empName) {
+                      setFormErrors(prev => ({ ...prev, empName: '' }));
+                    }
+                  }
+                }}
                 placeholder="Employee Name"
+              
                 InputLabelProps={{ shrink: false }}
                 sx={inputStyle}
               />
@@ -947,7 +1036,16 @@ const showAlertMessage = (message, type = 'success') => {
                 fullWidth
                 placeholder="Emp Contact No"
                 value={empContact}
-                onChange={(e) => setEmpContact(e.target.value)}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  if (value === '' || validateContact(value)) {
+                    setEmpContact(value);
+                    if (formErrors.empContact) {
+                      setFormErrors(prev => ({ ...prev, empContact: '' }));
+                    }
+                  }
+                }}
+            
                 sx={inputStyle}
               />
             </Box>
@@ -957,7 +1055,14 @@ const showAlertMessage = (message, type = 'success') => {
                 fullWidth
                 placeholder="Employee Email"
                 value={empEmail}
-                onChange={(e) => setEmpEmail(e.target.value)}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  setEmpEmail(value);
+                  if (formErrors.empEmail) {
+                    setFormErrors(prev => ({ ...prev, empEmail: '' }));
+                  }
+                }}
+             
                 sx={inputStyle}
               />
               {/* Second TextField */}
