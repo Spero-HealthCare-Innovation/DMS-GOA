@@ -322,12 +322,14 @@ function Login() {
               //   console.error("WebSocket connection failed:", err);
               // }
 
-              fetch('http://localhost:8000/launch')
+              fetch('http://localhost:9000/launch')
                 .then(res => res.text())
                 .then(data => {
                   console.log("Dashboard launched:", data);
                   alert("Dashboards launched!");
                 })
+
+
             } catch (err) {
               console.error("API call failed:", err);
               alert("Failed to launch dashboards.");
