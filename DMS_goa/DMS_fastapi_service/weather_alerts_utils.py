@@ -27,7 +27,7 @@ def get_old_weather_alerts():
                 "latitude": alert.latitude,
                 "longitude": alert.longitude,
                 "elevation": alert.elevation,
-                "alert_datetime": alert.alert_datetime.isoformat() if alert.alert_datetime else None,
+                "time": alert.alert_datetime.isoformat() if alert.alert_datetime else None,
                 "temperature_2m": alert.temperature_2m,
                 "rain": alert.rain,
                 "precipitation": alert.precipitation,
