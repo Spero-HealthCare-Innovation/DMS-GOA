@@ -56,6 +56,9 @@ const AlertPanel = ({ darkMode }) => {
     const socketUrl = import.meta.env.VITE_SOCKET_API_KEY;
     const group = localStorage.getItem('user_group');
     const token = localStorage.getItem('access_token');
+    const userName = localStorage.getItem('userId');
+    console.log(userName,'userName');
+    
     const [isHovered, setIsHovered] = useState(false);
     const handleClick = () => {
         navigate("/Incident");

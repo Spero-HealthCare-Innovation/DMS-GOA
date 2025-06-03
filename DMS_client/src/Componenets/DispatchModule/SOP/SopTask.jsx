@@ -9,8 +9,14 @@ import {
   Table,
   TableBody,
   TableContainer,
+  IconButton,
 } from "@mui/material";
-import { Search, Visibility, AddCircleOutline } from "@mui/icons-material";
+import {
+  Search,
+  Visibility,
+  AddCircleOutline,
+  CheckCircle,
+} from "@mui/icons-material";
 import { styled } from "@mui/material/styles";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
@@ -65,18 +71,19 @@ const StyledCardContent = styled("td")({
 });
 
 const Alerts = [
-  "Alert Id",
-  "Disaster Id",
-  "Alert Type",
-  "Date & Time",
-  "Priority",
-  "Initiated By",
-  "Add",
-  "View",
+  "Alert ID",
+  // "Disaster ID",
+  "Disaster Type",
+  "Latitude",
+  "Longitude",
+  "Temperature",
+  "Rain",
+  "Time",
+  "Added By",
 ];
 
 const Dispatch = [
-  "Alert ID",
+  "Incident ID",
   "Disaster ID",
   "Date & Time",
   "Disaster Type",
@@ -84,10 +91,17 @@ const Dispatch = [
   "Status",
   "Mode",
   "Initiated By",
-  "View",
+
+  "Actions",
 ];
 
-function SopTask({ darkMode, flag, setFlag, setSelectedIncident }) {
+function SopTask({
+  darkMode,
+  flag,
+  setFlag,
+  setSelectedIncident,
+  setViewmode,
+}) {
   const socketUrl = import.meta.env.VITE_SOCKET_API_KEY;
   const location = useLocation();
   const [alerts, setAlerts] = useState([]);
@@ -116,6 +130,7 @@ function SopTask({ darkMode, flag, setFlag, setSelectedIncident }) {
           setAlerts([data]);
           setSelectedIncident(data);
           setFlag(1);
+          setViewmode("incident"); // Set view mode to incident when new data is received
           // Show snackbar when data is received
           setSnackbarMsg(data.message || "⚠️ New weather alert triggered!");
           setOpenSnackbar(true);
@@ -144,11 +159,15 @@ function SopTask({ darkMode, flag, setFlag, setSelectedIncident }) {
 
   const handleBack = () => {
     setFlag(0);
+    setSelectedIncident(); // Clear selected incident
+    setViewmode("incident"); // Reset view mode to incident
   };
 
-  const handleForward = () => {
-    setFlag(1);
-  };
+  // const handleForward = () => {
+  //   setFlag(1);
+  //   setSelectedIncident(); // Clear selected incident
+  //   setViewmode("incident"); // Reset view mode to incident
+  // };
 
   const textColor = darkMode ? "#ffffff" : "#000000";
   const bgColor = darkMode ? "#0a1929" : "#ffffff";
@@ -176,7 +195,7 @@ function SopTask({ darkMode, flag, setFlag, setSelectedIncident }) {
           </Tooltip>
         )}
         {/* Forward Button */}
-        {flag === 0 && (
+        {/* {flag === 0 && (
           <Tooltip title="Go Forward to Dispatch SOP">
             <ArrowForwardIcon
               onClick={handleForward}
@@ -190,7 +209,7 @@ function SopTask({ darkMode, flag, setFlag, setSelectedIncident }) {
               }}
             />
           </Tooltip>
-        )}
+        )} */}
 
         {/* Title */}
         <Typography
@@ -251,16 +270,7 @@ function SopTask({ darkMode, flag, setFlag, setSelectedIncident }) {
                 backgroundColor: "#5FECC8",
               }}
             >
-              {[
-                "Alert ID",
-                "Disaster ID",
-                "Latitude",
-                "Longitude",
-                "Temperature",
-                "Rain",
-                "Time",
-                "Added By",
-              ].map((label, idx) => (
+              {Alerts.map((label, idx) => (
                 <StyledCardContent
                   key={idx}
                   sx={{
@@ -271,7 +281,7 @@ function SopTask({ darkMode, flag, setFlag, setSelectedIncident }) {
                     padding: "8px",
                   }}
                 >
-                  <Typography variant="subtitle2" fontWeight={600}>
+                  <Typography variant="subtitle2" fontWeight={400}>
                     {label}
                   </Typography>
                 </StyledCardContent>
@@ -299,8 +309,13 @@ function SopTask({ darkMode, flag, setFlag, setSelectedIncident }) {
                   <StyledCardContent sx={{ flex: 1, justifyContent: "center" }}>
                     <Typography variant="subtitle2">{item.pk_id}</Typography>
                   </StyledCardContent>
-                   <StyledCardContent sx={{ flex: 1, justifyContent: "center" }}>
+                  {/* <StyledCardContent sx={{ flex: 1, justifyContent: "center" }}>
                     <Typography variant="subtitle2">{item.disaster_id_id}</Typography>
+                  </StyledCardContent> */}
+                  <StyledCardContent sx={{ flex: 1, justifyContent: "center" }}>
+                    <Typography variant="subtitle2">
+                      {item.disaster_name}
+                    </Typography>
                   </StyledCardContent>
                   <StyledCardContent sx={{ flex: 1, justifyContent: "center" }}>
                     <Typography variant="subtitle2">{item.latitude}</Typography>
@@ -378,56 +393,112 @@ function SopTask({ darkMode, flag, setFlag, setSelectedIncident }) {
                   ) : (
                     tasks.map((item) => (
                       <EnquiryCardBody key={item.id} status={item.status}>
-                        {[
-                          item.alertId,
-                          item.disasterId,
-                          `${item.date} ${item.time}`,
-                          item.disasterType,
-                          item.priority,
-                          item.status,
-                          item.mode,
-                          item.initiatedBy,
-                          "View", // Placeholder for icon
-                        ].map((val, idx) => (
-                          <StyledCardContent
-                            key={idx}
-                            style={{
-                              flex: 1,
-                              display: "flex",
-                              justifyContent: "center",
+                        <StyledCardContent
+                          sx={{ flex: 1, justifyContent: "center" }}
+                        >
+                          <Typography variant="subtitle2">
+                            {item.alertId}
+                          </Typography>
+                        </StyledCardContent>
+
+                        <StyledCardContent
+                          sx={{ flex: 1, justifyContent: "center" }}
+                        >
+                          <Typography variant="subtitle2">
+                            {item.disasterId}
+                          </Typography>
+                        </StyledCardContent>
+
+                        <StyledCardContent
+                          sx={{ flex: 1, justifyContent: "center" }}
+                        >
+                          <Typography variant="subtitle2">{`${item.date} ${item.time}`}</Typography>
+                        </StyledCardContent>
+
+                        <StyledCardContent
+                          sx={{ flex: 1, justifyContent: "center" }}
+                        >
+                          <Typography variant="subtitle2">
+                            {item.disasterType}
+                          </Typography>
+                        </StyledCardContent>
+
+                        <StyledCardContent
+                          sx={{ flex: 1, justifyContent: "center" }}
+                        >
+                          <Typography variant="subtitle2">
+                            {item.priority}
+                          </Typography>
+                        </StyledCardContent>
+
+                        <StyledCardContent
+                          sx={{ flex: 1, justifyContent: "center" }}
+                        >
+                          <Typography
+                            variant="subtitle2"
+                            sx={{
+                              color:
+                                item.status === "Completed"
+                                  ? "#00e676"
+                                  : "#f44336",
                             }}
                           >
-                            {idx === 8 ? (
+                            {item.status}
+                          </Typography>
+                        </StyledCardContent>
+
+                        <StyledCardContent
+                          sx={{ flex: 1, justifyContent: "center" }}
+                        >
+                          <Typography variant="subtitle2">
+                            {item.mode}
+                          </Typography>
+                        </StyledCardContent>
+
+                        <StyledCardContent
+                          sx={{ flex: 1, justifyContent: "center" }}
+                        >
+                          <Typography variant="subtitle2">
+                            {item.initiatedBy}
+                          </Typography>
+                        </StyledCardContent>
+
+                        <StyledCardContent
+                          sx={{
+                            flex: 1,
+                            justifyContent: "center",
+                            gap: 1,
+                            display: "flex",
+                          }}
+                        >
+                          <Tooltip title="View Details">
+                            <IconButton
+                              onClick={() => {
+                                setSelectedIncident(item);
+                                setFlag(0);
+                                setViewmode("incident"); // Set view mode to true
+                              }}
+                            >
                               <Visibility
-                                onClick={() => {
-                                  setSelectedIncident(item);
-                                  setFlag(0);
-                                }}
-                                sx={{
-                                  color: "#00f0c0",
-                                  cursor: "pointer",
-                                  fontSize: 28,
-                                }}
+                                sx={{ color: "#00f0c0", fontSize: 28 }}
                               />
-                            ) : (
-                              <Typography
-                                variant="subtitle2"
-                                sx={
-                                  idx === 5
-                                    ? {
-                                        color:
-                                          item.status === "Completed"
-                                            ? "#00e676"
-                                            : "#f44336",
-                                      }
-                                    : {}
-                                }
-                              >
-                                {val}
-                              </Typography>
-                            )}
-                          </StyledCardContent>
-                        ))}
+                            </IconButton>
+                          </Tooltip>
+
+                          <Tooltip title="Closure Details">
+                            <IconButton
+                              onClick={() => {
+                                setSelectedIncident(item);
+                                setFlag(0);
+                                setViewmode("closure"); // Or use a different flag if needed
+                              }}
+                            >
+                              <CheckCircle
+                                sx={{ color: "#4caf50", fontSize: 28 }}
+                              />
+                            </IconButton>
+                          </Tooltip>
+                        </StyledCardContent>
                       </EnquiryCardBody>
                     ))
                   )}
