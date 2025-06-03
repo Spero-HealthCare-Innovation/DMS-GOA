@@ -10,6 +10,9 @@ import {
   TableBody,
   TableContainer,
   IconButton,
+  Select,
+  MenuItem,
+  Chip,
 } from "@mui/material";
 import {
   Search,
@@ -29,6 +32,7 @@ import { Tooltip } from "@mui/material";
 
 import Snackbar from "@mui/material/Snackbar";
 import Alert from "@mui/material/Alert";
+import CustomPagination from "../../../common/CustomPagination";
 
 const EnquiryCard = styled("div")(() => ({
   display: "flex",
@@ -41,28 +45,37 @@ const EnquiryCard = styled("div")(() => ({
   height: "40px",
 }));
 
-const EnquiryCardBody = styled("tr")(({ theme, status }) => ({
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "space-between",
-  background: theme.palette.mode === "dark" ? "#112240" : "#fff",
-  color: theme.palette.mode === "dark" ? "#fff" : "#000",
-  marginTop: "0.5em",
-  borderRadius: "8px",
-  padding: "10px 12px",
-  transition: "all 0.3s ease",
-  cursor: "pointer",
-  "&:hover": {
-    boxShadow: `0 0 8px ${
-      status === "Completed"
-        ? "#00e67699"
-        : status === "Pending"
-        ? "#f4433699"
-        : "#88888855"
-    }`,
-  },
-  height: "45px",
-}));
+const EnquiryCardBody = styled("tr")(({ theme, alertType }) => {
+  const alertColors = {
+    1: "#f44336", // High - red
+    2: "#ff9800", // Medium - orange
+    3: "#888888", // Low - gray
+  };
+
+  const glowColor = alertColors[alertType] || "transparent";
+
+  return {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    background: theme.palette.mode === "dark" ? "#112240" : "#fff",
+    color: theme.palette.mode === "dark" ? "#fff" : "#000",
+    marginTop: "0.5em",
+    borderRadius: "8px",
+    padding: "10px 12px",
+    transition: "box-shadow 0.3s ease, border-color 0.3s ease",
+    cursor: "pointer",
+    border: `1px solid transparent`,
+    height: "45px",
+
+    "&:hover": {
+      boxShadow: `0 0 8px 3px ${glowColor}88`, // glowing shadow on hover
+      borderColor: "transparent",
+    },
+  };
+});
+
+
 
 const StyledCardContent = styled("td")({
   padding: "0 8px",
@@ -82,25 +95,22 @@ const Alerts = [
   "Added By",
 ];
 
-const Dispatch = [
+const DispatchHeaders = [
   "Incident ID",
-  "Disaster ID",
   "Date & Time",
   "Disaster Type",
-  "Priority",
-  "Status",
-  "Mode",
+  "Alert Type",
   "Initiated By",
-
   "Actions",
 ];
-
 function SopTask({
   darkMode,
   flag,
   setFlag,
   setSelectedIncident,
   setViewmode,
+  dispatchList,
+  loading = false, // Default to false if not provided
 }) {
   const socketUrl = import.meta.env.VITE_SOCKET_API_KEY;
   const location = useLocation();
@@ -108,6 +118,18 @@ function SopTask({
   const [searchTerm, setSearchTerm] = useState("");
   const [openSnackbar, setOpenSnackbar] = useState(false);
   const [snackbarMsg, setSnackbarMsg] = useState("");
+  const [page, setPage] = useState(1);
+  const [rowsPerPage, setRowsPerPage] = useState(3);
+
+  // Decide current list based on flag
+  const dataList = flag === 1 ? alerts : dispatchList;
+  // Calculate total pages
+  const totalPages = Math.ceil(dataList.length / rowsPerPage) || 1;
+  // Calculate start and end indexes for slice
+  const startIndex = (page - 1) * rowsPerPage;
+  const endIndex = startIndex + rowsPerPage;
+  // Get sliced data for current page
+  const dispatchListdata = dataList.slice(startIndex, endIndex);
 
   window.addEventListener("storage", (e) => {
     if (e.key === "logout") {
@@ -171,6 +193,7 @@ function SopTask({
 
   const textColor = darkMode ? "#ffffff" : "#000000";
   const bgColor = darkMode ? "#0a1929" : "#ffffff";
+  const borderColor = darkMode ? "#7F7F7F" : "#ccc";
 
   return (
     <Paper
@@ -367,9 +390,9 @@ function SopTask({
                 <TableBody>
                   {/* Header Row */}
                   <EnquiryCard>
-                    {Dispatch.map((label, idx) => (
+                    {DispatchHeaders.map((header, idx) => (
                       <StyledCardContent
-                        key={idx}
+                        key={header}
                         style={{
                           flex: 1,
                           display: "flex",
@@ -377,92 +400,87 @@ function SopTask({
                         }}
                       >
                         <Typography variant="subtitle2" fontWeight={500}>
-                          {label}
+                          {header}
                         </Typography>
                       </StyledCardContent>
                     ))}
                   </EnquiryCard>
 
                   {/* Body Rows */}
-                  {tasks.length === 0 ? (
-                    <Box p={2}>
+                  {dispatchListdata.length === 0 ? (
+                    <Box p={2} width="100%">
                       <Typography align="center" color="textSecondary">
                         No tasks available.
                       </Typography>
                     </Box>
                   ) : (
-                    tasks.map((item) => (
-                      <EnquiryCardBody key={item.id} status={item.status}>
+                    dispatchListdata.map((item) => (
+                      <EnquiryCardBody
+                        key={item.incident_id}
+                       alertType={item.inc_type}
+                      >
+                        {/* Incident ID */}
                         <StyledCardContent
                           sx={{ flex: 1, justifyContent: "center" }}
                         >
                           <Typography variant="subtitle2">
-                            {item.alertId}
+                            {item.incident_id || "N/A"}
                           </Typography>
                         </StyledCardContent>
 
+                        {/* Date & Time */}
                         <StyledCardContent
                           sx={{ flex: 1, justifyContent: "center" }}
                         >
                           <Typography variant="subtitle2">
-                            {item.disasterId}
+                            {item.inc_added_date
+                              ? new Date(item.inc_added_date).toLocaleString(
+                                  "en-US",
+                                  {
+                                    day: "2-digit",
+                                    month: "long",
+                                    year: "numeric",
+                                    hour: "numeric",
+                                    minute: "2-digit",
+                                    hour12: true,
+                                  }
+                                )
+                              : "N/A"}
                           </Typography>
                         </StyledCardContent>
 
-                        <StyledCardContent
-                          sx={{ flex: 1, justifyContent: "center" }}
-                        >
-                          <Typography variant="subtitle2">{`${item.date} ${item.time}`}</Typography>
-                        </StyledCardContent>
-
-                        <StyledCardContent
-                          sx={{ flex: 1, justifyContent: "center" }}
-                        >
-                          <Typography variant="subtitle2">
-                            {item.disasterType}
-                          </Typography>
-                        </StyledCardContent>
-
-                        <StyledCardContent
-                          sx={{ flex: 1, justifyContent: "center" }}
-                        >
-                          <Typography variant="subtitle2">
-                            {item.priority}
-                          </Typography>
-                        </StyledCardContent>
-
-                        <StyledCardContent
-                          sx={{ flex: 1, justifyContent: "center" }}
-                        >
-                          <Typography
-                            variant="subtitle2"
-                            sx={{
-                              color:
-                                item.status === "Completed"
-                                  ? "#00e676"
-                                  : "#f44336",
-                            }}
-                          >
-                            {item.status}
-                          </Typography>
-                        </StyledCardContent>
-
+                        {/* Disaster Type */}
                         <StyledCardContent
                           sx={{ flex: 1, justifyContent: "center" }}
                         >
                           <Typography variant="subtitle2">
-                            {item.mode}
+                            {item.disaster_name || "N/A"}
                           </Typography>
                         </StyledCardContent>
 
+                        {/* Alert Type */}
                         <StyledCardContent
                           sx={{ flex: 1, justifyContent: "center" }}
                         >
                           <Typography variant="subtitle2">
-                            {item.initiatedBy}
+                            {{
+                              1: "High",
+                              2: "Medium",
+                              3: "Low",
+                            }[item.inc_type] || "Unknown"}
                           </Typography>
                         </StyledCardContent>
 
+                        {/* Initiated By */}
+                        <StyledCardContent
+                          sx={{ flex: 1, justifyContent: "center" }}
+                        >
+                          <Typography variant="subtitle2">
+                            {item.inc_added_by || "N/A"}
+                          </Typography>
+                        </StyledCardContent>
+
+                        {/* Actions */}
                         <StyledCardContent
                           sx={{
                             flex: 1,
@@ -474,9 +492,9 @@ function SopTask({
                           <Tooltip title="View Details">
                             <IconButton
                               onClick={() => {
-                                setSelectedIncident(item);
+                                setSelectedIncident(item.incident_id);
                                 setFlag(0);
-                                setViewmode("incident"); // Set view mode to true
+                                setViewmode("incident");
                               }}
                             >
                               <Visibility
@@ -490,7 +508,7 @@ function SopTask({
                               onClick={() => {
                                 setSelectedIncident(item);
                                 setFlag(0);
-                                setViewmode("closure"); // Or use a different flag if needed
+                                setViewmode("closure");
                               }}
                             >
                               <CheckCircle
@@ -508,6 +526,24 @@ function SopTask({
           </Grid>
         </Grid>
       )}
+      {/* Pagination Component */}
+      {flag === 0 ? (
+        <Box mt={2}>
+          <CustomPagination
+            darkMode={darkMode}
+            page={page}
+            setPage={setPage}
+            rowsPerPage={rowsPerPage}
+            setRowsPerPage={setRowsPerPage}
+            totalPages={totalPages}
+            textColor={textColor}
+            borderColor={borderColor}
+            bgColor={bgColor}
+            inputBgColor={darkMode ? "#1e293b" : "#fff"}
+            rowsPerPageOptions={[3, 5, 10]}
+          />
+        </Box>
+      ) : null}
 
       {/* SNACKBAR FOR ALERT SHOW */}
       <Snackbar

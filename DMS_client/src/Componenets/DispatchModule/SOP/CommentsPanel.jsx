@@ -17,6 +17,7 @@ function CommentsPanel({
   selectedIncident,
   selectedResponders,
   setSelectedResponders,
+  fetchDispatchList, // Assuming this is passed down from parent component
 }) {
   window.addEventListener("storage", (e) => {
     if (e.key === "logout") {
@@ -84,6 +85,7 @@ function CommentsPanel({
       inc_added_by: userName,
       latitude: selectedIncident?.latitude,
       longitude: selectedIncident?.longitude,
+      mode: "2", // 2 for dispatch alert
     };
 
     try {
@@ -106,7 +108,8 @@ function CommentsPanel({
         // Clear input fields
         setCommentText("");
         setSelectedResponders([]);
-        setFlag(0); // ✅ yahi pe flag reset ho raha hai
+        setFlag(0);
+        fetchDispatchList(); // Fetch updated dispatch list after sending alert
       } else {
         setSnackbar({
           open: true,
