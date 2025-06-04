@@ -33,6 +33,10 @@ const screenConfig = {
     icon: <AccountCircleIcon />,
     screens: [],
   },
+   "Closure Detail": {
+    icon: <AccountCircleIcon />,
+    screens: [],
+  },
   Permission: {
     icon: <LockIcon />,
     screens: [
