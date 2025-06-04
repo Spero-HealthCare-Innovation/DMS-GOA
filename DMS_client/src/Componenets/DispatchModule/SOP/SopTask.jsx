@@ -29,10 +29,11 @@ import { useRef } from "react";
 import { useEffect } from "react";
 import { tasks } from "./dummydata";
 import { Tooltip } from "@mui/material";
-
+import { useNavigate } from 'react-router-dom';
 import Snackbar from "@mui/material/Snackbar";
 import Alert from "@mui/material/Alert";
 import CustomPagination from "../../../common/CustomPagination";
+import { Add } from "@mui/icons-material";
 
 const EnquiryCard = styled("div")(() => ({
   display: "flex",
@@ -120,7 +121,7 @@ function SopTask({
   const [snackbarMsg, setSnackbarMsg] = useState("");
   const [page, setPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(3);
-
+  const navigate = useNavigate();
   // Decide current list based on flag
   const dataList = flag === 1 ? alerts : dispatchList;
   // Calculate total pages
@@ -194,6 +195,10 @@ function SopTask({
   const textColor = darkMode ? "#ffffff" : "#000000";
   const bgColor = darkMode ? "#0a1929" : "#ffffff";
   const borderColor = darkMode ? "#7F7F7F" : "#ccc";
+
+  const handleClick = () => {
+    navigate("/create-incident", { state: { startData: "start" } });
+  };
 
   return (
     <Paper
@@ -280,6 +285,44 @@ function SopTask({
             },
           }}
         />
+
+        <IconButton
+          onClick={handleClick}
+          // onMouseEnter={() => setIsHovered(true)}
+          // onMouseLeave={() => setIsHovered(false)}
+          size="small"
+          sx={{
+            ml: "auto",
+            backgroundColor: "#5FECC8",
+            color: "black",
+            borderRadius: "18px",
+            "&:hover": {
+              backgroundColor: "#5FECC8",
+            },
+            // width: isHovered ? 140 : 36,
+            height: 36,
+            transition: "width 0.3s ease",
+            overflow: "hidden",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            // paddingRight: isHovered ? 1 : 1,
+          }}
+        >
+          <Add sx={{ color: darkMode ? "#000000" : "#000000" }} />
+          {/* {isHovered && ( */}
+          <Typography
+            variant="body2"
+            sx={{
+              marginLeft: 1,
+              color: "black",
+              whiteSpace: "nowrap",
+            }}
+          >
+            Create Incident
+          </Typography>
+          {/* )} */}
+        </IconButton>
       </Box>
 
       {flag === 1 ? (
@@ -364,23 +407,23 @@ function SopTask({
                     >
                       {item.alert_datetime
                         ? new Date(item.alert_datetime).toLocaleString(
-                            "en-US",
-                            {
-                              day: "2-digit",
-                              month: "long",
-                              year: "numeric",
-                              hour: "numeric",
-                              minute: "2-digit",
-                              hour12: true,
-                            }
-                          )
+                          "en-US",
+                          {
+                            day: "2-digit",
+                            month: "long",
+                            year: "numeric",
+                            hour: "numeric",
+                            minute: "2-digit",
+                            hour12: true,
+                          }
+                        )
                         : "N/A"}
                     </Typography>
                   </StyledCardContent>
                   <StyledCardContent sx={{ flex: 1, justifyContent: "center" }}>
                     <Typography variant="subtitle2">{item.added_by}</Typography>
                   </StyledCardContent>
-                  
+
                 </EnquiryCardBody>
               ))
             )}
@@ -439,16 +482,16 @@ function SopTask({
                           <Typography variant="subtitle2">
                             {item.inc_added_date
                               ? new Date(item.inc_added_date).toLocaleString(
-                                  "en-US",
-                                  {
-                                    day: "2-digit",
-                                    month: "long",
-                                    year: "numeric",
-                                    hour: "numeric",
-                                    minute: "2-digit",
-                                    hour12: true,
-                                  }
-                                )
+                                "en-US",
+                                {
+                                  day: "2-digit",
+                                  month: "long",
+                                  year: "numeric",
+                                  hour: "numeric",
+                                  minute: "2-digit",
+                                  hour12: true,
+                                }
+                              )
                               : "N/A"}
                           </Typography>
                         </StyledCardContent>
