@@ -405,6 +405,7 @@ class Responder_Serializer(serializers.ModelSerializer):
         fields = ['responder_id', 'responder_name']
 
 class DisasterResponderSerializer(serializers.ModelSerializer):
+    disaster_name=serializers.CharField(source='dis_id.disaster_name', read_only=True)
     class Meta:
          model = DMS_Disaster_Responder
          fields = '__all__'
