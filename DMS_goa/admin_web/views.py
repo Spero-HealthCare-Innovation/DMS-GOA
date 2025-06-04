@@ -998,8 +998,8 @@ class incident_get_Api(APIView):
         # Combine data
         data = {
             "incident_details": incident_data,
-            "incident_id": inc_id,
+            "inc_id": inc_id,
             "comments": list(comment_texts),
-            "responders": responder_details
+            "responders scope": responder_details
         }
         return Response(data, status=status.HTTP_200_OK)
