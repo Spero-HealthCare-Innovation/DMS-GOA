@@ -21,25 +21,6 @@ import { Checkbox, ListItemText, FormControl, InputLabel } from '@mui/material';
 
 
 function RegisterResponder({ darkMode }) {
-    const port = import.meta.env.VITE_APP_API_KEY;
-    const { newToken, disaster } = useAuth();
-    const token = localStorage.getItem("access_token");
-    const [showSuccessAlert, setShowSuccessAlert] = useState(false);
-    const textColor = darkMode ? "#ffffff" : "#000000";
-    const bgColor = darkMode ? "#0a1929" : "#0a1929";
-    const labelColor = darkMode ? "#5FECC8" : "#1976d2";
-    const fontFamily = "Roboto, sans-serif";
-    const borderColor = darkMode ? "#7F7F7F" : "#ccc";
-
-    const theme = useTheme();
-    const isDarkMode = theme.palette.mode === "dark";
-    const selectStyles = getCustomSelectStyles(isDarkMode);
-
-    const [page, setPage] = useState(1);
-    const [rowsPerPage, setRowsPerPage] = useState(5);
-    const [anchorEl, setAnchorEl] = useState(null);
-    const userName = localStorage.getItem('userId');
-
     const EnquiryCard = styled("div")(() => ({
         display: "flex",
         alignItems: "center",
@@ -99,15 +80,81 @@ function RegisterResponder({ darkMode }) {
         textAlign: "center",
     };
 
+    const port = import.meta.env.VITE_APP_API_KEY;
+    const { newToken, disaster } = useAuth();
+    const token = localStorage.getItem("access_token");
+    const [showSuccessAlert, setShowSuccessAlert] = useState(false);
+    const textColor = darkMode ? "#ffffff" : "#000000";
+    const bgColor = darkMode ? "#0a1929" : "#0a1929";
+    const labelColor = darkMode ? "#5FECC8" : "#1976d2";
+    const fontFamily = "Roboto, sans-serif";
+    const borderColor = darkMode ? "#7F7F7F" : "#ccc";
+
+    const theme = useTheme();
+    const isDarkMode = theme.palette.mode === "dark";
+    const selectStyles = getCustomSelectStyles(isDarkMode);
+
+    const [page, setPage] = useState(1);
+    const [rowsPerPage, setRowsPerPage] = useState(5);
+    const [anchorEl, setAnchorEl] = useState(null);
+    const userName = localStorage.getItem('userId');
+
     const [selectedResponders, setSelectedResponders] = useState([]);
     const [selectedDisaster, setSelectedDisaster] = useState(null);
+    const [responder, setResponder] = useState([]);
+    const [responderTableData, setResponderTableData] = useState([]);
+    const [snackbarOpen, setSnackbarOpen] = useState(false);
+    const [snackbarMessage, setSnackbarMessage] = useState('');
 
-    const [responder] = useState([
-        { id: 1, name: "Fire" },
-        { id: 2, name: "Cyclone" },
-        { id: 3, name: "Rain" },
-        { id: 4, name: "Thunderstrom" },
-    ]);
+    const getResponderData = async () => {
+        try {
+            const response = await fetch(`${port}/admin_web/Disaster_Responder_get/`, {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token || newToken}`,
+                },
+            });
+
+            const data = await response.json();
+            if (response.status === 200) {
+                setResponderTableData(data);
+                console.log(data, "SOP");
+                setPage(1);
+            }
+        } catch (error) {
+            console.error("Error:", error);
+        }
+    };
+
+    useEffect(() => {
+        getResponderData();
+    }, [port, token, newToken]);
+
+    const fetchResponder = async () => {
+        try {
+            const response = await fetch(`${port}/admin_web/responder_get/`, {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token || newToken}`,
+                },
+            });
+            if (response.ok) {
+                const data = await response.json();
+                setResponder(data);
+                console.log("Responder list:", data);
+            } else {
+                console.error("Failed to fetch responders. Status:", response.status);
+            }
+        } catch (error) {
+            console.error("Error:", error);
+        }
+    };
+
+    useEffect(() => {
+        fetchResponder();
+    }, [port, token, newToken]);
 
     const handleChange = (event) => {
         setSelectedResponders(event.target.value);
@@ -132,10 +179,19 @@ function RegisterResponder({ darkMode }) {
             });
 
             const data = await response.json();
-            if (response.status === 200) {
-                console.log(data);
+            if (response.status === 201) {
+                setSnackbarMessage("Responder Registered Successfully");
+                setSnackbarOpen(true);
+            }
+            else if (response.status === 409) {
+                setSnackbarMessage("Responder already exists with this disaster type");
+                setSnackbarOpen(true);
+            } else if (response.status === 500) {
+                setSnackbarMessage("Internal Server Error");
+                setSnackbarOpen(true);
             } else {
-                console.error('Error:', data);
+                setSnackbarMessage(data?.detail || "Something went wrong");
+                setSnackbarOpen(true);
             }
         } catch (error) {
             console.error('Error:', error);
@@ -146,6 +202,17 @@ function RegisterResponder({ darkMode }) {
     return (
         <div style={{ marginLeft: "3.5rem" }}>
             <Box sx={{ display: "flex", alignItems: "center", gap: 2, pb: 2, mt: 3 }}>
+                <Snackbar
+                    open={snackbarOpen}
+                    autoHideDuration={3000}
+                    onClose={() => setSnackbarOpen(false)}
+                    anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+                >
+                    <Alert onClose={() => setSnackbarOpen(false)} severity="success" sx={{ width: '100%' }}>
+                        {snackbarMessage}
+                    </Alert>
+                </Snackbar>
+
                 <Typography variant="h6" sx={{
                     color: labelColor,
                     fontWeight: 600,
@@ -204,7 +271,7 @@ function RegisterResponder({ darkMode }) {
                                         }}>
                                             <StyledCardContent
                                                 sx={{
-                                                    flex: 0.6,
+                                                    flex: 0.5,
                                                     borderRight: "1px solid black",
                                                     justifyContent: "center",
                                                 }}
@@ -229,7 +296,7 @@ function RegisterResponder({ darkMode }) {
 
                                             <StyledCardContent
                                                 sx={{
-                                                    flex: 2,
+                                                    flex: 3,
                                                     borderRight: "1px solid black",
                                                     justifyContent: "center",
                                                     ...fontsTableHeading,
@@ -254,43 +321,50 @@ function RegisterResponder({ darkMode }) {
                                 </TableHead>
 
                                 <TableBody>
-                                    <EnquiryCardBody
-                                        sx={{
-                                            backgroundColor: inputBgColor,
-                                            p: 2,
-                                            borderRadius: 2,
-                                            color: textColor,
-                                            display: "flex",
-                                            width: "100%",
-                                            mb: 1,
-                                        }}
-                                    >
-                                        <StyledCardContent sx={{ flex: 0.6, justifyContent: "center" }}>
-                                            <Typography variant="subtitle2" sx={fontsTableBody}>
-                                                1
-                                            </Typography>
-                                        </StyledCardContent>
+                                    {responderTableData.map((row, index) => (
+                                        <EnquiryCardBody
+                                            key={row.pk_id}
+                                            sx={{
+                                                backgroundColor: inputBgColor,
+                                                p: 2,
+                                                borderRadius: 2,
+                                                color: textColor,
+                                                display: "flex",
+                                                width: "100%",
+                                                mb: 1,
+                                            }}
+                                        >
+                                            <StyledCardContent sx={{ flex: 0.5, justifyContent: "center" }}>
+                                                <Typography variant="subtitle2" sx={fontsTableBody}>
+                                                    {index + 1}
+                                                </Typography>
+                                            </StyledCardContent>
 
-                                        <StyledCardContent sx={{ flex: 1.9, justifyContent: "center", ...fontsTableBody }}>
-                                            <Typography variant="subtitle2">fffffffffffffffffffffff</Typography>
-                                        </StyledCardContent>
+                                            <StyledCardContent sx={{ flex: 1.9, justifyContent: "center", ...fontsTableBody }}>
+                                                <Typography variant="subtitle2">
+                                                    {row.dis_id}
+                                                </Typography>
+                                            </StyledCardContent>
 
-                                        <StyledCardContent sx={{ flex: 2, justifyContent: "center", ...fontsTableBody }}>
-                                            <Typography variant="subtitle2">ffffffffffffffffffffffffff</Typography>
-                                        </StyledCardContent>
+                                            <StyledCardContent sx={{ flex: 3, justifyContent: "left", ...fontsTableBody }}>
+                                                <Typography variant="subtitle2">
+                                                    {row.res_id.map((res) => res.responder_name).join(", ")}
+                                                </Typography>
+                                            </StyledCardContent>
 
-                                        <StyledCardContent sx={{ flex: 0.5, justifyContent: "center", ...fontsTableBody }}>
-                                            <MoreHorizIcon
-                                                sx={{
-                                                    color: "#00f0c0",
-                                                    cursor: "pointer",
-                                                    fontSize: 28,
-                                                    justifyContent: "center",
-                                                    ...fontsTableBody,
-                                                }}
-                                            />
-                                        </StyledCardContent>
-                                    </EnquiryCardBody>
+                                            <StyledCardContent sx={{ flex: 0.5, justifyContent: "center", ...fontsTableBody }}>
+                                                <MoreHorizIcon
+                                                    sx={{
+                                                        color: "#00f0c0",
+                                                        cursor: "pointer",
+                                                        fontSize: 28,
+                                                        justifyContent: "center",
+                                                        ...fontsTableBody,
+                                                    }}
+                                                />
+                                            </StyledCardContent>
+                                        </EnquiryCardBody>
+                                    ))}
                                 </TableBody>
                             </Table>
                         </TableContainer>
@@ -382,55 +456,75 @@ function RegisterResponder({ darkMode }) {
                 <Grid item xs={12} md={4.9}>
                     <Paper elevation={3} sx={{ padding: 2, borderRadius: 3, backgroundColor: bgColor, mt: 1, mb: 5 }}>
                         <Box sx={{ display: 'flex', gap: 1, mb: 2 }}>
-                            <Select
-                                select
-                                fullWidth
-                                size="small"
-                                label="Disaster Type"
-                                variant="outlined"
-                                sx={selectStyles}
-                                value={selectedDisaster}
-                                onChange={(e) => setSelectedDisaster(e.target.value)}
-                            >
-                                <MenuItem disabled value="">
-                                    Select Disaster Type
-                                </MenuItem>
-                                {disaster.map((item) => (
-                                    <MenuItem key={item.disaster_id} value={item.disaster_id}>
-                                        {item.disaster_name}
-                                    </MenuItem>
-                                ))}
-                            </Select>
+                            <Grid container spacing={2}>
+                                <Grid item xs={12} sm={6}>
+                                    <TextField
+                                        select
+                                        fullWidth
+                                        size="small"
+                                        label="Disaster Type"
+                                        variant="outlined"
+                                        value={selectedDisaster}
+                                        onChange={(e) => setSelectedDisaster(e.target.value)}
+                                        SelectProps={{
+                                            MenuProps: {
+                                                PaperProps: {
+                                                    style: {
+                                                        maxHeight: 250,
+                                                        width: '250'
+                                                    },
+                                                },
+                                            },
+                                        }}
+                                    >
+                                        {disaster.map((item) => (
+                                            <MenuItem key={item.disaster_id} value={item.disaster_id}>
+                                                {item.disaster_name}
+                                            </MenuItem>
+                                        ))}
+                                    </TextField>
+                                </Grid>
 
-                            <FormControl fullWidth>
-                                <Select
-                                    multiple
-                                    value={selectedResponders}
-                                    onChange={handleChange}
-                                    displayEmpty
-                                    renderValue={(selected) => {
-                                        if (selected.length === 0) {
-                                            return "Select Responder";
-                                        }
-                                        return responder
-                                            .filter((res) => selected.includes(res.id))
-                                            .map((res) => res.name)
-                                            .join(", ");
-                                    }}
-                                    inputProps={{ "aria-label": "Select Responder" }}
-                                    sx={selectStyles}
-                                >
-                                    <MenuItem value="" disabled>
-                                        Select Responder
-                                    </MenuItem>
-                                    {responder.map((res) => (
-                                        <MenuItem key={res.id} value={res.id}>
-                                            <Checkbox checked={selectedResponders.includes(res.id)} />
-                                            <ListItemText primary={res.name} />
-                                        </MenuItem>
-                                    ))}
-                                </Select>
-                            </FormControl>
+                                <Grid item xs={12} sm={6}>
+                                    <FormControl fullWidth>
+                                        <Select
+                                            multiple
+                                            value={selectedResponders}
+                                            onChange={handleChange}
+                                            displayEmpty
+                                            renderValue={(selected) => {
+                                                if (selected.length === 0) {
+                                                    return "Select Responder";
+                                                }
+                                                return responder
+                                                    .filter((res) => selected.includes(res.responder_id))
+                                                    .map((res) => res.responder_name)
+                                                    .join(", ");
+                                            }}
+                                            size="small"
+                                            inputProps={{ "aria-label": "Select Responder" }}
+                                            MenuProps={{
+                                                PaperProps: {
+                                                    style: {
+                                                        maxHeight: 250,
+                                                        width: 200,
+                                                    },
+                                                },
+                                            }}
+                                        >
+                                            <MenuItem value="" disabled>
+                                                Select Responder
+                                            </MenuItem>
+                                            {responder.map((res) => (
+                                                <MenuItem key={res.responder_id} value={res.responder_id}>
+                                                    <Checkbox checked={selectedResponders.includes(res.responder_id)} />
+                                                    <ListItemText primary={res.responder_name} />
+                                                </MenuItem>
+                                            ))}
+                                        </Select>
+                                    </FormControl>
+                                </Grid>
+                            </Grid>
                         </Box>
 
                         <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, mt: 3, mb: 1 }}>

@@ -18,24 +18,6 @@ import {
 } from "../../../CommonStyle/Style";
 
 function SopRegister({ darkMode }) {
-    const port = import.meta.env.VITE_APP_API_KEY;
-    const { newToken, disaster } = useAuth();
-    const token = localStorage.getItem("access_token");
-    const [showSuccessAlert, setShowSuccessAlert] = useState(false);
-    const textColor = darkMode ? "#ffffff" : "#000000";
-    const bgColor = darkMode ? "#0a1929" : "#0a1929";
-    const labelColor = darkMode ? "#5FECC8" : "#1976d2";
-    const fontFamily = "Roboto, sans-serif";
-    const borderColor = darkMode ? "#7F7F7F" : "#ccc";
-
-    const theme = useTheme();
-    const isDarkMode = theme.palette.mode === "dark";
-    const selectStyles = getCustomSelectStyles(isDarkMode);
-    const [description, setDescription] = useState("");
-    const [selectedDisaster, setSelectedDisaster] = useState(null);
-    const userName = localStorage.getItem('userId');
-    const [sop, setSop] = useState([]);
-
     const EnquiryCard = styled("div")(() => ({
         display: "flex",
         alignItems: "center",
@@ -90,10 +72,39 @@ function SopRegister({ darkMode }) {
     const fontsTableBody = {
         fontFamily: "Roboto",
         fontWeight: 400,
-        fontSize: 13,
+        fontSize: 17,
         letterSpacing: 0,
         textAlign: "center",
     };
+
+    const port = import.meta.env.VITE_APP_API_KEY;
+    const { newToken, disaster } = useAuth();
+    const token = localStorage.getItem("access_token");
+    const textColor = darkMode ? "#ffffff" : "#000000";
+    const bgColor = darkMode ? "#0a1929" : "#0a1929";
+    const labelColor = darkMode ? "#5FECC8" : "#1976d2";
+    const fontFamily = "Roboto, sans-serif";
+    const borderColor = darkMode ? "#7F7F7F" : "#ccc";
+
+    const theme = useTheme();
+    const isDarkMode = theme.palette.mode === "dark";
+    const selectStyles = getCustomSelectStyles(isDarkMode);
+    const [description, setDescription] = useState("");
+    const [selectedDisaster, setSelectedDisaster] = useState(null);
+    const userName = localStorage.getItem('userId');
+    const [sop, setSop] = useState([]);
+
+    const [snackbarOpen, setSnackbarOpen] = useState(false);
+    const [snackbarMessage, setSnackbarMessage] = useState('');
+
+    // GET API SOP
+    const [page, setPage] = useState(1);
+    const [rowsPerPage, setRowsPerPage] = useState(5);
+    const [anchorEl, setAnchorEl] = useState(null);
+    const [selectedItem, setSelectedItem] = useState(null);
+    const open = Boolean(anchorEl);
+    const [sopId, setSopId] = useState(null);
+    const [isEditMode, setIsEditMode] = useState(false);
 
     const handleSubmit = async () => {
         const payload = {
@@ -138,17 +149,6 @@ function SopRegister({ darkMode }) {
         }
     };
 
-    const [snackbarOpen, setSnackbarOpen] = useState(false);
-    const [snackbarMessage, setSnackbarMessage] = useState('');
-
-    // GET API SOP
-    const [page, setPage] = useState(1);
-    const [rowsPerPage, setRowsPerPage] = useState(5);
-    const [anchorEl, setAnchorEl] = useState(null);
-    const [selectedItem, setSelectedItem] = useState(null);
-    const open = Boolean(anchorEl);
-
-
     const handleOpen = (event, item) => {
         setAnchorEl(event.currentTarget);
         setSelectedItem(item);
@@ -184,7 +184,87 @@ function SopRegister({ darkMode }) {
         fetchSop();
     }, [port, token, newToken]);
 
-    // Calculate total pages and sliced data for pagination
+    const handleEdit = async (selectedItem) => {
+        const Id = selectedItem.sop_id;
+        setSopId(Id);
+        setIsEditMode(true);
+
+        try {
+            const res = await axios.get(
+                `${port}/admin_web/sop_put/${Id}`,
+                {
+                    headers: {
+                        Authorization: `Bearer ${token || newToken}`,
+                    },
+                }
+            );
+            const data = res.data[0];
+
+            setSelectedDisaster(data.disaster_id);
+            setDescription(data.sop_description);
+        } catch (err) {
+            console.error("Error fetching department data:", err);
+        }
+    };
+
+    const handleUpdate = async () => {
+        const payload = {
+            sop_description: description,
+            disaster_id: selectedDisaster,
+            sop_modified_by: userName,
+        };
+
+        try {
+            const response = await fetch(`${port}/admin_web/sop_put/${sopId}/`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${token || newToken}`,
+                },
+                body: JSON.stringify(payload),
+            });
+
+            if (response.status === 200) {
+                setSnackbarMessage("SOP Updated Successfully");
+                setSnackbarOpen(true);
+                await fetchSop();
+            }
+            else if (response.status === 409) {
+                setSnackbarMessage("SOP already exists with this disaster type");
+                setSnackbarOpen(true);
+                setDescription("");
+                setSelectedDisaster("");
+            } else if (response.status === 500) {
+                setSnackbarMessage("Internal Server Error");
+                setSnackbarOpen(true);
+            }
+        } catch (error) {
+            console.error('Update error:', error);
+        }
+    };
+
+
+    const handleDelete = async (selectedItem) => {
+        try {
+            const res = await axios.delete(
+                `${port}/admin_web/sop_delete/${selectedItem.sop_id}/`,
+                {
+                    headers: {
+                        Authorization: `Bearer ${token || newToken}`,
+                    },
+                }
+            );
+
+            console.log("Delete success:", res.data);
+            setSnackbarMessage("SOP Deleted Successfully");
+            await fetchSop();
+            setSnackbarOpen(true);
+            handleClose();
+        } catch (err) {
+            console.error("Error deleting department:", err);
+        }
+    };
+
     const totalPages = Math.ceil(sop.length / rowsPerPage);
     const paginatedData = sop.slice((page - 1) * rowsPerPage, page * rowsPerPage);
 
@@ -345,6 +425,7 @@ function SopRegister({ darkMode }) {
                                                 <MoreHorizIcon
                                                     onClick={(e) => handleOpen(e, item)}
                                                     sx={{
+                                                        fontSize: "2em",
                                                         color: "#00f0c0",
                                                         cursor: "pointer",
                                                         justifyContent: "center",
@@ -386,7 +467,7 @@ function SopRegister({ darkMode }) {
                                 variant="outlined"
                                 color="warning"
                                 startIcon={<EditOutlined />}
-                                // onClick={() => handleEdit(selectedItem)}
+                                onClick={() => handleEdit(selectedItem)}
                             >
                                 Edit
                             </Button>
@@ -396,11 +477,11 @@ function SopRegister({ darkMode }) {
                                 variant="outlined"
                                 color="error"
                                 startIcon={<DeleteOutline />}
-                                // onClick={() => handleDelete(selectedItem.dep_id)}
-                                // onClick={() => {
-                                //     setDeleteDepId(selectedItem.dep_id);
-                                //     setOpenDeleteDialog(true);
-                                // }}
+                                onClick={() => handleDelete(selectedItem)}
+                            // onClick={() => {
+                            //     setDeleteDepId(selectedItem.dep_id);
+                            //     setOpenDeleteDialog(true);
+                            // }}
                             >
                                 Delete
                             </Button>
@@ -496,6 +577,7 @@ function SopRegister({ darkMode }) {
                                         variant="outlined"
                                         value={selectedDisaster}
                                         onChange={(e) => setSelectedDisaster(e.target.value)}
+                                        InputLabelProps={{ shrink: true }}
                                         SelectProps={{
                                             MenuProps: {
                                                 PaperProps: {
@@ -529,29 +611,31 @@ function SopRegister({ darkMode }) {
                         </Box>
 
                         <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, mt: 3, mb: 1 }}>
-                            <Button
-                                variant="contained"
-                                sx={{
-                                    mt: 2,
-                                    width: "40%",
-                                    backgroundColor: "#00f0c0",
-                                    color: "black",
-                                    fontWeight: "bold",
-                                    borderRadius: "12px",
-                                    "&:hover": {
-                                        backgroundColor: bgColor,
-                                        color: "white !important",
-                                    },
-                                }}
-                                onClick={handleSubmit}
-                            >
-                                Submit
-                            </Button>
+                            <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, mt: 3, mb: 1 }}>
+                                <Button
+                                    variant="contained"
+                                    sx={{
+                                        mt: 2,
+                                        width: "40%",
+                                        backgroundColor: "#00f0c0",
+                                        color: "black",
+                                        fontWeight: "bold",
+                                        borderRadius: "12px",
+                                        "&:hover": {
+                                            backgroundColor: bgColor,
+                                            color: "white !important",
+                                        },
+                                    }}
+                                    onClick={isEditMode ? handleUpdate : handleSubmit}
+                                >
+                                    {isEditMode ? 'Update' : 'Submit'}
+                                </Button>
+                            </Box>
                         </Box>
                     </Paper>
                 </Grid>
             </Grid>
-        </div>
+        </div >
     )
 }
 
