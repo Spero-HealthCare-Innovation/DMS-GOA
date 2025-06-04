@@ -103,7 +103,7 @@ const AppRoutes = ({ darkMode, setIsLoggedIn }) => {
           }
         />
         <Route
-          path="/register-sop"
+          path="/registersop"
           element={
             <PrivateRoute>
               <SopRegister darkMode={darkMode} />
