@@ -897,8 +897,7 @@ class DMS_Disaster_Responder_GET_API(APIView):
         for obj in queryset:
             serialized_data = DisasterResponderSerializer(obj).data
 
-            # Get responder details as a list of dicts
-            res_ids = obj.res_id or []
+            res_ids = obj.res_id if isinstance(obj.res_id, list) else []
 
             responder_details = list(
                 DMS_Responder.objects
@@ -906,12 +905,12 @@ class DMS_Disaster_Responder_GET_API(APIView):
                 .values('responder_id', 'responder_name')
             )
 
-            # Replace 'res_id' with actual responder details
             serialized_data['res_id'] = responder_details
 
             response_data.append(serialized_data)
 
         return Response(response_data)
+
 
 
 class closure_Post_api(APIView):
