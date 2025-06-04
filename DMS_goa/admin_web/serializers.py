@@ -452,6 +452,6 @@ class incident_get_serializer(serializers.ModelSerializer):
     disaster_name=serializers.CharField(source='disaster_type.disaster_name', read_only=True)
     class Meta:
         model = DMS_Incident
-        fields=['incident_id','disaster_type','inc_type','responder_scope','caller_id','caller_name','caller_no','location','summary','summary_name','disaster_name','alert_type']
+        fields=['incident_id','disaster_type','inc_type','responder_scope','caller_id','caller_name','caller_no','location','summary','summary_name','disaster_name','alert_type','mode']
 
 
