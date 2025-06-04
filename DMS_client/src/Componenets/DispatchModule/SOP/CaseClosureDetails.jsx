@@ -8,15 +8,19 @@ import {
   Button,
   CircularProgress,
   Alert,
-  
+
 } from "@mui/material";
 import axios from "axios";
 import { useEffect, useState } from "react";
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
+import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
+
 
 const CaseClosureDetails = ({ darkMode, flag, selectedIncident }) => {
   const port = import.meta.env.VITE_APP_API_KEY;
-   const token = localStorage.getItem("accessToken");
-     const userName = localStorage.getItem("userId");
+  const token = localStorage.getItem("accessToken");
+  const userName = localStorage.getItem("userId");
 
   const [formData, setFormData] = useState({
     acknowledge: "",
@@ -50,7 +54,7 @@ const CaseClosureDetails = ({ darkMode, flag, selectedIncident }) => {
   });
   // Load initial values from props
 
- 
+
 
   // useEffect(() => {
   //   if (selectedIncident) {
@@ -189,9 +193,9 @@ const CaseClosureDetails = ({ darkMode, flag, selectedIncident }) => {
             </Typography>
             {flag === 0 ? (
               <Box>
-                {renderText("Alert ID", selectedIncident?.IncidentId)}
-                {renderText("Disaster Id", selectedIncident?.disasterId)}
-                {renderText("Disaster Type", selectedIncident?.disasterType)}
+                {renderText("Incident ID", selectedIncident?.IncidentId)}
+                {renderText("Disaster Type", selectedIncident?.disasterId)}
+                {renderText("Alert Type", selectedIncident?.disasterType)}
               </Box>
             ) : (
               <Typography variant="body2" sx={{ color: textColor }}>
@@ -204,7 +208,7 @@ const CaseClosureDetails = ({ darkMode, flag, selectedIncident }) => {
           <Grid
             item
             xs={12}
-            md={4}
+            md={5}
             sx={{
               borderRight: { md: `1px solid ${borderColor}` },
               px: { md: 3 },
@@ -218,6 +222,7 @@ const CaseClosureDetails = ({ darkMode, flag, selectedIncident }) => {
             </Typography>
 
             <Grid container spacing={2}>
+              {/* <Grid container spacing={2}>
               {[
                 ["Acknowledge", "acknowledge"],
                 ["Start Base Location", "startBaseLocation"],
@@ -234,16 +239,64 @@ const CaseClosureDetails = ({ darkMode, flag, selectedIncident }) => {
                     InputLabelProps={{ shrink: true }}
                     value={formData[field]}
                     onChange={(e) => handleChange(field, e.target.value)}
-                    InputProps={{ sx: { color: textColor } }}
+                  
+                    InputProps={{
+                      sx: {
+                        color: textColor, "& input::-webkit-calendar-picker-indicator": {
+                          filter: "invert(1)", // white icon
+                        },
+                      }
+                    }}
                     sx={textFieldStyle}
+
                   />
                 </Grid>
               ))}
+            </Grid> */}
+              <LocalizationProvider dateAdapter={AdapterDateFns}>
+                <Grid container spacing={2} sx={{ mt: 0.5 }}>
+                  {[
+                    ["Acknowledge", "acknowledge"],
+                    ["Start Base Location", "startBaseLocation"],
+                    ["At Scene", "atScene"],
+                    ["From Scene", "fromScene"],
+                    ["Back to Base", "backToBase"],
+                  ].map(([label, field], i) => (
+                    <Grid item xs={12} sm={6} key={i}>
+                      <DateTimePicker
+                        label={label}
+                        value={formData[field] || null}
+                        onChange={(newValue) => handleChange(field, newValue)}
+                        inputFormat="yyyy-MM-dd | HH:mm"
+                        renderInput={(params) => (
+                          <TextField
+                            {...params}
+                            fullWidth
+                            placeholder="yyyy-MM-dd | hh:mm"
+                            variant="outlined"
+                            InputLabelProps={{ shrink: true }}
+                            InputProps={{
+                              ...params.InputProps,
+                              sx: {
+                                color: textColor,
+                                "& .MuiSvgIcon-root": {
+                                  color: "white", // calendar icon color
+                                },
+                              },
+                            }}
+                            sx={textFieldStyle}
+                          />
+                        )}
+                      />
+                    </Grid>
+                  ))}
+                </Grid>
+              </LocalizationProvider>
             </Grid>
           </Grid>
 
           {/* Right Column */}
-          <Grid item xs={12} md={5}>
+          <Grid item xs={12} md={4}>
             <Typography
               variant="subtitle1"
               sx={{ fontWeight: 600, color: labelColor, fontFamily, mb: 2 }}
@@ -264,7 +317,7 @@ const CaseClosureDetails = ({ darkMode, flag, selectedIncident }) => {
               sx={textFieldStyle}
             />
 
-            <Box mt={3}>
+            <Box mt={3} sx={{ textAlign: "right" }}>
               <Button
                 variant="contained"
                 onClick={handleSubmit}
