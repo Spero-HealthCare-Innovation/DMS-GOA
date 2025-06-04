@@ -99,7 +99,7 @@ const IncidentCreateMap = () => {
   // };
 
   return (
-    <div style={{ position: "relative", width: "100%", height: "92.5vh" }}>
+    <div style={{ position: "relative", width: "100%"}}>
       {/* Search input & suggestions */}
       <div
         style={{
@@ -136,7 +136,7 @@ const IncidentCreateMap = () => {
       <MapContainer
         center={selectedPosition}
         zoom={9}
-        style={{ height: "90vh", width: "100%", borderRadius: 10 }}
+        style={{ height: "55vh", width: "100%", borderRadius: 10 }}
         whenCreated={(mapInstance) => {
           mapRef.current = mapInstance;
         }}
