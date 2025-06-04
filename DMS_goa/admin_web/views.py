@@ -984,7 +984,9 @@ class incident_get_Api(APIView):
         incident_data = incident_serializer.data
         responder_ids = []
         if incident_data:
-            responder_ids = incident_data[0].get('responder_scope', [])
+             raw_ids = incident_data[0].get('responder_scope', [])
+             responder_ids = [int(rid) for rid in raw_ids if str(rid).isdigit()]
+
 
         # Get Responder Names
         responders = DMS_Responder.objects.filter(responder_id__in=responder_ids).values('responder_id', 'responder_name')
