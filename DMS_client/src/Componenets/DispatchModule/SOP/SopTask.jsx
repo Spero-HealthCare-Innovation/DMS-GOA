@@ -75,8 +75,6 @@ const EnquiryCardBody = styled("tr")(({ theme, alertType }) => {
   };
 });
 
-
-
 const StyledCardContent = styled("td")({
   padding: "0 8px",
   display: "flex",
@@ -103,6 +101,7 @@ const DispatchHeaders = [
   "Initiated By",
   "Actions",
 ];
+
 function SopTask({
   darkMode,
   flag,
@@ -110,7 +109,8 @@ function SopTask({
   setSelectedIncident,
   setViewmode,
   dispatchList,
-  loading = false, // Default to false if not provided
+  loading = false,
+  setIncidentId, // Default to false if not provided
 }) {
   const socketUrl = import.meta.env.VITE_SOCKET_API_KEY;
   const location = useLocation();
@@ -357,26 +357,30 @@ function SopTask({
                     <Typography variant="subtitle2">{item.rain}</Typography>
                   </StyledCardContent>
                   <StyledCardContent sx={{ flex: 1, justifyContent: "center" }}>
-                    <Typography variant="subtitle2" fontSize={12}>
-                      {item.time || `${item.date} ${item.time}`}
+                    <Typography
+                      variant="subtitle2"
+                      fontSize={12}
+                      textAlign="center"
+                    >
+                      {item.alert_datetime
+                        ? new Date(item.alert_datetime).toLocaleString(
+                            "en-US",
+                            {
+                              day: "2-digit",
+                              month: "long",
+                              year: "numeric",
+                              hour: "numeric",
+                              minute: "2-digit",
+                              hour12: true,
+                            }
+                          )
+                        : "N/A"}
                     </Typography>
                   </StyledCardContent>
                   <StyledCardContent sx={{ flex: 1, justifyContent: "center" }}>
                     <Typography variant="subtitle2">{item.added_by}</Typography>
                   </StyledCardContent>
-                  {/* <StyledCardContent sx={{ flex: 1, justifyContent: "center" }}>
-            <Visibility
-              onClick={() => {
-                setSelectedIncident(item);
-                setFlag(1);
-              }}
-              sx={{
-                color: "#00f0c0",
-                cursor: "pointer",
-                fontSize: 28,
-              }}
-            />
-          </StyledCardContent> */}
+                  
                 </EnquiryCardBody>
               ))
             )}
@@ -417,7 +421,7 @@ function SopTask({
                     dispatchListdata.map((item) => (
                       <EnquiryCardBody
                         key={item.incident_id}
-                       alertType={item.inc_type}
+                        alertType={item.inc_type}
                       >
                         {/* Incident ID */}
                         <StyledCardContent
@@ -492,7 +496,9 @@ function SopTask({
                           <Tooltip title="View Details">
                             <IconButton
                               onClick={() => {
-                                setSelectedIncident(item.incident_id);
+                                setSelectedIncident(item);
+                                setIncidentId(item.inc_id);
+                                console.log("Incident idd", setIncidentId);
                                 setFlag(0);
                                 setViewmode("incident");
                               }}

@@ -23,12 +23,23 @@ function Sop({ darkMode, setDarkMode }) {
 
   const port = import.meta.env.VITE_APP_API_KEY;
   const Token = localStorage.getItem("access_token");
-  const { newToken, responderScope, fetchResponderScope, setDisaterid } = useAuth();
+  const {
+    newToken,
+    responderScope,
+    fetchResponderScope,
+    setDisaterid,
+    setDisasterIdFromSop,
+  } = useAuth();
   const location = useLocation();
 
   const flagFromState = location?.state?.triggerStatus ?? 0;
   const [flag, setFlag] = useState(flagFromState);
   const [selectedIncident, setSelectedIncident] = useState(null);
+  const [incidentDetails, setIncidentDetails] = useState(null);
+  const [incidentId, setIncidentId] = useState(null);
+  // const [disasterIdFromSop, setDisasterIdFromSop] = useState(null);
+
+  console.log("Incident", incidentId);
   const [dispatchList, setDispatchList] = useState([]);
   const [loading, setLoading] = useState(false);
   const [viewmode, setViewmode] = useState("incident");
@@ -38,7 +49,10 @@ function Sop({ darkMode, setDarkMode }) {
 
   useEffect(() => {
     if (selectedIncident?.disaster_id_id) {
-      console.log("Setting disaster id in context:", selectedIncident.disaster_id_id);
+      console.log(
+        "Setting disaster id in context:",
+        selectedIncident.disaster_id_id
+      );
       setDisaterid(selectedIncident.disaster_id_id);
       fetchResponderScope(selectedIncident.disaster_id_id);
     }
@@ -81,7 +95,11 @@ function Sop({ darkMode, setDarkMode }) {
           Authorization: `Bearer ${Token || newToken}`,
         },
       });
-      setDispatchList(res.data);
+
+      // Reverse the array to show last record first
+      const reversedData = res.data.reverse();
+
+      setDispatchList(reversedData);
     } catch (err) {
       console.error("Failed to fetch dispatch list", err);
     } finally {
@@ -93,21 +111,41 @@ function Sop({ darkMode, setDarkMode }) {
     fetchDispatchList();
   }, []);
 
-  const fetchDispatchListid = async (incidentId) => {
+  const fetchIncidentDetails = async () => {
+    if (!incidentId) return;
+    console.log("Fetching incident details for ID:", incidentId);
     try {
       setLoading(true);
-      const res = await axios.get(`${port}/admin_web/dispatch_get/${incidentId}/`, {
-        headers: {
-          Authorization: `Bearer ${Token || newToken}`,
-        },
-      });
-      setDispatchList(res.data);
-    } catch (err) {
-      console.error("Failed to fetch dispatch list by incident ID", err);
+      const res = await axios.get(
+        `${port}/admin_web/incident_get/${incidentId}/`,
+        {
+          headers: {
+            Authorization: `Bearer ${Token || newToken}`,
+          },
+        }
+      );
+      const incidentData = res.data;
+      console.log(
+        "Disaster Detail Fetched",
+        incidentData.incident_details[0]?.disaster_type
+      );
+      setDisasterIdFromSop(incidentData.incident_details[0]?.disaster_type);
+
+      setIncidentDetails(res.data);
+      setSelectedIncident(res.data);
+    } catch (error) {
+      console.error("Error fetching incident details:", error);
+      setSnackbarMessage("Failed to load incident details");
+      setShowSnackbar(true);
     } finally {
       setLoading(false);
     }
-  }
+  };
+  useEffect(() => {
+    if (incidentId) {
+      fetchIncidentDetails(); // Remove the param
+    }
+  }, [incidentId]);
 
   return (
     <Box
@@ -133,6 +171,8 @@ function Sop({ darkMode, setDarkMode }) {
             setViewmode={setViewmode}
             dispatchList={dispatchList}
             loading={loading}
+            incidentId={incidentId}
+            setIncidentId={setIncidentId}
           />
         </Grid>
 
@@ -147,6 +187,7 @@ function Sop({ darkMode, setDarkMode }) {
               fetchResponderScope={fetchResponderScope}
               dispatchList={dispatchList}
               fetchDispatchList={fetchDispatchList}
+              incidentDetails={incidentDetails}
             />
           </Grid>
         ) : (
