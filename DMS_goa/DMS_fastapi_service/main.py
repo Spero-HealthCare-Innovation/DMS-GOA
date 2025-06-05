@@ -50,6 +50,7 @@ from rest_framework_simplejwt.exceptions import InvalidToken, TokenError
 from admin_web.models import DMS_Employee
 from rest_framework_simplejwt.tokens import AccessToken
 from rest_framework_simplejwt.exceptions import TokenError
+from reports import router as my_get_router
 
 # def get_user_from_token(token: str):
 #     try:
@@ -58,6 +59,7 @@ from rest_framework_simplejwt.exceptions import TokenError
 #         return DMS_Employee.objects.get(id=user_id)
 #     except (InvalidToken, TokenError, DMS_Employee.DoesNotExist):
 #         return None
+
 
 
 def get_user_from_token(token: str):
@@ -127,6 +129,9 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(lifespan=lifespan)
+
+
+app.include_router(my_get_router)
 
 # Create the ASGI application by mounting the Socket.IO app and the FastAPI app
 socket_app = socketio.ASGIApp(

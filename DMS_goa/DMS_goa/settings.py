@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'rest_framework',
     "corsheaders",
     "captcha",
+
 ]
 
 MIDDLEWARE = [
@@ -92,6 +93,10 @@ DATABASES = {
         'OPTIONS': {
             'options': '-c timezone=Asia/Kolkata',
         },
+    },
+        'hive': {
+            'ENGINE': '', 
+            'NAME': 'processed_dms',  
     }
 }
 
