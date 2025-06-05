@@ -261,6 +261,9 @@ function Login() {
         ) {
           setCaptchaTextError("Invalid captcha. Please try again.");
           fetchCaptcha();
+        }
+          else if (errorMessage.includes("already logged in")) {
+          setPasswordError("User already logged in on another device/session.");
         } else if (data.errors?.non_field_errors?.[0]) {
           setPasswordError(data.errors.non_field_errors[0]);
         } else if (data.msg && data.msg.toLowerCase().includes("captcha")) {

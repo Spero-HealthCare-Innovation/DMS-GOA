@@ -96,7 +96,6 @@ function RegisterResponder({ darkMode }) {
 
     const [page, setPage] = useState(1);
     const [rowsPerPage, setRowsPerPage] = useState(5);
-    const [anchorEl, setAnchorEl] = useState(null);
     const userName = localStorage.getItem('userId');
 
     const [selectedResponders, setSelectedResponders] = useState([]);
@@ -105,6 +104,9 @@ function RegisterResponder({ darkMode }) {
     const [responderTableData, setResponderTableData] = useState([]);
     const [snackbarOpen, setSnackbarOpen] = useState(false);
     const [snackbarMessage, setSnackbarMessage] = useState('');
+    // Edit
+    const [responderID, setResponderID] = useState(null);
+    const [isEditMode, setIsEditMode] = useState(false);
 
     const getResponderData = async () => {
         try {
@@ -198,6 +200,121 @@ function RegisterResponder({ darkMode }) {
         }
     };
 
+    const handleUpdate = async () => {
+        const payload = {
+            res_id: selectedResponders,
+            dis_id: selectedDisaster,
+            sop_added_by: userName,
+            sop_modified_by: userName
+        };
+
+        try {
+            const response = await fetch(`${port}/admin_web/disaster_responder_put/${responderID}/`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${token || newToken}`,
+                },
+                body: JSON.stringify(payload),
+            });
+
+            if (response.status === 200) {
+                setSnackbarMessage("Responder Data Updated Successfully");
+                setSnackbarOpen(true);
+                await fetchResponder();
+            }
+            else if (response.status === 409) {
+                setSnackbarMessage("SOP already exists with this disaster type");
+                setSnackbarOpen(true);
+                // setDescription("");
+                // setSelectedDisaster("");
+            } else if (response.status === 500) {
+                setSnackbarMessage("Internal Server Error");
+                setSnackbarOpen(true);
+            }
+        } catch (error) {
+            console.error('Update error:', error);
+        }
+    };
+
+    /// POP UP 
+    const [anchorEl, setAnchorEl] = useState(null);
+    const [selectedItem, setSelectedItem] = useState(null);
+
+    const handleClick = (event, row) => {
+        setAnchorEl(event.currentTarget);
+        setSelectedItem(row);
+    };
+
+    const handleClose = () => {
+        setAnchorEl(null);
+    };
+
+    const open = Boolean(anchorEl);
+    const id = open ? 'simple-popover' : undefined;
+
+    const handleEdit = async (selectedItem) => {
+        const Id = selectedItem.pk_id;
+        console.log(Id, "idddddddddd");
+
+        setResponderID(Id);
+        setIsEditMode(true);
+
+        try {
+            const res = await axios.get(
+                `${port}/admin_web/disaster_responder_put/${Id}/`,
+                {
+                    headers: {
+                        Authorization: `Bearer ${token || newToken}`,
+                    },
+                }
+            );
+            const data = res.data[0];
+
+            setSelectedDisaster(data.dis_id);
+            setSelectedResponders(data.res_id);
+            // setDescription(data.sop_description);
+        } catch (err) {
+            console.error("Error fetching department data:", err);
+        }
+    };
+
+    const handleDelete = async (selectedItem) => {
+        try {
+            const res = await axios.delete(
+                `${port}/admin_web/Disaster_Responder_delete/${selectedItem.pk_id}/`,
+                {
+                    headers: {
+                        Authorization: `Bearer ${token || newToken}`,
+                    },
+                }
+            );
+
+            console.log("Delete success:", res.data);
+            setSnackbarMessage("Responder Data Deleted Successfully");
+            await fetchResponder();
+            setSnackbarOpen(true);
+            handleClose();
+        } catch (err) {
+            console.error("Error deleting department:", err);
+        }
+    };
+
+
+    const [searchQuery, setSearchQuery] = useState("");
+
+    const filteredData = responderTableData.filter((row) => {
+        const disasterMatch = row.disaster_name?.toLowerCase().includes(searchQuery);
+        const responderMatch = row.res_id.some((responder) =>
+            responder.responder_name?.toLowerCase().includes(searchQuery)
+        );
+        return disasterMatch || responderMatch;
+    });
+
+    const paginatedData = filteredData.slice(
+        (page - 1) * rowsPerPage,
+        page * rowsPerPage
+    );
 
     return (
         <div style={{ marginLeft: "3.5rem" }}>
@@ -226,6 +343,8 @@ function RegisterResponder({ darkMode }) {
                     variant="outlined"
                     size="small"
                     placeholder="Search"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value.toLowerCase())}
                     InputProps={{
                         startAdornment: (
                             <InputAdornment position="start">
@@ -321,61 +440,110 @@ function RegisterResponder({ darkMode }) {
                                 </TableHead>
 
                                 <TableBody>
-                                    {responderTableData.map((row, index) => (
-                                        <EnquiryCardBody
-                                            key={row.pk_id}
-                                            sx={{
-                                                backgroundColor: inputBgColor,
-                                                p: 2,
-                                                borderRadius: 2,
-                                                color: textColor,
-                                                display: "flex",
-                                                width: "100%",
-                                                mb: 1,
-                                            }}
-                                        >
-                                            <StyledCardContent sx={{ flex: 0.5, justifyContent: "center" }}>
-                                                <Typography variant="subtitle2" sx={fontsTableBody}>
-                                                    {index + 1}
-                                                </Typography>
-                                            </StyledCardContent>
+                                    {paginatedData.length > 0 ? (
+                                        paginatedData.map((row, index) => (
+                                            <EnquiryCardBody
+                                                key={row.pk_id}
+                                                sx={{
+                                                    backgroundColor: inputBgColor,
+                                                    p: 2,
+                                                    borderRadius: 2,
+                                                    color: textColor,
+                                                    display: "flex",
+                                                    width: "100%",
+                                                    mb: 1,
+                                                }}
+                                            >
+                                                <StyledCardContent sx={{ flex: 0.5, justifyContent: "center" }}>
+                                                    <Typography variant="subtitle2" sx={fontsTableBody}>
+                                                        {index + 1}
+                                                    </Typography>
+                                                </StyledCardContent>
 
-                                            <StyledCardContent sx={{ flex: 1.9, justifyContent: "center", ...fontsTableBody }}>
-                                                <Typography variant="subtitle2">
-                                                    {row.dis_id}
-                                                </Typography>
-                                            </StyledCardContent>
+                                                <StyledCardContent sx={{ flex: 1.9, justifyContent: "center", ...fontsTableBody }}>
+                                                    <Typography variant="subtitle2">{row.disaster_name}</Typography>
+                                                </StyledCardContent>
 
-                                            <StyledCardContent sx={{ flex: 3, justifyContent: "left", ...fontsTableBody }}>
-                                                <Typography variant="subtitle2">
-                                                    {row.res_id.map((res) => res.responder_name).join(", ")}
-                                                </Typography>
-                                            </StyledCardContent>
+                                                <StyledCardContent sx={{ flex: 3, justifyContent: "left", ...fontsTableBody }}>
+                                                    <Typography variant="subtitle2">
+                                                        {row.res_id.map((res) => res.responder_name).join(", ")}
+                                                    </Typography>
+                                                </StyledCardContent>
 
-                                            <StyledCardContent sx={{ flex: 0.5, justifyContent: "center", ...fontsTableBody }}>
-                                                <MoreHorizIcon
-                                                    sx={{
-                                                        color: "#00f0c0",
-                                                        cursor: "pointer",
-                                                        fontSize: 28,
-                                                        justifyContent: "center",
-                                                        ...fontsTableBody,
-                                                    }}
-                                                />
-                                            </StyledCardContent>
-                                        </EnquiryCardBody>
-                                    ))}
+                                                <StyledCardContent sx={{ flex: 0.5, justifyContent: "center", ...fontsTableBody }}>
+                                                    <MoreHorizIcon
+                                                        aria-describedby={id}
+                                                        onClick={(e) => handleClick(e, row)}
+                                                        sx={{
+                                                            color: "#00f0c0",
+                                                            cursor: "pointer",
+                                                            fontSize: 28,
+                                                            justifyContent: "center",
+                                                        }}
+                                                    />
+                                                </StyledCardContent>
+                                            </EnquiryCardBody>
+                                        ))
+                                    ) : (
+                                        <TableRow>
+                                            <TableCell colSpan={4} align="center" sx={{ py: 4, color: textColor }}>
+                                                No data found
+                                            </TableCell>
+                                        </TableRow>
+                                    )}
                                 </TableBody>
                             </Table>
                         </TableContainer>
 
-                        <Box
-                            display="flex"
-                            justifyContent="space-between"
-                            alignItems="center"
-                            mt={2}
-                            px={1}
+                        <Popover
+                            open={open}
+                            anchorEl={anchorEl}
+                            onClose={handleClose}
+                            anchorOrigin={{
+                                vertical: "center",
+                                horizontal: "right",
+                            }}
+                            transformOrigin={{
+                                vertical: "center",
+                                horizontal: "left",
+                            }}
+                            PaperProps={{
+                                sx: {
+                                    p: 2,
+                                    display: "flex",
+                                    flexDirection: "column",
+                                    gap: 1.5,
+                                    borderRadius: 2,
+                                    minWidth: 120,
+                                },
+                            }}
                         >
+                            <Button
+                                fullWidth
+                                variant="outlined"
+                                color="warning"
+                                startIcon={<EditOutlined />}
+                                onClick={() => handleEdit(selectedItem)}
+                            >
+                                Edit
+                            </Button>
+
+                            <Button
+                                fullWidth
+                                variant="outlined"
+                                color="error"
+                                startIcon={<DeleteOutline />}
+                                onClick={() => handleDelete(selectedItem)}
+                            // onClick={() => {
+                            //     setDeleteDepId(selectedItem.dep_id);
+                            //     setOpenDeleteDialog(true);
+                            // }}
+                            >
+                                Delete
+                            </Button>
+                        </Popover>
+
+                        <Box display="flex" justifyContent="space-between" alignItems="center" mt={2} px={1}>
                             <Box display="flex" alignItems="center" gap={1}>
                                 <Typography variant="body2" sx={{ color: textColor }}>
                                     Records per page:
@@ -432,22 +600,24 @@ function RegisterResponder({ darkMode }) {
                                 >
                                     &#8249;
                                 </Box>
-                                {/* <Box>{page}/ {Math.ceil(groups.length / rowsPerPage)}</Box> */}
-                                {/* <Box
+                                <Box>
+                                    {page} / {Math.ceil(filteredData.length / rowsPerPage)}
+                                </Box>
+                                <Box
                                     onClick={() =>
-                                        page < Math.ceil(groups.length / rowsPerPage) &&
+                                        page < Math.ceil(responderTableData.length / rowsPerPage) &&
                                         setPage(page + 1)
                                     }
                                     sx={{
                                         cursor:
-                                            page < Math.ceil(groups.length / rowsPerPage)
+                                            page < Math.ceil(responderTableData.length / rowsPerPage)
                                                 ? "pointer"
                                                 : "not-allowed",
                                         userSelect: "none",
                                     }}
                                 >
                                     &#8250;
-                                </Box> */}
+                                </Box>
                             </Box>
                         </Box>
                     </Paper>
@@ -457,6 +627,37 @@ function RegisterResponder({ darkMode }) {
                     <Paper elevation={3} sx={{ padding: 2, borderRadius: 3, backgroundColor: bgColor, mt: 1, mb: 5 }}>
                         <Box sx={{ display: 'flex', gap: 1, mb: 2 }}>
                             <Grid container spacing={2}>
+                                <Grid item xs={12} sm={12}>
+                                    {isEditMode && (
+                                        <Box
+                                            sx={{
+                                                display: "flex",
+                                                justifyContent: "flex-end",
+                                                cursor: "pointer",
+                                            }}
+                                        >
+                                            <Button
+                                                variant="contained"
+                                                sx={{
+                                                    mb: 1,
+                                                    width: "40%",
+                                                    backgroundColor: "#00f0c0",
+                                                    color: "black",
+                                                    fontWeight: "bold",
+                                                    borderRadius: "12px",
+                                                    cursor: "pointer",
+                                                }}
+                                                onClick={() => {
+                                                    setSelectedDisaster("");
+                                                    setSelectedResponders([]);
+                                                }}
+                                            >
+                                                + Add Responder
+                                            </Button>
+                                        </Box>
+                                    )}
+                                </Grid>
+
                                 <Grid item xs={12} sm={6}>
                                     <TextField
                                         select
@@ -464,7 +665,7 @@ function RegisterResponder({ darkMode }) {
                                         size="small"
                                         label="Disaster Type"
                                         variant="outlined"
-                                        value={selectedDisaster}
+                                        value={selectedDisaster || ""}
                                         onChange={(e) => setSelectedDisaster(e.target.value)}
                                         SelectProps={{
                                             MenuProps: {
@@ -512,8 +713,8 @@ function RegisterResponder({ darkMode }) {
                                                 },
                                             }}
                                         >
-                                            <MenuItem value="" disabled>
-                                                Select Responder
+                                            <MenuItem disabled value="">
+                                                <em>Select Responder</em>
                                             </MenuItem>
                                             {responder.map((res) => (
                                                 <MenuItem key={res.responder_id} value={res.responder_id}>
@@ -542,9 +743,9 @@ function RegisterResponder({ darkMode }) {
                                         color: "white !important",
                                     },
                                 }}
-                                onClick={handleSubmit}
+                                onClick={isEditMode ? handleUpdate : handleSubmit}
                             >
-                                Submit
+                                {isEditMode ? 'Update' : 'Submit'}
                             </Button>
                         </Box>
                     </Paper>

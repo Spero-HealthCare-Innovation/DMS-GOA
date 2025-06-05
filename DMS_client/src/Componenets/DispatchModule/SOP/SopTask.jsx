@@ -36,6 +36,7 @@ import Snackbar from "@mui/material/Snackbar";
 import Alert from "@mui/material/Alert";
 import CustomPagination from "../../../common/CustomPagination";
 import { Add } from "@mui/icons-material";
+import { useAuth } from "../../../Context/ContextAPI";
 
 const EnquiryCard = styled("div")(() => ({
   display: "flex",
@@ -134,6 +135,8 @@ function SopTask({
   const endIndex = startIndex + rowsPerPage;
   // Get sliced data for current page
   const dispatchListdata = dataList.slice(startIndex, endIndex);
+  const { setSelectedIncidentFromSop, setDisasterIdFromSop } = useAuth();
+
 
   window.addEventListener("storage", (e) => {
     if (e.key === "logout") {
@@ -570,6 +573,8 @@ function SopTask({
                               onClick={() => {
                                 setSelectedIncident(item);
                                 setIncidentId(item.inc_id);
+                                setSelectedIncidentFromSop(item);
+                                setDisasterIdFromSop(item.disaster_name);
                                 console.log("Incident idd", setIncidentId);
                                 setFlag(0);
                                 setViewmode("incident");
