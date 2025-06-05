@@ -1,6 +1,6 @@
 # ------------------------------Nikita---------------------------------------
 from asgiref.sync import sync_to_async
-from admin_web.models import Weather_alerts, DMS_Disaster_Type
+from admin_web.models import Weather_alerts, DMS_Disaster_Type, DMS_Employee
 from asgiref.sync import sync_to_async
 import logging
 import asyncio
@@ -14,6 +14,9 @@ import json
 
 # -------------------------------NIKITA-----------------------------------------
 connected_clients_trigger2 = set()
+EMP_USERNAME = None
+print("connected_clients_trigger2---", connected_clients_trigger2)
+
 
 logger = logging.getLogger(__name__)
 
@@ -70,6 +73,17 @@ def get_disaster_name(disaster_id):
         return disaster_obj.disaster_name
     except DMS_Disaster_Type.DoesNotExist:
         return None
+    
+@sync_to_async
+def get_user_id(user_id):
+    try:
+        print("******************************GOT THE EMP ID *****************************")
+        EMP_USERNAME = user_id
+        print("EMP_USERNAME---", EMP_USERNAME)
+        user_obj = DMS_Employee.objects.get(emp_id=user_id)
+        return user_obj.emp_username
+    except DMS_Employee.DoesNotExist:
+        return None
 
 
 
@@ -80,7 +94,7 @@ async def on_notify(conn, pid, channel, payload):
 
     disaster_name = await get_disaster_name(data['disaster_id_id'])
     data['disaster_name'] = disaster_name
-    print("Updated payload:", data)
+    # print("Updated payload:", data)
 
     # Broadcast to all clients (if you want old behavior)
     for ws in connected_clients.copy():
