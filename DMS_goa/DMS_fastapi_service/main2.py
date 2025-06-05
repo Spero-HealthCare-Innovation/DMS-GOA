@@ -11,7 +11,6 @@ from kafka import KafkaProducer
 from kafka import KafkaConsumer
 import threading
 # import subprocess
-import time
 # import pygetwindow as gw
 # import pyautogui
 import os
@@ -34,7 +33,7 @@ import json
 from django_setup import *
 from asgiref.sync import sync_to_async
 from admin_web.models import Weather_alerts  # Django model
-from weather_alerts_utils import get_old_weather_alerts, listen_to_postgres, connected_clients, connected_clients_trigger2, get_user_id
+# from weather_alerts_utils import get_old_weather_alerts, listen_to_postgres, connected_clients, connected_clients_trigger2, get_user_id
 from contextlib import asynccontextmanager
 from starlette.applications import Starlette
 from starlette.routing import WebSocketRoute
@@ -65,13 +64,16 @@ def get_user_from_token(token: str):
     try:
         print("in try block")
         access_token = AccessToken(token)  # This checks signature and expiration
-        print("access_token*******")
-        user_id = access_token["user_id"]  # Or "emp_id" if you've added it
-        print("access_token, user_id------ ",access_token, user_id)
-        print(type(user_id))
-        # dms_emp_obj = DMS_Employee.objects.get(emp_id='4')
-        # print("dms_emp_obj-- ", dms_emp_obj)
-        return user_id
+        if access_token:
+            print("access_token*******")
+            user_id = access_token["user_id"]  # Or "emp_id" if you've added it
+            print("access_token, user_id------ ",access_token, user_id)
+            print(type(user_id))
+            # dms_emp_obj = DMS_Employee.objects.get(emp_id='4')
+            # print("dms_emp_obj-- ", dms_emp_obj)
+            return user_id
+        else:
+            pass
     except (TokenError, DMS_Employee.DoesNotExist):
         return None
 
@@ -256,28 +258,6 @@ async def websocket_endpoint(websocket: WebSocket):
     except WebSocketDisconnect:
         print("Client disconnected")
         connected_clients.remove(websocket)
-        
-        
-        
-connected_clients_new: List[WebSocket] = []
-
-@app.websocket("/send_ip")
-async def websocket_endpoint(websocket: WebSocket):
-    await websocket.accept()
-    connected_clients_new.append(websocket)
-    print("Client connected")
-    try:
-        while True:
-            data = await websocket.receive_text()
-            print(f"Received from frontend: {data}")
-            # if data.strip().lower() == "true":
-                # Broadcast to all connected clients
-            for client in connected_clients_new:
-                if client != websocket:
-                    await client.send_text(data)
-    except WebSocketDisconnect:
-        print("Client disconnected")
-        connected_clients_new.remove(websocket)
 
 
 
@@ -345,15 +325,184 @@ async def scheduled_weather_fetch():
 async def startup_event():
     asyncio.create_task(scheduled_weather_fetch())
 
+# ----------------------------------------------------weather_alerts_utils.py------------------------------------------------
+# ------------------------------Nikita---------------------------------------
+from asgiref.sync import sync_to_async
+from admin_web.models import Weather_alerts, DMS_Disaster_Type, DMS_Employee
+from asgiref.sync import sync_to_async
+import logging
+import asyncio
+import asyncpg
+import urllib.parse
+from django.conf import settings
+import json
+# ----------------------------###Nikita###-------------------------------------
 
 
-# -----------------------------------------Nikita----------------------------------------------
+
+# -------------------------------NIKITA-----------------------------------------
+# connected_clients_trigger2 = set()
+connected_clients_trigger2 = {}  # dict: {websocket: emp_username}
+
+print("connected_clients_trigger2---", connected_clients_trigger2)
+
+
+logger = logging.getLogger(__name__)
+
+@sync_to_async
+def get_old_weather_alerts():
+    try:
+        # alerts = Weather_alerts.objects.order_by("-time")
+        alerts = Weather_alerts.objects.order_by("-alert_datetime")
+        return [
+            {
+                "pk_id": alert.pk_id,
+                "latitude": alert.latitude,
+                "longitude": alert.longitude,
+                "elevation": alert.elevation,
+                # "time": alert.time.isoformat() if alert.time else None,
+                "time": alert.alert_datetime.isoformat() if alert.alert_datetime else None,
+                "temperature_2m": alert.temperature_2m,
+                "rain": alert.rain,
+                "precipitation": alert.precipitation,
+                "weather_code": alert.weather_code,
+                "triger_status": alert.triger_status,
+                "disaster_id": alert.disaster_id.disaster_id,
+                "disaster_name": alert.disaster_id.disaster_name
+            }
+            for alert in alerts
+        ]
+    except Exception as e:
+        logger.error(f"Error in get_old_weather_alerts: {e}")
+        return []
+
+
+connected_clients = set()
+
+# Build DSN from Django settings
+db_settings = settings.DATABASES['default']
+# Safely encode password
+password = urllib.parse.quote_plus(db_settings['PASSWORD'])
+PG_DSN = f"postgresql://{db_settings['USER']}:{password}@{db_settings['HOST']}:{db_settings['PORT']}/{db_settings['NAME']}"
+
+
+
+async def pg_listener(conn, pid, channel, payload):
+    print(f"Received from PostgreSQL: {payload}")
+    for ws in connected_clients.copy():
+        try:
+            await ws.send_text(payload)
+        except Exception as e:
+            print(f"Error sending to WebSocket: {e}")
+            connected_clients.remove(ws)
+
+
+@sync_to_async
+def get_disaster_name(disaster_id):
+    try:
+        disaster_obj = DMS_Disaster_Type.objects.get(disaster_id=disaster_id)
+        return disaster_obj.disaster_name
+    except DMS_Disaster_Type.DoesNotExist:
+        return None
+    
+@sync_to_async
+def get_user_id(user_id):
+    try:
+        print("******************************GOT THE EMP ID *****************************")
+        user_obj = DMS_Employee.objects.get(emp_id=user_id)
+        return user_obj.emp_username
+    except DMS_Employee.DoesNotExist:
+        return None
+
+
+
+async def on_notify(conn, pid, channel, payload):
+    # print("New payload:", payload)
+
+    data = json.loads(payload)
+
+    disaster_name = await get_disaster_name(data['disaster_id_id'])
+    data['disaster_name'] = disaster_name
+    # print("Updated payload:", data)
+
+    # Broadcast to all clients (if you want old behavior)
+    for ws in connected_clients.copy():
+        try:
+            # await ws.send_text(payload)
+            await ws.send_text(json.dumps(data))
+        except Exception as e:
+            print(f"Error sending to client: {e}")
+            connected_clients.discard(ws)
+
+    # Send only if triger_status == 2 to trigger2 clients
+    # if data.get("triger_status") == 2:
+    #     print("checking triger status for 2 ******************")
+    #     print(f"connected_clients_trigger2 length: {len(connected_clients_trigger2)}")
+    #     for ws in connected_clients_trigger2.copy():
+    #         print("here11")
+    #         try:
+    #             print("in send data")
+    #             print("data--", data)
+    #             # await ws.send_text(data)
+    #             await ws.send_text(json.dumps(data))
+    #         except Exception as e:
+    #             print(f"Error sending to trigger2 client: {e}")
+    #             connected_clients_trigger2.discard(ws)
+
+    if data.get("triger_status") == 2:
+        print("Checking triger_status == 2")
+
+        for ws, emp_username in connected_clients_trigger2.copy().items():
+            try:
+                if data.get("modified_by") == emp_username:
+                    print(f"Sending to {emp_username}")
+                    await ws.send_text(json.dumps(data))
+            except Exception as e:
+                print(f"Error sending to trigger2 client: {e}")
+                connected_clients_trigger2.pop(ws, None)
+
+
+
+async def listen_to_postgres():
+    while True:
+        try:
+            conn = await asyncpg.connect(PG_DSN)
+
+            await conn.add_listener('weather_alerts_channel', on_notify)
+            print("Listening to PostgreSQL channel...")
+
+            while True:
+                # await asyncio.sleep(1)
+                await asyncio.sleep(60)
+
+        except Exception as e:
+            print(f"PostgreSQL listen error: {e}")
+            await asyncio.sleep(10)  # wait and retry
+        finally:
+            # if 'conn' in locals():
+            #     await conn.close()
+            if conn:
+                try:
+                    await conn.remove_listener('weather_alerts_channel', on_notify)
+                    await conn.close()
+                    print("🔌 PostgreSQL connection closed and listener removed.")
+                except Exception as cleanup_error:
+                    print(f"⚠️ Cleanup error: {cleanup_error}")
+
+# -------------------------------###NIKITA###-----------------------------------------
+# ----------------------------------------------------***weather_alerts_utils.py***----------------------------------------------
+
+
+
+
+# -------------------------------------------------------Nikita----------------------------------------------
 
 
 @app.websocket("/ws/weather_alerts")
 async def websocket_endpoint(websocket: WebSocket):
     await websocket.accept()
-    connected_clients_trigger2.add(websocket)
+    # connected_clients_trigger2.add(websocket)
+    connected_clients.add(websocket)
     print(f"WebSocket connected: {websocket.client}")
 
     last_sent_pk = 0  # Keep track of the last pk_id sent to this client
@@ -383,6 +532,8 @@ async def websocket_endpoint(websocket: WebSocket):
                     )
 
                     for alert in new_alerts:
+                        # if alert["time"]:
+                        #     alert["time"] = alert["time"].isoformat()
                         if alert["alert_datetime"]:
                             alert["alert_datetime"] = alert["alert_datetime"].isoformat()
                         await websocket.send_text(json.dumps(alert))  # ✅ same flat format
@@ -410,7 +561,8 @@ async def websocket_endpoint(websocket: WebSocket):
     except Exception as e:
         print(f"WebSocket error: {e}")
     finally:
-        connected_clients_trigger2.remove(websocket)
+        # connected_clients_trigger2.remove(websocket)
+        connected_clients_trigger2.pop(websocket, None)
         print(f"WebSocket removed: {websocket.client}")
         background_task.cancel()  # Stop the background polling
 
@@ -428,18 +580,32 @@ def get_user_by_emp_id(emp_id):
 async def websocket_trigger2(websocket: WebSocket):
     user_exist = 0
     token = websocket.query_params.get("token")
+    print("Inside main2 file")
     print("tokennnnnnn----", token)
     user_id = get_user_from_token(token)
-    user_obj = await get_user_by_emp_id(user_id)
-    user_exist = user_obj.emp_id
-    print("user obj-----", user_obj.emp_id)
-    user_IDdd = await get_user_id(user_obj.emp_id)
-    print("MAIN.py user idd function called-----", user_IDdd)
+    if user_id:
+        user_obj = await get_user_by_emp_id(user_id)
+        user_exist = user_obj.emp_id
+        print("user obj-----", user_obj.emp_id)
+        user_IDdd = await get_user_id(user_obj.emp_id)
+        print("MAIN.py user idd function called-----", user_IDdd)
+
     if user_exist == 0:
+        # await websocket.send_json({"error": "Unauthorized access", "code": 401})
+        # await asyncio.sleep(5)
         await websocket.close(code=1008)
         return
     
     await websocket.accept()
+    
+
+
+    # connected_clients_trigger2.add(websocket)
+    connected_clients_trigger2[websocket] = user_IDdd  # map websocket to username
+
+    print("Added WebSocket to connected_clients_trigger2")
+    print("Total connected trigger2 clients:", len(connected_clients_trigger2))
+
 
     try:
         # No old data here — only listen
@@ -451,7 +617,8 @@ async def websocket_trigger2(websocket: WebSocket):
     except Exception as e:
         print(f"Trigger2 WebSocket error: {e}")
     finally:
-        connected_clients_trigger2.remove(websocket)
+        # connected_clients_trigger2.remove(websocket)
+        connected_clients_trigger2.pop(websocket, None)
         print(f"Trigger2 WebSocket removed: {websocket.client}")
 
 
