@@ -68,6 +68,9 @@ const AlertPanel = ({ darkMode }) => {
     const socketRef = useRef(null);
     const [triggeredData, setTriggeredData] = useState([]);
     console.log(triggeredData, 'triggeredData');
+    
+      const [showSnackbar, setShowSnackbar] = useState(false);
+      const [snackbarMessage, setSnackbarMessage] = useState("");
 
     const startIndex = (page - 1) * rowsPerPage;
     const endIndex = startIndex + rowsPerPage;
@@ -80,9 +83,37 @@ const AlertPanel = ({ darkMode }) => {
         }
     });
 
+
+
     useEffect(() => {
         document.title = "DMS-AlertPanel";
     }, []);
+
+ useEffect(() => {
+    const handleOnline = () => {
+      setSnackbarMessage("System is Online ");
+      setShowSnackbar(true);
+
+      setTimeout(() => {
+        setShowSnackbar(false);
+        window.location.reload();
+      }, 2000);
+    };
+
+    const handleOffline = () => {
+      setSnackbarMessage("No Internet Connection ❌");
+      setShowSnackbar(true);
+    };
+
+    window.addEventListener("online", handleOnline);
+    window.addEventListener("offline", handleOffline);
+
+    return () => {
+      window.removeEventListener("online", handleOnline);
+      window.removeEventListener("offline", handleOffline);
+    };
+  }, []);
+
 
     useEffect(() => {
         const socket = new WebSocket(`${socketUrl}/ws/weather_alerts`);

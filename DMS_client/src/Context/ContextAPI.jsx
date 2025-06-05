@@ -340,9 +340,9 @@ export const AuthProvider = ({ children }) => {
         setPopupText,
         setQuery,
         selectedIncidentFromSop,
-setSelectedIncidentFromSop,
-disasterIdFromSop,
-setDisasterIdFromSop,
+        setSelectedIncidentFromSop,
+        disasterIdFromSop,
+        setDisasterIdFromSop,
         responderScopeForDispatch,
         setResponderScopeForDispatch,
       }}

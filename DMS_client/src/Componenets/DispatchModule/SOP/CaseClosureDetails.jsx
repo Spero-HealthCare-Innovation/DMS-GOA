@@ -414,7 +414,6 @@ const handleSubmit = async () => {
               sx: {
                 color: textColor,
                  fontSize: "0.85rem", // smaller font
-                 height: 40, // reduce height
                 height: "10%",
                 "& .MuiSvgIcon-root": {
                   color: "white",
@@ -446,7 +445,6 @@ const handleSubmit = async () => {
               sx: {
                 color: textColor,
                  fontSize: "0.85rem", // smaller font
-      height: 40, // reduce height
                 height: "10%",
                 "& .MuiSvgIcon-root": {
                   color: "white",
@@ -478,7 +476,6 @@ const handleSubmit = async () => {
               sx: {
                 color: textColor,
                  fontSize: "0.85rem", // smaller font
-      height: 40, // reduce height
                 height: "10%",
                 "& .MuiSvgIcon-root": {
                   color: "white",
@@ -510,7 +507,6 @@ const handleSubmit = async () => {
               sx: {
                 color: textColor,
           fontSize: "0.85rem", // smaller font
-      height: 40, // reduce height
                 "& .MuiSvgIcon-root": {
                   color: "white",
                 },

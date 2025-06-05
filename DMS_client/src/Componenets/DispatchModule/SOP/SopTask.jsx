@@ -20,8 +20,10 @@ import {
   AddCircleOutline,
   CheckCircle,
 } from "@mui/icons-material";
+import CloseIcon from "@mui/icons-material/Close";
 import { styled } from "@mui/material/styles";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import TextSnippetIcon from "@mui/icons-material/TextSnippet";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import { useLocation } from "react-router-dom";
 import { useState } from "react";
@@ -29,7 +31,7 @@ import { useRef } from "react";
 import { useEffect } from "react";
 import { tasks } from "./dummydata";
 import { Tooltip } from "@mui/material";
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from "react-router-dom";
 import Snackbar from "@mui/material/Snackbar";
 import Alert from "@mui/material/Alert";
 import CustomPagination from "../../../common/CustomPagination";
@@ -93,6 +95,7 @@ const Alerts = [
   "Rain",
   "Time",
   "Added By",
+  "Actions",
 ];
 
 const DispatchHeaders = [
@@ -115,6 +118,11 @@ function SopTask({
   setIncidentId, // Default to false if not provided
 }) {
   const socketUrl = import.meta.env.VITE_SOCKET_API_KEY;
+  const AccessToken = localStorage.getItem("access_token");
+  const {
+      newToken
+    ,
+    } = useAuth();
   const location = useLocation();
   const [alerts, setAlerts] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
@@ -134,7 +142,6 @@ function SopTask({
   const dispatchListdata = dataList.slice(startIndex, endIndex);
   const { setSelectedIncidentFromSop, setDisasterIdFromSop } = useAuth();
 
-
   window.addEventListener("storage", (e) => {
     if (e.key === "logout") {
       location.href = "/login";
@@ -143,7 +150,7 @@ function SopTask({
   useEffect(() => {
     let socket;
     const timer = setTimeout(() => {
-      socket = new WebSocket(`${socketUrl}/ws/weather_alerts_trigger2`);
+      socket = new WebSocket(`${socketUrl}/ws/weather_alerts_trigger2?token=${AccessToken || newToken}`);
 
       socket.onopen = () => {
         console.log("WebSocket connected");
@@ -189,6 +196,17 @@ function SopTask({
     setViewmode("incident"); // Reset view mode to incident
   };
 
+
+
+  const filteredDispatchList = dispatchListdata.filter((item) => {
+  const searchLower = searchTerm.toLowerCase();
+  return (
+    item.incident_id?.toString().toLowerCase().includes(searchLower) ||
+    item.disaster_name?.toLowerCase().includes(searchLower) ||
+    item.inc_added_by?.toLowerCase().includes(searchLower) ||
+    item.inc_type?.toString().includes(searchLower)
+  );
+});
   // const handleForward = () => {
   //   setFlag(1);
   //   setSelectedIncident(); // Clear selected incident
@@ -208,7 +226,7 @@ function SopTask({
       elevation={3}
       sx={{ padding: 2, borderRadius: 3, backgroundColor: bgColor }}
     >
-      <Box sx={{ display: "flex", alignItems: "center", gap: 2, pb: 2 }}>
+      <Box sx={{ display: "flex", alignItems: "center", gap: 2, pb: 2 ,}}>
         {/* Back Button */}
         {flag === 1 && (
           <Tooltip title="Go Back to Alert Tasks">
@@ -410,23 +428,50 @@ function SopTask({
                     >
                       {item.alert_datetime
                         ? new Date(item.alert_datetime).toLocaleString(
-                          "en-US",
-                          {
-                            day: "2-digit",
-                            month: "long",
-                            year: "numeric",
-                            hour: "numeric",
-                            minute: "2-digit",
-                            hour12: true,
-                          }
-                        )
+                            "en-US",
+                            {
+                              day: "2-digit",
+                              month: "long",
+                              year: "numeric",
+                              hour: "numeric",
+                              minute: "2-digit",
+                              hour12: true,
+                            }
+                          )
                         : "N/A"}
                     </Typography>
                   </StyledCardContent>
                   <StyledCardContent sx={{ flex: 1, justifyContent: "center" }}>
                     <Typography variant="subtitle2">{item.added_by}</Typography>
                   </StyledCardContent>
+                  <StyledCardContent
+                    sx={{
+                      flex: 1,
+                      justifyContent: "center",
+                      display: "flex",
+                      alignItems: "center",
+                    }}
+                  >
+                    <Tooltip title="Cancel">
+                      <IconButton
+                        size="large"
+                        color="error"
+                        onClick={() => {
+                          console.log("Cancel clicked for", item);
+                          setSelectedIncident(item.pk_id);
 
+                        }}
+                        sx={{
+                          "&:hover": {
+                            backgroundColor: "rgba(255, 0, 0, 0.1)",
+                          },
+                        }}
+                        aria-label="cancel"
+                      >
+                        <CloseIcon fontSize="small" />
+                      </IconButton>
+                    </Tooltip>
+                  </StyledCardContent>
                 </EnquiryCardBody>
               ))
             )}
@@ -457,14 +502,14 @@ function SopTask({
                   </EnquiryCard>
 
                   {/* Body Rows */}
-                  {dispatchListdata.length === 0 ? (
+                  {filteredDispatchList.length === 0 ? (
                     <Box p={2} width="100%">
                       <Typography align="center" color="textSecondary">
                         No tasks available.
                       </Typography>
                     </Box>
                   ) : (
-                    dispatchListdata.map((item) => (
+                    filteredDispatchList.map((item) => (
                       <EnquiryCardBody
                         key={item.incident_id}
                         alertType={item.inc_type}
@@ -485,16 +530,16 @@ function SopTask({
                           <Typography variant="subtitle2">
                             {item.inc_added_date
                               ? new Date(item.inc_added_date).toLocaleString(
-                                "en-US",
-                                {
-                                  day: "2-digit",
-                                  month: "long",
-                                  year: "numeric",
-                                  hour: "numeric",
-                                  minute: "2-digit",
-                                  hour12: true,
-                                }
-                              )
+                                  "en-US",
+                                  {
+                                    day: "2-digit",
+                                    month: "long",
+                                    year: "numeric",
+                                    hour: "numeric",
+                                    minute: "2-digit",
+                                    hour12: true,
+                                  }
+                                )
                               : "N/A"}
                           </Typography>
                         </StyledCardContent>
@@ -561,15 +606,13 @@ function SopTask({
                             <IconButton
                               onClick={() => {
                                 setSelectedIncident(item);
-                                setIncidentId(item.inc_id);
-                                setSelectedIncidentFromSop(item);
-                                setDisasterIdFromSop(item.disaster_name);
                                 setFlag(0);
                                 setViewmode("closure");
                               }}
+                              size="large"
                             >
-                              <CheckCircle
-                                sx={{ color: "#4caf50", fontSize: 28 }}
+                              <TextSnippetIcon
+                                sx={{ color: "#4caf50", fontSize: 20 }}
                               />
                             </IconButton>
                           </Tooltip>
@@ -597,7 +640,7 @@ function SopTask({
             borderColor={borderColor}
             bgColor={bgColor}
             inputBgColor={darkMode ? "#1e293b" : "#fff"}
-            rowsPerPageOptions={[3, 5, 10]}
+            rowsPerPageOptions={[3, 10, 20,50]}
           />
         </Box>
       ) : null}
