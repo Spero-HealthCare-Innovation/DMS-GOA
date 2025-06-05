@@ -329,8 +329,8 @@ class UserLoginView(APIView):
                 if emp.emp_is_deleted != False:
                     return Response({'msg':'Login access denied. Please check your permissions or reach out to support for help.'},status=status.HTTP_401_UNAUTHORIZED)
                 if emp.emp_is_login is False: 
-                    # emp.emp_is_login = True
-                    # emp.save()
+                    emp.emp_is_login = True
+                    emp.save()
                     token = get_tokens_for_user(user)
                     return Response({'token':token,'msg':'Logged in Successfully'},status=status.HTTP_200_OK)
                 else:
@@ -576,10 +576,17 @@ class DMS_Alert_idwise_get_api(APIView):
     def get(self,request):
         print("request user-- ",request.user)
         alert_id = request.GET.get('id')
-        alert_obj = Weather_alerts.objects.get(pk_id=alert_id)
-        alert_obj.triger_status = 2
-        alert_obj.modified_by = str(request.user)
-        alert_obj.save()
+        status = request.GET.get('status')
+        if alert_id and status:
+            alert_obj = Weather_alerts.objects.get(pk_id=alert_id)
+            alert_obj.triger_status = 1
+            alert_obj.modified_by = str(request.user)
+            alert_obj.save()
+        else:
+            alert_obj = Weather_alerts.objects.get(pk_id=alert_id)
+            alert_obj.triger_status = 2
+            alert_obj.modified_by = str(request.user)
+            alert_obj.save()
         serializers = WeatherAlertSerializer(alert_obj,many=False)
         return Response(serializers.data,status=status.HTTP_200_OK)
     
