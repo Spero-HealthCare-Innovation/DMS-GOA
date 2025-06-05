@@ -26,6 +26,8 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
+  TableCell,
+  CircularProgress,
 } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import SearchIcon from "@mui/icons-material/Search";
@@ -128,6 +130,7 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
   const [snackbarmsgAddDept, setSnackbarMessageAdded] = useState("");
   const [snackbarupdate, setSnackbarMessageUpdated] = useState("");
   const [filteredResults, setFilteredResults] = useState([]);
+  const [loading, setLoading] = useState(false);
 
   const TableDataColor = darkMode
     ? "rgba(0, 0, 0, 0.04)"
@@ -362,6 +365,7 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
 
   const fetchDepartments = async () => {
     try {
+      setLoading(true);
       const response = await fetch(`${port}/admin_web/Department_get/`, {
         headers: {
           Authorization: `Bearer ${token || newToken}`,
@@ -382,6 +386,8 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
       }
     } catch (error) {
       console.error("Error fetching departments:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -698,7 +704,7 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
                     >
                       <StyledCardContent
                         sx={{
-                          flex: 0.3,
+                          flex: 0.9,
                           borderRight: "1px solid black",
                           justifyContent: "center",
                         }}
@@ -783,12 +789,12 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
                 </TableHead>
 
                 <TableBody>
-                  {paginatedData.length === 0 ? (
-                    <Box p={2}>
-                      <Typography align="center" color="textSecondary">
-                        No tasks available.
-                      </Typography>
-                    </Box>
+                  {loading ? (
+                    <TableRow>
+                      <TableCell colSpan={6} align="center">
+                        <CircularProgress size={30} sx={{ color: "#5FECC8" }} />
+                      </TableCell>
+                    </TableRow>
                   ) : (
                     paginatedData
                       // .slice((page - 1) * rowsPerPage, page * rowsPerPage)
@@ -1072,7 +1078,7 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
                 <Box
                   onClick={() =>
                     page <
-                    Math.ceil(filteredDepartments.length / rowsPerPage) &&
+                      Math.ceil(filteredDepartments.length / rowsPerPage) &&
                     setPage(page + 1)
                   }
                   sx={{
