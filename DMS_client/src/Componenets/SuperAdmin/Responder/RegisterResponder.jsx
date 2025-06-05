@@ -104,6 +104,9 @@ function RegisterResponder({ darkMode }) {
     const [responderTableData, setResponderTableData] = useState([]);
     const [snackbarOpen, setSnackbarOpen] = useState(false);
     const [snackbarMessage, setSnackbarMessage] = useState('');
+    // Edit
+    const [responderID, setResponderID] = useState(null);
+    const [isEditMode, setIsEditMode] = useState(false);
 
     const getResponderData = async () => {
         try {
@@ -197,6 +200,43 @@ function RegisterResponder({ darkMode }) {
         }
     };
 
+    const handleUpdate = async () => {
+        const payload = {
+            res_id: selectedResponders,
+            dis_id: selectedDisaster,
+            sop_added_by: userName,
+            sop_modified_by: userName
+        };
+
+        try {
+            const response = await fetch(`${port}/admin_web/disaster_responder_put/${responderID}/`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${token || newToken}`,
+                },
+                body: JSON.stringify(payload),
+            });
+
+            if (response.status === 200) {
+                setSnackbarMessage("Responder Data Updated Successfully");
+                setSnackbarOpen(true);
+                await fetchResponder();
+            }
+            else if (response.status === 409) {
+                setSnackbarMessage("SOP already exists with this disaster type");
+                setSnackbarOpen(true);
+                // setDescription("");
+                // setSelectedDisaster("");
+            } else if (response.status === 500) {
+                setSnackbarMessage("Internal Server Error");
+                setSnackbarOpen(true);
+            }
+        } catch (error) {
+            console.error('Update error:', error);
+        }
+    };
+
     /// POP UP 
     const [anchorEl, setAnchorEl] = useState(null);
     const [selectedItem, setSelectedItem] = useState(null);
@@ -213,15 +253,12 @@ function RegisterResponder({ darkMode }) {
     const open = Boolean(anchorEl);
     const id = open ? 'simple-popover' : undefined;
 
-    // Edit
-    const [responderID, setResponderID] = useState(null);
-
     const handleEdit = async (selectedItem) => {
         const Id = selectedItem.pk_id;
         console.log(Id, "idddddddddd");
 
         setResponderID(Id);
-        // setIsEditMode(true);
+        setIsEditMode(true);
 
         try {
             const res = await axios.get(
@@ -241,6 +278,28 @@ function RegisterResponder({ darkMode }) {
             console.error("Error fetching department data:", err);
         }
     };
+
+    const handleDelete = async (selectedItem) => {
+        try {
+            const res = await axios.delete(
+                `${port}/admin_web/Disaster_Responder_delete/${selectedItem.pk_id}/`,
+                {
+                    headers: {
+                        Authorization: `Bearer ${token || newToken}`,
+                    },
+                }
+            );
+
+            console.log("Delete success:", res.data);
+            setSnackbarMessage("Responder Data Deleted Successfully");
+            await fetchResponder();
+            setSnackbarOpen(true);
+            handleClose();
+        } catch (err) {
+            console.error("Error deleting department:", err);
+        }
+    };
+
 
     return (
         <div style={{ marginLeft: "3.5rem" }}>
@@ -451,7 +510,7 @@ function RegisterResponder({ darkMode }) {
                                 variant="outlined"
                                 color="error"
                                 startIcon={<DeleteOutline />}
-                            // onClick={() => handleDelete(selectedItem)}
+                                onClick={() => handleDelete(selectedItem)}
                             // onClick={() => {
                             //     setDeleteDepId(selectedItem.dep_id);
                             //     setOpenDeleteDialog(true);
@@ -634,9 +693,9 @@ function RegisterResponder({ darkMode }) {
                                         color: "white !important",
                                     },
                                 }}
-                                onClick={handleSubmit}
+                                onClick={isEditMode ? handleUpdate : handleSubmit}
                             >
-                                Submit
+                                {isEditMode ? 'Update' : 'Submit'}
                             </Button>
                         </Box>
                     </Paper>
