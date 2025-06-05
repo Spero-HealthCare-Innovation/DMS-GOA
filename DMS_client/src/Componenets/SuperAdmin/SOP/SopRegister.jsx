@@ -184,6 +184,11 @@ function SopRegister({ darkMode }) {
         fetchSop();
     }, [port, token, newToken]);
 
+    const handleAddForm = () => {
+        setSelectedDisaster("");
+        setDescription("")
+    }
+
     const handleEdit = async (selectedItem) => {
         const Id = selectedItem.sop_id;
         setSopId(Id);
@@ -568,22 +573,49 @@ function SopRegister({ darkMode }) {
                     <Paper elevation={3} sx={{ padding: 2, borderRadius: 3, backgroundColor: bgColor, mt: 1, mb: 5 }}>
                         <Box sx={{ mb: 2 }}>
                             <Grid container spacing={2}>
-                                <Grid item xs={6} sm={6}>
+                                <Grid item xs={12} sm={12}>
+                                    {isEditMode && (
+                                        <Box
+                                            sx={{
+                                                display: "flex",
+                                                justifyContent: "flex-end",
+                                                cursor: "pointer",
+                                            }}
+                                            onClick={handleAddForm}
+                                        >
+                                            <Button
+                                                variant="contained"
+                                                sx={{
+                                                    mb: 1,
+                                                    width: "30%",
+                                                    backgroundColor: "#00f0c0",
+                                                    color: "black",
+                                                    fontWeight: "bold",
+                                                    borderRadius: "12px",
+                                                    cursor: "pointer",
+                                                }}
+                                            >
+                                                + Add SOP
+                                            </Button>
+                                        </Box>
+                                    )}
+                                </Grid>
+
+                                <Grid item xs={12} sm={6}>
                                     <TextField
                                         select
                                         fullWidth
                                         size="small"
                                         label="Disaster Type"
                                         variant="outlined"
-                                        value={selectedDisaster}
+                                        value={selectedDisaster || ""}
                                         onChange={(e) => setSelectedDisaster(e.target.value)}
-                                        InputLabelProps={{ shrink: true }}
                                         SelectProps={{
                                             MenuProps: {
                                                 PaperProps: {
                                                     style: {
-                                                        maxHeight: 200,
-                                                        overflow: 'auto',
+                                                        maxHeight: 250,
+                                                        width: '250'
                                                     },
                                                 },
                                             },
@@ -611,26 +643,24 @@ function SopRegister({ darkMode }) {
                         </Box>
 
                         <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, mt: 3, mb: 1 }}>
-                            <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, mt: 3, mb: 1 }}>
-                                <Button
-                                    variant="contained"
-                                    sx={{
-                                        mt: 2,
-                                        width: "40%",
-                                        backgroundColor: "#00f0c0",
-                                        color: "black",
-                                        fontWeight: "bold",
-                                        borderRadius: "12px",
-                                        "&:hover": {
-                                            backgroundColor: bgColor,
-                                            color: "white !important",
-                                        },
-                                    }}
-                                    onClick={isEditMode ? handleUpdate : handleSubmit}
-                                >
-                                    {isEditMode ? 'Update' : 'Submit'}
-                                </Button>
-                            </Box>
+                            <Button
+                                variant="contained"
+                                sx={{
+                                    mt: 2,
+                                    width: "40%",
+                                    backgroundColor: "#00f0c0",
+                                    color: "black",
+                                    fontWeight: "bold",
+                                    borderRadius: "12px",
+                                    "&:hover": {
+                                        backgroundColor: bgColor,
+                                        color: "white !important",
+                                    },
+                                }}
+                                onClick={isEditMode ? handleUpdate : handleSubmit}
+                            >
+                                {isEditMode ? 'Update' : 'Submit'}
+                            </Button>
                         </Box>
                     </Paper>
                 </Grid>

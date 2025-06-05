@@ -301,6 +301,21 @@ function RegisterResponder({ darkMode }) {
     };
 
 
+    const [searchQuery, setSearchQuery] = useState("");
+
+    const filteredData = responderTableData.filter((row) => {
+        const disasterMatch = row.disaster_name?.toLowerCase().includes(searchQuery);
+        const responderMatch = row.res_id.some((responder) =>
+            responder.responder_name?.toLowerCase().includes(searchQuery)
+        );
+        return disasterMatch || responderMatch;
+    });
+
+    const paginatedData = filteredData.slice(
+        (page - 1) * rowsPerPage,
+        page * rowsPerPage
+    );
+
     return (
         <div style={{ marginLeft: "3.5rem" }}>
             <Box sx={{ display: "flex", alignItems: "center", gap: 2, pb: 2, mt: 3 }}>
@@ -328,6 +343,8 @@ function RegisterResponder({ darkMode }) {
                     variant="outlined"
                     size="small"
                     placeholder="Search"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value.toLowerCase())}
                     InputProps={{
                         startAdornment: (
                             <InputAdornment position="start">
@@ -423,7 +440,7 @@ function RegisterResponder({ darkMode }) {
                                 </TableHead>
 
                                 <TableBody>
-                                    {responderTableData.map((row, index) => (
+                                    {paginatedData.map((row, index) => (
                                         <EnquiryCardBody
                                             key={row.pk_id}
                                             sx={{
@@ -520,13 +537,7 @@ function RegisterResponder({ darkMode }) {
                             </Button>
                         </Popover>
 
-                        <Box
-                            display="flex"
-                            justifyContent="space-between"
-                            alignItems="center"
-                            mt={2}
-                            px={1}
-                        >
+                        <Box display="flex" justifyContent="space-between" alignItems="center" mt={2} px={1}>
                             <Box display="flex" alignItems="center" gap={1}>
                                 <Typography variant="body2" sx={{ color: textColor }}>
                                     Records per page:
@@ -583,22 +594,24 @@ function RegisterResponder({ darkMode }) {
                                 >
                                     &#8249;
                                 </Box>
-                                {/* <Box>{page}/ {Math.ceil(groups.length / rowsPerPage)}</Box> */}
-                                {/* <Box
+                                <Box>
+                                    {page} / {Math.ceil(filteredData.length / rowsPerPage)}
+                                </Box>
+                                <Box
                                     onClick={() =>
-                                        page < Math.ceil(groups.length / rowsPerPage) &&
+                                        page < Math.ceil(responderTableData.length / rowsPerPage) &&
                                         setPage(page + 1)
                                     }
                                     sx={{
                                         cursor:
-                                            page < Math.ceil(groups.length / rowsPerPage)
+                                            page < Math.ceil(responderTableData.length / rowsPerPage)
                                                 ? "pointer"
                                                 : "not-allowed",
                                         userSelect: "none",
                                     }}
                                 >
                                     &#8250;
-                                </Box> */}
+                                </Box>
                             </Box>
                         </Box>
                     </Paper>
@@ -608,6 +621,37 @@ function RegisterResponder({ darkMode }) {
                     <Paper elevation={3} sx={{ padding: 2, borderRadius: 3, backgroundColor: bgColor, mt: 1, mb: 5 }}>
                         <Box sx={{ display: 'flex', gap: 1, mb: 2 }}>
                             <Grid container spacing={2}>
+                                <Grid item xs={12} sm={12}>
+                                    {isEditMode && (
+                                        <Box
+                                            sx={{
+                                                display: "flex",
+                                                justifyContent: "flex-end",
+                                                cursor: "pointer",
+                                            }}
+                                        >
+                                            <Button
+                                                variant="contained"
+                                                sx={{
+                                                    mb: 1,
+                                                    width: "40%",
+                                                    backgroundColor: "#00f0c0",
+                                                    color: "black",
+                                                    fontWeight: "bold",
+                                                    borderRadius: "12px",
+                                                    cursor: "pointer",
+                                                }}
+                                                onClick={() => {
+                                                    setSelectedDisaster("");
+                                                    setSelectedResponders([]);
+                                                }}
+                                            >
+                                                + Add Responder
+                                            </Button>
+                                        </Box>
+                                    )}
+                                </Grid>
+
                                 <Grid item xs={12} sm={6}>
                                     <TextField
                                         select
