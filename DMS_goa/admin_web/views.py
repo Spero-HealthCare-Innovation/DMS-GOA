@@ -592,19 +592,23 @@ class DMS_Alert_idwise_get_api(APIView):
     def get(self,request):
         print("request user-- ",request.user)
         alert_id = request.GET.get('id')
-        status = request.GET.get('status')
-        if alert_id and status:
+        st = request.GET.get('st')
+        if alert_id and st == 1:
+            print("1")
             alert_obj = Weather_alerts.objects.get(pk_id=alert_id)
             alert_obj.triger_status = 1
             alert_obj.modified_by = str(request.user)
             alert_obj.save()
+            print("done")
         else:
+            print("2")
             alert_obj = Weather_alerts.objects.get(pk_id=alert_id)
             alert_obj.triger_status = 2
             alert_obj.modified_by = str(request.user)
             alert_obj.save()
+            print("done 2")
         serializers = WeatherAlertSerializer(alert_obj,many=False)
-        return Response(serializers.data,status=status.HTTP_200_OK)
+        return Response(serializers.data, status=status.HTTP_200_OK)
     
 
 class DMS_Incident_Post_api(APIView):
