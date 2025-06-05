@@ -36,6 +36,7 @@ function Sop({ darkMode, setDarkMode }) {
   const [flag, setFlag] = useState(flagFromState);
   const [selectedIncident, setSelectedIncident] = useState(null);
   const [incidentDetails, setIncidentDetails] = useState(null);
+  console.log(" incidentDetails", incidentDetails);
   const [incidentId, setIncidentId] = useState(null);
   // const [disasterIdFromSop, setDisasterIdFromSop] = useState(null);
 

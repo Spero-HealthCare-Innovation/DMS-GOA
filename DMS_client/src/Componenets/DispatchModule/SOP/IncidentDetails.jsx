@@ -20,7 +20,8 @@ function IncidentDetails({
   setFlag,
   selectedIncident,
   responderScope,
-fetchDispatchList
+  fetchDispatchList,
+  incidentDetails,
 }) {
   window.addEventListener("storage", (e) => {
     if (e.key === "logout") {
@@ -28,25 +29,24 @@ fetchDispatchList
     }
   });
 
-  const userName = localStorage.getItem('userId');
+  const userName = localStorage.getItem("userId");
 
-  const { disaterid } = useAuth();
+  const { disaterid, setResponderScopeForDispatch, responderScopeForDispatch } =
+    useAuth();
 
+  const incident = incidentDetails?.incident_details?.[0] || {};
+  console.log("Incident Details:", incident);
+  const respondersList = incidentDetails?.responders || [];
 
   const [selectedResponders, setSelectedResponders] = useState(
     responderScope?.responder_scope?.map((item) => item.pk_id) || []
   );
 
-
-  
   // Define colors and styles based on dark mode
   const labelColor = darkMode ? "#5FECC8" : "#1976d2";
   const textColor = darkMode ? "#ffffff" : "#000000";
   const borderColor = darkMode ? "#7F7F7F" : "#ccc";
   const fontFamily = "Roboto, sans-serif";
-
-
-
 
   // Style for the box containing label and value
   // This can be customized further based on your design requirements
@@ -55,8 +55,6 @@ fetchDispatchList
     pb: 1.5,
     borderBottom: `1px solid ${borderColor}`,
   };
-
-
 
   // Function to render text with label and value
   const renderText = (label, value) => (
@@ -110,14 +108,18 @@ fetchDispatchList
               </>
             ) : (
               <>
-                {renderText("Incident ID", selectedIncident?.IncidentId)}
-                {renderText("Incident Type", selectedIncident?.disasterType)}
-                {renderText("Alert Type", selectedIncident?.disasterType)}
+                {renderText("Incident ID", incident?.incident_id)}
+                {renderText(
+                  "Incident Type",
+                  incident?.inc_type === 1 ? "Emergency" : "Non-Emergency"
+                )}
+                {renderText("Alert Type", incident?.alert_type || "N/A")}
               </>
             )}
           </Grid>
 
           {/* Middle Column */}
+
           <Grid
             item
             xs={12}
@@ -130,6 +132,7 @@ fetchDispatchList
           >
             {flag === 1 ? (
               <>
+                {/* Different UI    for alerts if flag !== 1 (optional) or repeat same */}
                 <Box sx={boxStyle}>
                   <Typography
                     variant="subtitle2"
@@ -139,7 +142,7 @@ fetchDispatchList
                   </Typography>
                   {responderScope?.sop_responses?.length > 0 ? (
                     <Typography variant="subtitle2" sx={{ fontFamily }}>
-                      {responderScope.sop_responses[0].sop_description}
+                      {incidentDetails.sop_responses[0].sop_description}
                     </Typography>
                   ) : (
                     <Box display="flex" alignItems="center" gap={1} mt={1}>
@@ -151,7 +154,7 @@ fetchDispatchList
                   )}
                 </Box>
 
-                <Box>
+              <Box>
                   <Typography
                     variant="subtitle2"
                     sx={{ color: labelColor, fontWeight: 500, fontFamily }}
@@ -210,7 +213,7 @@ fetchDispatchList
               </>
             ) : (
               <>
-                {/* Different UI if flag !== 1 (optional) or repeat same */}
+                {/* Different UI    for dispatch if flag !== 1 (optional) or repeat same */}
                 <Box sx={boxStyle}>
                   <Typography
                     variant="subtitle2"
@@ -218,11 +221,21 @@ fetchDispatchList
                   >
                     Response Procedure
                   </Typography>
+
                   {selectedIncident ? (
-                    <Typography variant="subtitle2" sx={{ fontFamily }}>
-                      {selectedIncident.responseProcedure ||
-                        "No response procedure available."}
-                    </Typography>
+                    responderScope?.sop_responses?.length > 0 &&
+                    responderScope.sop_responses[0]?.sop_description ? (
+                      <Typography variant="subtitle2" sx={{ fontFamily }}>
+                        {responderScope.sop_responses[0].sop_description}
+                      </Typography>
+                    ) : (
+                      <Box display="flex" alignItems="center" gap={1} mt={0.5}>
+                        <InfoOutlinedIcon color="disabled" fontSize="small" />
+                        <Typography variant="subtitle2" sx={{ fontFamily }}>
+                          No response procedure available.
+                        </Typography>
+                      </Box>
+                    )
                   ) : (
                     <Skeleton variant="text" width="60%" height={24} />
                   )}
@@ -233,34 +246,61 @@ fetchDispatchList
                     variant="subtitle2"
                     sx={{ color: labelColor, fontWeight: 500, fontFamily }}
                   >
-                    Responding Units
+                    Responder Scope
                   </Typography>
+
                   {selectedIncident ? (
-                    <Stack spacing={1} mt={1}>
-                      <Box display="flex" flexWrap="wrap" gap={1}>
-                        {["Health", "Rescue", "NGOs", "Local Bodies"].map(
-                          (label) => (
-                            <FormControlLabel
-                              key={label}
-                              control={
-                                <Checkbox
-                                  defaultChecked
-                                  sx={{ color: labelColor }}
-                                />
-                              }
-                              label={
-                                <Typography
-                                  variant="subtitle2"
-                                  sx={{ fontFamily }}
-                                >
-                                  {label}
-                                </Typography>
-                              }
-                            />
-                          )
-                        )}
+                    Array.isArray(incidentDetails?.["responders scope"]) &&
+                    incidentDetails["responders scope"].length > 0 ? (
+                      <Stack spacing={1} mt={1}>
+                        <Box display="flex" flexWrap="wrap" gap={1}>
+                          {incidentDetails["responders scope"].map(
+                            ({ responder_id, responder_name }) => (
+                              <FormControlLabel
+                                key={responder_id}
+                                control={
+                                  <Checkbox
+                                    checked={selectedResponders.includes(
+                                      responder_id
+                                    )}
+                                    onChange={(e) => {
+                                      if (e.target.checked) {
+                                        setSelectedResponders((prev) => [
+                                          ...prev,
+                                          responder_id,
+                                        ]);
+                                      } else {
+                                        setSelectedResponders((prev) =>
+                                          prev.filter(
+                                            (id) => id !== responder_id
+                                          )
+                                        );
+                                      }
+                                    }}
+                                    sx={{ color: labelColor }}
+                                  />
+                                }
+                                label={
+                                  <Typography
+                                    variant="subtitle2"
+                                    sx={{ fontFamily }}
+                                  >
+                                    {responder_name}
+                                  </Typography>
+                                }
+                              />
+                            )
+                          )}
+                        </Box>
+                      </Stack>
+                    ) : (
+                      <Box display="flex" alignItems="center" gap={1} mt={1}>
+                        <InfoOutlinedIcon color="disabled" />
+                        <Typography variant="subtitle2" sx={{ fontFamily }}>
+                          Responder scope data not available.
+                        </Typography>
                       </Box>
-                    </Stack>
+                    )
                   ) : (
                     <Skeleton variant="rectangular" height={60} width="100%" />
                   )}
