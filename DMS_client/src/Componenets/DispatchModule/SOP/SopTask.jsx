@@ -13,6 +13,10 @@ import {
   Select,
   MenuItem,
   Chip,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Dialog,
 } from "@mui/material";
 import {
   Search,
@@ -37,6 +41,9 @@ import Alert from "@mui/material/Alert";
 import CustomPagination from "../../../common/CustomPagination";
 import { Add } from "@mui/icons-material";
 import { useAuth } from "../../../Context/ContextAPI";
+import IncidentDetails from "./IncidentDetails";
+import axios from "axios";
+import { useSnackbar } from "../../../hooks/useSnackbar";
 
 const EnquiryCard = styled("div")(() => ({
   display: "flex",
@@ -115,14 +122,14 @@ function SopTask({
   setViewmode,
   dispatchList,
   loading = false,
-  setIncidentId, // Default to false if not provided
+  setIncidentId,
+  incidentId,
+  fetchDispatchList,
 }) {
+  const port = import.meta.env.VITE_APP_API_KEY;
   const socketUrl = import.meta.env.VITE_SOCKET_API_KEY;
   const AccessToken = localStorage.getItem("access_token");
-  const {
-      newToken
-    ,
-    } = useAuth();
+  const { newToken } = useAuth();
   const location = useLocation();
   const [alerts, setAlerts] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
@@ -130,7 +137,24 @@ function SopTask({
   const [snackbarMsg, setSnackbarMsg] = useState("");
   const [page, setPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(3);
+  const [openCancelDialog, setOpenCancelDialog] = useState(false);
+  const [selectedAlert, setSelectedAlert] = useState(null);
+
+   const {
+    snackbarOpen,
+    snackbarMessage,
+    snackbarSeverity,
+    showSnackbar,
+    closeSnackbar,
+  } = useSnackbar();
+
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: "",
+    severity: "success",
+  });
   const navigate = useNavigate();
+
   // Decide current list based on flag
   const dataList = flag === 1 ? alerts : dispatchList;
   // Calculate total pages
@@ -150,7 +174,11 @@ function SopTask({
   useEffect(() => {
     let socket;
     const timer = setTimeout(() => {
-      socket = new WebSocket(`${socketUrl}/ws/weather_alerts_trigger2?token=${AccessToken || newToken}`);
+      socket = new WebSocket(
+        `${socketUrl}/ws/weather_alerts_trigger2?token=${
+          AccessToken || newToken
+        }`
+      );
 
       socket.onopen = () => {
         console.log("WebSocket connected");
@@ -196,17 +224,15 @@ function SopTask({
     setViewmode("incident"); // Reset view mode to incident
   };
 
-
-
   const filteredDispatchList = dispatchListdata.filter((item) => {
-  const searchLower = searchTerm.toLowerCase();
-  return (
-    item.incident_id?.toString().toLowerCase().includes(searchLower) ||
-    item.disaster_name?.toLowerCase().includes(searchLower) ||
-    item.inc_added_by?.toLowerCase().includes(searchLower) ||
-    item.inc_type?.toString().includes(searchLower)
-  );
-});
+    const searchLower = searchTerm.toLowerCase();
+    return (
+      item.incident_id?.toString().toLowerCase().includes(searchLower) ||
+      item.disaster_name?.toLowerCase().includes(searchLower) ||
+      item.inc_added_by?.toLowerCase().includes(searchLower) ||
+      item.inc_type?.toString().includes(searchLower)
+    );
+  });
   // const handleForward = () => {
   //   setFlag(1);
   //   setSelectedIncident(); // Clear selected incident
@@ -221,12 +247,42 @@ function SopTask({
     navigate("/create-incident", { state: { startData: "start" } });
   };
 
+ 
+const handleCancelTrigger = async () => {
+  const payload = {
+    id: selectedAlert,
+  };
+
+  try {
+    const response = await axios.post(
+      `${port}/admin_web/cancel-trigger/`,
+      payload,
+      {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${AccessToken || newToken}`,
+        },
+      }
+    );
+
+    showSnackbar("Alert cancelled successfully!", "success");
+    setOpenCancelDialog(false);
+    setFlag(0);
+    fetchDispatchList();
+
+  } catch (err) {
+    console.error(err);
+    showSnackbar("Failed to cancel alert!", "error");
+  }
+};
+
+
   return (
     <Paper
       elevation={3}
       sx={{ padding: 2, borderRadius: 3, backgroundColor: bgColor }}
     >
-      <Box sx={{ display: "flex", alignItems: "center", gap: 2, pb: 2 ,}}>
+      <Box sx={{ display: "flex", alignItems: "center", gap: 2, pb: 2 }}>
         {/* Back Button */}
         {flag === 1 && (
           <Tooltip title="Go Back to Alert Tasks">
@@ -452,14 +508,14 @@ function SopTask({
                       alignItems: "center",
                     }}
                   >
-                    <Tooltip title="Cancel">
+                    <Tooltip title="Cancel alert">
                       <IconButton
                         size="large"
                         color="error"
                         onClick={() => {
                           console.log("Cancel clicked for", item);
-                          setSelectedIncident(item.pk_id);
-
+                          setSelectedAlert(item.pk_id);
+                          setOpenCancelDialog(true);
                         }}
                         sx={{
                           "&:hover": {
@@ -640,7 +696,7 @@ function SopTask({
             borderColor={borderColor}
             bgColor={bgColor}
             inputBgColor={darkMode ? "#1e293b" : "#fff"}
-            rowsPerPageOptions={[3, 10, 20,50]}
+            rowsPerPageOptions={[3, 10, 20, 50]}
           />
         </Box>
       ) : null}
@@ -667,6 +723,48 @@ function SopTask({
           {snackbarMsg}
         </Alert>
       </Snackbar>
+
+
+<Snackbar
+        open={snackbarOpen}
+        autoHideDuration={3000}
+        onClose={closeSnackbar}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+      >
+        <Alert
+          elevation={6}
+          variant="filled"
+          onClose={closeSnackbar}
+          severity={snackbarSeverity}
+          sx={{ width: "100%", fontWeight: 500 }}
+        >
+          {snackbarMessage}
+        </Alert>
+      </Snackbar>
+
+{/* dilog for alert cancel? */}
+      <Dialog
+        open={openCancelDialog}
+        onClose={() => setOpenCancelDialog(false)}
+      >
+        <DialogTitle>Confirm Cancellation</DialogTitle>
+        <DialogContent>
+          <Typography>
+            Are you sure you want to cancel alert ID{" "}
+            <strong>{incidentId?.pk_id}</strong>?
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpenCancelDialog(false)}>No</Button>
+          <Button
+            onClick={handleCancelTrigger}
+            color="error"
+            variant="contained"
+          >
+            Yes, Cancel
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Paper>
   );
 }

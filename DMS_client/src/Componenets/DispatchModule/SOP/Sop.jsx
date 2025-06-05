@@ -40,6 +40,7 @@ function Sop({ darkMode, setDarkMode }) {
   const [incidentId, setIncidentId] = useState(null);
   // const [disasterIdFromSop, setDisasterIdFromSop] = useState(null);
     const { setSelectedIncidentFromSop } = useAuth();
+    
 
   
   const [dispatchList, setDispatchList] = useState([]);
@@ -204,6 +205,9 @@ function Sop({ darkMode, setDarkMode }) {
     }
   }, [incidentId]);
 
+
+
+
   return (
     <Box
       sx={{
@@ -230,6 +234,8 @@ function Sop({ darkMode, setDarkMode }) {
             loading={loading}
             incidentId={incidentId}
             setIncidentId={setIncidentId}
+           incidentid={incidentId} 
+            fetchDispatchList={fetchDispatchList}// Pass the incidentId prop
           />
         </Grid>
 
