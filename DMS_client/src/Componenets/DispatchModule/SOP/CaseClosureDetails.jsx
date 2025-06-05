@@ -239,6 +239,19 @@ const handleSubmit = async () => {
   }
 };
 
+// Inside your component
+useEffect(() => {
+  if (submitStatus) {
+    const timer = setTimeout(() => {
+      // Clear the submitStatus after 5 seconds
+      setSubmitStatus(null);
+    }, 3000);
+
+    // Cleanup the timer if component unmounts or submitStatus changes before timeout
+    return () => clearTimeout(timer);
+  }
+}, [submitStatus]);
+
 
   const renderText = (label, value) => (
     <Box sx={{ pb: 1.5, mb: 1.5, borderBottom: `1px solid ${borderColor}` }}>
@@ -260,6 +273,20 @@ const handleSubmit = async () => {
 
   return (
     <>
+    {submitStatus && (
+              <Box sx={{
+                  width:"100%",
+      display: "flex",
+      alignItems:"center",
+      justifyContent: "center", // horizontal center
+      alignItems: "center",     // vertical center
+       height: "auto",           // let height adjust to content
+      margin: 0,                // no margin around Box
+      padding: 0,               // no padding around Box
+    }}>
+                <Alert severity={submitStatus.type} >{submitStatus.message}</Alert>
+              </Box>
+            )}
       <Typography
         variant="h6"
         sx={{
@@ -592,11 +619,7 @@ const handleSubmit = async () => {
               </Button>
             </Box>
 
-            {submitStatus && (
-              <Box mt={2}>
-                <Alert severity={submitStatus.type}>{submitStatus.message}</Alert>
-              </Box>
-            )}
+            
           </Grid>
         </Grid>
       </Paper>
