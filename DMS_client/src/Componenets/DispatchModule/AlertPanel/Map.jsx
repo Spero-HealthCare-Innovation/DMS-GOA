@@ -15,7 +15,7 @@ const customIcon = new L.Icon({
 
 const MapView = ({ data }) => {
   console.log('Data', data)
-  const position = [15.414965044599617, 74.0364962305364]; // Goa
+  const position = [15.414965044599617, 74.0364962305364]; // Default location of Goa
   const [stateData, setStateData] = useState();
   const [triggeredData, setTriggeredData] = useState();
   console.log("State", stateData)
