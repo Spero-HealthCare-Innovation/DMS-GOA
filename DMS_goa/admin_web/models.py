@@ -126,9 +126,9 @@ class DMS_Permission(models.Model):
 class DMS_Disaster_Type(models.Model):
     disaster_id = models.AutoField(primary_key=True)
     disaster_name = models.CharField(max_length=255)
-    disaster_rng_high = models.IntegerField(null=True, blank=True)
-    disaster_rng_medium = models.IntegerField(null=True, blank=True)
-    disaster_rng_low = models.IntegerField(null=True, blank=True)
+    disaster_rng_high = models.CharField(max_length=255,null=True, blank=True)
+    disaster_rng_medium = models.CharField(max_length=255,null=True, blank=True)
+    disaster_rng_low = models.CharField(max_length=255,null=True, blank=True)
     disaster_is_deleted = models.BooleanField(default=False)
     disaster_added_date = models.DateTimeField(auto_now=True,null=True, blank=True)
     disaster_added_by = models.CharField(max_length=255, null=True, blank=True)
