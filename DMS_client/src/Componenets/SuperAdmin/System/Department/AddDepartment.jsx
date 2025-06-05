@@ -822,18 +822,23 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
                             sx={{
                               flex: 2.4,
                               justifyContent: "center",
-                              ...fontsTableBody,
-                              display: "-webkit-box",
-                              WebkitLineClamp: 2,
-                              WebkitBoxOrient: "vertical",
-                              overflow: "hidden",
-                              textOverflow: "ellipsis",
+                              alignItems: "center",
+                              display: "flex",
+                              minWidth: 0,
                             }}
                           >
-                            <Typography variant="subtitle2">
+                            <Typography
+                              variant="subtitle2"
+                              sx={{
+                                overflow: "hidden",
+                                textOverflow: "ellipsis",
+                                whiteSpace: "nowrap", // or use line clamp if multiline allowed
+                              }}
+                            >
                               {item.dep_name}
                             </Typography>
                           </StyledCardContent>
+
                           {/* <StyledCardContent
                             sx={{
                               flex: 1.5,
@@ -1109,28 +1114,25 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
           >
             <Box
               display="flex"
-              justifyContent="space-between"
+              justifyContent={{ xs: "center", md: "flex-end" }}
               alignItems="center"
               mb={2}
+              flexWrap="wrap"
             >
-              {/* <Typography
-                sx={{ fontWeight: 500, fontSize: "18px", fontFamily: "Roboto" }}
-              >
-                Add User{" "}
-              </Typography> */}
               <Button
                 variant="contained"
                 startIcon={<AddCircleOutline />}
-                disabled={!isEditMode} // 👈 disables button if not in edit mode
-                onClick={handleAddNewDepartment} // 👉 add handler
+                disabled={!isEditMode}
+                onClick={handleAddNewDepartment}
                 sx={{
                   backgroundColor: "#5FECC8",
                   color: "#000",
                   fontWeight: 600,
                   fontFamily: "Roboto",
                   textTransform: "none",
-                  left: "16rem",
-
+                  px: 2,
+                  py: 1,
+                  fontSize: { xs: "0.75rem", sm: "0.875rem" },
                   "&:hover": {
                     backgroundColor: "#4ddbb6",
                   },
