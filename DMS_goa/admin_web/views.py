@@ -25,6 +25,7 @@ from django.utils.http import urlsafe_base64_encode
 from django.utils.encoding import force_bytes
 from django.core.mail import send_mail
 
+
 class DMS_department_post_api(APIView):
     def post(self,request):
         serializers=DMS_department_serializer(data=request.data)
@@ -973,3 +974,28 @@ class incident_get_Api(APIView):
             "responders scope": responder_details
         }
         return Response(data, status=status.HTTP_200_OK)
+
+
+
+#-----------------------------cancel Dispatch API ----------------------
+class UpdateTriggerStatusAPIView(APIView):
+    def post(self, request):
+        pk_id = request.data.get('id')
+
+        if not pk_id:
+            return Response({'status': False, 'message': 'ID is required.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            record = Weather_alerts.objects.get(pk_id=pk_id)
+        except Weather_alerts.DoesNotExist:
+            return Response({'status': False, 'message': 'Record not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+        if record.triger_status == 2:
+            record.triger_status = 1
+            record.save(update_fields=['triger_status'])
+            return Response({'status': True, 'message': f'Record with ID {pk_id} updated successfully.'}, status=status.HTTP_200_OK)
+        else:
+            return Response({
+                'status': False,
+                'message': f'Record with ID {pk_id} already has triger_status = {record.triger_status}.'
+            }, status=status.HTTP_200_OK)
