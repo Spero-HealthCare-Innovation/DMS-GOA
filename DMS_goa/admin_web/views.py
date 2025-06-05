@@ -910,7 +910,7 @@ class DMS_comment_Get_API(APIView):
 
 class dispatch_sop_Get_API(APIView):
     def get(self,request):
-        snippet = DMS_Incident.objects.all()
+        snippet = DMS_Incident.objects.all().order_by('-inc_added_date')
         serializers = dispatchsopserializer(snippet,many=True)
         return Response(serializers.data,status=status.HTTP_200_OK)
 
