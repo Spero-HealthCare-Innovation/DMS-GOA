@@ -105,139 +105,139 @@ const CaseClosureDetails = ({ darkMode, flag, selectedIncident }) => {
 
 
   const formatDate = (date) => {
-  if (!date) return "";
-  const d = new Date(date);
-  const pad = (n) => (n < 10 ? "0" + n : n);
-  return (
-    d.getFullYear() +
-    "-" +
-    pad(d.getMonth() + 1) +
-    "-" +
-    pad(d.getDate()) +
-    " " +
-    pad(d.getHours()) +
-    ":" +
-    pad(d.getMinutes()) +
-    ":" +
-    pad(d.getSeconds())
-  );
-};
-
-
-
-//   const handleSubmit = async () => {
-//     if (!selectedIncident?.IncidentId) return;
-
-//    const payload = {
-//   Incident_ID: selectedIncidentFromSop?.incident_id || selectedIncident?.IncidentId,
-//   Disaster_Type: selectedIncidentFromSop?.disaster_name || selectedIncident?.disasterId,
-//   Alert_Type: "High", // set this statically as required
-//   inc_id: selectedIncident?.IncidentId,
-//   closure_acknowledge: formData.acknowledge ? formatDate(formData.acknowledge) : "",
-//   closure_start_base_location: formData.startBaseLocation ? formatDate(formData.startBaseLocation) : "",
-//   closure_at_scene: formData.atScene ? formatDate(formData.atScene) : "",
-//   closure_from_scene: formData.fromScene ? formatDate(formData.fromScene) : "",
-//   closure_back_to_base: formData.backToBase ? formatDate(formData.backToBase) : "",
-//   closure_added_by: userName,
-//   closure_modified_by: userName,
-//   closure_remark: formData.closureRemark,
-// };
-
-
-//     try {
-//       setLoading(true);
-//       const res = await axios.post(
-//         `${port}/admin_web/closure_post_api/`,
-//         payload
-//       );
-//       setSubmitStatus({ type: "success", message: "Closure details saved successfully!" });
-//     } catch (error) {
-//       setSubmitStatus({ type: "error", message: "Failed to save closure details." });
-//       console.error(error);
-//     } finally {
-//       setLoading(false);
-//     }
-//   };
-
-
-const handleSubmit = async () => {
-  // Check if we have incident data
-  const incidentId = selectedIncidentFromSop?.incident_id || 
-                    selectedIncidentFromSop?.inc_id || 
-                    selectedIncident?.IncidentId ||
-                    selectedIncident?.incident_id ||
-                    selectedIncident?.inc_id;
-                    
-  if (!incidentId) {
-    setSubmitStatus({ type: "error", message: "No incident ID found!" });
-    return;
-  }
-
-  const payload = {
-    Incident_ID: incidentId,
-    Disaster_Type: selectedIncidentFromSop?.disaster_name || 
-                   disasterIdFromSop || 
-                   selectedIncident?.disasterId ||
-                   selectedIncident?.disaster_name,
-    Alert_Type: "High", // set this statically as required
-    inc_id: incidentId,
-    closure_acknowledge: formData.acknowledge ? formatDate(formData.acknowledge) : "",
-    closure_start_base_location: formData.startBaseLocation ? formatDate(formData.startBaseLocation) : "",
-    closure_at_scene: formData.atScene ? formatDate(formData.atScene) : "",
-    closure_from_scene: formData.fromScene ? formatDate(formData.fromScene) : "",
-    closure_back_to_base: formData.backToBase ? formatDate(formData.backToBase) : "",
-    closure_added_by: userName,
-    closure_modified_by: userName,
-    closure_remark: formData.closureRemark,
+    if (!date) return "";
+    const d = new Date(date);
+    const pad = (n) => (n < 10 ? "0" + n : n);
+    return (
+      d.getFullYear() +
+      "-" +
+      pad(d.getMonth() + 1) +
+      "-" +
+      pad(d.getDate()) +
+      " " +
+      pad(d.getHours()) +
+      ":" +
+      pad(d.getMinutes()) +
+      ":" +
+      pad(d.getSeconds())
+    );
   };
 
-  console.log("Payload being sent:", payload); // Debug log
 
-  try {
-    setLoading(true);
-    setSubmitStatus(null); // Clear previous status
-    
-    // Get the correct token
-    const authToken = localStorage.getItem("access_token") || token;
-    
-    const res = await axios.post(
-      `${port}/admin_web/closure_post_api/`,
-      payload,
-      {
-        headers: {
-          'Authorization': `Bearer ${authToken}`,
-          'Content-Type': 'application/json'
+
+  //   const handleSubmit = async () => {
+  //     if (!selectedIncident?.IncidentId) return;
+
+  //    const payload = {
+  //   Incident_ID: selectedIncidentFromSop?.incident_id || selectedIncident?.IncidentId,
+  //   Disaster_Type: selectedIncidentFromSop?.disaster_name || selectedIncident?.disasterId,
+  //   Alert_Type: "High", // set this statically as required
+  //   inc_id: selectedIncident?.IncidentId,
+  //   closure_acknowledge: formData.acknowledge ? formatDate(formData.acknowledge) : "",
+  //   closure_start_base_location: formData.startBaseLocation ? formatDate(formData.startBaseLocation) : "",
+  //   closure_at_scene: formData.atScene ? formatDate(formData.atScene) : "",
+  //   closure_from_scene: formData.fromScene ? formatDate(formData.fromScene) : "",
+  //   closure_back_to_base: formData.backToBase ? formatDate(formData.backToBase) : "",
+  //   closure_added_by: userName,
+  //   closure_modified_by: userName,
+  //   closure_remark: formData.closureRemark,
+  // };
+
+
+  //     try {
+  //       setLoading(true);
+  //       const res = await axios.post(
+  //         `${port}/admin_web/closure_post_api/`,
+  //         payload
+  //       );
+  //       setSubmitStatus({ type: "success", message: "Closure details saved successfully!" });
+  //     } catch (error) {
+  //       setSubmitStatus({ type: "error", message: "Failed to save closure details." });
+  //       console.error(error);
+  //     } finally {
+  //       setLoading(false);
+  //     }
+  //   };
+
+
+  const handleSubmit = async () => {
+    // Check if we have incident data
+    const incidentId = selectedIncidentFromSop?.incident_id ||
+      selectedIncidentFromSop?.inc_id ||
+      selectedIncident?.IncidentId ||
+      selectedIncident?.incident_id ||
+      selectedIncident?.inc_id;
+
+    if (!incidentId) {
+      setSubmitStatus({ type: "error", message: "No incident ID found!" });
+      return;
+    }
+
+    const payload = {
+      Incident_ID: incidentId,
+      Disaster_Type: selectedIncidentFromSop?.disaster_name ||
+        disasterIdFromSop ||
+        selectedIncident?.disasterId ||
+        selectedIncident?.disaster_name,
+      Alert_Type: "High", // set this statically as required
+      inc_id: incidentId,
+      closure_acknowledge: formData.acknowledge ? formatDate(formData.acknowledge) : "",
+      closure_start_base_location: formData.startBaseLocation ? formatDate(formData.startBaseLocation) : "",
+      closure_at_scene: formData.atScene ? formatDate(formData.atScene) : "",
+      closure_from_scene: formData.fromScene ? formatDate(formData.fromScene) : "",
+      closure_back_to_base: formData.backToBase ? formatDate(formData.backToBase) : "",
+      closure_added_by: userName,
+      closure_modified_by: userName,
+      closure_remark: formData.closureRemark,
+    };
+
+    console.log("Payload being sent:", payload); // Debug log
+
+    try {
+      setLoading(true);
+      setSubmitStatus(null); // Clear previous status
+
+      // Get the correct token
+      const authToken = localStorage.getItem("access_token") || token;
+
+      const res = await axios.post(
+        `${port}/admin_web/closure_post_api/`,
+        payload,
+        {
+          headers: {
+            'Authorization': `Bearer ${authToken}`,
+            'Content-Type': 'application/json'
+          }
         }
-      }
-    );
-    
-    console.log("API Response:", res.data); // Debug log
-    setSubmitStatus({ type: "success", message: "Closure details saved successfully!" });
+      );
 
-     // Clear form fields after successful submit
-    setFormData({
-      acknowledge: "",
-      startBaseLocation: "",
-      atScene: "",
-      fromScene: "",
-      backToBase: "",
-      closureRemark: "",
-    });
+      console.log("API Response:", res.data); // Debug log
+      setSubmitStatus({ type: "success", message: "Closure details saved successfully!" });
 
-    
-  } catch (error) {
-    console.error("API Error:", error); // Debug log
-    console.error("Error response:", error.response?.data); // Debug log
-    
-    const errorMessage = error.response?.data?.message || 
-                        error.response?.data?.error || 
-                        "Failed to save closure details.";
-    
-    setSubmitStatus({ type: "error", message: errorMessage });
-  } finally {
-    setLoading(false);
-  }
-};
+      // Clear form fields after successful submit
+      setFormData({
+        acknowledge: "",
+        startBaseLocation: "",
+        atScene: "",
+        fromScene: "",
+        backToBase: "",
+        closureRemark: "",
+      });
+
+
+    } catch (error) {
+      console.error("API Error:", error); // Debug log
+      console.error("Error response:", error.response?.data); // Debug log
+
+      const errorMessage = error.response?.data?.message ||
+        error.response?.data?.error ||
+        "Failed to save closure details.";
+
+      setSubmitStatus({ type: "error", message: errorMessage });
+    } finally {
+      setLoading(false);
+    }
+  };
 
 // Inside your component
 useEffect(() => {
@@ -345,7 +345,7 @@ useEffect(() => {
                       selectedIncident?.disasterId ||
                       selectedIncident?.disaster_name
                     )}
-                    {renderText("Alert Type"|| "high")}
+                    {renderText("Alert Type" || "high")}
                   </Box>
                 ) : (
                   <Typography variant="body2" sx={{ color: textColor }}>
@@ -421,168 +421,165 @@ useEffect(() => {
               </LocalizationProvider> */}
 
               <LocalizationProvider dateAdapter={AdapterDateFns}>
-  <Grid container spacing={2} sx={{ mt: 0.5 }}>
-    {/* Acknowledge */}
-    <Grid item xs={12} sm={6}>
-      <DateTimePicker
-        label="Acknowledge"
-        value={formData.acknowledge || null}
-        onChange={(newValue) => handleChange("acknowledge", newValue)}
-        inputFormat="yyyy-MM-dd | HH:mm"
-        renderInput={(params) => (
-          <TextField
-            {...params}
-            fullWidth
-            placeholder="yyyy-MM-dd | hh:mm"
-            variant="outlined"
-            InputLabelProps={{ shrink: true }}
-            InputProps={{
-              ...params.InputProps,
-              sx: {
-                color: textColor,
-                 fontSize: "0.85rem", // smaller font
-                height: "10%",
-                "& .MuiSvgIcon-root": {
-                  color: "white",
-                },
-              },
-            }}
-            sx={textFieldStyle}
-          />
-        )}
-      />
-    </Grid>
+                <Grid container spacing={2} sx={{ mt: 0.5 }}>
+                  <Grid item xs={12} sm={6}>
+                    <DateTimePicker
+                      label="Acknowledge"
+                      value={formData.acknowledge || null}
+                      onChange={(newValue) => handleChange("acknowledge", newValue)}
+                      inputFormat="yyyy-MM-dd | HH:mm"
+                      renderInput={(params) => (
+                        <TextField
+                          {...params}
+                          fullWidth
+                          placeholder="yyyy-MM-dd | hh:mm"
+                          variant="outlined"
+                          size="small"
+                          InputLabelProps={{ shrink: true }}
+                          InputProps={{
+                            ...params.InputProps,
+                            sx: {
+                              color: textColor,
+                              "& .MuiSvgIcon-root": {
+                                color: "white",
+                              },
+                            },
+                          }}
+                          sx={textFieldStyle}
+                        />
+                      )}
+                    />
+                  </Grid>
 
-    {/* Start Base Location */}
-    <Grid item xs={12} sm={6}>
-      <DateTimePicker
-        label="Start Base Location"
-        value={formData.startBaseLocation || null}
-        onChange={(newValue) => handleChange("startBaseLocation", newValue)}
-        inputFormat="yyyy-MM-dd | HH:mm"
-        renderInput={(params) => (
-          <TextField
-            {...params}
-            fullWidth
-            placeholder="yyyy-MM-dd | hh:mm"
-            variant="outlined"
-            InputLabelProps={{ shrink: true }}
-            InputProps={{
-              ...params.InputProps,
-              sx: {
-                color: textColor,
-                 fontSize: "0.85rem", // smaller font
-                height: "10%",
-                "& .MuiSvgIcon-root": {
-                  color: "white",
-                },
-              },
-            }}
-            sx={textFieldStyle}
-          />
-        )}
-      />
-    </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <DateTimePicker
+                      label="Start Base Location"
+                      value={formData.startBaseLocation || null}
+                      onChange={(newValue) => handleChange("startBaseLocation", newValue)}
+                      inputFormat="yyyy-MM-dd | HH:mm"
+                      renderInput={(params) => (
+                        <TextField
+                          {...params}
+                          fullWidth
+                          placeholder="yyyy-MM-dd | hh:mm"
+                          variant="outlined"
+                          InputLabelProps={{ shrink: true }}
+                          InputProps={{
+                            ...params.InputProps,
+                            sx: {
+                              color: textColor,
+                              fontSize: "0.85rem", // smaller font
+                              height: "10%",
+                              "& .MuiSvgIcon-root": {
+                                color: "white",
+                              },
+                            },
+                          }}
+                          sx={textFieldStyle}
+                        />
+                      )}
+                    />
+                  </Grid>
 
-    {/* At Scene */}
-    <Grid item xs={12} sm={6}>
-      <DateTimePicker
-        label="At Scene"
-        value={formData.atScene || null}
-        onChange={(newValue) => handleChange("atScene", newValue)}
-        inputFormat="yyyy-MM-dd | HH:mm"
-        renderInput={(params) => (
-          <TextField
-            {...params}
-            fullWidth
-            placeholder="yyyy-MM-dd | hh:mm"
-            variant="outlined"
-            InputLabelProps={{ shrink: true }}
-            InputProps={{
-              ...params.InputProps,
-              sx: {
-                color: textColor,
-                 fontSize: "0.85rem", // smaller font
-                height: "10%",
-                "& .MuiSvgIcon-root": {
-                  color: "white",
-                },
-              },
-            }}
-            sx={textFieldStyle}
-          />
-        )}
-      />
-    </Grid>
+                  {/* At Scene */}
+                  <Grid item xs={12} sm={6}>
+                    <DateTimePicker
+                      label="At Scene"
+                      value={formData.atScene || null}
+                      onChange={(newValue) => handleChange("atScene", newValue)}
+                      inputFormat="yyyy-MM-dd | HH:mm"
+                      renderInput={(params) => (
+                        <TextField
+                          {...params}
+                          fullWidth
+                          placeholder="yyyy-MM-dd | hh:mm"
+                          variant="outlined"
+                          InputLabelProps={{ shrink: true }}
+                          InputProps={{
+                            ...params.InputProps,
+                            sx: {
+                              color: textColor,
+                              fontSize: "0.85rem", // smaller font
+                              height: "10%",
+                              "& .MuiSvgIcon-root": {
+                                color: "white",
+                              },
+                            },
+                          }}
+                          sx={textFieldStyle}
+                        />
+                      )}
+                    />
+                  </Grid>
 
-    {/* From Scene */}
-    <Grid item xs={12} sm={6}>
-      <DateTimePicker
-        label="From Scene"
-        value={formData.fromScene || null}
-        onChange={(newValue) => handleChange("fromScene", newValue)}
-        inputFormat="yyyy-MM-dd | HH:mm"
-        renderInput={(params) => (
-          <TextField
-            {...params}
-            fullWidth
-            placeholder="yyyy-MM-dd | hh:mm"
-            variant="outlined"
-            InputLabelProps={{ shrink: true }}
-            InputProps={{
-              ...params.InputProps,
-              sx: {
-                color: textColor,
-          fontSize: "0.85rem", // smaller font
-                "& .MuiSvgIcon-root": {
-                  color: "white",
-                },
-              },
-            }}
-            sx={textFieldStyle}
-          />
-        )}
-      />
-    </Grid>
+                  {/* From Scene */}
+                  <Grid item xs={12} sm={6}>
+                    <DateTimePicker
+                      label="From Scene"
+                      value={formData.fromScene || null}
+                      onChange={(newValue) => handleChange("fromScene", newValue)}
+                      inputFormat="yyyy-MM-dd | HH:mm"
+                      renderInput={(params) => (
+                        <TextField
+                          {...params}
+                          fullWidth
+                          placeholder="yyyy-MM-dd | hh:mm"
+                          variant="outlined"
+                          InputLabelProps={{ shrink: true }}
+                          InputProps={{
+                            ...params.InputProps,
+                            sx: {
+                              color: textColor,
+                              fontSize: "0.85rem", // smaller font
+                              "& .MuiSvgIcon-root": {
+                                color: "white",
+                              },
+                            },
+                          }}
+                          sx={textFieldStyle}
+                        />
+                      )}
+                    />
+                  </Grid>
 
-    {/* Back to Base */}
-    <Grid item xs={12} sm={6}>
-      <DateTimePicker
-        label="Back to Base"
-        value={formData.backToBase || null}
-        onChange={(newValue) => handleChange("backToBase", newValue)}
-        inputFormat="yyyy-MM-dd | HH:mm"
-        renderInput={(params) => (
-          <TextField
-            {...params}
-            fullWidth
-            placeholder="yyyy-MM-dd | hh:mm"
-            variant="outlined"
-            InputLabelProps={{ shrink: true }}
-            InputProps={{
-              ...params.InputProps,
-              sx: {
-                color: textColor,
-                 fontSize: "0.85rem", // smaller font
-                "& .MuiSvgIcon-root": {
-                  color: "white",
-                    fontSize: "0.8rem", 
-                },
-                '& .MuiFilledInput-input': {
-                fontSize: 14,
-                height: 20,
-                lineHeight: 1,
-                p: 0
-              },
-              },
-            }}
-            sx={textFieldStyle}
-          />
-        )}
-      />
-    </Grid>
-  </Grid>
-</LocalizationProvider>
+                  {/* Back to Base */}
+                  <Grid item xs={12} sm={6}>
+                    <DateTimePicker
+                      label="Back to Base"
+                      value={formData.backToBase || null}
+                      onChange={(newValue) => handleChange("backToBase", newValue)}
+                      inputFormat="yyyy-MM-dd | HH:mm"
+                      renderInput={(params) => (
+                        <TextField
+                          {...params}
+                          fullWidth
+                          placeholder="yyyy-MM-dd | hh:mm"
+                          variant="outlined"
+                          InputLabelProps={{ shrink: true }}
+                          InputProps={{
+                            ...params.InputProps,
+                            sx: {
+                              color: textColor,
+                              fontSize: "0.85rem", // smaller font
+                              "& .MuiSvgIcon-root": {
+                                color: "white",
+                                fontSize: "0.8rem",
+                              },
+                              '& .MuiFilledInput-input': {
+                                fontSize: 14,
+                                height: 20,
+                                lineHeight: 1,
+                                p: 0
+                              },
+                            },
+                          }}
+                          sx={textFieldStyle}
+                        />
+                      )}
+                    />
+                  </Grid>
+                </Grid>
+              </LocalizationProvider>
 
             </Grid>
           </Grid>
