@@ -96,7 +96,6 @@ function RegisterResponder({ darkMode }) {
 
     const [page, setPage] = useState(1);
     const [rowsPerPage, setRowsPerPage] = useState(5);
-    const [anchorEl, setAnchorEl] = useState(null);
     const userName = localStorage.getItem('userId');
 
     const [selectedResponders, setSelectedResponders] = useState([]);
@@ -198,6 +197,50 @@ function RegisterResponder({ darkMode }) {
         }
     };
 
+    /// POP UP 
+    const [anchorEl, setAnchorEl] = useState(null);
+    const [selectedItem, setSelectedItem] = useState(null);
+
+    const handleClick = (event, row) => {
+        setAnchorEl(event.currentTarget);
+        setSelectedItem(row);
+    };
+
+    const handleClose = () => {
+        setAnchorEl(null);
+    };
+
+    const open = Boolean(anchorEl);
+    const id = open ? 'simple-popover' : undefined;
+
+    // Edit
+    const [responderID, setResponderID] = useState(null);
+
+    const handleEdit = async (selectedItem) => {
+        const Id = selectedItem.pk_id;
+        console.log(Id, "idddddddddd");
+
+        setResponderID(Id);
+        // setIsEditMode(true);
+
+        try {
+            const res = await axios.get(
+                `${port}/admin_web/disaster_responder_put/${Id}/`,
+                {
+                    headers: {
+                        Authorization: `Bearer ${token || newToken}`,
+                    },
+                }
+            );
+            const data = res.data[0];
+
+            setSelectedDisaster(data.dis_id);
+            setSelectedResponders(data.res_id);
+            // setDescription(data.sop_description);
+        } catch (err) {
+            console.error("Error fetching department data:", err);
+        }
+    };
 
     return (
         <div style={{ marginLeft: "3.5rem" }}>
@@ -342,7 +385,7 @@ function RegisterResponder({ darkMode }) {
 
                                             <StyledCardContent sx={{ flex: 1.9, justifyContent: "center", ...fontsTableBody }}>
                                                 <Typography variant="subtitle2">
-                                                    {row.dis_id}
+                                                    {row.disaster_name}
                                                 </Typography>
                                             </StyledCardContent>
 
@@ -354,12 +397,13 @@ function RegisterResponder({ darkMode }) {
 
                                             <StyledCardContent sx={{ flex: 0.5, justifyContent: "center", ...fontsTableBody }}>
                                                 <MoreHorizIcon
+                                                    aria-describedby={id}
+                                                    onClick={(e) => handleClick(e, row)}
                                                     sx={{
                                                         color: "#00f0c0",
                                                         cursor: "pointer",
                                                         fontSize: 28,
                                                         justifyContent: "center",
-                                                        ...fontsTableBody,
                                                     }}
                                                 />
                                             </StyledCardContent>
@@ -368,6 +412,54 @@ function RegisterResponder({ darkMode }) {
                                 </TableBody>
                             </Table>
                         </TableContainer>
+
+                        <Popover
+                            open={open}
+                            anchorEl={anchorEl}
+                            onClose={handleClose}
+                            anchorOrigin={{
+                                vertical: "center",
+                                horizontal: "right",
+                            }}
+                            transformOrigin={{
+                                vertical: "center",
+                                horizontal: "left",
+                            }}
+                            PaperProps={{
+                                sx: {
+                                    p: 2,
+                                    display: "flex",
+                                    flexDirection: "column",
+                                    gap: 1.5,
+                                    borderRadius: 2,
+                                    minWidth: 120,
+                                },
+                            }}
+                        >
+                            <Button
+                                fullWidth
+                                variant="outlined"
+                                color="warning"
+                                startIcon={<EditOutlined />}
+                                onClick={() => handleEdit(selectedItem)}
+                            >
+                                Edit
+                            </Button>
+
+                            <Button
+                                fullWidth
+                                variant="outlined"
+                                color="error"
+                                startIcon={<DeleteOutline />}
+                            // onClick={() => handleDelete(selectedItem)}
+                            // onClick={() => {
+                            //     setDeleteDepId(selectedItem.dep_id);
+                            //     setOpenDeleteDialog(true);
+                            // }}
+                            >
+                                Delete
+                            </Button>
+                        </Popover>
 
                         <Box
                             display="flex"
@@ -464,7 +556,7 @@ function RegisterResponder({ darkMode }) {
                                         size="small"
                                         label="Disaster Type"
                                         variant="outlined"
-                                        value={selectedDisaster}
+                                        value={selectedDisaster || ""}
                                         onChange={(e) => setSelectedDisaster(e.target.value)}
                                         SelectProps={{
                                             MenuProps: {
@@ -512,8 +604,8 @@ function RegisterResponder({ darkMode }) {
                                                 },
                                             }}
                                         >
-                                            <MenuItem value="" disabled>
-                                                Select Responder
+                                            <MenuItem disabled value="">
+                                                <em>Select Responder</em>
                                             </MenuItem>
                                             {responder.map((res) => (
                                                 <MenuItem key={res.responder_id} value={res.responder_id}>
