@@ -584,16 +584,6 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
         onClose={() => setSnackbarMessageAdded(null)}
         message={snackbarmsgAddDept}
       />
-
-      {/* <Alert
-          onClose={() => setShowSuccessAlert(false)}
-          severity="success"
-          variant="filled"
-          sx={{ width: "100%" }}
-        >
-          Department added successfully!
-        </Alert> */}
-      {/* </Snackbar> */}
       <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
         <Box
           sx={{
@@ -1082,7 +1072,7 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
                 <Box
                   onClick={() =>
                     page <
-                      Math.ceil(filteredDepartments.length / rowsPerPage) &&
+                    Math.ceil(filteredDepartments.length / rowsPerPage) &&
                     setPage(page + 1)
                   }
                   sx={{
@@ -1152,12 +1142,14 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
                   placeholder="Department Name"
                   value={departmentName}
                   onChange={(e) => {
-                    setDepartmentName(e.target.value);
+                    const onlyLetters = e.target.value.replace(
+                      /[^a-zA-Z\s]/g,
+                      ""
+                    );
+                    setDepartmentName(onlyLetters);
                     setDepartmentError(false);
                     setDepartmentErrorMsg("");
                   }}
-                  // error={departmentError}
-                  // helperText={departmentError ? departmentErrorMsg : ""}
                   InputLabelProps={{ shrink: false }}
                   sx={selectStyles}
                 />

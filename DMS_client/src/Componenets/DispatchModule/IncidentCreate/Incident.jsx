@@ -15,9 +15,10 @@ import { useAuth } from "../../../Context/ContextAPI";
 import IncidentCreateMap from "./IncidentCreateMap";
 import { Snackbar, Alert } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
+import { useLocation } from "react-router-dom";
 
 const inputStyle = {
-    mb: 2,
+    mb: 1.2,
 };
 const boxStyle = {
     mb: 2,
@@ -27,12 +28,41 @@ const boxStyle = {
 const Incident = ({ darkMode }) => {
     const port = import.meta.env.VITE_APP_API_KEY;
     const googleKey = import.meta.env.VITE_APP_GOOGLE_MAPS_API_KEY;
+    const location = useLocation();
+    const [secondsElapsed, setSecondsElapsed] = useState(0);
+    const [timerActive, setTimerActive] = useState(false);
+
+    useEffect(() => {
+        if (location.state?.startData) {
+            console.log("Received startData:", location.state.startData);
+            setSecondsElapsed(0);
+            setTimerActive(true);
+        }
+    }, [location.state]);
+
+    useEffect(() => {
+        let intervalId;
+        if (timerActive) {
+            intervalId = setInterval(() => {
+                setSecondsElapsed((prev) => prev + 1);
+            }, 1000);
+        }
+
+        return () => clearInterval(intervalId);
+    }, [timerActive]);
+
+    const minutes = Math.floor(secondsElapsed / 60);
+    const seconds = secondsElapsed % 60;
+    const formattedTime = `${minutes.toString().padStart(2, "0")}:${seconds
+        .toString()
+        .padStart(2, "0")}`;
+
     console.log(googleKey, 'googleKey');
-   const navigate = useNavigate();
+    const navigate = useNavigate();
     const token = localStorage.getItem("access_token");
     const { newToken, responderScope, setDisasterIncident, disaster, popupText, setPopupText } = useAuth();
-    console.log(popupText,'popupTextpopupText');
-    
+    console.log(popupText, 'popupTextpopupText');
+
     const { handleSearchChange, handleSelectSuggestion, query } = useAuth();
     const bgColor = darkMode ? "#0a1929" : "#ffffff";
     const labelColor = darkMode ? "#5FECC8" : "#1976d2";
@@ -53,8 +83,6 @@ const Incident = ({ darkMode }) => {
     /// snackbar
     const [snackbarOpen, setSnackbarOpen] = useState(false);
     const [snackbarMessage, setSnackbarMessage] = useState('');
-    const [snackbarSeverity, setSnackbarSeverity] = useState('success');
-
     // Google API Start
     // const { isLoaded } = useJsApiLoader({
     //     googleMapsApiKey: googleKey,
@@ -87,13 +115,16 @@ const Incident = ({ darkMode }) => {
     };
 
     // Google API End
-    const handleCheckboxChange = (pk_id) => {
-        setSopId((prev) =>
-            prev.includes(pk_id)
-                ? prev.filter((id) => id !== pk_id)
-                : [...prev, pk_id]
-        );
+    const handleCheckboxChange = (id) => {
+        setSopId((prev) => {
+            if (prev.includes(id)) {
+                return prev.filter(item => item !== id);
+            } else {
+                return [...prev, id];
+            }
+        });
     };
+
 
     const handleSubmit = async () => {
         const payload = {
@@ -114,6 +145,7 @@ const Incident = ({ darkMode }) => {
             caller_modified_by: "admin",
             comm_added_by: "admin",
             comm_modified_by: "admin",
+            mode: 1
         };
 
         try {
@@ -175,7 +207,6 @@ const Incident = ({ darkMode }) => {
 
     return (
         <Box sx={{ minHeight: "100vh", backgroundColor: darkMode ? "#0a1929" : "#f5f5f5", px: 2, py: 3 }}>
-
             <Snackbar
                 open={snackbarOpen}
                 autoHideDuration={3000}
@@ -188,242 +219,250 @@ const Incident = ({ darkMode }) => {
             </Snackbar>
 
             <Grid container spacing={2}>
-                <Grid item xs={12} md={8}>
-                    <Grid container spacing={2}>
-                        <Grid item xs={12} md={8}>
-                            <Paper elevation={3} sx={{ ...inputStyle, p: 3, borderRadius: 3, backgroundColor: bgColor, height: "100%" }}>
-                                <Typography variant="h6" gutterBottom>
-                                    Create Incident
-                                </Typography>
-                                <Grid container spacing={2}>
-                                    <Grid item xs={12} sm={6}>
-                                        <TextField select fullWidth size="small" label="Incident Type" variant="outlined" sx={inputStyle}
-                                            value={selectedEmergencyValue}
-                                            onChange={handleEmergencyChange}
-                                        >
-                                            <MenuItem value={1}>Emergency</MenuItem>
-                                            <MenuItem value={2}>Non Emergency</MenuItem>
-                                        </TextField>
-                                    </Grid>
-                                    <Grid item xs={12} sm={6}>
-                                        <TextField
-                                            select
-                                            fullWidth
-                                            size="small"
-                                            
-                                            label="Disaster Type"
-                                            variant="outlined"
-                                            sx={inputStyle}
-                                            value={selectedDisaster}
-                                            onChange={(e) => setSelectedDisaster(e.target.value)}
-                                        >
-                                            <MenuItem disabled value="">
-                                                Select Disaster Type
-                                            </MenuItem>
-                                            {disaster.map((item) => (
-                                                <MenuItem key={item.disaster_id} value={item.disaster_id}>
-                                                    {item.disaster_name}
-                                                </MenuItem>
-                                            ))}
-                                        </TextField>
-                                    </Grid>
-                                    <Grid item xs={12} sm={6}>
-                                        <TextField
-                                            select
-                                            fullWidth
-                                            size="small"
-                                            label="Alert Type"
-                                            variant="outlined"
-                                            value={alertType}
-                                            onChange={handleAlertTypeChange}
-                                            sx={inputStyle}
-                                        >
-                                            <MenuItem value={1}>High</MenuItem>
-                                            <MenuItem value={2}>Medium</MenuItem>
-                                            <MenuItem value={3}>Low</MenuItem>
-                                        </TextField>
-                                    </Grid>
+                <Grid item xs={12} md={7}>
+                    <Paper
+                        elevation={3}
+                        sx={{
+                            ...inputStyle,
+                            p: 3,
+                            borderRadius: 3,
+                            backgroundColor: bgColor,
+                            height: 'auto',
+                        }}
+                    >
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                            <Typography variant="h6" gutterBottom>
+                                Create Incident
+                            </Typography>
+                            <Typography variant="h6" sx={{ fontSize: '16px' }} gutterBottom>
+                                Time : {formattedTime}
+                            </Typography>
+                        </Box>
 
-                                    <Grid item xs={12} sm={6}>
-                                        <TextField fullWidth size="small" label="Caller Number" variant="outlined" sx={inputStyle}
-                                            value={callerNumber} onChange={(e) => setCallerNumber(e.target.value)} />
-                                    </Grid>
-
-                                    <Grid item xs={12} sm={6}>
-                                        <TextField fullWidth size="small" label="Caller Name" variant="outlined" sx={inputStyle}
-                                            value={callerName} onChange={(e) => setCallerName(e.target.value)} />
-                                    </Grid>
-                                    <Grid item xs={12} sm={6}>
-                                        <TextField fullWidth size="small" label="Location" variant="outlined" sx={inputStyle} onChange={handleSearchChange} onClick={() => handleSelectSuggestion(item)} value={query} />
-                                    </Grid>
-                                    <Grid item xs={12} sm={12}>
-                                        <TextField
-                                            select
-                                            fullWidth
-                                            size="small"
-                                            label="Summary"
-                                            variant="outlined"
-                                            sx={inputStyle}
-                                            value={summaryId}
-                                            onChange={(e) => setSummaryId(e.target.value)}
-                                        >
-                                            <MenuItem disabled value="">
-                                                Select Summary
-                                            </MenuItem>
-                                            {summary.map((item) => (
-                                                <MenuItem key={item.sum_id} value={item.sum_id}>
-                                                    {item.summary}
-                                                </MenuItem>
-                                            ))}
-                                        </TextField>
-                                    </Grid>
-                                </Grid>
-                            </Paper>
-                        </Grid>
-
-                        <Grid item xs={12} md={4}>
-                            <Paper elevation={3} sx={{ ...inputStyle, p: 2, borderRadius: 3, backgroundColor: bgColor, height: "100%" }}>
-                                <Typography variant="h6">Comments</Typography>
+                        <Grid container spacing={1.6}>
+                            <Grid item xs={12} sm={6}>
                                 <TextField
-                                    fullWidth size="small"
-                                    multiline
-                                    rows={8}
+                                    select
+                                    fullWidth
+                                    size="small"
+                                    label="Incident Type"
                                     variant="outlined"
                                     sx={inputStyle}
-                                    value={comments}
-                                    onChange={(e) => setComments(e.target.value)}
-                                />
-                            </Paper>
-                        </Grid>
-
-                        {selectedEmergencyValue === 1 && (
-                            <Grid item xs={12} md={12}>
-                                <Paper elevation={3} sx={{ ...inputStyle, p: 3, borderRadius: 3, backgroundColor: bgColor }}>
-                                    <Grid container>
-                                        <Grid
-                                            item
-                                            xs={12}
-                                            md={3}
-                                            sx={{
-                                                borderRight: { md: `1px solid white` },
-                                                pr: { md: 2 },
-                                                mb: { xs: 2, md: 0 },
-                                            }}
-                                        >
-                                            <Box sx={boxStyle}>
-                                                <Typography
-                                                    sx={{ color: labelColor, fontWeight: 500, fontFamily, }}
-                                                >
-                                                    Incident Type
-                                                </Typography>
-                                                <Typography variant="subtitle2" sx={{ fontFamily }}>
-                                                    {selectedEmergencyValue === 1 ? "Emergency" : "Non-Emergency"}
-                                                </Typography>
-                                            </Box>
-
-                                            <Typography variant="subtitle2" sx={{ fontFamily, borderBottom: { md: `1px solid white` }, mb: 2 }}>
-                                            </Typography>
-
-                                            <Box>
-                                                <Typography
-                                                    variant="subtitle2"
-                                                    sx={{ color: labelColor, fontWeight: 500, fontFamily }}
-                                                >
-                                                    Alert Type
-                                                </Typography>
-                                                <Typography variant="subtitle2" sx={{ fontFamily }}>
-                                                    {alertType === 1 ? "High" : alertType === 2 ? "Medium" : "Low"}
-                                                </Typography>
-                                            </Box>
-                                        </Grid>
-
-                                        <Grid
-                                            item
-                                            xs={12}
-                                            md={9}
-                                            sx={{
-                                                px: { md: 2 },
-                                                mb: { xs: 5, md: 0 },
-                                            }}
-                                        >
-                                            <Box sx={boxStyle}>
-                                                <Typography
-                                                    variant="subtitle2"
-                                                    sx={{ color: labelColor, fontWeight: 500, fontFamily }}
-                                                >
-                                                    Response Procedure
-                                                </Typography>
-                                                <Typography variant="subtitle2" sx={{ fontFamily }}>
-                                                    {responderScope?.sop_responses?.map((sop) => (
-                                                        <div key={sop.sop_id}>
-                                                            {sop?.sop_description || "No SOP description"}
-                                                        </div>
-                                                    ))}
-                                                </Typography>
-                                            </Box>
-                                            <Box>
-                                                <Typography
-                                                    variant="subtitle2"
-                                                    sx={{ color: labelColor, fontWeight: 500, fontFamily }}
-                                                >
-                                                    Responder Scope
-                                                </Typography>
-                                                <Stack spacing={1} mt={1}>
-                                                    <Box display="flex" flexWrap="wrap" gap={1}>
-                                                        {responderScope?.responder_scope?.map((responder) => (
-                                                            <FormControlLabel
-                                                                key={responder.pk_id}
-                                                                control={
-                                                                    <Checkbox
-                                                                        checked={sopId.includes(responder.pk_id)}
-                                                                        onChange={() => handleCheckboxChange(responder.pk_id)}
-                                                                        sx={{ color: labelColor }}
-                                                                    />
-                                                                }
-                                                                label={
-                                                                    <Typography variant="subtitle2" sx={{ fontFamily }}>
-                                                                        {responder.responder_name}
-                                                                    </Typography>
-                                                                }
-                                                            />
-                                                        ))}
-                                                    </Box>
-                                                </Stack>
-                                            </Box>
-                                        </Grid>
-                                    </Grid>
-                                </Paper>
-                            </Grid>
-                        )}
-
-                        <Grid
-                            item
-                            xs={12}
-                            md={9}
-                            sx={{ marginLeft: '4em' }}
-                        >
-                            <Box sx={{ display: 'flex', justifyContent: 'center' }}>
-                                <Button
-                                    variant="contained"
-                                    sx={{
-                                        mb: '3em',
-                                        width: "30%",
-                                        backgroundColor: "white",
-                                        color: "black",
-                                        fontWeight: "bold",
-                                        borderRadius: "12px",
-                                    }}
-                                    onClick={handleSubmit}
+                                    value={selectedEmergencyValue}
+                                    onChange={handleEmergencyChange}
                                 >
-                                    Submit
-                                </Button>
-                            </Box>
+                                    <MenuItem value={1}>Emergency</MenuItem>
+                                    <MenuItem value={2}>Non Emergency</MenuItem>
+                                </TextField>
+                            </Grid>
+
+                            <Grid item xs={12} sm={6}>
+                                <TextField
+                                    select
+                                    fullWidth
+                                    size="small"
+                                    label="Disaster Type"
+                                    variant="outlined"
+                                    sx={inputStyle}
+                                    value={selectedDisaster}
+                                    onChange={(e) => setSelectedDisaster(e.target.value)}
+                                >
+                                    <MenuItem disabled value="">
+                                        Select Disaster Type
+                                    </MenuItem>
+                                    {disaster.map((item) => (
+                                        <MenuItem key={item.disaster_id} value={item.disaster_id}>
+                                            {item.disaster_name}
+                                        </MenuItem>
+                                    ))}
+                                </TextField>
+                            </Grid>
+
+                            <Grid item xs={12} sm={6}>
+                                <TextField
+                                    select
+                                    fullWidth
+                                    size="small"
+                                    label="Alert Type"
+                                    variant="outlined"
+                                    value={alertType}
+                                    onChange={handleAlertTypeChange}
+                                    sx={inputStyle}
+                                >
+                                    <MenuItem value={1}>High</MenuItem>
+                                    <MenuItem value={2}>Medium</MenuItem>
+                                    <MenuItem value={3}>Low</MenuItem>
+                                </TextField>
+                            </Grid>
+
+                            <Grid item xs={12} sm={6}>
+                                <TextField
+                                    fullWidth
+                                    size="small"
+                                    label="Caller Number"
+                                    variant="outlined"
+                                    sx={inputStyle}
+                                    value={callerNumber}
+                                    onChange={(e) => setCallerNumber(e.target.value)}
+                                />
+                            </Grid>
+
+                            <Grid item xs={12} sm={6}>
+                                <TextField
+                                    fullWidth
+                                    size="small"
+                                    label="Caller Name"
+                                    variant="outlined"
+                                    sx={inputStyle}
+                                    value={callerName}
+                                    onChange={(e) => setCallerName(e.target.value)}
+                                />
+                            </Grid>
+
+                            <Grid item xs={12} sm={6}>
+                                <TextField
+                                    fullWidth
+                                    size="small"
+                                    label="Location"
+                                    variant="outlined"
+                                    sx={inputStyle}
+                                    onChange={handleSearchChange}
+                                    onClick={() => handleSelectSuggestion(item)}
+                                    value={query}
+                                />
+                            </Grid>
+
+                            <Grid item xs={12}>
+                                <TextField
+                                    select
+                                    fullWidth
+                                    size="small"
+                                    label="Summary"
+                                    variant="outlined"
+                                    sx={inputStyle}
+                                    value={summaryId}
+                                    onChange={(e) => setSummaryId(e.target.value)}
+                                >
+                                    <MenuItem disabled value="">
+                                        Select Summary
+                                    </MenuItem>
+                                    {summary.map((item) => (
+                                        <MenuItem key={item.sum_id} value={item.sum_id}>
+                                            {item.summary}
+                                        </MenuItem>
+                                    ))}
+                                </TextField>
+                            </Grid>
                         </Grid>
-                    </Grid>
+                    </Paper>
                 </Grid>
 
-                <Grid item xs={12} md={4} style={{ position: "relative" }}>
+                <Grid item xs={12} md={5}>
                     <IncidentCreateMap />
+                </Grid>
+
+                {selectedEmergencyValue === 1 && (
+                    <Grid item xs={12}>
+                        <Paper elevation={3} sx={{ ...inputStyle, p: 3, borderRadius: 3, backgroundColor: bgColor }}>
+                            <Grid container spacing={2}>
+                                <Grid item xs={12} md={3} sx={{ borderRight: { md: `1px solid white` }, pr: 2 }}>
+                                    <Box sx={boxStyle}>
+                                        <Typography sx={{ color: labelColor, fontWeight: 500, fontFamily }}>
+                                            Incident Type
+                                        </Typography>
+                                        <Typography variant="subtitle2" sx={{ fontFamily }}>
+                                            {selectedEmergencyValue === 1 ? "Emergency" : "Non-Emergency"}
+                                        </Typography>
+                                    </Box>
+                                    <Box>
+                                        <Typography variant="subtitle2" sx={{ color: labelColor, fontWeight: 500, fontFamily }}>
+                                            Alert Type
+                                        </Typography>
+                                        <Typography variant="subtitle2" sx={{ fontFamily }}>
+                                            {alertType === 1 ? "High" : alertType === 2 ? "Medium" : "Low"}
+                                        </Typography>
+                                    </Box>
+                                </Grid>
+
+                                {/* SOP Section */}
+                                <Grid item xs={12} md={5} sx={{ px: 2, borderRight: { md: `1px solid white` } }}>
+                                    <Box sx={boxStyle}>
+                                        <Typography variant="subtitle2" sx={{ color: labelColor, fontWeight: 500, fontFamily }}>
+                                            Response Procedure
+                                        </Typography>
+                                        <Typography variant="subtitle2" sx={{ fontFamily }}>
+                                            {responderScope?.sop_responses?.map((sop) => (
+                                                <div key={sop.sop_id}>{sop?.sop_description || "No SOP description"}</div>
+                                            ))}
+                                        </Typography>
+                                    </Box>
+
+                                    <Box>
+                                        <Typography variant="subtitle2" sx={{ color: labelColor, fontWeight: 500, fontFamily }}>
+                                            Responder Scope
+                                        </Typography>
+                                        <Stack spacing={1} mt={1}>
+                                            <Box display="flex" flexWrap="wrap" gap={1}>
+                                                {responderScope?.responder_scope?.map((responder) => (
+                                                    <FormControlLabel
+                                                        key={responder.res_id}
+                                                        control={
+                                                            <Checkbox
+                                                                checked={sopId.includes(responder.res_id)}
+                                                                onChange={() => handleCheckboxChange(responder.res_id)}
+                                                                sx={{ color: labelColor }}
+                                                            />
+                                                        }
+                                                        label={
+                                                            <Typography variant="subtitle2" sx={{ fontFamily }}>
+                                                                {responder.responder_name}
+                                                            </Typography>
+                                                        }
+                                                    />
+                                                ))}
+                                            </Box>
+                                        </Stack>
+                                    </Box>
+                                </Grid>
+
+                                <Grid item xs={12} md={4}>
+                                    <Typography variant="h6" sx={{ fontSize: '16px' }} gutterBottom>
+                                        Comments
+                                    </Typography>
+                                    <TextField
+                                        fullWidth
+                                        size="small"
+                                        multiline
+                                        className='textarea'
+                                        rows={4}
+                                        variant="outlined"
+                                        sx={{ ...inputStyle }}
+                                        value={comments}
+                                        onChange={(e) => setComments(e.target.value)}
+                                    />
+                                </Grid>
+                            </Grid>
+                        </Paper>
+                    </Grid>
+                )}
+
+                <Grid item xs={12}>
+                    <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+                        <Button
+                            variant="contained"
+                            sx={{
+                                width: "10%",
+                                backgroundColor: "white",
+                                color: "black",
+                                fontWeight: "bold",
+                                borderRadius: "12px",
+                                mb: 5,
+                            }}
+                            onClick={handleSubmit}
+                        >
+                            Submit
+                        </Button>
+                    </Box>
                 </Grid>
             </Grid>
         </Box>

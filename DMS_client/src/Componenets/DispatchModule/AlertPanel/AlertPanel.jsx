@@ -10,7 +10,6 @@ import { useAuth } from './../../../Context/ContextAPI';
 import Sidebar from '../Sidebar/Sidebar';
 import { Search } from "@mui/icons-material";
 import { IconButton } from "@mui/material";
-import { Add } from "@mui/icons-material";
 
 const EnquiryCard = styled('div')({
     display: 'flex',
@@ -57,13 +56,7 @@ const AlertPanel = ({ darkMode }) => {
     const group = localStorage.getItem('user_group');
     const token = localStorage.getItem('access_token');
     const userName = localStorage.getItem('userId');
-    console.log(userName,'userName');
-    
-    const [isHovered, setIsHovered] = useState(false);
-    const handleClick = () => {
-        navigate("/Incident");
-    };
-
+    console.log(userName, 'userName');
     console.log(group, 'groupgroup');
 
     const textColor = darkMode ? "#ffffff" : "#000000";
@@ -198,44 +191,6 @@ const AlertPanel = ({ darkMode }) => {
                                     },
                                 }}
                             />
-
-                            <IconButton
-                                onClick={handleClick}
-                                onMouseEnter={() => setIsHovered(true)}
-                                onMouseLeave={() => setIsHovered(false)}
-                                size="small"
-                                sx={{
-                                    ml: "auto",
-                                    backgroundColor: "#5FECC8",
-                                    color: "black",
-                                    borderRadius: "18px",
-                                    "&:hover": {
-                                        backgroundColor: "#5FECC8",
-                                    },
-                                    width: isHovered ? 140 : 36,
-                                    height: 36,
-                                    transition: "width 0.3s ease",
-                                    overflow: "hidden",
-                                    display: "flex",
-                                    justifyContent: "center",
-                                    alignItems: "center",
-                                    paddingRight: isHovered ? 1 : 1,
-                                }}
-                            >
-                                <Add sx={{ color: darkMode ? "#000000" : "#000000" }} />
-                                {isHovered && (
-                                    <Typography
-                                        variant="body2"
-                                        sx={{
-                                            marginLeft: 1,
-                                            color: "black",
-                                            whiteSpace: "nowrap",
-                                        }}
-                                    >
-                                        Create Incident
-                                    </Typography>
-                                )}
-                            </IconButton>
                         </Grid>
                     </Grid>
 

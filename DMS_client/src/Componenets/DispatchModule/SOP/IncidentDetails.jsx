@@ -20,6 +20,7 @@ function IncidentDetails({
   setFlag,
   selectedIncident,
   responderScope,
+fetchDispatchList
 }) {
   window.addEventListener("storage", (e) => {
     if (e.key === "logout") {
@@ -278,6 +279,7 @@ function IncidentDetails({
                 selectedResponders={selectedResponders}
                 setSelectedResponders={setSelectedResponders}
                 selectedIncident={selectedIncident}
+                fetchDispatchList={fetchDispatchList} // Pass fetchDispatchList to CommentsPanel
               />
             ) : (
               <>

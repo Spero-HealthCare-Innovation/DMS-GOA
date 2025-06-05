@@ -18,28 +18,6 @@ import {
 } from "../../../CommonStyle/Style";
 
 function SopRegister({ darkMode }) {
-    const port = import.meta.env.VITE_APP_API_KEY;
-    const { newToken, disaster } = useAuth();
-    const token = localStorage.getItem("access_token");
-    const [showSuccessAlert, setShowSuccessAlert] = useState(false);
-    const textColor = darkMode ? "#ffffff" : "#000000";
-    const bgColor = darkMode ? "#0a1929" : "#0a1929";
-    const labelColor = darkMode ? "#5FECC8" : "#1976d2";
-    const fontFamily = "Roboto, sans-serif";
-    const borderColor = darkMode ? "#7F7F7F" : "#ccc";
-
-    const theme = useTheme();
-    const isDarkMode = theme.palette.mode === "dark";
-    const selectStyles = getCustomSelectStyles(isDarkMode);
-
-    const [page, setPage] = useState(1);
-    const [rowsPerPage, setRowsPerPage] = useState(5);
-    const [anchorEl, setAnchorEl] = useState(null);
-
-    const [description, setDescription] = useState("");
-    const [selectedDisaster, setSelectedDisaster] = useState(null);
-    const userName = localStorage.getItem('userId');
-
     const EnquiryCard = styled("div")(() => ({
         display: "flex",
         alignItems: "center",
@@ -94,17 +72,46 @@ function SopRegister({ darkMode }) {
     const fontsTableBody = {
         fontFamily: "Roboto",
         fontWeight: 400,
-        fontSize: 13,
+        fontSize: 17,
         letterSpacing: 0,
         textAlign: "center",
     };
+
+    const port = import.meta.env.VITE_APP_API_KEY;
+    const { newToken, disaster } = useAuth();
+    const token = localStorage.getItem("access_token");
+    const textColor = darkMode ? "#ffffff" : "#000000";
+    const bgColor = darkMode ? "#0a1929" : "#0a1929";
+    const labelColor = darkMode ? "#5FECC8" : "#1976d2";
+    const fontFamily = "Roboto, sans-serif";
+    const borderColor = darkMode ? "#7F7F7F" : "#ccc";
+
+    const theme = useTheme();
+    const isDarkMode = theme.palette.mode === "dark";
+    const selectStyles = getCustomSelectStyles(isDarkMode);
+    const [description, setDescription] = useState("");
+    const [selectedDisaster, setSelectedDisaster] = useState(null);
+    const userName = localStorage.getItem('userId');
+    const [sop, setSop] = useState([]);
+
+    const [snackbarOpen, setSnackbarOpen] = useState(false);
+    const [snackbarMessage, setSnackbarMessage] = useState('');
+
+    // GET API SOP
+    const [page, setPage] = useState(1);
+    const [rowsPerPage, setRowsPerPage] = useState(5);
+    const [anchorEl, setAnchorEl] = useState(null);
+    const [selectedItem, setSelectedItem] = useState(null);
+    const open = Boolean(anchorEl);
+    const [sopId, setSopId] = useState(null);
+    const [isEditMode, setIsEditMode] = useState(false);
 
     const handleSubmit = async () => {
         const payload = {
             sop_description: description,
             disaster_id: selectedDisaster,
             sop_added_by: userName,
-            sop_modified_by: userName
+            sop_modified_by: userName,
         };
 
         try {
@@ -118,41 +125,159 @@ function SopRegister({ darkMode }) {
             });
 
             const data = await response.json();
-            if (response.status === 200) {
-                console.log(data);
+            if (response.status === 201) {
+                setSnackbarMessage("SOP Registered Successfully");
+                setSnackbarOpen(true);
+                await fetchSop();
+                setDescription("");
+                setSelectedDisaster("");
+            }
+            else if (response.status === 409) {
+                setSnackbarMessage("SOP already exists with this disaster type");
+                setSnackbarOpen(true);
+                setDescription("");
+                setSelectedDisaster("");
+            } else if (response.status === 500) {
+                setSnackbarMessage("Internal Server Error");
+                setSnackbarOpen(true);
             } else {
-                console.error('Error:', data);
+                setSnackbarMessage(data?.detail || "Something went wrong");
+                setSnackbarOpen(true);
             }
         } catch (error) {
             console.error('Error:', error);
         }
     };
 
-    const [alertMessage, setAlertMessage] = useState('');
-    const [alertType, setAlertType] = useState('success');
-
-    const showAlert = (message, type = 'success') => {
-        setAlertMessage(message);
-        setAlertType(type);
-        setShowSuccessAlert(true);
-        setTimeout(() => setShowSuccessAlert(false), 3000);
+    const handleOpen = (event, item) => {
+        setAnchorEl(event.currentTarget);
+        setSelectedItem(item);
     };
+
+    const handleClose = () => {
+        setAnchorEl(null);
+        setSelectedItem(null);
+    };
+
+    const fetchSop = async () => {
+        try {
+            const response = await fetch(`${port}/admin_web/sop_get`, {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token || newToken}`,
+                },
+            });
+
+            const data = await response.json();
+            if (response.status === 200) {
+                setSop(data);
+                console.log(data, "SOP");
+                setPage(1);
+            }
+        } catch (error) {
+            console.error("Error:", error);
+        }
+    };
+
+    useEffect(() => {
+        fetchSop();
+    }, [port, token, newToken]);
+
+    const handleEdit = async (selectedItem) => {
+        const Id = selectedItem.sop_id;
+        setSopId(Id);
+        setIsEditMode(true);
+
+        try {
+            const res = await axios.get(
+                `${port}/admin_web/sop_put/${Id}`,
+                {
+                    headers: {
+                        Authorization: `Bearer ${token || newToken}`,
+                    },
+                }
+            );
+            const data = res.data[0];
+
+            setSelectedDisaster(data.disaster_id);
+            setDescription(data.sop_description);
+        } catch (err) {
+            console.error("Error fetching department data:", err);
+        }
+    };
+
+    const handleUpdate = async () => {
+        const payload = {
+            sop_description: description,
+            disaster_id: selectedDisaster,
+            sop_modified_by: userName,
+        };
+
+        try {
+            const response = await fetch(`${port}/admin_web/sop_put/${sopId}/`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${token || newToken}`,
+                },
+                body: JSON.stringify(payload),
+            });
+
+            if (response.status === 200) {
+                setSnackbarMessage("SOP Updated Successfully");
+                setSnackbarOpen(true);
+                await fetchSop();
+            }
+            else if (response.status === 409) {
+                setSnackbarMessage("SOP already exists with this disaster type");
+                setSnackbarOpen(true);
+                setDescription("");
+                setSelectedDisaster("");
+            } else if (response.status === 500) {
+                setSnackbarMessage("Internal Server Error");
+                setSnackbarOpen(true);
+            }
+        } catch (error) {
+            console.error('Update error:', error);
+        }
+    };
+
+
+    const handleDelete = async (selectedItem) => {
+        try {
+            const res = await axios.delete(
+                `${port}/admin_web/sop_delete/${selectedItem.sop_id}/`,
+                {
+                    headers: {
+                        Authorization: `Bearer ${token || newToken}`,
+                    },
+                }
+            );
+
+            console.log("Delete success:", res.data);
+            setSnackbarMessage("SOP Deleted Successfully");
+            await fetchSop();
+            setSnackbarOpen(true);
+            handleClose();
+        } catch (err) {
+            console.error("Error deleting department:", err);
+        }
+    };
+
+    const totalPages = Math.ceil(sop.length / rowsPerPage);
+    const paginatedData = sop.slice((page - 1) * rowsPerPage, page * rowsPerPage);
 
     return (
         <div style={{ marginLeft: "3.5rem" }}>
             <Snackbar
-                open={showSuccessAlert}
-                anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+                open={snackbarOpen}
                 autoHideDuration={3000}
-                onClose={() => setShowSuccessAlert(false)}
+                onClose={() => setSnackbarOpen(false)}
+                anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
             >
-                <Alert
-                    onClose={() => setShowSuccessAlert(false)}
-                    severity={alertType}
-                    variant="filled"
-                    sx={{ width: '100%' }}
-                >
-                    {alertMessage}
+                <Alert onClose={() => setSnackbarOpen(false)} severity="success" sx={{ width: '100%' }}>
+                    {snackbarMessage}
                 </Alert>
             </Snackbar>
 
@@ -205,14 +330,16 @@ function SopRegister({ darkMode }) {
                             <Table>
                                 <TableHead>
                                     <TableRow>
-                                        <EnquiryCard sx={{
-                                            backgroundColor: "#5FECC8",
-                                            color: "#000",
-                                            display: "flex",
-                                            width: "100%",
-                                            borderRadius: 2,
-                                            p: 2,
-                                        }}>
+                                        <EnquiryCard
+                                            sx={{
+                                                backgroundColor: "#5FECC8",
+                                                color: "#000",
+                                                display: "flex",
+                                                width: "100%",
+                                                borderRadius: 2,
+                                                p: 2,
+                                            }}
+                                        >
                                             <StyledCardContent
                                                 sx={{
                                                     flex: 0.6,
@@ -233,9 +360,7 @@ function SopRegister({ darkMode }) {
                                                     ...fontsTableHeading,
                                                 }}
                                             >
-                                                <Typography variant="subtitle2">
-                                                    Disaster Name
-                                                </Typography>
+                                                <Typography variant="subtitle2">Disaster Name</Typography>
                                             </StyledCardContent>
 
                                             <StyledCardContent
@@ -246,9 +371,7 @@ function SopRegister({ darkMode }) {
                                                     ...fontsTableHeading,
                                                 }}
                                             >
-                                                <Typography variant="subtitle2">
-                                                    Description
-                                                </Typography>
+                                                <Typography variant="subtitle2">Description</Typography>
                                             </StyledCardContent>
 
                                             <StyledCardContent
@@ -265,54 +388,105 @@ function SopRegister({ darkMode }) {
                                 </TableHead>
 
                                 <TableBody>
-                                    <EnquiryCardBody
-                                        sx={{
-                                            backgroundColor: inputBgColor,
-                                            p: 2,
-                                            borderRadius: 2,
-                                            color: textColor,
-                                            display: "flex",
-                                            width: "100%",
-                                            mb: 1,
-                                        }}
-                                    >
-                                        <StyledCardContent sx={{ flex: 0.6, justifyContent: "center" }}>
-                                            <Typography variant="subtitle2" sx={fontsTableBody}>
-                                                1
-                                            </Typography>
-                                        </StyledCardContent>
+                                    {paginatedData.map((item, index) => (
+                                        <EnquiryCardBody
+                                            key={(page - 1) * rowsPerPage + index}
+                                            sx={{
+                                                backgroundColor: inputBgColor,
+                                                p: 2,
+                                                borderRadius: 2,
+                                                color: textColor,
+                                                display: "flex",
+                                                width: "100%",
+                                                mb: 1,
+                                            }}
+                                        >
+                                            <StyledCardContent sx={{ flex: 0.6, justifyContent: "center" }}>
+                                                <Typography variant="subtitle2" sx={fontsTableBody}>
+                                                    {(page - 1) * rowsPerPage + index + 1}
+                                                </Typography>
+                                            </StyledCardContent>
 
-                                        <StyledCardContent sx={{ flex: 1.9, justifyContent: "center", ...fontsTableBody }}>
-                                            <Typography variant="subtitle2">fffffffffffffffffffffff</Typography>
-                                        </StyledCardContent>
+                                            <StyledCardContent sx={{ flex: 1.9, justifyContent: "center", ...fontsTableBody }}>
+                                                <Typography variant="subtitle2">{item.disaster_name ? item.disaster_name : "-"}</Typography>
+                                            </StyledCardContent>
 
-                                        <StyledCardContent sx={{ flex: 2, justifyContent: "center", ...fontsTableBody }}>
-                                            <Typography variant="subtitle2">ffffffffffffffffffffffffff</Typography>
-                                        </StyledCardContent>
+                                            <StyledCardContent sx={{ flex: 2, justifyContent: "center", ...fontsTableBody }}>
+                                                <Typography variant="subtitle2">{item.sop_description || "No Description"}</Typography>
+                                            </StyledCardContent>
 
-                                        <StyledCardContent sx={{ flex: 0.5, justifyContent: "center", ...fontsTableBody }}>
-                                            <MoreHorizIcon
+                                            <StyledCardContent
                                                 sx={{
-                                                    color: "#00f0c0",
-                                                    cursor: "pointer",
-                                                    fontSize: 28,
+                                                    flex: 0.3,
                                                     justifyContent: "center",
                                                     ...fontsTableBody,
                                                 }}
-                                            />
-                                        </StyledCardContent>
-                                    </EnquiryCardBody>
+                                            >
+                                                <MoreHorizIcon
+                                                    onClick={(e) => handleOpen(e, item)}
+                                                    sx={{
+                                                        fontSize: "2em",
+                                                        color: "#00f0c0",
+                                                        cursor: "pointer",
+                                                        justifyContent: "center",
+                                                        ...fontsTableBody,
+                                                    }}
+                                                />
+                                            </StyledCardContent>
+                                        </EnquiryCardBody>
+                                    ))}
                                 </TableBody>
                             </Table>
                         </TableContainer>
 
-                        <Box
-                            display="flex"
-                            justifyContent="space-between"
-                            alignItems="center"
-                            mt={2}
-                            px={1}
+                        <Popover
+                            open={open}
+                            anchorEl={anchorEl}
+                            onClose={handleClose}
+                            anchorOrigin={{
+                                vertical: "center",
+                                horizontal: "right",
+                            }}
+                            transformOrigin={{
+                                vertical: "center",
+                                horizontal: "left",
+                            }}
+                            PaperProps={{
+                                sx: {
+                                    p: 2,
+                                    display: "flex",
+                                    flexDirection: "column",
+                                    gap: 1.5,
+                                    borderRadius: 2,
+                                    minWidth: 120,
+                                },
+                            }}
                         >
+                            <Button
+                                fullWidth
+                                variant="outlined"
+                                color="warning"
+                                startIcon={<EditOutlined />}
+                                onClick={() => handleEdit(selectedItem)}
+                            >
+                                Edit
+                            </Button>
+
+                            <Button
+                                fullWidth
+                                variant="outlined"
+                                color="error"
+                                startIcon={<DeleteOutline />}
+                                onClick={() => handleDelete(selectedItem)}
+                            // onClick={() => {
+                            //     setDeleteDepId(selectedItem.dep_id);
+                            //     setOpenDeleteDialog(true);
+                            // }}
+                            >
+                                Delete
+                            </Button>
+                        </Popover>
+                        <Box display="flex" justifyContent="space-between" alignItems="center" mt={2} px={1}>
                             <Box display="flex" alignItems="center" gap={1}>
                                 <Typography variant="body2" sx={{ color: textColor }}>
                                     Records per page:
@@ -320,7 +494,7 @@ function SopRegister({ darkMode }) {
                                 <Select
                                     value={rowsPerPage}
                                     onChange={(e) => {
-                                        setRowsPerPage(parseInt(e.target.value));
+                                        setRowsPerPage(parseInt(e.target.value, 10));
                                         setPage(1);
                                     }}
                                     size="small"
@@ -365,9 +539,25 @@ function SopRegister({ darkMode }) {
                                     sx={{
                                         cursor: page > 1 ? "pointer" : "not-allowed",
                                         userSelect: "none",
+                                        opacity: page > 1 ? 1 : 0.5,
                                     }}
                                 >
                                     &#8249;
+                                </Box>
+
+                                <Typography variant="body2">
+                                    {page} / {totalPages || 1}
+                                </Typography>
+
+                                <Box
+                                    onClick={() => page < totalPages && setPage(page + 1)}
+                                    sx={{
+                                        cursor: page < totalPages ? "pointer" : "not-allowed",
+                                        userSelect: "none",
+                                        opacity: page < totalPages ? 1 : 0.5,
+                                    }}
+                                >
+                                    &#8250;
                                 </Box>
                             </Box>
                         </Box>
@@ -376,62 +566,76 @@ function SopRegister({ darkMode }) {
 
                 <Grid item xs={12} md={4.9}>
                     <Paper elevation={3} sx={{ padding: 2, borderRadius: 3, backgroundColor: bgColor, mt: 1, mb: 5 }}>
-                        <Box sx={{ display: 'flex', gap: 1, mb: 2 }}>
-                            <Select
-                                select
-                                fullWidth
-                                size="small"
-                                label="Disaster Type"
-                                variant="outlined"
-                                sx={selectStyles}
-                                value={selectedDisaster}
-                                onChange={(e) => setSelectedDisaster(e.target.value)}
-                            >
-                                <MenuItem disabled value="">
-                                    Select Disaster Type
-                                </MenuItem>
-                                {disaster.map((item) => (
-                                    <MenuItem key={item.disaster_id} value={item.disaster_id}>
-                                        {item.disaster_name}
-                                    </MenuItem>
-                                ))}
-                            </Select>
+                        <Box sx={{ mb: 2 }}>
+                            <Grid container spacing={2}>
+                                <Grid item xs={6} sm={6}>
+                                    <TextField
+                                        select
+                                        fullWidth
+                                        size="small"
+                                        label="Disaster Type"
+                                        variant="outlined"
+                                        value={selectedDisaster}
+                                        onChange={(e) => setSelectedDisaster(e.target.value)}
+                                        InputLabelProps={{ shrink: true }}
+                                        SelectProps={{
+                                            MenuProps: {
+                                                PaperProps: {
+                                                    style: {
+                                                        maxHeight: 200,
+                                                        overflow: 'auto',
+                                                    },
+                                                },
+                                            },
+                                        }}
+                                    >
+                                        {disaster.map((item) => (
+                                            <MenuItem key={item.disaster_id} value={item.disaster_id}>
+                                                {item.disaster_name}
+                                            </MenuItem>
+                                        ))}
+                                    </TextField>
+                                </Grid>
 
-                            <TextField
-                                fullWidth
-                                size="small"
-                                placeholder="Discription"
-                                InputLabelProps={{ shrink: false }}
-                                sx={selectStyles}
-                                value={description}
-                                onChange={(e) => setDescription(e.target.value)}
-                            />
+                                <Grid item xs={6} sm={6}>
+                                    <TextField
+                                        fullWidth
+                                        size="small"
+                                        placeholder="Description"
+                                        InputLabelProps={{ shrink: false }}
+                                        value={description}
+                                        onChange={(e) => setDescription(e.target.value)}
+                                    />
+                                </Grid>
+                            </Grid>
                         </Box>
 
                         <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, mt: 3, mb: 1 }}>
-                            <Button
-                                variant="contained"
-                                sx={{
-                                    mt: 2,
-                                    width: "40%",
-                                    backgroundColor: "#00f0c0",
-                                    color: "black",
-                                    fontWeight: "bold",
-                                    borderRadius: "12px",
-                                    "&:hover": {
-                                        backgroundColor: bgColor,
-                                        color: "white !important",
-                                    },
-                                }}
-                                onClick={handleSubmit}
-                            >
-                                Submit
-                            </Button>
+                            <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, mt: 3, mb: 1 }}>
+                                <Button
+                                    variant="contained"
+                                    sx={{
+                                        mt: 2,
+                                        width: "40%",
+                                        backgroundColor: "#00f0c0",
+                                        color: "black",
+                                        fontWeight: "bold",
+                                        borderRadius: "12px",
+                                        "&:hover": {
+                                            backgroundColor: bgColor,
+                                            color: "white !important",
+                                        },
+                                    }}
+                                    onClick={isEditMode ? handleUpdate : handleSubmit}
+                                >
+                                    {isEditMode ? 'Update' : 'Submit'}
+                                </Button>
+                            </Box>
                         </Box>
                     </Paper>
                 </Grid>
             </Grid>
-        </div>
+        </div >
     )
 }
 

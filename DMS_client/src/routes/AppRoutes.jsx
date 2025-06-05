@@ -15,6 +15,7 @@ const AddGroup = lazy(() => import("../Componenets/SuperAdmin/System/Groups/Add_
 const AddEmployee = lazy(() => import("../Componenets/SuperAdmin/System/Employee_reg/Add_employee"));
 const Map = lazy(() => import("../Componenets/DispatchModule/Map/Map"));
 const MultiScreen = lazy(() => import("../Page/multiscreen"));
+const ClosureDetail = lazy(() => import("../Componenets/SuperAdmin/Closure/ClosureDetail"));
 
 // Spinner Loader component
 const Loader = () => (
@@ -94,7 +95,7 @@ const AppRoutes = ({ darkMode, setIsLoggedIn }) => {
           }
         />
         <Route
-          path="/Incident"
+          path="/create-incident"
           element={
             <PrivateRoute>
               <Incident darkMode={darkMode} />
@@ -102,7 +103,7 @@ const AppRoutes = ({ darkMode, setIsLoggedIn }) => {
           }
         />
         <Route
-          path="/register sop"
+          path="/registersop"
           element={
             <PrivateRoute>
               <SopRegister darkMode={darkMode} />
@@ -114,6 +115,14 @@ const AppRoutes = ({ darkMode, setIsLoggedIn }) => {
           element={
             <PrivateRoute>
               <RegisterResponder darkMode={darkMode} />
+            </PrivateRoute>
+          }
+        />
+         <Route
+          path="/Closure Detail"
+          element={
+            <PrivateRoute>
+              <ClosureDetail darkMode={darkMode} />
             </PrivateRoute>
           }
         />

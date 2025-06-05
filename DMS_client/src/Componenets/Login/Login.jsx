@@ -20,8 +20,7 @@ import CachedIcon from "@mui/icons-material/Cached";
 function Login() {
   const port = import.meta.env.VITE_APP_API_KEY;
   const socketUrl = import.meta.env.VITE_SOCKET_API_KEY;
-  console.log(socketUrl, "socketUrlsocketUrlsocketUrl");
-
+  console.log(socketUrl, "socketUrlsocketUrlsocketUrl")
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
   const navigate = useNavigate();
@@ -310,17 +309,30 @@ function Login() {
             try {
               console.log(" Creating WebSocket connection for group 3");
               // const socket = new WebSocket(`ws://192.168.1.116:7777/send_data`);
-              const socket = new WebSocket(`${socketUrl}/send_data`);
-              socket.onopen = () => {
-                console.log(" WebSocket connected for group 3");
-                socket.send("true");
-                console.log(" Sent 'true' to server for group 3");
-              };
-              socket.onerror = (err) => {
-                console.error(" WebSocket error:", err);
-              };
+              //   const socket = new WebSocket(`${socketUrl}/send_data`);
+              //   socket.onopen = () => {
+              //     console.log(" WebSocket connected for group 3");
+              //     socket.send("true");
+              //     console.log(" Sent 'true' to server for group 3");
+              //   };
+              //   socket.onerror = (err) => {
+              //     console.error(" WebSocket error:", err);
+              //   };
+              // } catch (err) {
+              //   console.error("WebSocket connection failed:", err);
+              // }
+
+              fetch('http://localhost:9000/launch')
+                .then(res => res.text())
+                .then(data => {
+                  console.log("Dashboard launched:", data);
+                  alert("Dashboards launched!");
+                })
+
+
             } catch (err) {
-              console.error("WebSocket connection failed:", err);
+              console.error("API call failed:", err);
+              alert("Failed to launch dashboards.");
             }
           }, 2000);
         } else if (group === "1") {
