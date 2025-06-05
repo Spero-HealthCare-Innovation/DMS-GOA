@@ -23,7 +23,7 @@ import {
 import CloseIcon from "@mui/icons-material/Close";
 import { styled } from "@mui/material/styles";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import TextSnippetIcon from '@mui/icons-material/TextSnippet';
+import TextSnippetIcon from "@mui/icons-material/TextSnippet";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import { useLocation } from "react-router-dom";
 import { useState } from "react";
@@ -118,6 +118,11 @@ function SopTask({
   setIncidentId, // Default to false if not provided
 }) {
   const socketUrl = import.meta.env.VITE_SOCKET_API_KEY;
+  const AccessToken = localStorage.getItem("access_token");
+  const {
+      newToken
+    ,
+    } = useAuth();
   const location = useLocation();
   const [alerts, setAlerts] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
@@ -137,7 +142,6 @@ function SopTask({
   const dispatchListdata = dataList.slice(startIndex, endIndex);
   const { setSelectedIncidentFromSop, setDisasterIdFromSop } = useAuth();
 
-
   window.addEventListener("storage", (e) => {
     if (e.key === "logout") {
       location.href = "/login";
@@ -146,7 +150,7 @@ function SopTask({
   useEffect(() => {
     let socket;
     const timer = setTimeout(() => {
-      socket = new WebSocket(`${socketUrl}/ws/weather_alerts_trigger2`);
+      socket = new WebSocket(`${socketUrl}/ws/weather_alerts_trigger2?token=${AccessToken || newToken}`);
 
       socket.onopen = () => {
         console.log("WebSocket connected");
@@ -442,7 +446,6 @@ function SopTask({
                         size="large"
                         color="error"
                         onClick={() => {
-                        
                           console.log("Cancel clicked for", item);
                         }}
                         sx={{
@@ -586,18 +589,20 @@ function SopTask({
                             </IconButton>
                           </Tooltip>
 
-                         <Tooltip title="Closure Details">
-  <IconButton
-    onClick={() => {
-      setSelectedIncident(item);
-      setFlag(0);
-      setViewmode("closure");
-    }}
-    size="large"
-  >
-    <TextSnippetIcon sx={{ color: "#4caf50", fontSize: 28 }} />
-  </IconButton>
-</Tooltip>
+                          <Tooltip title="Closure Details">
+                            <IconButton
+                              onClick={() => {
+                                setSelectedIncident(item);
+                                setFlag(0);
+                                setViewmode("closure");
+                              }}
+                              size="large"
+                            >
+                              <TextSnippetIcon
+                                sx={{ color: "#4caf50", fontSize: 28 }}
+                              />
+                            </IconButton>
+                          </Tooltip>
                         </StyledCardContent>
                       </EnquiryCardBody>
                     ))
