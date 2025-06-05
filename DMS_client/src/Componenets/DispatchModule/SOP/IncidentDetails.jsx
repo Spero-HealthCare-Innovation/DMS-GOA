@@ -7,12 +7,13 @@ import {
   Checkbox,
   FormControlLabel,
   Skeleton,
+  Tooltip,
 } from "@mui/material";
 import CommentsPanel from "./CommentsPanel";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 
 import { useAuth } from "../../../Context/ContextAPI";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 function IncidentDetails({
   darkMode,
@@ -41,6 +42,8 @@ function IncidentDetails({
   const [selectedResponders, setSelectedResponders] = useState(
     responderScope?.responder_scope?.map((item) => item.pk_id) || []
   );
+
+  const comments = incidentDetails?.comments || [];
 
   // Define colors and styles based on dark mode
   const labelColor = darkMode ? "#5FECC8" : "#1976d2";
@@ -71,6 +74,16 @@ function IncidentDetails({
       )}
     </Box>
   );
+
+  useEffect(() => {
+    if (
+      responderScope?.responder_scope?.length > 0 &&
+      selectedResponders.length === 0
+    ) {
+      const defaultIds = responderScope.responder_scope.map((r) => r.pk_id);
+      setSelectedResponders(defaultIds); // ✅ Sirf pehli baar set karega
+    }
+  }, [responderScope]);
 
   return (
     <>
@@ -103,7 +116,23 @@ function IncidentDetails({
             {flag === 1 ? (
               <>
                 {renderText("Alert ID", selectedIncident?.pk_id)}
-                {renderText("Disaster Id", selectedIncident?.disaster_id_id)}
+                {renderText(
+                  "Time",
+                  selectedIncident?.alert_datetime
+                    ? new Date(selectedIncident.alert_datetime).toLocaleString(
+                        "en-US",
+                        {
+                          day: "2-digit",
+                          month: "long",
+                          year: "numeric",
+                          hour: "numeric",
+                          minute: "2-digit",
+                          hour12: true,
+                        }
+                      )
+                    : "N/A"
+                )}
+                {/* {renderText("Disaster Id", selectedIncident?.disaster_id_id)} */}
                 {renderText("Disaster Type", selectedIncident?.disaster_name)}
               </>
             ) : (
@@ -141,21 +170,21 @@ function IncidentDetails({
                     Response Procedure
                   </Typography>
                   {responderScope?.sop_responses?.length > 0 &&
- incidentDetails?.sop_responses?.[0]?.sop_description ? (
-  <Typography variant="subtitle2" sx={{ fontFamily }}>
-    {incidentDetails.sop_responses[0].sop_description}
-  </Typography>
-) : (
-  <Box display="flex" alignItems="center" gap={1} mt={1}>
-    <InfoOutlinedIcon color="disabled" />
-    <Typography variant="subtitle2" sx={{ fontFamily }}>
-      Response procedure data not available.
-    </Typography>
-  </Box>
-)}
+                  incidentDetails?.sop_responses?.[0]?.sop_description ? (
+                    <Typography variant="subtitle2" sx={{ fontFamily }}>
+                      {incidentDetails.sop_responses[0].sop_description}
+                    </Typography>
+                  ) : (
+                    <Box display="flex" alignItems="center" gap={1} mt={1}>
+                      <InfoOutlinedIcon color="disabled" />
+                      <Typography variant="subtitle2" sx={{ fontFamily }}>
+                        Response procedure data not available.
+                      </Typography>
+                    </Box>
+                  )}
                 </Box>
 
-              <Box>
+                <Box>
                   <Typography
                     variant="subtitle2"
                     sx={{ color: labelColor, fontWeight: 500, fontFamily }}
@@ -174,15 +203,13 @@ function IncidentDetails({
                                   checked={selectedResponders.includes(pk_id)}
                                   onChange={(e) => {
                                     if (e.target.checked) {
-                                      setSelectedResponders([
-                                        ...selectedResponders,
+                                      setSelectedResponders((prev) => [
+                                        ...prev,
                                         pk_id,
                                       ]);
                                     } else {
-                                      setSelectedResponders(
-                                        selectedResponders.filter(
-                                          (id) => id !== pk_id
-                                        )
+                                      setSelectedResponders((prev) =>
+                                        prev.filter((id) => id !== pk_id)
                                       );
                                     }
                                   }}
@@ -256,41 +283,51 @@ function IncidentDetails({
                       <Stack spacing={1} mt={1}>
                         <Box display="flex" flexWrap="wrap" gap={1}>
                           {incidentDetails["responders scope"].map(
-                            ({ responder_id, responder_name }) => (
-                              <FormControlLabel
-                                key={responder_id}
-                                control={
-                                  <Checkbox
-                                    checked={selectedResponders.includes(
-                                      responder_id
-                                    )}
-                                    onChange={(e) => {
-                                      if (e.target.checked) {
-                                        setSelectedResponders((prev) => [
-                                          ...prev,
-                                          responder_id,
-                                        ]);
-                                      } else {
-                                        setSelectedResponders((prev) =>
-                                          prev.filter(
-                                            (id) => id !== responder_id
-                                          )
-                                        );
-                                      }
-                                    }}
-                                    sx={{ color: labelColor }}
+                            ({ responder_id, responder_name }) => {
+                              const isChecked =
+                                Array.isArray(incident?.responder_scope) &&
+                                incident.responder_scope.includes(responder_id);
+
+                              return (
+                                <Tooltip
+                                  key={responder_id}
+                                  title={
+                                    isChecked
+                                      ? "Pre-assigned responder"
+                                      : "Responder not assigned"
+                                  }
+                                  placement="top"
+                                >
+                                  <FormControlLabel
+                                    control={
+                                      <Checkbox
+                                        checked={isChecked}
+                                        disabled
+                                        sx={{
+                                          color: labelColor,
+                                          "&.Mui-checked": {
+                                            color: "#00bfa5",
+                                          },
+                                          "&:hover": {
+                                            backgroundColor:
+                                              "rgba(0, 191, 165, 0.1)",
+                                            borderRadius: "6px",
+                                          },
+                                        }}
+                                      />
+                                    }
+                                    label={
+                                      <Typography
+                                        variant="subtitle2"
+                                        sx={{ fontFamily }}
+                                      >
+                                        {responder_name}
+                                      </Typography>
+                                    }
                                   />
-                                }
-                                label={
-                                  <Typography
-                                    variant="subtitle2"
-                                    sx={{ fontFamily }}
-                                  >
-                                    {responder_name}
-                                  </Typography>
-                                }
-                              />
-                            )
+                                </Tooltip>
+                              );
+                            }
                           )}
                         </Box>
                       </Stack>
@@ -320,6 +357,8 @@ function IncidentDetails({
                 selectedResponders={selectedResponders}
                 setSelectedResponders={setSelectedResponders}
                 selectedIncident={selectedIncident}
+                incidentDetails={incidentDetails}
+                comments={comments} // Pass comments to
                 fetchDispatchList={fetchDispatchList} // Pass fetchDispatchList to CommentsPanel
               />
             ) : (

@@ -20,8 +20,10 @@ import {
   AddCircleOutline,
   CheckCircle,
 } from "@mui/icons-material";
+import CloseIcon from "@mui/icons-material/Close";
 import { styled } from "@mui/material/styles";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import TextSnippetIcon from '@mui/icons-material/TextSnippet';
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import { useLocation } from "react-router-dom";
 import { useState } from "react";
@@ -29,7 +31,7 @@ import { useRef } from "react";
 import { useEffect } from "react";
 import { tasks } from "./dummydata";
 import { Tooltip } from "@mui/material";
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from "react-router-dom";
 import Snackbar from "@mui/material/Snackbar";
 import Alert from "@mui/material/Alert";
 import CustomPagination from "../../../common/CustomPagination";
@@ -92,6 +94,7 @@ const Alerts = [
   "Rain",
   "Time",
   "Added By",
+  "Actions",
 ];
 
 const DispatchHeaders = [
@@ -407,23 +410,49 @@ function SopTask({
                     >
                       {item.alert_datetime
                         ? new Date(item.alert_datetime).toLocaleString(
-                          "en-US",
-                          {
-                            day: "2-digit",
-                            month: "long",
-                            year: "numeric",
-                            hour: "numeric",
-                            minute: "2-digit",
-                            hour12: true,
-                          }
-                        )
+                            "en-US",
+                            {
+                              day: "2-digit",
+                              month: "long",
+                              year: "numeric",
+                              hour: "numeric",
+                              minute: "2-digit",
+                              hour12: true,
+                            }
+                          )
                         : "N/A"}
                     </Typography>
                   </StyledCardContent>
                   <StyledCardContent sx={{ flex: 1, justifyContent: "center" }}>
                     <Typography variant="subtitle2">{item.added_by}</Typography>
                   </StyledCardContent>
-
+                  <StyledCardContent
+                    sx={{
+                      flex: 1,
+                      justifyContent: "center",
+                      display: "flex",
+                      alignItems: "center",
+                    }}
+                  >
+                    <Tooltip title="Cancel">
+                      <IconButton
+                        size="large"
+                        color="error"
+                        onClick={() => {
+                        
+                          console.log("Cancel clicked for", item);
+                        }}
+                        sx={{
+                          "&:hover": {
+                            backgroundColor: "rgba(255, 0, 0, 0.1)",
+                          },
+                        }}
+                        aria-label="cancel"
+                      >
+                        <CloseIcon fontSize="small" />
+                      </IconButton>
+                    </Tooltip>
+                  </StyledCardContent>
                 </EnquiryCardBody>
               ))
             )}
@@ -482,16 +511,16 @@ function SopTask({
                           <Typography variant="subtitle2">
                             {item.inc_added_date
                               ? new Date(item.inc_added_date).toLocaleString(
-                                "en-US",
-                                {
-                                  day: "2-digit",
-                                  month: "long",
-                                  year: "numeric",
-                                  hour: "numeric",
-                                  minute: "2-digit",
-                                  hour12: true,
-                                }
-                              )
+                                  "en-US",
+                                  {
+                                    day: "2-digit",
+                                    month: "long",
+                                    year: "numeric",
+                                    hour: "numeric",
+                                    minute: "2-digit",
+                                    hour12: true,
+                                  }
+                                )
                               : "N/A"}
                           </Typography>
                         </StyledCardContent>
@@ -552,19 +581,18 @@ function SopTask({
                             </IconButton>
                           </Tooltip>
 
-                          <Tooltip title="Closure Details">
-                            <IconButton
-                              onClick={() => {
-                                setSelectedIncident(item);
-                                setFlag(0);
-                                setViewmode("closure");
-                              }}
-                            >
-                              <CheckCircle
-                                sx={{ color: "#4caf50", fontSize: 28 }}
-                              />
-                            </IconButton>
-                          </Tooltip>
+                         <Tooltip title="Closure Details">
+  <IconButton
+    onClick={() => {
+      setSelectedIncident(item);
+      setFlag(0);
+      setViewmode("closure");
+    }}
+    size="large"
+  >
+    <TextSnippetIcon sx={{ color: "#4caf50", fontSize: 28 }} />
+  </IconButton>
+</Tooltip>
                         </StyledCardContent>
                       </EnquiryCardBody>
                     ))
