@@ -43,6 +43,7 @@ export const AuthProvider = ({ children }) => {
   console.log(disasterIncident, 'disasterIncident');
   // 🔹 sop page
   const [responderScope, setResponderScope] = useState([]);
+  console.log("Selected Position",selectedPosition)
 
   useEffect(() => {
     const disasterValue = disaterid || disasterIncident;
@@ -216,6 +217,7 @@ export const AuthProvider = ({ children }) => {
       }
     });
 
+    console.log("Lets see",response.data.items)
     setSuggestions(response.data.items.filter(item => item.position));
 
   };
