@@ -140,18 +140,19 @@ function IncidentDetails({
                   >
                     Response Procedure
                   </Typography>
-                  {responderScope?.sop_responses?.length > 0 ? (
-                    <Typography variant="subtitle2" sx={{ fontFamily }}>
-                      {incidentDetails.sop_responses[0].sop_description}
-                    </Typography>
-                  ) : (
-                    <Box display="flex" alignItems="center" gap={1} mt={1}>
-                      <InfoOutlinedIcon color="disabled" />
-                      <Typography variant="subtitle2" sx={{ fontFamily }}>
-                        Response procedure data not available.
-                      </Typography>
-                    </Box>
-                  )}
+                  {responderScope?.sop_responses?.length > 0 &&
+ incidentDetails?.sop_responses?.[0]?.sop_description ? (
+  <Typography variant="subtitle2" sx={{ fontFamily }}>
+    {incidentDetails.sop_responses[0].sop_description}
+  </Typography>
+) : (
+  <Box display="flex" alignItems="center" gap={1} mt={1}>
+    <InfoOutlinedIcon color="disabled" />
+    <Typography variant="subtitle2" sx={{ fontFamily }}>
+      Response procedure data not available.
+    </Typography>
+  </Box>
+)}
                 </Box>
 
               <Box>
