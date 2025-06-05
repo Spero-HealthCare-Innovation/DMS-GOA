@@ -688,7 +688,8 @@ class Manual_Call_Incident_api(APIView):
             "latitude": incident_instance.latitude,
             "longitude": incident_instance.longitude,
             "added_by": incident_instance.inc_added_by,
-            "modified_by": incident_instance.inc_modified_by
+            "modified_by": incident_instance.inc_modified_by,
+            "alert_type": incident_instance.alert_type
         }
         weather_alert_serializer = WeatherAlertSerializer(data=weather_alert_data)
         if not weather_alert_serializer.is_valid():
