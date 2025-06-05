@@ -301,6 +301,7 @@ class Weather_alerts(models.Model):
     precipitation = models.FloatField(null=True,blank=True)
     weather_code = models.IntegerField(null=True,blank=True)
     disaster_id = models.ForeignKey(DMS_Disaster_Type,on_delete=models.CASCADE,null=True,blank=True)
+    alert_type = models.IntegerField(null=True,blank=True)
     added_by=models.CharField(max_length=255,null=True,blank=True)
     added_date = models.DateTimeField(auto_now=True)
     modified_by = models.CharField(max_length=255, null=True, blank=True)
