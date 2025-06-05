@@ -49,6 +49,7 @@ export const AuthProvider = ({ children }) => {
   console.log(responderScopeForDispatch, "disasterIncident");
 
   const [selectedIncidentFromSop, setSelectedIncidentFromSop] = useState(null);
+// const [disasterIdFromSop, setDisasterIdFromSop] = useState(null);
 
   useEffect(() => {
     const disasterValue = disaterid || disasterIncident || disasterIdFromSop;

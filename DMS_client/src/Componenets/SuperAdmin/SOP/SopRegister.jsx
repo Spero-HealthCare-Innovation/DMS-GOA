@@ -376,7 +376,7 @@ function SopRegister({ darkMode }) {
 
                                             <StyledCardContent
                                                 sx={{
-                                                    flex: 1.9,
+                                                    flex: 1.5,
                                                     borderRight: "1px solid black",
                                                     justifyContent: "center",
                                                     ...fontsTableHeading,
@@ -387,7 +387,7 @@ function SopRegister({ darkMode }) {
 
                                             <StyledCardContent
                                                 sx={{
-                                                    flex: 2,
+                                                    flex: 1.6,
                                                     borderRight: "1px solid black",
                                                     justifyContent: "center",
                                                     ...fontsTableHeading,
@@ -398,7 +398,7 @@ function SopRegister({ darkMode }) {
 
                                             <StyledCardContent
                                                 sx={{
-                                                    flex: 0.5,
+                                                    flex: 1,
                                                     justifyContent: "center",
                                                     ...fontsTableHeading,
                                                 }}
