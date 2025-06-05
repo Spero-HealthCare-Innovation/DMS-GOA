@@ -33,7 +33,6 @@ export const AuthProvider = ({ children }) => {
 
   const [departments, setDepartments] = useState([]);
   const [disaterid, setDisaterid] = useState(null);
-  const [disasterIdFromSop, setDisasterIdFromSop] = useState(null);
   console.log(disasterIdFromSop, "disasterIdFromSop");
 
   const [disasterIncident, setDisasterIncident] = useState(null);
@@ -49,7 +48,7 @@ export const AuthProvider = ({ children }) => {
   console.log(responderScopeForDispatch, "disasterIncident");
 
   const [selectedIncidentFromSop, setSelectedIncidentFromSop] = useState(null);
-const [disasterIdFromSop, setDisasterIdFromSop] = useState(null);
+  const [disasterIdFromSop, setDisasterIdFromSop] = useState(null);
 
   useEffect(() => {
     const disasterValue = disaterid || disasterIncident || disasterIdFromSop;
@@ -340,9 +339,9 @@ const [disasterIdFromSop, setDisasterIdFromSop] = useState(null);
         setPopupText,
         setQuery,
         selectedIncidentFromSop,
-setSelectedIncidentFromSop,
-disasterIdFromSop,
-setDisasterIdFromSop,
+        setSelectedIncidentFromSop,
+        disasterIdFromSop,
+        setDisasterIdFromSop,
         responderScopeForDispatch,
         setResponderScopeForDispatch,
       }}
