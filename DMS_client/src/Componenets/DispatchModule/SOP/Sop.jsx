@@ -39,8 +39,9 @@ function Sop({ darkMode, setDarkMode }) {
   console.log(" incidentDetails", incidentDetails);
   const [incidentId, setIncidentId] = useState(null);
   // const [disasterIdFromSop, setDisasterIdFromSop] = useState(null);
+    const { setSelectedIncidentFromSop } = useAuth();
 
-  console.log("Incident", incidentId);
+  
   const [dispatchList, setDispatchList] = useState([]);
   const [loading, setLoading] = useState(false);
   const [viewmode, setViewmode] = useState("incident");
@@ -48,16 +49,30 @@ function Sop({ darkMode, setDarkMode }) {
   const [showSnackbar, setShowSnackbar] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
 
-  useEffect(() => {
-    if (selectedIncident?.disaster_id_id) {
-      console.log(
-        "Setting disaster id in context:",
-        selectedIncident.disaster_id_id
-      );
-      setDisaterid(selectedIncident.disaster_id_id);
-      fetchResponderScope(selectedIncident.disaster_id_id);
-    }
-  }, [selectedIncident]);
+  // useEffect(() => {
+  //   if (selectedIncident?.disaster_id_id) {
+  //     console.log(
+  //       "Setting disaster id in context:",
+  //       selectedIncident.disaster_id_id
+  //     );
+  //     setDisaterid(selectedIncident.disaster_id_id);
+  //     fetchResponderScope(selectedIncident.disaster_id_id);
+  //   }
+  // }, [selectedIncident]);
+
+
+ useEffect(() => {
+  if (selectedIncident?.disaster_id_id) {
+    console.log(
+      "Setting disaster id in context:",
+      selectedIncident.disaster_id_id
+    );
+    setDisaterid(selectedIncident.disaster_id_id);
+    fetchResponderScope(selectedIncident.disaster_id_id);
+    setSelectedIncidentFromSop(selectedIncident); // Add this line
+  }
+}, [selectedIncident]);
+
 
   useEffect(() => {
     const handleOnline = () => {
@@ -112,36 +127,77 @@ function Sop({ darkMode, setDarkMode }) {
     fetchDispatchList();
   }, []);
 
-  const fetchIncidentDetails = async () => {
-    if (!incidentId) return;
-    console.log("Fetching incident details for ID:", incidentId);
-    try {
-      setLoading(true);
-      const res = await axios.get(
-        `${port}/admin_web/incident_get/${incidentId}/`,
-        {
-          headers: {
-            Authorization: `Bearer ${Token || newToken}`,
-          },
-        }
-      );
-      const incidentData = res.data;
-      console.log(
-        "Disaster Detail Fetched",
-        incidentData.incident_details[0]?.disaster_type
-      );
-      setDisasterIdFromSop(incidentData.incident_details[0]?.disaster_type);
+  // const fetchIncidentDetails = async () => {
+  //   if (!incidentId) return;
+  //   console.log("Fetching incident details for ID:", incidentId);
+  //   try {
+  //     setLoading(true);
+  //     const res = await axios.get(
+  //       `${port}/admin_web/incident_get/${incidentId}/`,
+  //       {
+  //         headers: {
+  //           Authorization: `Bearer ${Token || newToken}`,
+  //         },
+  //       }
+  //     );
+  //     const incidentData = res.data;
+  //     console.log(
+  //       "Disaster Detail Fetched",
+  //       incidentData.incident_details[0]?.disaster_type
+  //     );
+  //     setDisasterIdFromSop(incidentData.incident_details[0]?.disaster_type);
 
-      setIncidentDetails(res.data);
-      setSelectedIncident(res.data);
-    } catch (error) {
-      console.error("Error fetching incident details:", error);
-      setSnackbarMessage("Failed to load incident details");
-      setShowSnackbar(true);
-    } finally {
-      setLoading(false);
-    }
-  };
+  //     setIncidentDetails(res.data);
+  //     // console.log("Incident Details:", res.data);
+  //     setSelectedIncident(res.data);
+  //   } catch (error) {
+  //     console.error("Error fetching incident details:", error);
+  //     setSnackbarMessage("Failed to load incident details");
+  //     setShowSnackbar(true);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+  
+ const fetchIncidentDetails = async () => {
+  if (!incidentId) return;
+  console.log("Fetching incident details for ID:", incidentId);
+  try {
+    setLoading(true);
+    const res = await axios.get(
+      `${port}/admin_web/incident_get/${incidentId}/`,
+      {
+        headers: {
+          Authorization: `Bearer ${Token || newToken}`,
+        },
+      }
+    );
+    const incidentData = res.data;
+    console.log(
+      "Disaster Detail Fetched",
+      incidentData.incident_details[0]?.disaster_type
+    );
+    
+    // Create enhanced incident object with proper data
+    const enhancedIncident = {
+      ...incidentData,
+      incident_id: incidentData.IncidentId || incidentData.incident_id,
+      disaster_name: incidentData.incident_details[0]?.disaster_type || incidentData.disaster_name
+    };
+    
+    setDisasterIdFromSop(incidentData.incident_details[0]?.disaster_type);
+    setIncidentDetails(incidentData);
+    setSelectedIncident(enhancedIncident);
+    setSelectedIncidentFromSop(enhancedIncident); // Set with enhanced data
+  } catch (error) {
+    console.error("Error fetching incident details:", error);
+    setSnackbarMessage("Failed to load incident details");
+    setShowSnackbar(true);
+  } finally {
+    setLoading(false);
+  }
+};
+  
   useEffect(() => {
     if (incidentId) {
       fetchIncidentDetails(); // Remove the param
@@ -200,6 +256,7 @@ function Sop({ darkMode, setDarkMode }) {
               selectedIncident={selectedIncident}
               responderScope={responderScope}
               fetchResponderScope={fetchResponderScope}
+              
             />
           </Grid>
         )}
