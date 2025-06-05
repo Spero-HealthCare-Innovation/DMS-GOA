@@ -107,3 +107,6 @@ admin.site.register(DMS_SOP)
 admin.site.register(DMS_Caller)
 admin.site.register(DMS_Disaster_Responder)
 admin.site.register(DMS_Responder)
+admin.site.register(DMS_Summary)
+admin.site.register(DMS_Comments)
+

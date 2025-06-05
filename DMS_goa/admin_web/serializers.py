@@ -249,9 +249,16 @@ class ChangePasswordputSerializer(serializers.ModelSerializer):
         fields = ['password']
 
 class SopSerializer(serializers.ModelSerializer):
+    disaster_name=serializers.CharField(source='disaster_id.disaster_name', read_only=True)
     class Meta:
         model = DMS_SOP
-        fields = '__all__'
+        # fields = '__all__'
+        fields = ['sop_id','sop_description','disaster_id','sop_added_by','sop_modified_by','disaster_name']
+        
+class Sop_Put_Serializer(serializers.ModelSerializer):
+    class Meta:
+        model = DMS_SOP
+        fields = ['sop_description','disaster_id']
 
 class WeatherAlertSerializer(serializers.ModelSerializer):
     class Meta:
@@ -264,31 +271,58 @@ class WeatherAlertSerializer(serializers.ModelSerializer):
 #         model = DMS_Incident
 #         fields = '__all__' 
 
+class NotifySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DMS_Notify
+        fields = ['alert_type_id','disaster_type','alert_code']
 
+        
 class CommentsSerializer(serializers.ModelSerializer):
     class Meta:
         model = DMS_Comments
-        exclude = ['incident_id','alert_id','comm_modified_by','comm_modified_date']
+        exclude = ['alert_id','comm_modified_by','comm_modified_date']
 
 class Incident_Serializer(serializers.ModelSerializer):
-    comments = CommentsSerializer(write_only=True)
+    responder_scope = serializers.ListField(child=serializers.CharField(), write_only=True)
+    comments = serializers.CharField(write_only=True)
+    comm_added_by = serializers.CharField(write_only=True)
 
     class Meta:
         model = DMS_Incident
-        fields = '__all__'  
-        extra_fields = ['comments']
+        fields = '__all__'
+        extra_fields = ['latitude','longitude','responder_scope', 'comments', 'comm_added_by']
 
     def create(self, validated_data):
-        comments_data = validated_data.pop('comments')
-        incident = DMS_Incident.objects.create(**validated_data)
+        responder_scope = validated_data.pop('responder_scope', [])
+        comments_text = validated_data.pop('comments')
+        comm_added_by = validated_data.pop('comm_added_by')
 
-        DMS_Comments.objects.create(
-            alert_id=incident.alert_id,
-            incident_id=incident,
-            **comments_data
+        notify = DMS_Notify.objects.create(
+            alert_type_id=responder_scope,
+            disaster_type=validated_data.get('disaster_type'),
+            not_added_by=validated_data.get('inc_added_by'),
         )
 
+        incident = DMS_Incident.objects.create(
+            responder_scope=responder_scope,
+            notify_id=notify,
+            **validated_data
+        )
+
+        comment = DMS_Comments.objects.create(
+            alert_id=incident.alert_id,
+            incident_id=incident,
+            comments=comments_text,
+            comm_added_by=comm_added_by
+        )
+
+        incident.comment_id = comment
+        incident.save(update_fields=['comment_id'])
+
         return incident
+
+
+
 
         
 class Comments_Serializer(serializers.ModelSerializer):
@@ -320,7 +354,7 @@ class Alert_Type_Serializer(serializers.ModelSerializer):
 class Manual_call_incident_dispatch_Serializer(serializers.ModelSerializer):
     class Meta:
         model = DMS_Incident
-        fields = ['inc_type','disaster_type','alert_type','location','summary','responder_scope','latitude','longitude','caller_id','inc_added_by','inc_modified_by']
+        fields = ['inc_type','disaster_type','alert_type','location','summary','responder_scope','latitude','longitude','caller_id','inc_added_by','inc_modified_by','time','mode']
 
 class Manual_call_data_Serializer(serializers.ModelSerializer):
     class Meta:
@@ -330,10 +364,88 @@ class Manual_call_data_Serializer(serializers.ModelSerializer):
 class manual_Comments_Serializer(serializers.ModelSerializer):
     class Meta:
         model = DMS_Comments
-        fields = ['comments','comm_added_by','comm_modified_by','incident_id'] 
+        fields = ['incident_id','comments','comm_added_by','comm_modified_by'] 
         
 class Responder_Scope_Serializer(serializers.ModelSerializer):
-    responder_name = serializers.CharField(source='res_id.responder_name', read_only=True)
+    responder_names = serializers.SerializerMethodField()
+
     class Meta:
         model = DMS_Disaster_Responder
-        fields = ['pk_id','res_id','responder_name']
+        fields = ['pk_id', 'res_id', 'responder_names']
+
+    def get_responder_names(self, obj):
+        if isinstance(obj.res_id, list):
+            responder_ids = obj.res_id
+        else:
+            try:
+                import json
+                responder_ids = json.loads(obj.res_id)
+            except:
+                responder_ids = []
+
+        responders = DMS_Responder.objects.filter(responder_id__in=responder_ids)
+        return [r.responder_name for r in responders]
+
+        
+        
+class DMS_NotifySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DMS_Notify
+        fields = '__all__'
+        
+class DMS_Summary_Serializer(serializers.ModelSerializer):
+    class Meta:
+        model = DMS_Summary
+        fields = ['sum_id','summary']
+
+
+class Responder_Serializer(serializers.ModelSerializer):
+    class Meta:
+        model = DMS_Responder
+        fields = ['responder_id', 'responder_name']
+
+class DisasterResponderSerializer(serializers.ModelSerializer):
+    disaster_name=serializers.CharField(source='dis_id.disaster_name', read_only=True)
+    class Meta:
+         model = DMS_Disaster_Responder
+         fields = '__all__'
+
+class DisasterResponderPostSerializer(serializers.ModelSerializer):
+    class Meta:
+         model = DMS_Disaster_Responder
+         fields = ['dis_id','res_id']
+
+class ClosureSerializer(serializers.ModelSerializer):
+    class Meta:
+         model = DMS_incident_closure
+         fields = '__all__'
+
+class CommentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DMS_Comments
+        fields = ['incident_id','comments']
+
+
+class Comment_Post_Serializer(serializers.ModelSerializer):
+    class Meta:
+        model = DMS_Comments
+        fields = ['incident_id','comments','comm_added_by','comm_modified_by']
+
+class dispatchsopserializer(serializers.ModelSerializer):
+    disaster_name=serializers.CharField(source='disaster_type.disaster_name', read_only=True)
+    alert_id = serializers.CharField(source='alert_id.disaster_name', read_only=True)
+    class Meta:
+        model = DMS_Incident
+        fields = ['inc_id','incident_id','alert_id','disaster_type','inc_added_by','inc_added_date','disaster_name','inc_type','mode']
+
+
+class incident_get_serializer(serializers.ModelSerializer):
+    caller_name=serializers.CharField(source='caller_id.caller_name', read_only=True)
+    caller_no=serializers.CharField(source='caller_id.caller_no', read_only=True)
+    summary_name = serializers.CharField(source='summary.summary', read_only=True)
+    disaster_name=serializers.CharField(source='disaster_type.disaster_name', read_only=True)
+    class Meta:
+        model = DMS_Incident
+        fields=['incident_id','disaster_type','inc_type','responder_scope','caller_id','caller_name','caller_no','location','summary','summary_name','disaster_name','alert_type','mode']
+
+

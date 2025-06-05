@@ -28,6 +28,41 @@ urlpatterns = [
     path('sop_post',DMS_Sop_post_api.as_view(),name='sop_post'),
     path('sop_put/<int:sop_id>/',DMS_Sop_put_api.as_view(),name='sop_put'),
     path('sop_delete/<int:sop_id>/',DMS_Sop_delete_api.as_view(),name='sop_delete'),
+
+    path('responder_get/',GetResponderList_api.as_view(),name='responder_get'),
+
+    path('disaster_responder_put/<int:pk_id>/',Disaster_Responder_put.as_view(),name='disaster_responder_put'),
+    path('Disaster_Responder_delete/<int:pk_id>/',Disaster_responder_delete_api.as_view(),name='Disaster_Responder_delete'),
+    path('Disaster_Responder_post/',disaster_responder_Post_api.as_view(),name='Disaster_Responder_post'),
+    path('Disaster_Responder_get/',DMS_Disaster_Responder_GET_API.as_view(),name='Disaster_Responder_get'),
+
+
+
+
+    path('closure_post_api/',closure_Post_api.as_view(),name='closure_post_api'),
+
+
+    path('comment_get_idwise/<int:incident_id>/',comment_idwise_get_api.as_view(),name='comment_get_idwise'),
+    path('comment_get',DMS_comment_Get_API.as_view(),name='comment_get'),
+
+
+
+    path('dispatch_get/',dispatch_sop_Get_API.as_view(),name='disapatch_get'),
+    path('dispatch_get_idwise/<int:inc_id>/',dispatch_sop_Idwise_Get_API.as_view(),name='disapatch_get_idwise'),
+
+
+    path('incident_get/<int:inc_id>/',incident_get_Api.as_view(),name='incident_get'),
+
+
+
+    
+    
+
+
+
+
+    
+
     #===================================Kirti==================================================
     
     
@@ -62,6 +97,10 @@ urlpatterns = [
     path('manual_call_incident/', Manual_Call_Incident_api.as_view(), name='manual-call-create'),  
     path('Responder_Scope_Get/<int:disaster_id>/', Responder_Scope_Get_api.as_view(), name='Responder_Scope_Get'), 
     
+    path('DMS_Summary_Get/', DMS_Summary_Get_API.as_view(), name='DMS_Summary_Get'),
+    
+    
+    path('comments_post/<int:incident_id>/', CommentPostView.as_view(), name='comments_post'),
     
     #===================================Mohin==================================================
     
@@ -69,6 +108,7 @@ urlpatterns = [
 
     #=============================== Mayank =========================================================
     path('combined/', CombinedAPIView.as_view(), name='combined-api'),
+    path('cancel-trigger/', UpdateTriggerStatusAPIView.as_view()),
     #=============================== Mayank =========================================================
 
 

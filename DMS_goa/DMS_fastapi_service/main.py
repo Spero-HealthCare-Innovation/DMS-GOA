@@ -256,6 +256,28 @@ async def websocket_endpoint(websocket: WebSocket):
     except WebSocketDisconnect:
         print("Client disconnected")
         connected_clients.remove(websocket)
+        
+        
+        
+connected_clients_new: List[WebSocket] = []
+
+@app.websocket("/send_ip")
+async def websocket_endpoint(websocket: WebSocket):
+    await websocket.accept()
+    connected_clients_new.append(websocket)
+    print("Client connected")
+    try:
+        while True:
+            data = await websocket.receive_text()
+            print(f"Received from frontend: {data}")
+            # if data.strip().lower() == "true":
+                # Broadcast to all connected clients
+            for client in connected_clients_new:
+                if client != websocket:
+                    await client.send_text(data)
+    except WebSocketDisconnect:
+        print("Client disconnected")
+        connected_clients_new.remove(websocket)
 
 
 
@@ -355,14 +377,14 @@ async def websocket_endpoint(websocket: WebSocket):
                     new_alerts = await sync_to_async(list)(
                         Weather_alerts.objects.filter(pk_id__gt=last_sent_pk)
                         .order_by("pk_id")
-                        .values("pk_id", "latitude", "longitude", "elevation", "time", 
+                        .values("pk_id", "latitude", "longitude", "elevation", "alert_datetime", 
                                 "temperature_2m", "rain", "precipitation", 
                                 "weather_code", "triger_status")
                     )
 
                     for alert in new_alerts:
-                        if alert["time"]:
-                            alert["time"] = alert["time"].isoformat()
+                        if alert["alert_datetime"]:
+                            alert["alert_datetime"] = alert["alert_datetime"].isoformat()
                         await websocket.send_text(json.dumps(alert))  # ✅ same flat format
                         last_sent_pk = max(last_sent_pk, alert["pk_id"])
                         await asyncio.sleep(0.05)

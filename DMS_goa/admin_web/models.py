@@ -2,6 +2,14 @@ from django.db import models
 from django.contrib.auth.models import(
 	BaseUserManager,AbstractBaseUser
 )
+from django_enumfield import enum
+
+
+
+class division_enum(enum.Enum):
+    South=1
+    North=2
+    Central=3
 
 class DMS_State(models.Model):
     state_id = models.AutoField(primary_key=True)
@@ -53,7 +61,7 @@ class DMS_Department(models.Model):
     disaster_id = models.ForeignKey('DMS_Disaster_Type', on_delete=models.CASCADE)
     dep_is_deleted = models.BooleanField(default=False)
     dep_added_by = models.CharField(max_length=255, null=True, blank=True)
-    dep_added_date = models.DateTimeField(auto_now=True)
+    dep_added_date =  models.DateTimeField(auto_now=True)
     dep_modified_by = models.CharField(max_length=255, null=True, blank=True)
     dep_modified_date = models.DateTimeField(auto_now=True,null=True, blank=True)
     
@@ -286,12 +294,13 @@ class Weather_alerts(models.Model):
     timezone = models.TextField(null=True,blank=True)
     timezone_abbreviation = models.TextField(null=True,blank=True)
     utc_offset_seconds = models.IntegerField(null=True,blank=True)
-    time = models.DateTimeField(null=True,blank=True)
+    alert_datetime = models.DateTimeField(auto_now=True)
     temperature_2m = models.FloatField(null=True,blank=True)
     triger_status = models.IntegerField(null=True,blank=True)
     rain = models.FloatField(null=True,blank=True)
     precipitation = models.FloatField(null=True,blank=True)
     weather_code = models.IntegerField(null=True,blank=True)
+    disaster_id = models.ForeignKey(DMS_Disaster_Type,on_delete=models.CASCADE,null=True,blank=True)
     added_by=models.CharField(max_length=255,null=True,blank=True)
     added_date = models.DateTimeField(auto_now=True)
     modified_by = models.CharField(max_length=255, null=True, blank=True)
@@ -313,7 +322,7 @@ class Weather_alerts(models.Model):
 class DMS_SOP(models.Model):
     sop_id=models.AutoField(primary_key=True)
     sop_description=models.TextField(null=True,blank=True)
-    alert_id=models.ForeignKey(Weather_alerts,on_delete=models.CASCADE)
+    alert_id=models.ForeignKey(Weather_alerts,on_delete=models.CASCADE,null=True,blank=True)
     disaster_id = models.ForeignKey(DMS_Disaster_Type,on_delete=models.CASCADE)
     sop_is_deleted = models.BooleanField(default=False)
     sop_added_by=models.CharField(max_length=255,null=True,blank=True)
@@ -339,61 +348,66 @@ class DMS_Incident(models.Model):
     responder_scope = models.JSONField(null=True,blank=True)
     alert_id = models.ForeignKey(Weather_alerts,on_delete=models.CASCADE,null=True,blank=True)
     caller_id = models.ForeignKey(DMS_Caller,on_delete=models.CASCADE,null=True,blank=True)
+    notify_id = models.ForeignKey('DMS_Notify',on_delete=models.CASCADE,null=True,blank=True)
     alert_type = models.IntegerField(null=True,blank=True)
     location = models.CharField(max_length=255,null=True,blank=True)  
-    summary = models.CharField(max_length=255,null=True,blank=True)  
+    summary = models.ForeignKey('DMS_Summary',on_delete=models.CASCADE,null=True,blank=True)
     latitude = models.FloatField(null=True,blank=True)
     longitude = models.FloatField(null=True,blank=True)
     inc_type =  models.IntegerField(null=True,blank=True)
     disaster_type = models.ForeignKey(DMS_Disaster_Type,on_delete=models.CASCADE,null=True,blank=True)
+    comment_id = models.ForeignKey('DMS_Comments',on_delete=models.CASCADE,null=True,blank=True)
     alert_code = models.CharField(max_length=255,null=True,blank=True)
+    alert_division=enum.EnumField(division_enum,null=True,blank=True)
     inc_datetime = models.DateTimeField(auto_now=True)
+    mode = models.IntegerField(null=True,blank=True)
+    time = models.CharField(max_length=255,null=True,blank=True)
     inc_is_deleted = models.BooleanField(default=False)
     inc_added_by=models.CharField(max_length=255,null=True,blank=True)
     inc_added_date = models.DateTimeField(auto_now=True)
     inc_modified_by = models.CharField(max_length=255, null=True, blank=True)
     inc_modified_date = models.DateTimeField(auto_now=True,null=True, blank=True)
     
-    # def save(self, *args, **kwargs):
-    #     is_new = self.pk is None
-    #     super().save(*args, **kwargs)  
-
-    #     if is_new and not self.incident_id:
-    #         date_prefix = now().strftime('%Y%m%d')
-    #         self.incident_id = f"{date_prefix}{str(self.inc_id).zfill(5)}"
-    #         super().save(update_fields=['incident_id'])
-    
-
     def save(self, *args, **kwargs):
         is_new = self.pk is None
-        super().save(*args, **kwargs)
+        super().save(*args, **kwargs)  
 
         if is_new and not self.incident_id:
             date_prefix = now().strftime('%Y%m%d')
             self.incident_id = f"{date_prefix}{str(self.inc_id).zfill(5)}"
             super().save(update_fields=['incident_id'])
+    
 
-        if is_new and not self.alert_code:
-            timestamp = now().strftime('%Y%m%d%H%M%S')
+    # def save(self, *args, **kwargs):
+    #     is_new = self.pk is None
+    #     super().save(*args, **kwargs)
+
+    #     if is_new and not self.incident_id:
+    #         date_prefix = now().strftime('%Y%m%d')
+    #         self.incident_id = f"{date_prefix}{str(self.inc_id).zfill(5)}"
+    #         super().save(update_fields=['incident_id'])
+
+    #     if is_new and not self.alert_code:
+    #         timestamp = now().strftime('%Y%m%d%H%M%S')
             
-            latest_alert = DMS_Incident.objects.filter(alert_code__icontains='CALL-').order_by('-inc_id').first()
-            if latest_alert and latest_alert.alert_code and 'CALL-' in latest_alert.alert_code:
-                try:
-                    last_number = int(latest_alert.alert_code.split('CALL-')[1])
-                except:
-                    last_number = 0
-            else:
-                last_number = 0
+    #         latest_alert = DMS_Incident.objects.filter(alert_code__icontains='CALL-').order_by('-inc_id').first()
+    #         if latest_alert and latest_alert.alert_code and 'CALL-' in latest_alert.alert_code:
+    #             try:
+    #                 last_number = int(latest_alert.alert_code.split('CALL-')[1])
+    #             except:
+    #                 last_number = 0
+    #         else:
+    #             last_number = 0
 
-            next_number = last_number + 1
-            self.alert_code = f"{timestamp}-CALL-{next_number:02d}"
-            super().save(update_fields=['alert_code'])
+    #         next_number = last_number + 1
+    #         self.alert_code = f"{timestamp}-CALL-{next_number:02d}"
+    #         super().save(update_fields=['alert_code'])
 
             
 class DMS_Comments(models.Model):
     comm_id = models.AutoField(primary_key=True)
     alert_id = models.ForeignKey(Weather_alerts,on_delete=models.CASCADE,null=True,blank=True)
-    incident_id = models.ForeignKey(DMS_Incident,on_delete=models.CASCADE,null=True,blank=True)
+    incident_id=models.ForeignKey(DMS_Incident,on_delete=models.CASCADE,null=True,blank=True)
     comments = models.TextField(null=True, blank=True)
     comm_chat = models.BooleanField(default=False)
     comm_is_deleted= models.BooleanField(default=False)
@@ -415,9 +429,9 @@ class DMS_Alert_Type(models.Model):
     
 class DMS_Notify(models.Model):
     not_id = models.AutoField(primary_key=True)
-    name = models.CharField(max_length=255,null=True,blank=True)
     alert_type_id = models.JSONField(null=True,blank=True)
-    alert_id = models.ForeignKey(Weather_alerts,on_delete=models.CASCADE)
+    incident_id=models.ForeignKey(DMS_Incident,on_delete=models.CASCADE,null=True,blank=True)
+    disaster_type = models.ForeignKey(DMS_Disaster_Type,on_delete=models.CASCADE,null=True,blank=True)
     not_is_deleted= models.BooleanField(default=False)
     not_added_by=models.CharField(max_length=255,null=True,blank=True)
     not_added_date = models.DateTimeField(auto_now=True)
@@ -437,13 +451,37 @@ class DMS_Responder(models.Model):
     
 class DMS_Disaster_Responder(models.Model):
     pk_id = models.AutoField(primary_key=True)
-    res_id = models.ForeignKey(DMS_Responder,on_delete=models.CASCADE,null=True, blank=True)
+    res_id = models.JSONField(null=True,blank=True)
     dis_id = models.ForeignKey(DMS_Disaster_Type,on_delete=models.CASCADE,null=True, blank=True)
     dr_is_deleted = models.BooleanField(default=False)
     dr_added_date = models.DateTimeField(auto_now=True,null=True, blank=True)
     dr_added_by = models.CharField(max_length=255, null=True, blank=True)
     dr_modified_by = models.CharField(max_length=255, null=True, blank=True)
     dr_modified_date = models.DateTimeField(null=True, blank=True)
-    
-    
+
+
+class DMS_incident_closure(models.Model):
+    closure_id=models.AutoField(primary_key=True)
+    incident_id=models.ForeignKey(DMS_Incident,on_delete=models.CASCADE,null=True,blank=True)
+    closure_acknowledge=models.DateTimeField(null=True, blank=True)
+    closure_start_base_location=models.DateTimeField(null=True, blank=True)
+    closure_at_scene=models.DateTimeField(null=True, blank=True)
+    closure_from_scene=models.DateTimeField(null=True, blank=True)
+    closure_back_to_base=models.DateTimeField(null=True, blank=True)
+    closure_is_deleted = models.BooleanField(default=False)
+    closure_added_by = models.CharField(max_length=255, null=True, blank=True)
+    closure_added_date = models.DateTimeField(auto_now=True,null=True, blank=True)
+    closure_modified_by = models.CharField(max_length=255, null=True, blank=True)
+    closure_modified_date = models.DateTimeField(null=True, blank=True)
+    closure_remark=models.CharField(max_length=255, null=True, blank=True)
+
+
+class DMS_Summary(models.Model):
+    sum_id = models.AutoField(primary_key=True)
+    summary = models.CharField(max_length=5555, null=True, blank=True)
+    sum_is_deleted = models.BooleanField(default=False)
+    sum_added_date = models.DateTimeField(auto_now=True,null=True, blank=True)
+    sum_added_by = models.CharField(max_length=255, null=True, blank=True)
+    sum_modified_by = models.CharField(max_length=255, null=True, blank=True)
+    sum_modified_date = models.DateTimeField(null=True, blank=True)
     
