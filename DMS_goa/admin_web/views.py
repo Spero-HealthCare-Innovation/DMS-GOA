@@ -25,6 +25,7 @@ from django.utils.http import urlsafe_base64_encode
 from django.utils.encoding import force_bytes
 from django.core.mail import send_mail
 
+
 class DMS_department_post_api(APIView):
     def post(self,request):
         serializers=DMS_department_serializer(data=request.data)
@@ -329,8 +330,8 @@ class UserLoginView(APIView):
                 if emp.emp_is_deleted != False:
                     return Response({'msg':'Login access denied. Please check your permissions or reach out to support for help.'},status=status.HTTP_401_UNAUTHORIZED)
                 if emp.emp_is_login is False: 
-                    # emp.emp_is_login = True
-                    # emp.save()
+                    emp.emp_is_login = True
+                    emp.save()
                     token = get_tokens_for_user(user)
                     return Response({'token':token,'msg':'Logged in Successfully'},status=status.HTTP_200_OK)
                 else:
@@ -591,12 +592,23 @@ class DMS_Alert_idwise_get_api(APIView):
     def get(self,request):
         print("request user-- ",request.user)
         alert_id = request.GET.get('id')
-        alert_obj = Weather_alerts.objects.get(pk_id=alert_id)
-        alert_obj.triger_status = 2
-        alert_obj.modified_by = str(request.user)
-        alert_obj.save()
+        st = request.GET.get('st')
+        if alert_id and st == 1:
+            print("1")
+            alert_obj = Weather_alerts.objects.get(pk_id=alert_id)
+            alert_obj.triger_status = 1
+            alert_obj.modified_by = str(request.user)
+            alert_obj.save()
+            print("done")
+        else:
+            print("2")
+            alert_obj = Weather_alerts.objects.get(pk_id=alert_id)
+            alert_obj.triger_status = 2
+            alert_obj.modified_by = str(request.user)
+            alert_obj.save()
+            print("done 2")
         serializers = WeatherAlertSerializer(alert_obj,many=False)
-        return Response(serializers.data,status=status.HTTP_200_OK)
+        return Response(serializers.data, status=status.HTTP_200_OK)
     
 
 class DMS_Incident_Post_api(APIView):
@@ -676,7 +688,8 @@ class Manual_Call_Incident_api(APIView):
             "latitude": incident_instance.latitude,
             "longitude": incident_instance.longitude,
             "added_by": incident_instance.inc_added_by,
-            "modified_by": incident_instance.inc_modified_by
+            "modified_by": incident_instance.inc_modified_by,
+            "alert_type": incident_instance.alert_type
         }
         weather_alert_serializer = WeatherAlertSerializer(data=weather_alert_data)
         if not weather_alert_serializer.is_valid():
@@ -910,7 +923,7 @@ class DMS_comment_Get_API(APIView):
 
 class dispatch_sop_Get_API(APIView):
     def get(self,request):
-        snippet = DMS_Incident.objects.all()
+        snippet = DMS_Incident.objects.all().order_by('-inc_added_date')
         serializers = dispatchsopserializer(snippet,many=True)
         return Response(serializers.data,status=status.HTTP_200_OK)
 
@@ -973,3 +986,28 @@ class incident_get_Api(APIView):
             "responders scope": responder_details
         }
         return Response(data, status=status.HTTP_200_OK)
+
+
+
+#-----------------------------cancel Dispatch API ----------------------
+class UpdateTriggerStatusAPIView(APIView):
+    def post(self, request):
+        pk_id = request.data.get('id')
+
+        if not pk_id:
+            return Response({'status': False, 'message': 'ID is required.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            record = Weather_alerts.objects.get(pk_id=pk_id)
+        except Weather_alerts.DoesNotExist:
+            return Response({'status': False, 'message': 'Record not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+        if record.triger_status == 2:
+            record.triger_status = 1
+            record.save(update_fields=['triger_status'])
+            return Response({'status': True, 'message': f'Record with ID {pk_id} updated successfully.'}, status=status.HTTP_200_OK)
+        else:
+            return Response({
+                'status': False,
+                'message': f'Record with ID {pk_id} already has triger_status = {record.triger_status}.'
+            }, status=status.HTTP_200_OK)

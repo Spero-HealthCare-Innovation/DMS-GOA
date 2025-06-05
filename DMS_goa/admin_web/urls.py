@@ -108,6 +108,7 @@ urlpatterns = [
 
     #=============================== Mayank =========================================================
     path('combined/', CombinedAPIView.as_view(), name='combined-api'),
+    path('cancel-trigger/', UpdateTriggerStatusAPIView.as_view()),
     #=============================== Mayank =========================================================
 
 
