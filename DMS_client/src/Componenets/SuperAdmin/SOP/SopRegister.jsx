@@ -270,8 +270,20 @@ function SopRegister({ darkMode }) {
         }
     };
 
-    const totalPages = Math.ceil(sop.length / rowsPerPage);
-    const paginatedData = sop.slice((page - 1) * rowsPerPage, page * rowsPerPage);
+    // Filter SOP based on search query
+    const [searchQuery, setSearchQuery] = useState("");
+    const filteredSop = sop.filter(
+        (item) =>
+            item.sop_description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            (item.disaster_name && item.disaster_name.toLowerCase().includes(searchQuery.toLowerCase()))
+    );
+
+    const totalPages = Math.ceil(filteredSop.length / rowsPerPage);
+    const paginatedData = filteredSop.slice(
+        (page - 1) * rowsPerPage,
+        page * rowsPerPage
+    );
+
 
     return (
         <div style={{ marginLeft: "3.5rem" }}>
@@ -300,6 +312,11 @@ function SopRegister({ darkMode }) {
                     variant="outlined"
                     size="small"
                     placeholder="Search"
+                    value={searchQuery}
+                    onChange={(e) => {
+                        setSearchQuery(e.target.value.toLowerCase());
+                        setPage(1);
+                    }}
                     InputProps={{
                         startAdornment: (
                             <InputAdornment position="start">
@@ -393,53 +410,65 @@ function SopRegister({ darkMode }) {
                                 </TableHead>
 
                                 <TableBody>
-                                    {paginatedData.map((item, index) => (
-                                        <EnquiryCardBody
-                                            key={(page - 1) * rowsPerPage + index}
-                                            sx={{
-                                                backgroundColor: inputBgColor,
-                                                p: 2,
-                                                borderRadius: 2,
-                                                color: textColor,
-                                                display: "flex",
-                                                width: "100%",
-                                                mb: 1,
-                                            }}
-                                        >
-                                            <StyledCardContent sx={{ flex: 0.6, justifyContent: "center" }}>
-                                                <Typography variant="subtitle2" sx={fontsTableBody}>
-                                                    {(page - 1) * rowsPerPage + index + 1}
-                                                </Typography>
-                                            </StyledCardContent>
-
-                                            <StyledCardContent sx={{ flex: 1.9, justifyContent: "center", ...fontsTableBody }}>
-                                                <Typography variant="subtitle2">{item.disaster_name ? item.disaster_name : "-"}</Typography>
-                                            </StyledCardContent>
-
-                                            <StyledCardContent sx={{ flex: 2, justifyContent: "center", ...fontsTableBody }}>
-                                                <Typography variant="subtitle2">{item.sop_description || "No Description"}</Typography>
-                                            </StyledCardContent>
-
-                                            <StyledCardContent
+                                    {paginatedData.length > 0 ? (
+                                        paginatedData.map((item, index) => (
+                                            <EnquiryCardBody
+                                                key={(page - 1) * rowsPerPage + index}
                                                 sx={{
-                                                    flex: 0.3,
-                                                    justifyContent: "center",
-                                                    ...fontsTableBody,
+                                                    backgroundColor: inputBgColor,
+                                                    p: 2,
+                                                    borderRadius: 2,
+                                                    color: textColor,
+                                                    display: "flex",
+                                                    width: "100%",
+                                                    mb: 1,
                                                 }}
                                             >
-                                                <MoreHorizIcon
-                                                    onClick={(e) => handleOpen(e, item)}
+                                                <StyledCardContent sx={{ flex: 0.6, justifyContent: "center" }}>
+                                                    <Typography variant="subtitle2" sx={fontsTableBody}>
+                                                        {(page - 1) * rowsPerPage + index + 1}
+                                                    </Typography>
+                                                </StyledCardContent>
+
+                                                <StyledCardContent sx={{ flex: 1.9, justifyContent: "center", ...fontsTableBody }}>
+                                                    <Typography variant="subtitle2">
+                                                        {item.disaster_name ? item.disaster_name : "-"}
+                                                    </Typography>
+                                                </StyledCardContent>
+
+                                                <StyledCardContent sx={{ flex: 2, justifyContent: "center", ...fontsTableBody }}>
+                                                    <Typography variant="subtitle2">
+                                                        {item.sop_description || "No Description"}
+                                                    </Typography>
+                                                </StyledCardContent>
+
+                                                <StyledCardContent
                                                     sx={{
-                                                        fontSize: "2em",
-                                                        color: "#00f0c0",
-                                                        cursor: "pointer",
+                                                        flex: 0.3,
                                                         justifyContent: "center",
                                                         ...fontsTableBody,
                                                     }}
-                                                />
-                                            </StyledCardContent>
-                                        </EnquiryCardBody>
-                                    ))}
+                                                >
+                                                    <MoreHorizIcon
+                                                        onClick={(e) => handleOpen(e, item)}
+                                                        sx={{
+                                                            fontSize: "2em",
+                                                            color: "#00f0c0",
+                                                            cursor: "pointer",
+                                                            justifyContent: "center",
+                                                            ...fontsTableBody,
+                                                        }}
+                                                    />
+                                                </StyledCardContent>
+                                            </EnquiryCardBody>
+                                        ))
+                                    ) : (
+                                        <TableRow>
+                                            <Typography colSpan={4} align="center" sx={{ py: 4, color: textColor }}>
+                                                No data found
+                                            </Typography>
+                                        </TableRow>
+                                    )}
                                 </TableBody>
                             </Table>
                         </TableContainer>

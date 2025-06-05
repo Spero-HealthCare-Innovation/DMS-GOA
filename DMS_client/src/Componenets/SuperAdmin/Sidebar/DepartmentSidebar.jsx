@@ -14,6 +14,9 @@ import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import ArrowDropUpIcon from "@mui/icons-material/ArrowDropUp";
 import LockIcon from "@mui/icons-material/Lock";
 import { useNavigate } from "react-router-dom";
+import AddBoxIcon from '@mui/icons-material/AddBox';
+import AddCircleOutlineOutlinedIcon from '@mui/icons-material/AddCircleOutlineOutlined';
+import TextSnippetOutlinedIcon from '@mui/icons-material/TextSnippetOutlined';
 
 const screenConfig = {
   "System User": {
@@ -25,15 +28,15 @@ const screenConfig = {
     ],
   },
   "Register Sop": {
-    icon: <AccountCircleIcon />,
+    icon: <AddBoxIcon />,
     screens: [],
   },
   "Responder": {
-    icon: <AccountCircleIcon />,
+    icon: <AddCircleOutlineOutlinedIcon />,
     screens: [],
   },
-   "Closure Detail": {
-    icon: <AccountCircleIcon />,
+  "Closure Detail": {
+    icon: <TextSnippetOutlinedIcon />,
     screens: [],
   },
   Permission: {

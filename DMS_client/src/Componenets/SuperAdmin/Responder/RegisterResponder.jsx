@@ -440,51 +440,57 @@ function RegisterResponder({ darkMode }) {
                                 </TableHead>
 
                                 <TableBody>
-                                    {paginatedData.map((row, index) => (
-                                        <EnquiryCardBody
-                                            key={row.pk_id}
-                                            sx={{
-                                                backgroundColor: inputBgColor,
-                                                p: 2,
-                                                borderRadius: 2,
-                                                color: textColor,
-                                                display: "flex",
-                                                width: "100%",
-                                                mb: 1,
-                                            }}
-                                        >
-                                            <StyledCardContent sx={{ flex: 0.5, justifyContent: "center" }}>
-                                                <Typography variant="subtitle2" sx={fontsTableBody}>
-                                                    {index + 1}
-                                                </Typography>
-                                            </StyledCardContent>
+                                    {paginatedData.length > 0 ? (
+                                        paginatedData.map((row, index) => (
+                                            <EnquiryCardBody
+                                                key={row.pk_id}
+                                                sx={{
+                                                    backgroundColor: inputBgColor,
+                                                    p: 2,
+                                                    borderRadius: 2,
+                                                    color: textColor,
+                                                    display: "flex",
+                                                    width: "100%",
+                                                    mb: 1,
+                                                }}
+                                            >
+                                                <StyledCardContent sx={{ flex: 0.5, justifyContent: "center" }}>
+                                                    <Typography variant="subtitle2" sx={fontsTableBody}>
+                                                        {index + 1}
+                                                    </Typography>
+                                                </StyledCardContent>
 
-                                            <StyledCardContent sx={{ flex: 1.9, justifyContent: "center", ...fontsTableBody }}>
-                                                <Typography variant="subtitle2">
-                                                    {row.disaster_name}
-                                                </Typography>
-                                            </StyledCardContent>
+                                                <StyledCardContent sx={{ flex: 1.9, justifyContent: "center", ...fontsTableBody }}>
+                                                    <Typography variant="subtitle2">{row.disaster_name}</Typography>
+                                                </StyledCardContent>
 
-                                            <StyledCardContent sx={{ flex: 3, justifyContent: "left", ...fontsTableBody }}>
-                                                <Typography variant="subtitle2">
-                                                    {row.res_id.map((res) => res.responder_name).join(", ")}
-                                                </Typography>
-                                            </StyledCardContent>
+                                                <StyledCardContent sx={{ flex: 3, justifyContent: "left", ...fontsTableBody }}>
+                                                    <Typography variant="subtitle2">
+                                                        {row.res_id.map((res) => res.responder_name).join(", ")}
+                                                    </Typography>
+                                                </StyledCardContent>
 
-                                            <StyledCardContent sx={{ flex: 0.5, justifyContent: "center", ...fontsTableBody }}>
-                                                <MoreHorizIcon
-                                                    aria-describedby={id}
-                                                    onClick={(e) => handleClick(e, row)}
-                                                    sx={{
-                                                        color: "#00f0c0",
-                                                        cursor: "pointer",
-                                                        fontSize: 28,
-                                                        justifyContent: "center",
-                                                    }}
-                                                />
-                                            </StyledCardContent>
-                                        </EnquiryCardBody>
-                                    ))}
+                                                <StyledCardContent sx={{ flex: 0.5, justifyContent: "center", ...fontsTableBody }}>
+                                                    <MoreHorizIcon
+                                                        aria-describedby={id}
+                                                        onClick={(e) => handleClick(e, row)}
+                                                        sx={{
+                                                            color: "#00f0c0",
+                                                            cursor: "pointer",
+                                                            fontSize: 28,
+                                                            justifyContent: "center",
+                                                        }}
+                                                    />
+                                                </StyledCardContent>
+                                            </EnquiryCardBody>
+                                        ))
+                                    ) : (
+                                        <TableRow>
+                                            <TableCell colSpan={4} align="center" sx={{ py: 4, color: textColor }}>
+                                                No data found
+                                            </TableCell>
+                                        </TableRow>
+                                    )}
                                 </TableBody>
                             </Table>
                         </TableContainer>
