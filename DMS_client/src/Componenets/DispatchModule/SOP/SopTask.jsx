@@ -196,6 +196,17 @@ function SopTask({
     setViewmode("incident"); // Reset view mode to incident
   };
 
+
+
+  const filteredDispatchList = dispatchListdata.filter((item) => {
+  const searchLower = searchTerm.toLowerCase();
+  return (
+    item.incident_id?.toString().toLowerCase().includes(searchLower) ||
+    item.disaster_name?.toLowerCase().includes(searchLower) ||
+    item.inc_added_by?.toLowerCase().includes(searchLower) ||
+    item.inc_type?.toString().includes(searchLower)
+  );
+});
   // const handleForward = () => {
   //   setFlag(1);
   //   setSelectedIncident(); // Clear selected incident
@@ -215,7 +226,7 @@ function SopTask({
       elevation={3}
       sx={{ padding: 2, borderRadius: 3, backgroundColor: bgColor }}
     >
-      <Box sx={{ display: "flex", alignItems: "center", gap: 2, pb: 2 }}>
+      <Box sx={{ display: "flex", alignItems: "center", gap: 2, pb: 2 ,}}>
         {/* Back Button */}
         {flag === 1 && (
           <Tooltip title="Go Back to Alert Tasks">
@@ -447,6 +458,8 @@ function SopTask({
                         color="error"
                         onClick={() => {
                           console.log("Cancel clicked for", item);
+                          setSelectedIncident(item.pk_id);
+
                         }}
                         sx={{
                           "&:hover": {
@@ -489,14 +502,14 @@ function SopTask({
                   </EnquiryCard>
 
                   {/* Body Rows */}
-                  {dispatchListdata.length === 0 ? (
+                  {filteredDispatchList.length === 0 ? (
                     <Box p={2} width="100%">
                       <Typography align="center" color="textSecondary">
                         No tasks available.
                       </Typography>
                     </Box>
                   ) : (
-                    dispatchListdata.map((item) => (
+                    filteredDispatchList.map((item) => (
                       <EnquiryCardBody
                         key={item.incident_id}
                         alertType={item.inc_type}
@@ -599,7 +612,7 @@ function SopTask({
                               size="large"
                             >
                               <TextSnippetIcon
-                                sx={{ color: "#4caf50", fontSize: 28 }}
+                                sx={{ color: "#4caf50", fontSize: 20 }}
                               />
                             </IconButton>
                           </Tooltip>
@@ -627,7 +640,7 @@ function SopTask({
             borderColor={borderColor}
             bgColor={bgColor}
             inputBgColor={darkMode ? "#1e293b" : "#fff"}
-            rowsPerPageOptions={[3, 5, 10]}
+            rowsPerPageOptions={[3, 10, 20,50]}
           />
         </Box>
       ) : null}
