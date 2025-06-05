@@ -19,7 +19,7 @@ const fadeIn = keyframes`
 
 function MultiScreen({ darkMode }) {
   useEffect(() => {
-    document.title = "DMS | System";
+    document.title = "DMS|System";
   }, []);
 
   return (

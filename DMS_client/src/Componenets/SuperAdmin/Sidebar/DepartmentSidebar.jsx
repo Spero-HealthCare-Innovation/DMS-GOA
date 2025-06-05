@@ -24,9 +24,8 @@ const screenConfig = {
       { id: 3, text: "Add Employee", path: "/add-employee" },
     ],
   },
-  "RegisterSop": {
+  "Register Sop": {
     icon: <AccountCircleIcon />,
-    path: "/registersop",
     screens: [],
   },
   "Responder": {
