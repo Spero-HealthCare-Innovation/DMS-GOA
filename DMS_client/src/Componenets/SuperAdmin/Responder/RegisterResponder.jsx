@@ -78,6 +78,7 @@ const RegisterResponder = ({ darkMode, flag, setFlag, setSelectedIncident }) => 
     const [page, setPage] = useState(1);
     const [rowsPerPage, setRowsPerPage] = useState(5);
     const userName = localStorage.getItem('userId');
+    const [isEditMode, setIsEditMode] = useState(false);
     const [showSubmitButton, setShowSubmitButton] = useState(false);
     const [selectedResponders, setSelectedResponders] = useState([]);
     const [selectedDisaster, setSelectedDisaster] = useState(null);
@@ -87,7 +88,6 @@ const RegisterResponder = ({ darkMode, flag, setFlag, setSelectedIncident }) => 
     const [snackbarMessage, setSnackbarMessage] = useState('');
     // Edit
     const [responderID, setResponderID] = useState(null);
-    const [isEditMode, setIsEditMode] = useState(false);
 
     const getResponderData = async () => {
         try {
@@ -551,7 +551,11 @@ const RegisterResponder = ({ darkMode, flag, setFlag, setSelectedIncident }) => 
                                                                 variant="outlined"
                                                                 color="warning"
                                                                 startIcon={<EditOutlined />}
-                                                                onClick={() => handleEdit(selectedItem)}
+                                                                onClick={() => {
+                                                                    handleEdit(selectedItem);
+                                                                    setIsEditMode(true);
+                                                                    setShowSubmitButton(false);
+                                                                }}
                                                             >
                                                                 Edit
                                                             </Button>
@@ -566,24 +570,6 @@ const RegisterResponder = ({ darkMode, flag, setFlag, setSelectedIncident }) => 
                                                                 Delete
                                                             </Button>
                                                         </Popover>
-                                                        <Snackbar
-                                                            open={snackbarOpen}
-                                                            autoHideDuration={3000}
-                                                            onClose={() => setSnackbarOpen(false)}
-                                                            anchorOrigin={{
-                                                                vertical: "bottom",
-                                                                horizontal: "center",
-                                                            }}
-                                                        >
-                                                            <Alert
-                                                                onClose={() => setSnackbarOpen(false)}
-                                                                // severity={snackbarSeverity}
-                                                                variant="filled"
-                                                                sx={{ width: "100%" }}
-                                                            >
-                                                                {snackbarMessage}
-                                                            </Alert>
-                                                        </Snackbar>
                                                     </TableDataCardBody>
                                                 ))
                                         )}
@@ -725,6 +711,7 @@ const RegisterResponder = ({ darkMode, flag, setFlag, setSelectedIncident }) => 
                                                 onClick={() => {
                                                     setSelectedDisaster("");
                                                     setSelectedResponders([]);
+                                                    setIsEditMode(false);
                                                     setShowSubmitButton(true);
                                                 }}
                                             >

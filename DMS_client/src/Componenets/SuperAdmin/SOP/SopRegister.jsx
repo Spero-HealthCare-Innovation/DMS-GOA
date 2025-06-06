@@ -55,13 +55,12 @@ function SopRegister({ darkMode }) {
     transition: "all 0.3s ease",
     cursor: "pointer",
     "&:hover": {
-      boxShadow: `0 0 8px ${
-        status === "Completed"
-          ? "#00e67699"
-          : status === "Pending"
+      boxShadow: `0 0 8px ${status === "Completed"
+        ? "#00e67699"
+        : status === "Pending"
           ? "#f4433699"
           : "#88888855"
-      }`,
+        }`,
     },
     height: "45px",
   }));
@@ -119,6 +118,7 @@ function SopRegister({ darkMode }) {
   const [selectedItem, setSelectedItem] = useState(null);
   const [sopId, setSopId] = useState(null);
   const [isEditMode, setIsEditMode] = useState(false);
+  const [showSubmitButton, setShowSubmitButton] = useState(false);
   const [popoverPosition, setPopoverPosition] = useState({ top: 0, left: 0 });
   const [open, setOpen] = useState(false);
   const iconRef = useRef(null);
@@ -315,8 +315,18 @@ function SopRegister({ darkMode }) {
   };
 
   const totalPages = Math.ceil(sop.length / rowsPerPage);
-  const paginatedData = sop.slice((page - 1) * rowsPerPage, page * rowsPerPage);
+  // const paginatedData = sop.slice((page - 1) * rowsPerPage, page * rowsPerPage);
   const anchorRect = anchorEl?.getBoundingClientRect();
+  const [searchTerm, setSearchTerm] = useState("");
+
+  const filteredData = sop.filter(
+    (item) =>
+      item.disaster_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.sop_description?.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  // Then paginate
+  const paginatedData = filteredData.slice((page - 1) * rowsPerPage, page * rowsPerPage);
 
   return (
     <div style={{ marginLeft: "3.5rem" }}>
@@ -352,6 +362,8 @@ function SopRegister({ darkMode }) {
           variant="outlined"
           size="small"
           placeholder="Search"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
           InputProps={{
             startAdornment: (
               <InputAdornment position="start">
@@ -548,6 +560,8 @@ function SopRegister({ darkMode }) {
                       onClick={() => {
                         handleEdit(selectedItem);
                         setOpen(false);
+                        setIsEditMode(true);
+                        setShowSubmitButton(false);
                       }}
                     >
                       Edit
@@ -666,22 +680,55 @@ function SopRegister({ darkMode }) {
           >
             <Box sx={{ mb: 2 }}>
               <Grid container spacing={2}>
-                <Grid item xs={6} sm={6}>
+                <Grid item xs={12} sm={12}>
+                  {isEditMode && (
+                    <Box
+                      sx={{
+                        display: "flex",
+                        justifyContent: "flex-end",
+                        cursor: "pointer",
+                      }}
+                    >
+                      <Button
+                        variant="contained"
+                        sx={{
+                          mb: 1,
+                          width: "40%",
+                          backgroundColor: "#00f0c0",
+                          color: "black",
+                          fontWeight: "bold",
+                          borderRadius: "12px",
+                          cursor: "pointer",
+                        }}
+                        onClick={() => {
+                          setSelectedDisaster("");
+                          setDescription("");
+                          setIsEditMode(false);
+                          setShowSubmitButton(true);
+                        }}
+
+                      >
+                        + Add SOP
+                      </Button>
+                    </Box>
+                  )}
+                </Grid>
+
+                <Grid item xs={12} sm={6}>
                   <TextField
                     select
                     fullWidth
                     size="small"
                     label="Disaster Type"
                     variant="outlined"
-                    value={selectedDisaster}
+                    value={selectedDisaster || ""}
                     onChange={(e) => setSelectedDisaster(e.target.value)}
-                    InputLabelProps={{ shrink: true }}
                     SelectProps={{
                       MenuProps: {
                         PaperProps: {
                           style: {
-                            maxHeight: 200,
-                            overflow: "auto",
+                            maxHeight: 250,
+                            width: '250'
                           },
                         },
                       },
@@ -708,43 +755,25 @@ function SopRegister({ darkMode }) {
               </Grid>
             </Box>
 
-            <Box
-              sx={{
-                display: "flex",
-                justifyContent: "center",
-                gap: 2,
-                mt: 3,
-                mb: 1,
-              }}
-            >
-              <Box
+            <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, mt: 3, mb: 1 }}>
+              <Button
+                variant="contained"
                 sx={{
-                  display: "flex",
-                  justifyContent: "center",
-                  gap: 2,
-                  mt: 3,
-                  mb: 1,
+                  mt: 2,
+                  width: "40%",
+                  backgroundColor: "#00f0c0",
+                  color: "black",
+                  fontWeight: "bold",
+                  borderRadius: "12px",
+                  "&:hover": {
+                    backgroundColor: bgColor,
+                    color: "white !important",
+                  },
                 }}
+                onClick={isEditMode ? handleUpdate : handleSubmit}
               >
-                <Button
-                  variant="contained"
-                  sx={{
-                    mt: 2,
-                    width: "40%",
-                    backgroundColor: "#00f0c0",
-                    color: "black",
-                    fontWeight: "bold",
-                    borderRadius: "12px",
-                    "&:hover": {
-                      backgroundColor: bgColor,
-                      color: "white !important",
-                    },
-                  }}
-                  onClick={isEditMode ? handleUpdate : handleSubmit}
-                >
-                  {isEditMode ? "Update" : "Submit"}
-                </Button>
-              </Box>
+                {showSubmitButton ? 'Submit' : isEditMode ? 'Update' : 'Submit'}
+              </Button>
             </Box>
           </Paper>
         </Grid>
