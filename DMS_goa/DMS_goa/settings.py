@@ -195,7 +195,9 @@ CORS_ALLOWED_ORIGINS = [
     "http://192.168.1.116:9000"
 ]
 
-
+CSRF_TRUSTED_ORIGINS = [
+    "http://192.168.1.116:6003",
+]
 
 
 
