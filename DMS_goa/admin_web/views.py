@@ -900,7 +900,7 @@ class disaster_responder_Post_api(APIView):
 class DMS_Disaster_Responder_GET_API(APIView):
     def get(self, request):
         pk_id = request.query_params.get('pk_id')
-        queryset = DMS_Disaster_Responder.objects.all()
+        queryset = DMS_Disaster_Responder.objects.filter(dr_is_deleted=False)
 
         if pk_id is not None:
             queryset = queryset.filter(pk_id=pk_id)
@@ -1041,3 +1041,7 @@ class UpdateTriggerStatusAPIView(APIView):
                 'status': False,
                 'message': f'Record with ID {pk_id} already has triger_status = {record.triger_status}.'
             }, status=status.HTTP_200_OK)
+            
+
+
+        
