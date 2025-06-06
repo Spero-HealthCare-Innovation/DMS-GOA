@@ -1,85 +1,66 @@
-import { useState, useEffect, useMemo } from "react";
-import axios from "axios";
-import { Box, Typography, TextField, Button, Paper, InputAdornment, Grid, Popover, Snackbar } from "@mui/material";
-import Table from '@mui/material/Table';
-import TableBody from '@mui/material/TableBody';
-import TableCell from '@mui/material/TableCell';
-import TableContainer from '@mui/material/TableContainer';
-import TableHead from '@mui/material/TableHead';
-import TableRow from '@mui/material/TableRow';
-import { Search, DeleteOutline, EditOutlined, } from "@mui/icons-material";
-import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
-import { styled } from "@mui/material/styles";
-import { Alert } from '@mui/material';
-import { Select, MenuItem } from "@mui/material";
-import { useTheme } from "@mui/material/styles";
-import { useAuth } from "../../../Context/ContextAPI";
+import React, { useEffect, useMemo } from "react";
 import {
+    Paper,
+    Grid,
+    Typography,
+    Button,
+    Box,
+    TextField,
+    MenuItem,
+    Table,
+    TableBody,
+    TableContainer,
+    TableHead,
+    TableRow,
+    InputAdornment,
+    Select,
+    Popover,
+    Snackbar,
+    Alert,
+    Autocomplete,
+    FormHelperText,
+    FormControl,
+    InputLabel,
+    IconButton,
+    Dialog,
+    DialogTitle,
+    DialogContent,
+    DialogActions,
+    TableCell,
+    CircularProgress,
+} from "@mui/material";
+import { useTheme } from "@mui/material/styles";
+import SearchIcon from "@mui/icons-material/Search";
+import { Checkbox, ListItemText } from '@mui/material';
+import { Search, DeleteOutline, EditOutlined, } from "@mui/icons-material";
+
+import {
+    AddCircleOutline,
+} from "@mui/icons-material";
+import { styled } from "@mui/material/styles";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import { useLocation } from "react-router-dom";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import VisibilityIcon from "@mui/icons-material/Visibility";
+import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
+import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
+import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
+import CloseIcon from "@mui/icons-material/Close";
+
+import {
+    TableDataCardBody,
+    TableHeadingCard,
+    fontsTableBody,
     getCustomSelectStyles,
+    fontsTableHeading,
+    StyledCardContent,
 } from "../../../CommonStyle/Style";
-import { Checkbox, ListItemText, FormControl, InputLabel } from '@mui/material';
+import { useAuth } from "../../../Context/ContextAPI";
+import axios from "axios";
+import { select } from "framer-motion/client";
 
-
-function RegisterResponder({ darkMode }) {
-    const EnquiryCard = styled("div")(() => ({
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "space-between",
-        background: "#5FECC8",
-        borderRadius: "8px 10px 0 0",
-        padding: "6px 12px",
-        color: "black",
-        height: "40px",
-    }));
-
-    const EnquiryCardBody = styled("tr")(({ theme, status }) => ({
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "space-between",
-        background: theme.palette.mode === "dark" ? "#112240" : "#fff",
-        color: theme.palette.mode === "dark" ? "#fff" : "#000",
-        marginTop: "0.5em",
-        borderRadius: "8px",
-        padding: "10px 12px",
-        transition: "all 0.3s ease",
-        cursor: "pointer",
-        "&:hover": {
-            boxShadow: `0 0 8px ${status === "Completed"
-                ? "#00e67699"
-                : status === "Pending"
-                    ? "#f4433699"
-                    : "#88888855"
-                }`,
-        },
-        height: "45px",
-    }));
-
-    const StyledCardContent = styled("td")({
-        padding: "0 8px",
-        display: "flex",
-        alignItems: "center",
-    });
-
-    const fontsTableHeading = {
-        fontFamily: "Roboto",
-        fontWeight: 500,
-        fontSize: 14,
-        letterSpacing: 0,
-        textAlign: "center",
-    };
-
-    const inputBgColor = darkMode
-        ? "rgba(255, 255, 255, 0.16)"
-        : "rgba(0, 0, 0, 0.04)";
-
-    const fontsTableBody = {
-        fontFamily: "Roboto",
-        fontWeight: 400,
-        fontSize: 13,
-        letterSpacing: 0,
-        textAlign: "center",
-    };
-
+const RegisterResponder = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
     const port = import.meta.env.VITE_APP_API_KEY;
     const { newToken, disaster } = useAuth();
     const token = localStorage.getItem("access_token");
@@ -97,7 +78,7 @@ function RegisterResponder({ darkMode }) {
     const [page, setPage] = useState(1);
     const [rowsPerPage, setRowsPerPage] = useState(5);
     const userName = localStorage.getItem('userId');
-
+    const [showSubmitButton, setShowSubmitButton] = useState(false);
     const [selectedResponders, setSelectedResponders] = useState([]);
     const [selectedDisaster, setSelectedDisaster] = useState(null);
     const [responder, setResponder] = useState([]);
@@ -184,6 +165,9 @@ function RegisterResponder({ darkMode }) {
             if (response.status === 201) {
                 setSnackbarMessage("Responder Registered Successfully");
                 setSnackbarOpen(true);
+                await fetchResponder();
+                setSelectedDisaster("");
+                setSelectedResponders([]);
             }
             else if (response.status === 409) {
                 setSnackbarMessage("Responder already exists with this disaster type");
@@ -222,6 +206,8 @@ function RegisterResponder({ darkMode }) {
                 setSnackbarMessage("Responder Data Updated Successfully");
                 setSnackbarOpen(true);
                 await fetchResponder();
+                setSelectedDisaster("");
+                setSelectedResponders([]);
             }
             else if (response.status === 409) {
                 setSnackbarMessage("SOP already exists with this disaster type");
@@ -315,79 +301,103 @@ function RegisterResponder({ darkMode }) {
         (page - 1) * rowsPerPage,
         page * rowsPerPage
     );
+    const [loading, setLoading] = useState(false);
 
     return (
-        <div style={{ marginLeft: "3.5rem" }}>
-            <Box sx={{ display: "flex", alignItems: "center", gap: 2, pb: 2, mt: 3 }}>
-                <Snackbar
-                    open={snackbarOpen}
-                    autoHideDuration={3000}
-                    onClose={() => setSnackbarOpen(false)}
-                    anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
-                >
-                    <Alert onClose={() => setSnackbarOpen(false)} severity="success" sx={{ width: '100%' }}>
-                        {snackbarMessage}
-                    </Alert>
-                </Snackbar>
+        <Box sx={{ p: 2, marginLeft: "3rem" }}>
+            <Snackbar
+                open={snackbarOpen}
+                autoHideDuration={3000}
+                onClose={() => setSnackbarOpen(false)}
+                anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+            >
+                <Alert onClose={() => setSnackbarOpen(false)} severity="success" sx={{ width: '100%' }}>
+                    {snackbarMessage}
+                </Alert>
+            </Snackbar>
 
-                <Typography variant="h6" sx={{
-                    color: labelColor,
-                    fontWeight: 600,
-                    fontFamily,
-                    fontSize: 16,
-                }}>
-                    Register Responder
-                </Typography>
-
-                <TextField
-                    variant="outlined"
-                    size="small"
-                    placeholder="Search"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value.toLowerCase())}
-                    InputProps={{
-                        startAdornment: (
-                            <InputAdornment position="start">
-                                <Search sx={{ color: "gray", fontSize: 18 }} />
-                            </InputAdornment>
-                        ),
-                    }}
+            <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
+                <Box
                     sx={{
-                        width: "250px",
-                        "& .MuiOutlinedInput-root": {
-                            borderRadius: "25px",
-                            backgroundColor: darkMode ? "#1e293b" : "#fff",
-                            color: darkMode ? "#fff" : "#000",
-                            px: 1,
-                            py: 0.2,
-                        },
-                        "& .MuiOutlinedInput-notchedOutline": {
-                            borderColor: darkMode ? "#444" : "#ccc",
-                        },
-                        "& input": {
-                            color: darkMode ? "#fff" : "#000",
-                            padding: "6px 8px",
-                            fontSize: "13px",
-                        },
+                        display: "flex",
+                        flexDirection: "column",
+                        alignItems: "flex-start",
+                        gap: 1.5,
                     }}
-                />
+                >
+                    <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                        <Typography
+                            variant="h6"
+                            sx={{
+                                color: labelColor,
+                                fontWeight: 600,
+                                fontFamily,
+                                fontSize: 16,
+                            }}
+                        >
+                            Register Responder
+                        </Typography>
+                        <TextField
+                            variant="outlined"
+                            size="small"
+                            placeholder="Search"
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value.toLowerCase())}
+                            InputProps={{
+                                startAdornment: (
+                                    <InputAdornment position="start">
+                                        <Search sx={{ color: "gray", fontSize: 18 }} />
+                                    </InputAdornment>
+                                ),
+                            }}
+                            sx={{
+                                width: "250px",
+                                "& .MuiOutlinedInput-root": {
+                                    borderRadius: "25px",
+                                    backgroundColor: darkMode ? "#1e293b" : "#fff",
+                                    color: darkMode ? "#fff" : "#000",
+                                    px: 1,
+                                    py: 0.2,
+                                },
+                                "& .MuiOutlinedInput-notchedOutline": {
+                                    borderColor: darkMode ? "#444" : "#ccc",
+                                },
+                                "& input": {
+                                    color: darkMode ? "#fff" : "#000",
+                                    padding: "6px 8px",
+                                    fontSize: "13px",
+                                },
+                            }}
+                        />
+                    </Box>
+                </Box>
             </Box>
 
             <Grid container spacing={2}>
                 <Grid item xs={12} md={7}>
-                    <Paper elevation={3} sx={{ padding: 2, borderRadius: 3, backgroundColor: bgColor, mt: 1, mb: 5, ml: 1 }}>
+                    <Paper
+                        sx={{
+                            backgroundColor: bgColor,
+                            p: 2,
+                            borderRadius: 2,
+                            color: textColor,
+                            transition: "all 0.3s ease-in-out",
+                        }}
+                    >
                         <TableContainer>
                             <Table>
                                 <TableHead>
                                     <TableRow>
-                                        <EnquiryCard sx={{
-                                            backgroundColor: "#5FECC8",
-                                            color: "#000",
-                                            display: "flex",
-                                            width: "100%",
-                                            borderRadius: 2,
-                                            p: 2,
-                                        }}>
+                                        <TableHeadingCard
+                                            sx={{
+                                                backgroundColor: "#5FECC8",
+                                                color: "#000",
+                                                display: "flex",
+                                                width: "100%",
+                                                borderRadius: 2,
+                                                p: 3,
+                                            }}
+                                        >
                                             <StyledCardContent
                                                 sx={{
                                                     flex: 0.5,
@@ -399,10 +409,9 @@ function RegisterResponder({ darkMode }) {
                                                     Sr. No
                                                 </Typography>
                                             </StyledCardContent>
-
                                             <StyledCardContent
                                                 sx={{
-                                                    flex: 1.9,
+                                                    flex: 1.8,
                                                     borderRight: "1px solid black",
                                                     justifyContent: "center",
                                                     ...fontsTableHeading,
@@ -412,136 +421,202 @@ function RegisterResponder({ darkMode }) {
                                                     Disaster Name
                                                 </Typography>
                                             </StyledCardContent>
-
                                             <StyledCardContent
                                                 sx={{
-                                                    flex: 3,
+                                                    flex: 2.2,
                                                     borderRight: "1px solid black",
                                                     justifyContent: "center",
                                                     ...fontsTableHeading,
                                                 }}
                                             >
-                                                <Typography variant="subtitle2">
-                                                    Responder
-                                                </Typography>
+                                                <Typography variant="subtitle2">Responder</Typography>
                                             </StyledCardContent>
-
                                             <StyledCardContent
                                                 sx={{
-                                                    flex: 0.5,
+                                                    flex: 0.4,
                                                     justifyContent: "center",
                                                     ...fontsTableHeading,
                                                 }}
                                             >
                                                 <Typography variant="subtitle2">Actions</Typography>
                                             </StyledCardContent>
-                                        </EnquiryCard>
+                                        </TableHeadingCard>
                                     </TableRow>
                                 </TableHead>
 
                                 <TableBody>
-                                    {paginatedData.length > 0 ? (
-                                        paginatedData.map((row, index) => (
-                                            <EnquiryCardBody
-                                                key={row.pk_id}
-                                                sx={{
-                                                    backgroundColor: inputBgColor,
-                                                    p: 2,
-                                                    borderRadius: 2,
-                                                    color: textColor,
-                                                    display: "flex",
-                                                    width: "100%",
-                                                    mb: 1,
-                                                }}
-                                            >
-                                                <StyledCardContent sx={{ flex: 0.5, justifyContent: "center" }}>
-                                                    <Typography variant="subtitle2" sx={fontsTableBody}>
-                                                        {index + 1}
-                                                    </Typography>
-                                                </StyledCardContent>
-
-                                                <StyledCardContent sx={{ flex: 1.9, justifyContent: "center", ...fontsTableBody }}>
-                                                    <Typography variant="subtitle2">{row.disaster_name}</Typography>
-                                                </StyledCardContent>
-
-                                                <StyledCardContent sx={{ flex: 3, justifyContent: "left", ...fontsTableBody }}>
-                                                    <Typography variant="subtitle2">
-                                                        {row.res_id.map((res) => res.responder_name).join(", ")}
-                                                    </Typography>
-                                                </StyledCardContent>
-
-                                                <StyledCardContent sx={{ flex: 0.5, justifyContent: "center", ...fontsTableBody }}>
-                                                    <MoreHorizIcon
-                                                        aria-describedby={id}
-                                                        onClick={(e) => handleClick(e, row)}
+                                    {
+                                        loading ? (
+                                            <TableRow>
+                                                <TableCell colSpan={6} align="center">
+                                                    <CircularProgress size={30} sx={{ color: "#5FECC8" }} />
+                                                </TableCell>
+                                            </TableRow>
+                                        ) : (
+                                            paginatedData
+                                                .map((item, index) => (
+                                                    <TableDataCardBody
+                                                        key={index}
                                                         sx={{
-                                                            color: "#00f0c0",
-                                                            cursor: "pointer",
-                                                            fontSize: 28,
-                                                            justifyContent: "center",
+                                                            // backgroundColor: inputBgColor,
+                                                            p: 2,
+                                                            borderRadius: 2,
+                                                            color: textColor,
+                                                            display: "flex",
+                                                            width: "100%",
+                                                            mb: 1,
                                                         }}
-                                                    />
-                                                </StyledCardContent>
-                                            </EnquiryCardBody>
-                                        ))
-                                    ) : (
-                                        <TableRow>
-                                            <TableCell colSpan={4} align="center" sx={{ py: 4, color: textColor }}>
-                                                No data found
-                                            </TableCell>
-                                        </TableRow>
-                                    )}
+                                                    >
+                                                        <StyledCardContent
+                                                            sx={{ flex: 0.5, justifyContent: "center" }}
+                                                        >
+                                                            <Typography variant="subtitle2" sx={fontsTableBody}>
+                                                                {index + 1}
+                                                            </Typography>
+                                                        </StyledCardContent>
+                                                        <StyledCardContent
+                                                            sx={{
+                                                                flex: 1.5,
+                                                                justifyContent: "center",
+                                                                alignItems: "center",
+                                                                display: "flex",
+                                                                minWidth: 0,
+                                                            }}
+                                                        >
+                                                            <Typography
+                                                                variant="subtitle2"
+                                                                sx={{
+                                                                    overflow: "hidden",
+                                                                    textOverflow: "ellipsis",
+                                                                    whiteSpace: "nowrap",
+                                                                }}
+                                                            >
+                                                                {item.disaster_name}
+                                                            </Typography>
+                                                        </StyledCardContent>
+                                                        <StyledCardContent
+                                                            sx={{
+                                                                flex: 2.2,
+                                                                justifyContent: "left",
+                                                                ...fontsTableBody,
+                                                            }}
+                                                        >
+                                                            <Typography variant="subtitle2">
+                                                                {item.res_id.map((res) => res.responder_name).join(", ")}
+                                                            </Typography>
+                                                        </StyledCardContent>
+                                                        <StyledCardContent
+                                                            sx={{
+                                                                flex: 0.3,
+                                                                justifyContent: "center",
+                                                                ...fontsTableBody,
+                                                            }}
+                                                        >
+                                                            <MoreHorizIcon
+                                                                onClick={(e) => handleClick(e, item)}
+                                                                sx={{
+                                                                    color: "#00f0c0",
+                                                                    cursor: "pointer",
+                                                                    // fontSize: 35,
+                                                                    justifyContent: "center",
+                                                                    ...fontsTableBody,
+                                                                }}
+                                                            />
+                                                        </StyledCardContent>
+                                                        <Popover
+                                                            open={open}
+                                                            anchorEl={anchorEl}
+                                                            onClose={handleClose}
+                                                            anchorOrigin={{
+                                                                vertical: "center",
+                                                                horizontal: "right",
+                                                            }}
+                                                            transformOrigin={{
+                                                                vertical: "center",
+                                                                horizontal: "left",
+                                                            }}
+                                                            PaperProps={{
+                                                                sx: {
+                                                                    p: 2,
+                                                                    display: "flex",
+                                                                    flexDirection: "column",
+                                                                    gap: 1.5,
+                                                                    borderRadius: 2,
+                                                                    minWidth: 120,
+                                                                },
+                                                            }}
+                                                        >
+                                                            <Button
+                                                                fullWidth
+                                                                variant="outlined"
+                                                                color="warning"
+                                                                startIcon={<EditOutlined />}
+                                                                onClick={() => handleEdit(selectedItem)}
+                                                            >
+                                                                Edit
+                                                            </Button>
+
+                                                            <Button
+                                                                fullWidth
+                                                                variant="outlined"
+                                                                color="error"
+                                                                startIcon={<DeleteOutline />}
+                                                                onClick={() => handleDelete(selectedItem)}
+                                                            >
+                                                                Delete
+                                                            </Button>
+                                                        </Popover>
+                                                        <Snackbar
+                                                            open={snackbarOpen}
+                                                            autoHideDuration={3000}
+                                                            onClose={() => setSnackbarOpen(false)}
+                                                            anchorOrigin={{
+                                                                vertical: "bottom",
+                                                                horizontal: "center",
+                                                            }}
+                                                        >
+                                                            <Alert
+                                                                onClose={() => setSnackbarOpen(false)}
+                                                                // severity={snackbarSeverity}
+                                                                variant="filled"
+                                                                sx={{ width: "100%" }}
+                                                            >
+                                                                {snackbarMessage}
+                                                            </Alert>
+                                                        </Snackbar>
+                                                    </TableDataCardBody>
+                                                ))
+                                        )}
                                 </TableBody>
                             </Table>
+                            <Dialog
+                                // open={openDeleteDialog}
+                                // onClose={() => setOpenDeleteDialog(false)}
+                                maxWidth="xs"
+                                fullWidth
+                            >
+                                <DialogTitle>Confirm Deletion</DialogTitle>
+                                <DialogContent>
+                                    <Typography>
+                                        Are you sure you want to delete this department?
+                                    </Typography>
+                                </DialogContent>
+                                <DialogActions>
+                                    <Button
+                                    // onClick={() => setOpenDeleteDialog(false)}
+                                    >
+                                        Cancel
+                                    </Button>
+                                    <Button
+                                        onClick={handleDelete}
+                                        color="error"
+                                        variant="contained"
+                                    >
+                                        Delete
+                                    </Button>
+                                </DialogActions>
+                            </Dialog>
                         </TableContainer>
-
-                        <Popover
-                            open={open}
-                            anchorEl={anchorEl}
-                            onClose={handleClose}
-                            anchorOrigin={{
-                                vertical: "center",
-                                horizontal: "right",
-                            }}
-                            transformOrigin={{
-                                vertical: "center",
-                                horizontal: "left",
-                            }}
-                            PaperProps={{
-                                sx: {
-                                    p: 2,
-                                    display: "flex",
-                                    flexDirection: "column",
-                                    gap: 1.5,
-                                    borderRadius: 2,
-                                    minWidth: 120,
-                                },
-                            }}
-                        >
-                            <Button
-                                fullWidth
-                                variant="outlined"
-                                color="warning"
-                                startIcon={<EditOutlined />}
-                                onClick={() => handleEdit(selectedItem)}
-                            >
-                                Edit
-                            </Button>
-
-                            <Button
-                                fullWidth
-                                variant="outlined"
-                                color="error"
-                                startIcon={<DeleteOutline />}
-                                onClick={() => handleDelete(selectedItem)}
-                            // onClick={() => {
-                            //     setDeleteDepId(selectedItem.dep_id);
-                            //     setOpenDeleteDialog(true);
-                            // }}
-                            >
-                                Delete
-                            </Button>
-                        </Popover>
 
                         <Box display="flex" justifyContent="space-between" alignItems="center" mt={2} px={1}>
                             <Box display="flex" alignItems="center" gap={1}>
@@ -650,6 +725,7 @@ function RegisterResponder({ darkMode }) {
                                                 onClick={() => {
                                                     setSelectedDisaster("");
                                                     setSelectedResponders([]);
+                                                    setShowSubmitButton(true);
                                                 }}
                                             >
                                                 + Add Responder
@@ -745,14 +821,15 @@ function RegisterResponder({ darkMode }) {
                                 }}
                                 onClick={isEditMode ? handleUpdate : handleSubmit}
                             >
-                                {isEditMode ? 'Update' : 'Submit'}
+                                {/* {isEditMode ? 'Update' : 'Submit'} */}
+                                {showSubmitButton ? 'Submit' : isEditMode ? 'Update' : 'Submit'}
                             </Button>
                         </Box>
                     </Paper>
                 </Grid>
             </Grid>
-        </div>
-    )
-}
+        </Box>
+    );
+};
 
-export default RegisterResponder
+export default RegisterResponder;

@@ -140,7 +140,7 @@ function IncidentDetails({
                 {renderText("Incident ID", incident?.incident_id)}
                 {renderText(
                   "Incident Type",
-                  incident?.inc_type === 1 ? "Emergency" : "Non-Emergency"
+                  incident?.inc_type === 1 ? "Emergency" : incident?.inc_type === 2 ? "Non-Emergency" : "N/A"
                 )}
                 {renderText("Alert Type", incident?.alert_type || "N/A")}
               </>

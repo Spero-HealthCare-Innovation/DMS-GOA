@@ -79,7 +79,7 @@ function CommentsPanel({
   };
 
   useEffect(() => {
-    if (flag !== 1) {
+    if (flag !== 0) {
       fetchComments();
     }
   }, [flag, selectedIncident]);

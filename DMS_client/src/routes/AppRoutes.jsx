@@ -111,7 +111,7 @@ const AppRoutes = ({ darkMode, setIsLoggedIn }) => {
           }
         />
         <Route
-          path="/responder"
+          path="/Responder"
           element={
             <PrivateRoute>
               <RegisterResponder darkMode={darkMode} />
