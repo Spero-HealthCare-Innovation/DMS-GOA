@@ -31,17 +31,27 @@ function IncidentDetails({
   });
 
   const userName = localStorage.getItem("userId");
+  console.log(selectedIncident?.inc_id, 'selectedIncidentselectedIncidentselectedIncident');
+  let incident = {};
+
+  if (selectedIncident?.inc_id) {
+    console.log(selectedIncident.inc_id, 'selectedIncidentselectedIncidentselectedIncident');
+    incident = incidentDetails?.incident_details?.[0] || {};
+  }
 
   const { disaterid, setResponderScopeForDispatch, responderScopeForDispatch } =
     useAuth();
 
-  const incident = incidentDetails?.incident_details?.[0] || {};
+  // const incident = incidentDetails?.incident_details?.[0] || {};
   console.log("Incident Details:", incident);
   const respondersList = incidentDetails?.responders || [];
 
   const [selectedResponders, setSelectedResponders] = useState(
     responderScope?.responder_scope?.map((item) => item.pk_id) || []
   );
+
+  console.log(selectedResponders, 'selectedReasdadadaspondersssss');
+
 
   const comments = incidentDetails?.comments || [];
 
@@ -76,7 +86,7 @@ function IncidentDetails({
   );
 
 
-   const renderHorizontalFields = (label, value) => (
+  const renderHorizontalFields = (label, value) => (
     <Box>
       <Typography
         variant="body2"
@@ -138,16 +148,16 @@ function IncidentDetails({
                   "Time",
                   selectedIncident?.alert_datetime
                     ? new Date(selectedIncident.alert_datetime).toLocaleString(
-                        "en-US",
-                        {
-                          day: "2-digit",
-                          month: "long",
-                          year: "numeric",
-                          hour: "numeric",
-                          minute: "2-digit",
-                          hour12: true,
-                        }
-                      )
+                      "en-US",
+                      {
+                        day: "2-digit",
+                        month: "long",
+                        year: "numeric",
+                        hour: "numeric",
+                        minute: "2-digit",
+                        hour12: true,
+                      }
+                    )
                     : "N/A"
                 )}
                 {/* {renderText("Disaster Id", selectedIncident?.disaster_id_id)} */}
@@ -155,60 +165,60 @@ function IncidentDetails({
               </>
             ) : (
               <>
-    <>
-  {incident?.mode === 2 ? (
-    <>
-      {renderText("Incident ID", incident?.incident_id)}
-      {renderText(
-        "Incident Type",
-        incident?.inc_type === 1 ? "Emergency" : "Non-Emergency"
-      )}
-      {renderText(
-        "Alert Type",
-        incident?.alert_type === 1
-          ? "High"
-          : incident?.alert_type === 2
-          ? "Medium"
-          : incident?.alert_type === 3
-          ? "Low"
-          : "N/A"
-      )}
-    </>
-  ) : (
-    <Grid container spacing={2}>
-      {[
-        { label: "Incident ID", value: incident?.incident_id },
-        {
-          label: "Incident Type",
-          value: incident?.inc_type === 1 ? "Emergency" : "Non-Emergency",
-        },
-        {
-          label: "Alert Type",
-          value:
-            { 1: "High", 2: "Medium", 3: "Low" }[incident?.alert_type] ||
-            "Unknown",
-        },
-        { label: "Caller Name", value: incident?.caller_name },
-        { label: "Caller Number", value: incident?.caller_no },
-        { label: "Location", value: incident?.location },
-      ].map((item, idx) => (
-        <Grid item xs={12} sm={6} key={idx}>
-          <Box sx={{ whiteSpace: "pre-wrap", wordBreak: "break-word" }}>
-            {renderHorizontalFields(item.label, item.value)}
-          </Box>
-        </Grid>
-      ))}
+                <>
+                  {incident?.mode === 2 ? (
+                    <>
+                      {renderText("Incident ID", incident?.incident_id)}
+                      {renderText(
+                        "Incident Type",
+                        incident?.inc_type === 1 ? "Emergency" : incident?.inc_type === 2 ? "Non-Emergency" : "N/A"
+                      )}
+                      {renderText(
+                        "Alert Type",
+                        incident?.alert_type === 1
+                          ? "High"
+                          : incident?.alert_type === 2
+                            ? "Medium"
+                            : incident?.alert_type === 3
+                              ? "Low"
+                              : "N/A"
+                      )}
+                    </>
+                  ) : (
+                    <Grid container spacing={2}>
+                      {[
+                        { label: "Incident ID", value: incident?.incident_id },
+                        {
+                          label: "Incident Type",
+                          value: incident?.inc_type === 1 ? "Emergency" : incident?.inc_type === 2 ? "Non-Emergency" : "N/A"
+                        },
+                        {
+                          label: "Alert Type",
+                          value:
+                            { 1: "High", 2: "Medium", 3: "Low" }[incident?.alert_type] ||
+                            "N/A",
+                        },
+                        { label: "Caller Name", value: incident?.caller_name },
+                        { label: "Caller Number", value: incident?.caller_no },
+                        { label: "Location", value: incident?.location },
+                      ].map((item, idx) => (
+                        <Grid item xs={12} sm={6} key={idx}>
+                          <Box sx={{ whiteSpace: "pre-wrap", wordBreak: "break-word" }}>
+                            {renderHorizontalFields(item.label, item.value)}
+                          </Box>
+                        </Grid>
+                      ))}
 
-      {incident?.summary_name && (
-        <Grid item xs={12}>
-          <Box sx={{ whiteSpace: "pre-wrap", wordBreak: "break-word" }}>
-            {renderHorizontalFields("Summary", incident?.summary_name)}
-          </Box>
-        </Grid>
-      )}
-    </Grid>
-  )}
-</>
+                      {incident?.summary_name && (
+                        <Grid item xs={12}>
+                          <Box sx={{ whiteSpace: "pre-wrap", wordBreak: "break-word" }}>
+                            {renderHorizontalFields("Summary", incident?.summary_name)}
+                          </Box>
+                        </Grid>
+                      )}
+                    </Grid>
+                  )}
+                </>
 
               </>
             )}
@@ -236,10 +246,11 @@ function IncidentDetails({
                   >
                     Response Procedure
                   </Typography>
-                  {responderScope?.sop_responses?.length > 0 &&
-                  incidentDetails?.sop_responses?.[0]?.sop_description ? (
+                  {(responderScope?.sop_responses?.[0]?.sop_description ||
+                    incidentDetails?.sop_responses?.[0]?.sop_description) ? (
                     <Typography variant="subtitle2" sx={{ fontFamily }}>
-                      {incidentDetails.sop_responses[0].sop_description}
+                      {responderScope?.sop_responses?.[0]?.sop_description ||
+                        incidentDetails?.sop_responses?.[0]?.sop_description}
                     </Typography>
                   ) : (
                     <Box display="flex" alignItems="center" gap={1} mt={1}>
@@ -317,22 +328,25 @@ function IncidentDetails({
                     Response Procedure
                   </Typography>
 
-                  {selectedIncident ? (
-                    responderScope?.sop_responses?.length > 0 &&
-                    responderScope.sop_responses[0]?.sop_description ? (
+                  {selectedIncident?.inc_id === undefined ? (
+                    <Box display="flex" alignItems="center" gap={1} mt={0.5}>
+                      <InfoOutlinedIcon color="disabled" fontSize="small" />
                       <Typography variant="subtitle2" sx={{ fontFamily }}>
-                        {responderScope.sop_responses[0].sop_description}
+                        No response procedure available.
                       </Typography>
-                    ) : (
-                      <Box display="flex" alignItems="center" gap={1} mt={0.5}>
-                        <InfoOutlinedIcon color="disabled" fontSize="small" />
-                        <Typography variant="subtitle2" sx={{ fontFamily }}>
-                          No response procedure available.
-                        </Typography>
-                      </Box>
-                    )
+                    </Box>
+                  ) : responderScope?.sop_responses?.length > 0 &&
+                    responderScope.sop_responses[0]?.sop_description ? (
+                    <Typography variant="subtitle2" sx={{ fontFamily }}>
+                      {responderScope.sop_responses[0].sop_description}
+                    </Typography>
                   ) : (
-                    <Skeleton variant="text" width="60%" height={24} />
+                    <Box display="flex" alignItems="center" gap={1} mt={0.5}>
+                      <InfoOutlinedIcon color="disabled" fontSize="small" />
+                      <Typography variant="subtitle2" sx={{ fontFamily }}>
+                        No response procedure available.
+                      </Typography>
+                    </Box>
                   )}
                 </Box>
 
@@ -346,7 +360,7 @@ function IncidentDetails({
 
                   {selectedIncident ? (
                     Array.isArray(incidentDetails?.["responders scope"]) &&
-                    incidentDetails["responders scope"].length > 0 ? (
+                      incidentDetails["responders scope"].length > 0 ? (
                       <Stack spacing={1} mt={1}>
                         <Box display="flex" flexWrap="wrap" gap={1}>
                           {incidentDetails["responders scope"].map(

@@ -28,6 +28,7 @@ function CommentsPanel({
   const userName = localStorage.getItem("userId");
   const { newToken } = useAuth();
   const Token = localStorage.getItem("access_token");
+  console.log(selectedIncident?.inc_id, 'selectedIncidentincommentapanel');
 
   const [snackbar, setSnackbar] = useState({
     open: false,
@@ -84,7 +85,7 @@ function CommentsPanel({
     }
   }, [flag, selectedIncident]);
 
-  
+
 
   const handlealertSaveClick = async () => {
     if (!commentText.trim()) return;
@@ -198,107 +199,117 @@ function CommentsPanel({
 
       {/* Comments Display */}
       {flag !== 1 && (
-        <Box
-          mb={2}
-          sx={{
-            height: 100,
-            overflowY: "auto",
-            display: "flex",
-            flexDirection: "column",
-            gap: 1,
-            px: 1,
-            pr: 0.5,
-            scrollBehavior: "smooth",
-            "&::-webkit-scrollbar": {
-              width: "6px",
-            },
-            "&::-webkit-scrollbar-thumb": {
-              backgroundColor: darkMode ? "#5FECC8" : "#888",
-              borderRadius: 3,
-            },
-            "&::-webkit-scrollbar-thumb:hover": {
-              backgroundColor: darkMode ? "#48c7ab" : "#555",
-            },
-          }}
-        >
-          {isLoadingComments ? (
-            [...Array(3)].map((_, i) => (
-              <Skeleton
-                key={i}
-                variant="rectangular"
-                height={30}
-                animation="wave"
-                sx={{
-                  borderRadius: 2,
-                  my: 0.5,
-                  width: i % 2 === 0 ? "80%" : "60%",
-                  alignSelf: i % 2 === 0 ? "flex-start" : "flex-end",
-                  bgcolor: darkMode ? "#1e293b" : "#e0e0e0",
-                }}
-              />
-            ))
-          ) : allComments && allComments.length > 0 ? (
-            allComments.map(({ comm_id, comments: commentMsg, comm_added_by }) => {
-              const isOwnComment = comm_added_by === userName;
-              return (
+        <>
+          {
+            selectedIncident?.inc_id === undefined ? (
+              <Typography variant="body2"></Typography>
+            )
+              :
+              (
                 <Box
-                  key={comm_id}
+                  mb={2}
                   sx={{
+                    height: 100,
+                    overflowY: "auto",
                     display: "flex",
-                    justifyContent: isOwnComment ? "flex-end" : "flex-start",
+                    flexDirection: "column",
+                    gap: 1,
+                    px: 1,
+                    pr: 0.5,
+                    scrollBehavior: "smooth",
+                    "&::-webkit-scrollbar": {
+                      width: "6px",
+                    },
+                    "&::-webkit-scrollbar-thumb": {
+                      backgroundColor: darkMode ? "#5FECC8" : "#888",
+                      borderRadius: 3,
+                    },
+                    "&::-webkit-scrollbar-thumb:hover": {
+                      backgroundColor: darkMode ? "#48c7ab" : "#555",
+                    },
                   }}
                 >
-                  <Stack direction="row" spacing={1} alignItems="flex-end">
-                    {!isOwnComment && (
-                      <Avatar sx={{ bgcolor: "#0288d1", fontSize: 14 }}>
-                        {getInitials(comm_added_by)}
-                      </Avatar>
-                    )}
-                    <Box
-                      sx={{
-                        backgroundColor: isOwnComment
-                          ? darkMode
-                            ? "#0f766e"
-                            : "#d1fae5"
-                          : darkMode
-                          ? "#1e293b"
-                          : "#f3f4f6",
-                        color: isOwnComment
-                          ? darkMode
-                            ? "#e0f2f1"
-                            : "#065f46"
-                          : darkMode
-                          ? "#e2e8f0"
-                          : "#111827",
-                        px: 2,
-                        py: 1,
-                        borderRadius: 2,
-                        maxWidth: "80%",
-                        wordBreak: "break-word",
-                        whiteSpace: "pre-line",
-                        textAlign: "left",
-                      }}
-                    >
-                      <Typography variant="body2">
-                        {commentMsg || "no comment Message"}
-                      </Typography>
-                    </Box>
-                    {isOwnComment && (
-                      <Avatar sx={{ bgcolor: "#6a1b9a", fontSize: 14 }}>
-                        {getInitials(comm_added_by)}
-                      </Avatar>
-                    )}
-                  </Stack>
+                  {isLoadingComments ? (
+                    [...Array(3)].map((_, i) => (
+                      <Skeleton
+                        key={i}
+                        variant="rectangular"
+                        height={30}
+                        animation="wave"
+                        sx={{
+                          borderRadius: 2,
+                          my: 0.5,
+                          width: i % 2 === 0 ? "80%" : "60%",
+                          alignSelf: i % 2 === 0 ? "flex-start" : "flex-end",
+                          bgcolor: darkMode ? "#1e293b" : "#e0e0e0",
+                        }}
+                      />
+                    ))
+                  ) : allComments && allComments.length > 0 ? (
+                    allComments.map(({ comm_id, comments: commentMsg, comm_added_by }) => {
+                      const isOwnComment = comm_added_by === userName;
+                      return (
+                        <Box
+                          key={comm_id}
+                          sx={{
+                            display: "flex",
+                            justifyContent: isOwnComment ? "flex-end" : "flex-start",
+                          }}
+                        >
+                          <Stack direction="row" spacing={1} alignItems="flex-end">
+                            {!isOwnComment && (
+                              <Avatar sx={{ bgcolor: "#0288d1", fontSize: 14 }}>
+                                {getInitials(comm_added_by)}
+                              </Avatar>
+                            )}
+                            <Box
+                              sx={{
+                                backgroundColor: isOwnComment
+                                  ? darkMode
+                                    ? "#0f766e"
+                                    : "#d1fae5"
+                                  : darkMode
+                                    ? "#1e293b"
+                                    : "#f3f4f6",
+                                color: isOwnComment
+                                  ? darkMode
+                                    ? "#e0f2f1"
+                                    : "#065f46"
+                                  : darkMode
+                                    ? "#e2e8f0"
+                                    : "#111827",
+                                px: 2,
+                                py: 1,
+                                borderRadius: 2,
+                                maxWidth: "80%",
+                                wordBreak: "break-word",
+                                whiteSpace: "pre-line",
+                                textAlign: "left",
+                              }}
+                            >
+                              <Typography variant="body2">
+                                {commentMsg || "no comment Message"}
+                              </Typography>
+                            </Box>
+                            {isOwnComment && (
+                              <Avatar sx={{ bgcolor: "#6a1b9a", fontSize: 14 }}>
+                                {getInitials(comm_added_by)}
+                              </Avatar>
+                            )}
+                          </Stack>
+                        </Box>
+                      );
+                    })
+                  ) : (
+                    <Typography variant="body2" color="text.secondary">
+                      No comments yet.
+                    </Typography>
+                  )}
+                  <div ref={bottomRef} />
                 </Box>
-              );
-            })
-          ) : (
-            <Typography variant="body2" color="text.secondary">
-              No comments yet.
-            </Typography>
-          )}
-          <div ref={bottomRef} />
-        </Box>
+              )
+          }
+        </>
       )}
 
       {/* Input + Send/Save Button */}
