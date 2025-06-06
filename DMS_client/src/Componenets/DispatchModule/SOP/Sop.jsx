@@ -104,25 +104,27 @@ function Sop({ darkMode, setDarkMode }) {
     return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
   });
 
-  const fetchDispatchList = async () => {
-    try {
-      setLoading(true);
-      const res = await axios.get(`${port}/admin_web/dispatch_get/`, {
-        headers: {
-          Authorization: `Bearer ${Token || newToken}`,
-        },
-      });
+const fetchDispatchList = async () => {
+  try {
+    setLoading(true);
+    const res = await axios.get(`${port}/admin_web/dispatch_get/`, {
+      headers: {
+        Authorization: `Bearer ${Token || newToken}`,
+      },
+    });
 
-      // Reverse the array to show last record first
-      const reversedData = res.data.reverse();
+    // Sort by latest created_at or ID
+    const sortedData = res.data.sort(
+      (a, b) => new Date(b.created_at) - new Date(a.created_at)
+    );
 
-      setDispatchList(reversedData);
-    } catch (err) {
-      console.error("Failed to fetch dispatch list", err);
-    } finally {
-      setLoading(false);
-    }
-  };
+    setDispatchList(sortedData);
+  } catch (err) {
+    console.error("Failed to fetch dispatch list", err);
+  } finally {
+    setLoading(false);
+  }
+};
 
   useEffect(() => {
     fetchDispatchList();
@@ -235,6 +237,7 @@ function Sop({ darkMode, setDarkMode }) {
             incidentId={incidentId}
             setIncidentId={setIncidentId}
            incidentid={incidentId} 
+            selectedIncident={selectedIncident}
             fetchDispatchList={fetchDispatchList}// Pass the incidentId prop
           />
         </Grid>

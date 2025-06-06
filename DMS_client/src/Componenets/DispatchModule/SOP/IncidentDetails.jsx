@@ -75,6 +75,24 @@ function IncidentDetails({
     </Box>
   );
 
+
+   const renderHorizontalFields = (label, value) => (
+    <Box>
+      <Typography
+        variant="body2"
+        sx={{ color: labelColor, fontWeight: 500, fontFamily }}
+      >
+        {label}
+      </Typography>
+      <Typography
+        variant="subtitle2"
+        sx={{ fontFamily, color: textColor, wordBreak: "break-word" }}
+      >
+        {value || "N/A"}
+      </Typography>
+    </Box>
+  );
+
   useEffect(() => {
     if (
       responderScope?.responder_scope?.length > 0 &&
@@ -137,12 +155,61 @@ function IncidentDetails({
               </>
             ) : (
               <>
-                {renderText("Incident ID", incident?.incident_id)}
-                {renderText(
-                  "Incident Type",
-                  incident?.inc_type === 1 ? "Emergency" : "Non-Emergency"
-                )}
-                {renderText("Alert Type", incident?.alert_type || "N/A")}
+    <>
+  {incident?.mode === 2 ? (
+    <>
+      {renderText("Incident ID", incident?.incident_id)}
+      {renderText(
+        "Incident Type",
+        incident?.inc_type === 1 ? "Emergency" : "Non-Emergency"
+      )}
+      {renderText(
+        "Alert Type",
+        incident?.alert_type === 1
+          ? "High"
+          : incident?.alert_type === 2
+          ? "Medium"
+          : incident?.alert_type === 3
+          ? "Low"
+          : "N/A"
+      )}
+    </>
+  ) : (
+    <Grid container spacing={2}>
+      {[
+        { label: "Incident ID", value: incident?.incident_id },
+        {
+          label: "Incident Type",
+          value: incident?.inc_type === 1 ? "Emergency" : "Non-Emergency",
+        },
+        {
+          label: "Alert Type",
+          value:
+            { 1: "High", 2: "Medium", 3: "Low" }[incident?.alert_type] ||
+            "Unknown",
+        },
+        { label: "Caller Name", value: incident?.caller_name },
+        { label: "Caller Number", value: incident?.caller_no },
+        { label: "Location", value: incident?.location },
+      ].map((item, idx) => (
+        <Grid item xs={12} sm={6} key={idx}>
+          <Box sx={{ whiteSpace: "pre-wrap", wordBreak: "break-word" }}>
+            {renderHorizontalFields(item.label, item.value)}
+          </Box>
+        </Grid>
+      ))}
+
+      {incident?.summary_name && (
+        <Grid item xs={12}>
+          <Box sx={{ whiteSpace: "pre-wrap", wordBreak: "break-word" }}>
+            {renderHorizontalFields("Summary", incident?.summary_name)}
+          </Box>
+        </Grid>
+      )}
+    </Grid>
+  )}
+</>
+
               </>
             )}
           </Grid>
