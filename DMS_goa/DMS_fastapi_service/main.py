@@ -373,7 +373,8 @@ def get_old_weather_alerts():
                 "weather_code": alert.weather_code,
                 "triger_status": alert.triger_status,
                 "disaster_id": alert.disaster_id.disaster_id,
-                "disaster_name": alert.disaster_id.disaster_name
+                "disaster_name": alert.disaster_id.disaster_name,
+                "alert_type":alert.alert_type
             }
             for alert in alerts
         ]
@@ -537,7 +538,7 @@ async def websocket_endpoint(websocket: WebSocket):
                         .order_by("pk_id")
                         .values("pk_id", "latitude", "longitude", "elevation", "alert_datetime", 
                                 "temperature_2m", "rain", "precipitation", 
-                                "weather_code", "triger_status")
+                                "weather_code", "triger_status", "alert_type")
                     )
 
                     for alert in new_alerts:
