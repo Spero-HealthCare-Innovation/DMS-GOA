@@ -113,6 +113,8 @@ function IncidentDetails({
     }
   }, [responderScope]);
 
+
+  
   return (
     <>
       <Typography variant="h6" color={labelColor} sx={{ fontFamily }}>
@@ -273,21 +275,21 @@ function IncidentDetails({
                     <Stack spacing={1} mt={1}>
                       <Box display="flex" flexWrap="wrap" gap={1}>
                         {responderScope.responder_scope.map(
-                          ({ pk_id, responder_name }) => (
+                          ({ res_id, responder_name }) => (
                             <FormControlLabel
-                              key={pk_id}
+                              key={res_id}
                               control={
                                 <Checkbox
-                                  checked={selectedResponders.includes(pk_id)}
+                                  checked={selectedResponders.includes(res_id)}
                                   onChange={(e) => {
                                     if (e.target.checked) {
                                       setSelectedResponders((prev) => [
                                         ...prev,
-                                        pk_id,
+                                        res_id,
                                       ]);
                                     } else {
                                       setSelectedResponders((prev) =>
-                                        prev.filter((id) => id !== pk_id)
+                                        prev.filter((id) => id !== res_id)
                                       );
                                     }
                                   }}
