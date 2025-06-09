@@ -127,7 +127,7 @@ export const inputStyle = {
   backgroundColor: inputBgColor,
   "& input::placeholder": {
     fontSize: "0.85rem",
-    color: `${textColor} !important`,
+    color: ` #9e9e9e!important`,
   },
   boxShadow: "0px 2px 10px rgba(0, 0, 0, 0.1)",
   "&:hover": {
@@ -163,7 +163,7 @@ export const textfieldInputFonts = {
 };
 
 export const getCustomSelectStyles = (isDarkMode) => {
-  const textColor = isDarkMode ? "#fff" : "#000";
+  const textColor = isDarkMode ? "#fff" : "grey";
   const textfieldcolor = isDarkMode ? "#fff" : "grey";
   const placeholderColor = isDarkMode ? "#bbb" : "#666";
   const bgColor = isDarkMode

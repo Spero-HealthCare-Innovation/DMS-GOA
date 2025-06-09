@@ -26,6 +26,8 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
+  TableCell,
+  CircularProgress,
 } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import SearchIcon from "@mui/icons-material/Search";
@@ -128,6 +130,7 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
   const [snackbarmsgAddDept, setSnackbarMessageAdded] = useState("");
   const [snackbarupdate, setSnackbarMessageUpdated] = useState("");
   const [filteredResults, setFilteredResults] = useState([]);
+  const [loading, setLoading] = useState(false);
 
   const TableDataColor = darkMode
     ? "rgba(0, 0, 0, 0.04)"
@@ -362,6 +365,7 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
 
   const fetchDepartments = async () => {
     try {
+      setLoading(true);
       const response = await fetch(`${port}/admin_web/Department_get/`, {
         headers: {
           Authorization: `Bearer ${token || newToken}`,
@@ -382,6 +386,8 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
       }
     } catch (error) {
       console.error("Error fetching departments:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -698,7 +704,7 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
                     >
                       <StyledCardContent
                         sx={{
-                          flex: 0.3,
+                          flex: 0.9,
                           borderRight: "1px solid black",
                           justifyContent: "center",
                         }}
@@ -783,12 +789,12 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
                 </TableHead>
 
                 <TableBody>
-                  {paginatedData.length === 0 ? (
-                    <Box p={2}>
-                      <Typography align="center" color="textSecondary">
-                        No tasks available.
-                      </Typography>
-                    </Box>
+                  {loading ? (
+                    <TableRow>
+                      <TableCell colSpan={6} align="center">
+                        <CircularProgress size={30} sx={{ color: "#5FECC8" }} />
+                      </TableCell>
+                    </TableRow>
                   ) : (
                     paginatedData
                       // .slice((page - 1) * rowsPerPage, page * rowsPerPage)
@@ -816,18 +822,23 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
                             sx={{
                               flex: 2.4,
                               justifyContent: "center",
-                              ...fontsTableBody,
-                              display: "-webkit-box",
-                              WebkitLineClamp: 2,
-                              WebkitBoxOrient: "vertical",
-                              overflow: "hidden",
-                              textOverflow: "ellipsis",
+                              alignItems: "center",
+                              display: "flex",
+                              minWidth: 0,
                             }}
                           >
-                            <Typography variant="subtitle2">
+                            <Typography
+                              variant="subtitle2"
+                              sx={{
+                                overflow: "hidden",
+                                textOverflow: "ellipsis",
+                                whiteSpace: "nowrap", // or use line clamp if multiline allowed
+                              }}
+                            >
                               {item.dep_name}
                             </Typography>
                           </StyledCardContent>
+
                           {/* <StyledCardContent
                             sx={{
                               flex: 1.5,
@@ -1103,28 +1114,25 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
           >
             <Box
               display="flex"
-              justifyContent="space-between"
+              justifyContent={{ xs: "center", md: "flex-end" }}
               alignItems="center"
               mb={2}
+              flexWrap="wrap"
             >
-              {/* <Typography
-                sx={{ fontWeight: 500, fontSize: "18px", fontFamily: "Roboto" }}
-              >
-                Add User{" "}
-              </Typography> */}
               <Button
                 variant="contained"
                 startIcon={<AddCircleOutline />}
-                disabled={!isEditMode} // 👈 disables button if not in edit mode
-                onClick={handleAddNewDepartment} // 👉 add handler
+                disabled={!isEditMode}
+                onClick={handleAddNewDepartment}
                 sx={{
                   backgroundColor: "#5FECC8",
                   color: "#000",
                   fontWeight: 600,
                   fontFamily: "Roboto",
                   textTransform: "none",
-                  left: "16rem",
-
+                  px: 2,
+                  py: 1,
+                  fontSize: { xs: "0.75rem", sm: "0.875rem" },
                   "&:hover": {
                     backgroundColor: "#4ddbb6",
                   },
