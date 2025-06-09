@@ -6,6 +6,8 @@ import TableBody from '@mui/material/TableBody';
 import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
+import TableCell from '@mui/material/TableCell';
+import CircularProgress from '@mui/material/CircularProgress';
 import { Search, ArrowBack, DeleteOutline, EditOutlined, AddCircleOutline } from "@mui/icons-material";
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 import { styled } from "@mui/material/styles";
@@ -60,7 +62,7 @@ function Add_group({ darkMode }) {
 
 
   const userName = localStorage.getItem("userId");
-  console.log(userName, "userName");
+  // console.log(userName, "userName");
 
   // Determine effective token (context token takes priority)
   const effectiveToken = newToken || localStorage.getItem("access_token");
@@ -76,7 +78,7 @@ function Add_group({ darkMode }) {
         },
       });
 
-      console.log(" Departments fetched:", response.data);
+      // console.log(" Departments fetched:", response.data);
       setDepartmentList(response.data);
     } catch (err) {
       console.error(" Error fetching departments:", err);
@@ -484,57 +486,75 @@ function Add_group({ darkMode }) {
                 </TableHead>
 
                 <TableBody>
-                  {paginatedData.length === 0 ? (
-                    <Box p={2}>
-                      <Typography align="center" color="textSecondary">
-                        {searchTerm ? 'No groups found matching your search.' : 'No groups available.'}
-                      </Typography>
-                    </Box>
-                  ) : (
-                    paginatedData.map((item, index) => (
-                      <EnquiryCardBody
-                        key={index}
-                        sx={{
-                          backgroundColor: inputBgColor,
-                          p: 2,
-                          borderRadius: 2,
-                          color: textColor,
-                          display: "flex",
-                          width: "100%",
-                          mb: 1,
-                        }}
-                      >
-                        <StyledCardContent sx={{ flex: 0.6, justifyContent: "center" }}>
-                          <Typography variant="subtitle2" sx={fontsTableBody}>
-                            {(page - 1) * rowsPerPage + index + 1}
-                          </Typography>
-                        </StyledCardContent>
-                        <StyledCardContent sx={{ flex: 2, justifyContent: "center", ...fontsTableBody }}>
-                          <Typography variant="subtitle2">{item.groupName}</Typography>
-                        </StyledCardContent>
+  {loading ? (
+    <TableRow>
+      <TableCell colSpan={6} align="center">
+        <CircularProgress size={30} sx={{ color: "#5FECC8" }} />
+      </TableCell>
+    </TableRow>
+  ) : paginatedData.length === 0 ? (
+    <TableRow>
+      <TableCell colSpan={6}>
+        <Box p={2}>
+          <Typography align="center" color="textSecondary">
+            {searchTerm
+              ? "No groups found matching your search."
+              : "No groups available."}
+          </Typography>
+        </Box>
+      </TableCell>
+    </TableRow>
+  ) : (
+    paginatedData.map((item, index) => (
+      <EnquiryCardBody
+        key={index}
+        sx={{
+          backgroundColor: inputBgColor,
+          p: 2,
+          borderRadius: 2,
+          color: textColor,
+          display: "flex",
+          width: "100%",
+          mb: 1,
+        }}
+      >
+        <StyledCardContent sx={{ flex: 0.6, justifyContent: "center" }}>
+          <Typography variant="subtitle2" sx={fontsTableBody}>
+            {(page - 1) * rowsPerPage + index + 1}
+          </Typography>
+        </StyledCardContent>
 
+        <StyledCardContent
+          sx={{ flex: 2, justifyContent: "center", ...fontsTableBody }}
+        >
+          <Typography variant="subtitle2">{item.groupName}</Typography>
+        </StyledCardContent>
 
-                        <StyledCardContent sx={{ flex: 2, justifyContent: "center", ...fontsTableBody }}>
-                          <Typography variant="subtitle2">{item.departmentID}</Typography>
-                        </StyledCardContent>
+        <StyledCardContent
+          sx={{ flex: 2, justifyContent: "center", ...fontsTableBody }}
+        >
+          <Typography variant="subtitle2">{item.departmentID}</Typography>
+        </StyledCardContent>
 
+        <StyledCardContent
+          sx={{ flex: 1.2, justifyContent: "center", ...fontsTableBody }}
+        >
+          <MoreHorizIcon
+            onClick={(e) => handleOpen(e, item)}
+            sx={{
+              color: "#00f0c0",
+              cursor: "pointer",
+              fontSize: 28,
+              justifyContent: "center",
+              ...fontsTableBody,
+            }}
+          />
+        </StyledCardContent>
+      </EnquiryCardBody>
+    ))
+  )}
+</TableBody>
 
-                        <StyledCardContent sx={{ flex: 1.2, justifyContent: "center", ...fontsTableBody }}>
-                          <MoreHorizIcon
-                            onClick={(e) => handleOpen(e, item)}
-                            sx={{
-                              color: "#00f0c0",
-                              cursor: "pointer",
-                              fontSize: 28,
-                              justifyContent: "center",
-                              ...fontsTableBody,
-                            }}
-                          />
-                        </StyledCardContent>
-                      </EnquiryCardBody>
-                    ))
-                  )}
-                </TableBody>
               </Table>
             </TableContainer>
 

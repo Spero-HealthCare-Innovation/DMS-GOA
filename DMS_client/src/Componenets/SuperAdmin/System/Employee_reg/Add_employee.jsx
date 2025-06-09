@@ -17,6 +17,7 @@ import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
 import { useTheme } from "@mui/material/styles";
 import VisibilityIcon from "@mui/icons-material/Visibility";
+import CircularProgress from '@mui/material/CircularProgress';
 import {
   CustomTextField,
   getThemeBgColors,
@@ -267,6 +268,7 @@ function Add_employee({ darkMode }) {
   // const paginatedData = employees; 
 
   const fetchEmployees = async () => {
+     setLoading1(true);
     try {
       const response = await axios.get(`${port}/admin_web/employee_get/`, {
         headers: {
@@ -289,9 +291,12 @@ function Add_employee({ darkMode }) {
       console.log(`${port}/admin_web/employee_get/`);
 
       setEmployees(employeeData);
+
     } catch (error) {
       console.error("Failed to fetch employees:", error);
-    }
+    } finally {
+    setLoading1(false); 
+  }
   };
 
 
@@ -691,7 +696,14 @@ function Add_employee({ darkMode }) {
 
 
                 <TableBody>
-                  {filteredEmployees.length === 0 ? (
+                   {loading1 ? (
+                      <TableRow>
+                        <TableCell colSpan={6} align="center">
+                          <CircularProgress size={30} sx={{ color: "#5FECC8" }} />
+                        </TableCell>
+                      </TableRow>
+                    ) :
+                  filteredEmployees.length === 0 ? (
                     <Box p={2}>
                       <Typography align="center" color="textSecondary">
                         {searchTerm ? "No employees found matching your search." : "No employees available."}
@@ -778,10 +790,8 @@ function Add_employee({ darkMode }) {
                           </StyledCardContent>
                         </EnquiryCardBody>
                       ))
-                  )}
-                  {/* {paginatedData.map((item, index) => ( */}
-
-                  {/* // ))} */}
+  )}
+                  
                 </TableBody>
               </Table>
             </TableContainer>

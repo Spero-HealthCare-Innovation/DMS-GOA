@@ -4,8 +4,6 @@ import axios from "axios";
 const AuthContext = createContext();
 export const useAuth = () => useContext(AuthContext);
 
-
-
 export const AuthProvider = ({ children }) => {
   const port = import.meta.env.VITE_APP_API_KEY;
   const token = localStorage.getItem("access_token");
@@ -35,23 +33,32 @@ export const AuthProvider = ({ children }) => {
 
   const [departments, setDepartments] = useState([]);
   const [disaterid, setDisaterid] = useState(null);
+  const [disasterIdFromSop, setDisasterIdFromSop] = useState(null);
+  console.log(disasterIdFromSop, "disasterIdFromSop");
+
   const [disasterIncident, setDisasterIncident] = useState(null);
-  const [query, setQuery] = useState('');
+  const [query, setQuery] = useState("");
   const [suggestions, setSuggestions] = useState([]);
-  const [selectedPosition, setSelectedPosition] = useState([15.298430295875988, 74.08868128835907]); // Default: Goa
-  const [popupText, setPopupText] = useState('');
-  console.log(disasterIncident, 'disasterIncident');
+  const [selectedPosition, setSelectedPosition] = useState([
+    15.298430295875988, 74.08868128835907,
+  ]); // Default: Goa
+  const [popupText, setPopupText] = useState("");
   // 🔹 sop page
   const [responderScope, setResponderScope] = useState([]);
+  const [responderScopeForDispatch, setResponderScopeForDispatch] = useState([]);
+  console.log(responderScopeForDispatch, "disasterIncident");
+
+  const [selectedIncidentFromSop, setSelectedIncidentFromSop] = useState(null);
+// const [disasterIdFromSop, setDisasterIdFromSop] = useState(null);
 
   useEffect(() => {
-    const disasterValue = disaterid || disasterIncident;
-    console.log(disasterValue, 'passingValue');
+    const disasterValue = disaterid || disasterIncident || disasterIdFromSop;
+    console.log(disasterValue, "passingValue");
 
     if (disasterValue) {
       fetchResponderScope(disasterValue);
     }
-  }, [disaterid, disasterIncident]);
+  }, [disaterid, disasterIncident, disasterIdFromSop]);
 
   const refreshAuthToken = async () => {
     const refresh = localStorage.getItem("refresh_token");
@@ -94,13 +101,11 @@ export const AuthProvider = ({ children }) => {
   const fetchStates = async () => {
     try {
       setLoading(true);
-      const res = await axios.get(`${port}/admin_web/state_get/`,
-        {
-          headers: {
-            Authorization: `Bearer ${token || newToken}`,
-          },
-        }
-      );
+      const res = await axios.get(`${port}/admin_web/state_get/`, {
+        headers: {
+          Authorization: `Bearer ${token || newToken}`,
+        },
+      });
       setStates(res.data);
     } catch (err) {
       console.error("Error fetching states:", err);
@@ -190,10 +195,11 @@ export const AuthProvider = ({ children }) => {
           },
         }
       );
-      console.log(res, 'resssssss');
+      console.log(res, "resssssss");
 
       console.log("Responder Scope:", res.data);
       setResponderScope(res.data || []);
+      setResponderScopeForDispatch(res.data || []);
     } catch (err) {
       console.error("Error fetching responder scope:", err);
       setError(err);
@@ -207,17 +213,19 @@ export const AuthProvider = ({ children }) => {
     setQuery(value);
     if (value.length < 3) return;
 
-    const response = await axios.get('https://autosuggest.search.hereapi.com/v1/autosuggest', {
-      params: {
-        apiKey: HERE_API_KEY,
-        q: value,
-        at: `${selectedPosition[0]},${selectedPosition[1]}`,
-        limit: 5
+    const response = await axios.get(
+      "https://autosuggest.search.hereapi.com/v1/autosuggest",
+      {
+        params: {
+          apiKey: HERE_API_KEY,
+          q: value,
+          at: `${selectedPosition[0]},${selectedPosition[1]}`,
+          limit: 5,
+        },
       }
-    });
+    );
 
-    setSuggestions(response.data.items.filter(item => item.position));
-
+    setSuggestions(response.data.items.filter((item) => item.position));
   };
 
   const handleSelectSuggestion = async (item) => {
@@ -287,13 +295,13 @@ export const AuthProvider = ({ children }) => {
       const disaster = await fetch(`${port}/admin_web/DMS_Disaster_Type_Get/`, {
         headers: {
           Authorization: `Bearer ${token || newToken}`,
-        }
-      })
+        },
+      });
       const disasterData = await disaster.json();
       setDisaster(disasterData);
     };
-    fetchDisaster()
-  }, [])
+    fetchDisaster();
+  }, []);
 
   return (
     <AuthContext.Provider
@@ -330,7 +338,13 @@ export const AuthProvider = ({ children }) => {
         selectedPosition,
         popupText,
         setPopupText,
-        setQuery
+        setQuery,
+        selectedIncidentFromSop,
+        setSelectedIncidentFromSop,
+        disasterIdFromSop,
+        setDisasterIdFromSop,
+        responderScopeForDispatch,
+        setResponderScopeForDispatch,
       }}
     >
       {children}
