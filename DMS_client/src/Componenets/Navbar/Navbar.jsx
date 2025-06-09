@@ -121,13 +121,20 @@ const Navbar = ({ darkMode, toggleDarkMode }) => {
 
 
   const logout = async () => {
-     const effectiveToken = newToken || localStorage.getItem("access_token");
+    const effectiveToken = newToken || localStorage.getItem("access_token");
+    console.log(localStorage.getItem("access_token"),"hii");
+
+    console.log(effectiveToken, 'effectiveTokeneffectiveToken');
 
     if (!effectiveToken) {
       console.error('No access token found');
-      window.location.href = '/login';
+      // window.location.href = '/login';
+      navigate("/login");
       return;
     }
+
+    const refreshToken = localStorage.getItem("refresh_token");
+    console.log(refreshToken, 'refresh token i got');
 
     try {
       const response = await fetch(`${port}/admin_web/logout/`, {
@@ -135,7 +142,10 @@ const Navbar = ({ darkMode, toggleDarkMode }) => {
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${effectiveToken}`,
-        }
+        },
+        body: JSON.stringify({
+          refresh_token: refreshToken
+        })
       });
       localStorage.setItem('logout', Date.now());
 
@@ -152,13 +162,15 @@ const Navbar = ({ darkMode, toggleDarkMode }) => {
         console.warn('Logout request failed:', await response.text());
       }
 
-      window.location.href = '/login';
+      // window.location.href = '/login';
+      navigate("/login");
     } catch (error) {
       console.error('Error during logout:', error);
       localStorage.removeItem('access_token');
       localStorage.removeItem('refresh_token');
       localStorage.removeItem('token');
-      window.location.href = '/login';
+      // window.location.href = '/login';
+        // navigate("/login");
     }
   };
 
