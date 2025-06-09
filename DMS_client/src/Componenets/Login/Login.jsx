@@ -480,7 +480,6 @@ const handleLogin = async () => {
       setPasswordError("Login failed. Please try again.");
       return;
     }
-
  
     localStorage.setItem("access_token", data.token.access);
     localStorage.setItem("refresh_token", data.token.refresh);
