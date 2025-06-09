@@ -303,7 +303,17 @@ const Incident = ({ darkMode }) => {
                                     variant="outlined"
                                     sx={inputStyle}
                                     value={callerNumber}
-                                    onChange={(e) => setCallerNumber(e.target.value)}
+                                    onChange={(e) => {
+                                        const value = e.target.value;
+                                        if (/^\d{0,10}$/.test(value)) {
+                                            setCallerNumber(value);
+                                        }
+                                    }}
+                                    inputProps={{
+                                        maxLength: 10,
+                                        inputMode: 'numeric',
+                                        pattern: '[0-9]*'
+                                    }}
                                 />
                             </Grid>
 
