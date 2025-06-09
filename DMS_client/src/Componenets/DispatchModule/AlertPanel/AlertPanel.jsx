@@ -68,9 +68,9 @@ const AlertPanel = ({ darkMode }) => {
     const socketRef = useRef(null);
     const [triggeredData, setTriggeredData] = useState([]);
     console.log(triggeredData, 'triggeredData');
-    
-      const [showSnackbar, setShowSnackbar] = useState(false);
-      const [snackbarMessage, setSnackbarMessage] = useState("");
+
+    const [showSnackbar, setShowSnackbar] = useState(false);
+    const [snackbarMessage, setSnackbarMessage] = useState("");
 
     const startIndex = (page - 1) * rowsPerPage;
     const endIndex = startIndex + rowsPerPage;
@@ -89,30 +89,30 @@ const AlertPanel = ({ darkMode }) => {
         document.title = "DMS-AlertPanel";
     }, []);
 
- useEffect(() => {
-    const handleOnline = () => {
-      setSnackbarMessage("System is Online ");
-      setShowSnackbar(true);
+    useEffect(() => {
+        const handleOnline = () => {
+            setSnackbarMessage("System is Online ");
+            setShowSnackbar(true);
 
-      setTimeout(() => {
-        setShowSnackbar(false);
-        window.location.reload();
-      }, 2000);
-    };
+            setTimeout(() => {
+                setShowSnackbar(false);
+                window.location.reload();
+            }, 2000);
+        };
 
-    const handleOffline = () => {
-      setSnackbarMessage("No Internet Connection ❌");
-      setShowSnackbar(true);
-    };
+        const handleOffline = () => {
+            setSnackbarMessage("No Internet Connection ❌");
+            setShowSnackbar(true);
+        };
 
-    window.addEventListener("online", handleOnline);
-    window.addEventListener("offline", handleOffline);
+        window.addEventListener("online", handleOnline);
+        window.addEventListener("offline", handleOffline);
 
-    return () => {
-      window.removeEventListener("online", handleOnline);
-      window.removeEventListener("offline", handleOffline);
-    };
-  }, []);
+        return () => {
+            window.removeEventListener("online", handleOnline);
+            window.removeEventListener("offline", handleOffline);
+        };
+    }, []);
 
 
     useEffect(() => {
@@ -245,6 +245,9 @@ const AlertPanel = ({ darkMode }) => {
                                         <StyledCardContent style={{ flex: 1, borderRight: "1px solid black" }}>
                                             <Typography variant="subtitle2">Rain (mm)</Typography>
                                         </StyledCardContent>
+                                        <StyledCardContent style={{ flex: 1, borderRight: "1px solid black" }}>
+                                            <Typography variant="subtitle2">Alert Type</Typography>
+                                        </StyledCardContent>
                                         <StyledCardContent style={{ flex: 1, marginTop: '15px' }}>
                                             <Typography variant="subtitle2">Trigger</Typography>
                                         </StyledCardContent>
@@ -286,6 +289,31 @@ const AlertPanel = ({ darkMode }) => {
                                             </StyledCardContent>
                                             <StyledCardContent style={{ flex: 1 }}>
                                                 <Typography variant="subtitle2">{item.rain} mm</Typography>
+                                            </StyledCardContent>
+                                            <StyledCardContent style={{ flex: 1 }}>
+                                                <Typography variant="subtitle2">
+                                                    {
+                                                        item.alert_type === 1 ? (
+                                                            <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                                                <span style={{ width: 15, height: 15, borderRadius: '50%', backgroundColor: '#FF3B30' }}></span>
+                                                            </span>
+                                                        ) : item.alert_type === 2 ? (
+                                                            <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                                                <span style={{ width: 15, height: 15, borderRadius: '50%', backgroundColor: '#FF9500' }}></span>
+                                                            </span>
+                                                        ) : item.alert_type === 3 ? (
+                                                            <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                                                <span style={{ width: 15, height: 15, borderRadius: '50%', backgroundColor: '#FFD60A' }}></span>
+                                                            </span>
+                                                        ) : item.alert_type === 4 ? (
+                                                            <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                                                <span style={{ width: 15, height: 15, borderRadius: '50%', backgroundColor: '#5AC8FA' }}></span>
+                                                            </span>
+                                                        ) : (
+                                                            'N/A'
+                                                        )
+                                                    }
+                                                </Typography>
                                             </StyledCardContent>
                                             <StyledCardContent style={{ flex: 1 }}>
                                                 <Button
