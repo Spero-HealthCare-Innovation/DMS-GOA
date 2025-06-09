@@ -53,6 +53,7 @@ const port = import.meta.env.VITE_SOCKET1_API_KEY;
   const [error, setError] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const [hasSubmitted, setHasSubmitted] = useState(false);
+    const [downloadLoading, setDownloadLoading] = useState(false);
 
   const [page, setPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(5);
@@ -201,6 +202,69 @@ const [formData, setFormData] = useState({
       fetchClosureData();
     } else {
       console.warn("No token found for department fetch.");
+    }
+  };
+
+   // Download function to handle the download API call
+  const handleDownload = async () => {
+    if (!formData.fromDate || !formData.toDate) {
+      setError('Please select both from and to dates before downloading');
+      return;
+    }
+
+    setDownloadLoading(true);
+    setError('');
+
+    try {
+      const fromDateStr = formatDateForAPI(formData.fromDate);
+      const toDateStr = formatDateForAPI(formData.toDate);
+
+      const response = await fetch(
+        `${port}/download_incident_closure_report_daywise/?from_date=${fromDateStr}&to_date=${toDateStr}`,
+        {
+          method: 'GET',
+          headers: {
+            Authorization: `Bearer ${effectiveToken}`,
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      // Get the filename from response headers or use a default name
+      const contentDisposition = response.headers.get('content-disposition');
+      let filename = 'incident_closure_report.xlsx'; // default filename
+      
+      if (contentDisposition) {
+        const filenameMatch = contentDisposition.match(/filename="?([^"]+)"?/);
+        if (filenameMatch) {
+          filename = filenameMatch[1];
+        }
+      }
+
+      // Create blob from response
+      const blob = await response.blob();
+      
+      // Create download link
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      
+      // Clean up
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(link);
+
+      console.log('Download completed successfully');
+    } catch (err) {
+      console.error('Error downloading file:', err);
+      setError('Failed to download file. Please try again.');
+    } finally {
+      setDownloadLoading(false);
     }
   };
 
@@ -497,10 +561,11 @@ const [formData, setFormData] = useState({
             <Button
               variant="outlined"
               color="success"
-              startIcon={<DownloadIcon />}
+              // startIcon={<DownloadIcon />}
+               startIcon={downloadLoading ? <CircularProgress size={16} /> : <DownloadIcon />}
               size="small"
               sx={{ height: 35, minWidth: 130, ml: 2 }}
-              onClick={onDownload}
+              onClick={handleDownload}
             >
               Download
             </Button>
