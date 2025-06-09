@@ -10,7 +10,6 @@ import { useAuth } from './../../../Context/ContextAPI';
 import Sidebar from '../Sidebar/Sidebar';
 import { Search } from "@mui/icons-material";
 import { IconButton } from "@mui/material";
-import { Add } from "@mui/icons-material";
 
 const EnquiryCard = styled('div')({
     display: 'flex',
@@ -57,13 +56,7 @@ const AlertPanel = ({ darkMode }) => {
     const group = localStorage.getItem('user_group');
     const token = localStorage.getItem('access_token');
     const userName = localStorage.getItem('userId');
-    console.log(userName,'userName');
-    
-    const [isHovered, setIsHovered] = useState(false);
-    const handleClick = () => {
-        navigate("/Incident");
-    };
-
+    console.log(userName, 'userName');
     console.log(group, 'groupgroup');
 
     const textColor = darkMode ? "#ffffff" : "#000000";
@@ -75,6 +68,9 @@ const AlertPanel = ({ darkMode }) => {
     const socketRef = useRef(null);
     const [triggeredData, setTriggeredData] = useState([]);
     console.log(triggeredData, 'triggeredData');
+    
+      const [showSnackbar, setShowSnackbar] = useState(false);
+      const [snackbarMessage, setSnackbarMessage] = useState("");
 
     const startIndex = (page - 1) * rowsPerPage;
     const endIndex = startIndex + rowsPerPage;
@@ -87,9 +83,37 @@ const AlertPanel = ({ darkMode }) => {
         }
     });
 
+
+
     useEffect(() => {
         document.title = "DMS-AlertPanel";
     }, []);
+
+ useEffect(() => {
+    const handleOnline = () => {
+      setSnackbarMessage("System is Online ");
+      setShowSnackbar(true);
+
+      setTimeout(() => {
+        setShowSnackbar(false);
+        window.location.reload();
+      }, 2000);
+    };
+
+    const handleOffline = () => {
+      setSnackbarMessage("No Internet Connection ❌");
+      setShowSnackbar(true);
+    };
+
+    window.addEventListener("online", handleOnline);
+    window.addEventListener("offline", handleOffline);
+
+    return () => {
+      window.removeEventListener("online", handleOnline);
+      window.removeEventListener("offline", handleOffline);
+    };
+  }, []);
+
 
     useEffect(() => {
         const socket = new WebSocket(`${socketUrl}/ws/weather_alerts`);
@@ -198,44 +222,6 @@ const AlertPanel = ({ darkMode }) => {
                                     },
                                 }}
                             />
-
-                            <IconButton
-                                onClick={handleClick}
-                                onMouseEnter={() => setIsHovered(true)}
-                                onMouseLeave={() => setIsHovered(false)}
-                                size="small"
-                                sx={{
-                                    ml: "auto",
-                                    backgroundColor: "#5FECC8",
-                                    color: "black",
-                                    borderRadius: "18px",
-                                    "&:hover": {
-                                        backgroundColor: "#5FECC8",
-                                    },
-                                    width: isHovered ? 140 : 36,
-                                    height: 36,
-                                    transition: "width 0.3s ease",
-                                    overflow: "hidden",
-                                    display: "flex",
-                                    justifyContent: "center",
-                                    alignItems: "center",
-                                    paddingRight: isHovered ? 1 : 1,
-                                }}
-                            >
-                                <Add sx={{ color: darkMode ? "#000000" : "#000000" }} />
-                                {isHovered && (
-                                    <Typography
-                                        variant="body2"
-                                        sx={{
-                                            marginLeft: 1,
-                                            color: "black",
-                                            whiteSpace: "nowrap",
-                                        }}
-                                    >
-                                        Create Incident
-                                    </Typography>
-                                )}
-                            </IconButton>
                         </Grid>
                     </Grid>
 

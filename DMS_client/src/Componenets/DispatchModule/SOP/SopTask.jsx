@@ -13,6 +13,10 @@ import {
   Select,
   MenuItem,
   Chip,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Dialog,
 } from "@mui/material";
 import {
   Search,
@@ -20,8 +24,10 @@ import {
   AddCircleOutline,
   CheckCircle,
 } from "@mui/icons-material";
+import CloseIcon from "@mui/icons-material/Close";
 import { styled } from "@mui/material/styles";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import TextSnippetIcon from "@mui/icons-material/TextSnippet";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import { useLocation } from "react-router-dom";
 import { useState } from "react";
@@ -29,10 +35,15 @@ import { useRef } from "react";
 import { useEffect } from "react";
 import { tasks } from "./dummydata";
 import { Tooltip } from "@mui/material";
-
+import { useNavigate } from "react-router-dom";
 import Snackbar from "@mui/material/Snackbar";
 import Alert from "@mui/material/Alert";
 import CustomPagination from "../../../common/CustomPagination";
+import { Add } from "@mui/icons-material";
+import { useAuth } from "../../../Context/ContextAPI";
+import IncidentDetails from "./IncidentDetails";
+import axios from "axios";
+import { useSnackbar } from "../../../hooks/useSnackbar";
 
 const EnquiryCard = styled("div")(() => ({
   display: "flex",
@@ -75,8 +86,6 @@ const EnquiryCardBody = styled("tr")(({ theme, alertType }) => {
   };
 });
 
-
-
 const StyledCardContent = styled("td")({
   padding: "0 8px",
   display: "flex",
@@ -93,6 +102,7 @@ const Alerts = [
   "Rain",
   "Time",
   "Added By",
+  "Actions",
 ];
 
 const DispatchHeaders = [
@@ -103,6 +113,7 @@ const DispatchHeaders = [
   "Initiated By",
   "Actions",
 ];
+
 function SopTask({
   darkMode,
   flag,
@@ -110,9 +121,15 @@ function SopTask({
   setSelectedIncident,
   setViewmode,
   dispatchList,
-  loading = false, // Default to false if not provided
+  loading = false,
+  setIncidentId,
+  incidentId,
+  fetchDispatchList,
 }) {
+  const port = import.meta.env.VITE_APP_API_KEY;
   const socketUrl = import.meta.env.VITE_SOCKET_API_KEY;
+  const AccessToken = localStorage.getItem("access_token");
+  const { newToken } = useAuth();
   const location = useLocation();
   const [alerts, setAlerts] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
@@ -120,6 +137,23 @@ function SopTask({
   const [snackbarMsg, setSnackbarMsg] = useState("");
   const [page, setPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(3);
+  const [openCancelDialog, setOpenCancelDialog] = useState(false);
+  const [selectedAlert, setSelectedAlert] = useState(null);
+
+   const {
+    snackbarOpen,
+    snackbarMessage,
+    snackbarSeverity,
+    showSnackbar,
+    closeSnackbar,
+  } = useSnackbar();
+
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: "",
+    severity: "success",
+  });
+  const navigate = useNavigate();
 
   // Decide current list based on flag
   const dataList = flag === 1 ? alerts : dispatchList;
@@ -130,6 +164,7 @@ function SopTask({
   const endIndex = startIndex + rowsPerPage;
   // Get sliced data for current page
   const dispatchListdata = dataList.slice(startIndex, endIndex);
+  const { setSelectedIncidentFromSop, setDisasterIdFromSop } = useAuth();
 
   window.addEventListener("storage", (e) => {
     if (e.key === "logout") {
@@ -139,7 +174,11 @@ function SopTask({
   useEffect(() => {
     let socket;
     const timer = setTimeout(() => {
-      socket = new WebSocket(`${socketUrl}/ws/weather_alerts_trigger2`);
+      socket = new WebSocket(
+        `${socketUrl}/ws/weather_alerts_trigger2?token=${
+          AccessToken || newToken
+        }`
+      );
 
       socket.onopen = () => {
         console.log("WebSocket connected");
@@ -185,6 +224,15 @@ function SopTask({
     setViewmode("incident"); // Reset view mode to incident
   };
 
+  const filteredDispatchList = dispatchListdata.filter((item) => {
+    const searchLower = searchTerm.toLowerCase();
+    return (
+      item.incident_id?.toString().toLowerCase().includes(searchLower) ||
+      item.disaster_name?.toLowerCase().includes(searchLower) ||
+      item.inc_added_by?.toLowerCase().includes(searchLower) ||
+      item.inc_type?.toString().includes(searchLower)
+    );
+  });
   // const handleForward = () => {
   //   setFlag(1);
   //   setSelectedIncident(); // Clear selected incident
@@ -194,6 +242,40 @@ function SopTask({
   const textColor = darkMode ? "#ffffff" : "#000000";
   const bgColor = darkMode ? "#0a1929" : "#ffffff";
   const borderColor = darkMode ? "#7F7F7F" : "#ccc";
+
+  const handleClick = () => {
+    navigate("/create-incident", { state: { startData: "start" } });
+  };
+
+ 
+const handleCancelTrigger = async () => {
+  const payload = {
+    id: selectedAlert,
+  };
+
+  try {
+    const response = await axios.post(
+      `${port}/admin_web/cancel-trigger/`,
+      payload,
+      {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${AccessToken || newToken}`,
+        },
+      }
+    );
+
+    showSnackbar("Alert cancelled successfully!", "success");
+    setOpenCancelDialog(false);
+    setFlag(0);
+    fetchDispatchList();
+
+  } catch (err) {
+    console.error(err);
+    showSnackbar("Failed to cancel alert!", "error");
+  }
+};
+
 
   return (
     <Paper
@@ -280,6 +362,44 @@ function SopTask({
             },
           }}
         />
+
+        <IconButton
+          onClick={handleClick}
+          // onMouseEnter={() => setIsHovered(true)}
+          // onMouseLeave={() => setIsHovered(false)}
+          size="small"
+          sx={{
+            ml: "auto",
+            backgroundColor: "#5FECC8",
+            color: "black",
+            borderRadius: "18px",
+            "&:hover": {
+              backgroundColor: "#5FECC8",
+            },
+            // width: isHovered ? 140 : 36,
+            height: 36,
+            transition: "width 0.3s ease",
+            overflow: "hidden",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            // paddingRight: isHovered ? 1 : 1,
+          }}
+        >
+          <Add sx={{ color: darkMode ? "#000000" : "#000000" }} />
+          {/* {isHovered && ( */}
+          <Typography
+            variant="body2"
+            sx={{
+              marginLeft: 1,
+              color: "black",
+              whiteSpace: "nowrap",
+            }}
+          >
+            Create Incident
+          </Typography>
+          {/* )} */}
+        </IconButton>
       </Box>
 
       {flag === 1 ? (
@@ -357,26 +477,57 @@ function SopTask({
                     <Typography variant="subtitle2">{item.rain}</Typography>
                   </StyledCardContent>
                   <StyledCardContent sx={{ flex: 1, justifyContent: "center" }}>
-                    <Typography variant="subtitle2" fontSize={12}>
-                      {item.time || `${item.date} ${item.time}`}
+                    <Typography
+                      variant="subtitle2"
+                      fontSize={12}
+                      textAlign="center"
+                    >
+                      {item.alert_datetime
+                        ? new Date(item.alert_datetime).toLocaleString(
+                            "en-US",
+                            {
+                              day: "2-digit",
+                              month: "long",
+                              year: "numeric",
+                              hour: "numeric",
+                              minute: "2-digit",
+                              hour12: true,
+                            }
+                          )
+                        : "N/A"}
                     </Typography>
                   </StyledCardContent>
                   <StyledCardContent sx={{ flex: 1, justifyContent: "center" }}>
                     <Typography variant="subtitle2">{item.added_by}</Typography>
                   </StyledCardContent>
-                  {/* <StyledCardContent sx={{ flex: 1, justifyContent: "center" }}>
-            <Visibility
-              onClick={() => {
-                setSelectedIncident(item);
-                setFlag(1);
-              }}
-              sx={{
-                color: "#00f0c0",
-                cursor: "pointer",
-                fontSize: 28,
-              }}
-            />
-          </StyledCardContent> */}
+                  <StyledCardContent
+                    sx={{
+                      flex: 1,
+                      justifyContent: "center",
+                      display: "flex",
+                      alignItems: "center",
+                    }}
+                  >
+                    <Tooltip title="Cancel alert">
+                      <IconButton
+                        size="large"
+                        color="error"
+                        onClick={() => {
+                          console.log("Cancel clicked for", item);
+                          setSelectedAlert(item.pk_id);
+                          setOpenCancelDialog(true);
+                        }}
+                        sx={{
+                          "&:hover": {
+                            backgroundColor: "rgba(255, 0, 0, 0.1)",
+                          },
+                        }}
+                        aria-label="cancel"
+                      >
+                        <CloseIcon fontSize="small" />
+                      </IconButton>
+                    </Tooltip>
+                  </StyledCardContent>
                 </EnquiryCardBody>
               ))
             )}
@@ -407,17 +558,17 @@ function SopTask({
                   </EnquiryCard>
 
                   {/* Body Rows */}
-                  {dispatchListdata.length === 0 ? (
+                  {filteredDispatchList.length === 0 ? (
                     <Box p={2} width="100%">
                       <Typography align="center" color="textSecondary">
                         No tasks available.
                       </Typography>
                     </Box>
                   ) : (
-                    dispatchListdata.map((item) => (
+                    filteredDispatchList.map((item) => (
                       <EnquiryCardBody
                         key={item.incident_id}
-                       alertType={item.inc_type}
+                        alertType={item.inc_type}
                       >
                         {/* Incident ID */}
                         <StyledCardContent
@@ -492,7 +643,11 @@ function SopTask({
                           <Tooltip title="View Details">
                             <IconButton
                               onClick={() => {
-                                setSelectedIncident(item.incident_id);
+                                setSelectedIncident(item);
+                                setIncidentId(item.inc_id);
+                                setSelectedIncidentFromSop(item);
+                                setDisasterIdFromSop(item.disaster_name);
+                                console.log("Incident idd", setIncidentId);
                                 setFlag(0);
                                 setViewmode("incident");
                               }}
@@ -510,9 +665,10 @@ function SopTask({
                                 setFlag(0);
                                 setViewmode("closure");
                               }}
+                              size="large"
                             >
-                              <CheckCircle
-                                sx={{ color: "#4caf50", fontSize: 28 }}
+                              <TextSnippetIcon
+                                sx={{ color: "#4caf50", fontSize: 20 }}
                               />
                             </IconButton>
                           </Tooltip>
@@ -540,7 +696,7 @@ function SopTask({
             borderColor={borderColor}
             bgColor={bgColor}
             inputBgColor={darkMode ? "#1e293b" : "#fff"}
-            rowsPerPageOptions={[3, 5, 10]}
+            rowsPerPageOptions={[3, 10, 20, 50]}
           />
         </Box>
       ) : null}
@@ -567,6 +723,48 @@ function SopTask({
           {snackbarMsg}
         </Alert>
       </Snackbar>
+
+
+<Snackbar
+        open={snackbarOpen}
+        autoHideDuration={3000}
+        onClose={closeSnackbar}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+      >
+        <Alert
+          elevation={6}
+          variant="filled"
+          onClose={closeSnackbar}
+          severity={snackbarSeverity}
+          sx={{ width: "100%", fontWeight: 500 }}
+        >
+          {snackbarMessage}
+        </Alert>
+      </Snackbar>
+
+{/* dilog for alert cancel? */}
+      <Dialog
+        open={openCancelDialog}
+        onClose={() => setOpenCancelDialog(false)}
+      >
+        <DialogTitle>Confirm Cancellation</DialogTitle>
+        <DialogContent>
+          <Typography>
+            Are you sure you want to cancel alert ID{" "}
+            <strong>{incidentId?.pk_id}</strong>?
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpenCancelDialog(false)}>No</Button>
+          <Button
+            onClick={handleCancelTrigger}
+            color="error"
+            variant="contained"
+          >
+            Yes, Cancel
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Paper>
   );
 }
