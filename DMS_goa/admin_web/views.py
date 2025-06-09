@@ -24,7 +24,7 @@ from django.contrib.auth.tokens import default_token_generator
 from django.utils.http import urlsafe_base64_encode
 from django.utils.encoding import force_bytes
 from django.core.mail import send_mail
-
+from rest_framework_simplejwt.tokens import AccessToken
 
 class DMS_department_post_api(APIView):
     def post(self,request):
@@ -345,6 +345,12 @@ class LogoutView(APIView):
 
     def post(self, request):
         try:
+            print("1", request.user)
+            emp_obj = DMS_Employee.objects.get(emp_username=request.user)
+            if emp_obj.emp_is_login is True: 
+                emp_obj.emp_is_login = False
+                emp_obj.save()
+                
             refresh_token = request.data.get("refresh_token")
             if refresh_token:
                 token = RefreshToken(refresh_token)
