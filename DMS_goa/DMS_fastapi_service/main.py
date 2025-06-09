@@ -383,7 +383,7 @@ def get_old_weather_alerts():
         return []
 
 
-connected_clients = set()
+connected_clients2 = set()
 
 # Build DSN from Django settings
 db_settings = settings.DATABASES['default']
@@ -395,12 +395,12 @@ PG_DSN = f"postgresql://{db_settings['USER']}:{password}@{db_settings['HOST']}:{
 
 async def pg_listener(conn, pid, channel, payload):
     print(f"Received from PostgreSQL: {payload}")
-    for ws in connected_clients.copy():
+    for ws in connected_clients2.copy():
         try:
             await ws.send_text(payload)
         except Exception as e:
             print(f"Error sending to WebSocket: {e}")
-            connected_clients.remove(ws)
+            connected_clients2.remove(ws)
 
 
 @sync_to_async
@@ -436,13 +436,13 @@ async def on_notify(conn, pid, channel, payload):
         # print("Updated payload:", data)
 
         # Broadcast to all clients (if you want old behavior)
-        for ws in connected_clients.copy():
+        for ws in connected_clients2.copy():
             try:
                 # await ws.send_text(payload)
                 await ws.send_text(json.dumps(data))
             except Exception as e:
                 print(f"Error sending to client: {e}")
-                connected_clients.discard(ws)
+                connected_clients2.discard(ws)
 
     # Send only if triger_status == 2 to trigger2 clients
     # if data.get("triger_status") == 2:
@@ -512,7 +512,7 @@ async def listen_to_postgres():
 async def websocket_endpoint(websocket: WebSocket):
     await websocket.accept()
     # connected_clients_trigger2.add(websocket)
-    connected_clients.add(websocket)
+    connected_clients2.add(websocket)
     print(f"WebSocket connected: {websocket.client}")
 
     last_sent_pk = 0  # Keep track of the last pk_id sent to this client
