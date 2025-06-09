@@ -68,8 +68,7 @@ const AlertPanel = ({ darkMode }) => {
     const socketRef = useRef(null);
     const [triggeredData, setTriggeredData] = useState([]);
     console.log(triggeredData, 'triggeredData');
-    
-      const [showSnackbar, setShowSnackbar] = useState(false);
+     const [showSnackbar, setShowSnackbar] = useState(false);
       const [snackbarMessage, setSnackbarMessage] = useState("");
 
     const startIndex = (page - 1) * rowsPerPage;
