@@ -14,9 +14,9 @@ import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import ArrowDropUpIcon from "@mui/icons-material/ArrowDropUp";
 import LockIcon from "@mui/icons-material/Lock";
 import { useNavigate } from "react-router-dom";
-import AddBoxIcon from '@mui/icons-material/AddBox';
-import AddCircleOutlineOutlinedIcon from '@mui/icons-material/AddCircleOutlineOutlined';
-import TextSnippetOutlinedIcon from '@mui/icons-material/TextSnippetOutlined';
+import AddBoxIcon from "@mui/icons-material/AddBox";
+import AddCircleOutlineOutlinedIcon from "@mui/icons-material/AddCircleOutlineOutlined";
+import TextSnippetOutlinedIcon from "@mui/icons-material/TextSnippetOutlined";
 
 const screenConfig = {
   "System User": {
@@ -31,7 +31,7 @@ const screenConfig = {
     icon: <AddBoxIcon />,
     screens: [],
   },
-  "Responder": {
+  Responder: {
     icon: <AddCircleOutlineOutlinedIcon />,
     screens: [],
   },
@@ -76,9 +76,10 @@ const Departmentsidebar = ({ darkMode }) => {
               width: open ? 200 : 50,
               position: "absolute",
               top: "50%",
+
               transform: "translateY(-50%)",
               background: darkMode
-                ? "linear-gradient(to bottom, #5FECC8, rgba(95, 236, 200, 0.05))"
+                ? "linear-gradient(to bottom, #5FECC8, rgba(32, 43, 40, 0.05))"
                 : "radial-gradient(6035.71% 72.44% at 0% 50%, #00BFA6 0%, #292D45 100%)",
               borderRadius: "30px",
               transition: "width 0.5s ease-in-out",
@@ -88,11 +89,12 @@ const Departmentsidebar = ({ darkMode }) => {
               overflow: "hidden",
               height: "50vh",
               maxHeight: "90vh",
-              marginLeft: "0.2em",
+              // marginLeft: "0.2em",
+              alignContent: "left",
             },
           }}
         >
-          <Box sx={{ width: "100%", overflow: "hidden" }}>
+          <Box sx={{ width: "100%", overflow: "hidden", alignContent: "left" }}>
             <List>
               {Object.entries(screenConfig).map(
                 ([sectionName, { icon, screens }]) => {
@@ -108,7 +110,7 @@ const Departmentsidebar = ({ darkMode }) => {
                         }
                         sx={{
                           flexDirection: open ? "row" : "column",
-                          justifyContent: "center",
+                          justifyContent: "left",
                           py: 1,
                           gap: 1,
                         }}

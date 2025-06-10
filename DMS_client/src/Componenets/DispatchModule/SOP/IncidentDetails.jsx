@@ -11,9 +11,14 @@ import {
 } from "@mui/material";
 import CommentsPanel from "./CommentsPanel";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
-
 import { useAuth } from "../../../Context/ContextAPI";
 import { useEffect, useState } from "react";
+import IconButton from "@mui/material/IconButton";
+import VisibilityIcon from "@mui/icons-material/Visibility";
+import Dialog from "@mui/material/Dialog";
+import DialogTitle from "@mui/material/DialogTitle";
+import DialogContent from "@mui/material/DialogContent";
+import CloseIcon from "@mui/icons-material/Close";
 
 function IncidentDetails({
   darkMode,
@@ -31,17 +36,11 @@ function IncidentDetails({
   });
 
   const userName = localStorage.getItem("userId");
-  console.log(
-    selectedIncident?.inc_id,
-    "selectedIncidentselectedIncidentselectedIncident"
-  );
+  console.log(selectedIncident?.inc_id, 'selectedIncidentselectedIncidentselectedIncident');
   let incident = {};
 
   if (selectedIncident?.inc_id) {
-    console.log(
-      selectedIncident.inc_id,
-      "selectedIncidentselectedIncidentselectedIncident"
-    );
+    console.log(selectedIncident.inc_id, 'selectedIncidentselectedIncidentselectedIncident');
     incident = incidentDetails?.incident_details?.[0] || {};
   }
 
@@ -52,11 +51,12 @@ function IncidentDetails({
   console.log("Incident Details:", incident);
   const respondersList = incidentDetails?.responders || [];
 
-  const [selectedResponders, setSelectedResponders] = useState(
-    responderScope?.responder_scope?.map((item) => item.pk_id) || []
-  );
+  // const [selectedResponders, setSelectedResponders] = useState(
+  //   responderScope?.responder_scope?.map((item) => item.pk_id)
+  // );
+  const [selectedResponders, setSelectedResponders] = useState([]);
+  console.log(selectedResponders, 'selectedReasdadadaspondersssss');
 
-  console.log(selectedResponders, "selectedReasdadadaspondersssss");
 
   const comments = incidentDetails?.comments || [];
 
@@ -90,6 +90,7 @@ function IncidentDetails({
     </Box>
   );
 
+
   const renderHorizontalFields = (label, value) => (
     <Box>
       <Typography
@@ -106,16 +107,27 @@ function IncidentDetails({
       </Typography>
     </Box>
   );
-
   useEffect(() => {
-    if (
-      responderScope?.responder_scope?.length > 0 &&
-      selectedResponders.length === 0
-    ) {
-      const defaultIds = responderScope.responder_scope.map((r) => r.pk_id);
-      setSelectedResponders(defaultIds); // ✅ Sirf pehli baar set karega
+    if (Array.isArray(responderScope?.responder_scope)) {
+      const defaultSelected = responderScope.responder_scope.map(r => r.res_id);
+      setSelectedResponders(defaultSelected);
     }
   }, [responderScope]);
+
+  const [openDialog, setOpenDialog] = useState(false);
+
+  // Get the response procedure text
+  const responseProcedure =
+    responderScope?.sop_responses?.[0]?.sop_description ||
+    incidentDetails?.sop_responses?.[0]?.sop_description ||
+    "";
+
+  // Helper to get first 2 lines (or less)
+  const getFirstTwoLines = (text) => {
+    if (!text) return "";
+    const lines = text.split("\n");
+    return lines.slice(0, 2).join("\n") + (lines.length > 2 ? "..." : "");
+  };
 
   return (
     <>
@@ -131,10 +143,6 @@ function IncidentDetails({
           backgroundColor: darkMode ? "#0a1929" : "#fff",
           color: textColor,
           transition: "all 0.3s ease",
-          marginBottom: 3,
-          boxShadow: darkMode
-            ? "0px 4px 8px rgba(0, 0, 0, 0.2)"
-            : "0px 2px 4px rgba(0, 0, 0, 0.1)",
         }}
       >
         <Grid container>
@@ -153,15 +161,19 @@ function IncidentDetails({
               <>
                 {renderText("Alert ID", selectedIncident?.pk_id)}
                 {renderText(
-                  "Alert Type",
-                  selectedIncident?.alert_type === 1
-                    ? "High"
-                    : selectedIncident?.alert_type === 2
-                    ? "Medium"
-                    : selectedIncident?.alert_type === 3
-                    ? "Low"
-                    : selectedIncident?.alert_type === 4
-                    ? "Very Low"
+                  "Time",
+                  selectedIncident?.alert_datetime
+                    ? new Date(selectedIncident.alert_datetime).toLocaleString(
+                      "en-US",
+                      {
+                        day: "2-digit",
+                        month: "long",
+                        year: "numeric",
+                        hour: "numeric",
+                        minute: "2-digit",
+                        hour12: true,
+                      }
+                    )
                     : "N/A"
                 )}
                 {/* {renderText("Disaster Id", selectedIncident?.disaster_id_id)} */}
@@ -175,69 +187,55 @@ function IncidentDetails({
                       {renderText("Incident ID", incident?.incident_id)}
                       {renderText(
                         "Incident Type",
-                        incident?.inc_type === 1
-                          ? "Emergency"
-                          : incident?.inc_type === 2
-                          ? "Non-Emergency"
-                          : "N/A"
+                        incident?.inc_type === 1 ? "Emergency" : incident?.inc_type === 2 ? "Non-Emergency" : "N/A"
                       )}
                       {renderText(
                         "Alert Type",
                         incident?.alert_type === 1
                           ? "High"
                           : incident?.alert_type === 2
-                          ? "Medium"
-                          : incident?.alert_type === 3
-                          ? "Low"
-                          : "N/A"
+                            ? "Medium"
+                            : incident?.alert_type === 3
+                              ? "Low"
+                              : "N/A"
                       )}
                     </>
                   ) : (
-                  <Grid container spacing={2}>
-  {[
-    { label: "Incident ID", value: incident?.incident_id },
-    {
-      label: "Incident Type",
-      value:
-        incident?.inc_type === 1
-          ? "Emergency"
-          : incident?.inc_type === 2
-          ? "Non-Emergency"
-          : "N/A",
-    },
-    {
-      label: "Alert Type",
-      value:
-        { 1: "High", 2: "Medium", 3: "Low" }[incident?.alert_type] || "N/A",
-    },
-    { label: "Caller Name", value: incident?.caller_name },
-    { label: "Caller Number", value: incident?.caller_no },
-  ].map((item, idx) => (
-    <Grid item xs={12} sm={6} key={idx}>
-      <Box sx={{ whiteSpace: "pre-wrap", wordBreak: "break-word" }}>
-        {renderHorizontalFields(item.label, item.value)}
-      </Box>
-    </Grid>
-  ))}
+                    <Grid container spacing={2}>
+                      {[
+                        { label: "Incident ID", value: incident?.incident_id },
+                        {
+                          label: "Incident Type",
+                          value: incident?.inc_type === 1 ? "Emergency" : incident?.inc_type === 2 ? "Non-Emergency" : "N/A"
+                        },
+                        {
+                          label: "Alert Type",
+                          value:
+                            { 1: "High", 2: "Medium", 3: "Low" }[incident?.alert_type] ||
+                            "N/A",
+                        },
+                        { label: "Caller Name", value: incident?.caller_name },
+                        { label: "Caller Number", value: incident?.caller_no },
+                        { label: "Location", value: incident?.location },
+                      ].map((item, idx) => (
+                        <Grid item xs={12} sm={6} key={idx}>
+                          <Box sx={{ whiteSpace: "pre-wrap", wordBreak: "break-word" }}>
+                            {renderHorizontalFields(item.label, item.value)}
+                          </Box>
+                        </Grid>
+                      ))}
 
-  {incident?.summary_name && (
-    <Grid item xs={12}>
-      <Box sx={{ whiteSpace: "pre-wrap", wordBreak: "break-word" }}>
-        {renderHorizontalFields("Summary", incident.summary_name)}
-      </Box>
-    </Grid>
-  )}
-
-  {incident?.location && (
-    <Grid item xs={12}>
-      <Box sx={{ whiteSpace: "pre-wrap", wordBreak: "break-word" }}>
-        {renderHorizontalFields("Location", incident.location)}
-      </Box>
-    </Grid>
-  )}
-</Grid>
+                      {incident?.summary_name && (
+                        <Grid item xs={12}>
+                          <Box sx={{ whiteSpace: "pre-wrap", wordBreak: "break-word" }}>
+                            {renderHorizontalFields("Summary", incident?.summary_name)}
+                          </Box>
+                        </Grid>
+                      )}
+                    </Grid>
                   )}
                 </>
+
               </>
             )}
           </Grid>
@@ -264,12 +262,61 @@ function IncidentDetails({
                   >
                     Response Procedure
                   </Typography>
-                  {responderScope?.sop_responses?.[0]?.sop_description ||
-                  incidentDetails?.sop_responses?.[0]?.sop_description ? (
-                    <Typography variant="subtitle2" sx={{ fontFamily }}>
-                      {responderScope?.sop_responses?.[0]?.sop_description ||
-                        incidentDetails?.sop_responses?.[0]?.sop_description}
-                    </Typography>
+                  {responseProcedure ? (
+                    <Box display="flex" alignItems="center">
+                      <Typography
+                        variant="subtitle2"
+                        sx={{
+                          fontFamily,
+                          display: "-webkit-box",
+                          WebkitLineClamp: 2,
+                          WebkitBoxOrient: "vertical",
+                          overflow: "hidden",
+                          whiteSpace: "pre-line",
+                          flex: 1,
+                        }}
+                      >
+                        {getFirstTwoLines(responseProcedure)}
+                      </Typography>
+                      {responseProcedure.split("\n").length > 2 && (
+                        <IconButton
+                          size="small"
+                          onClick={() => setOpenDialog(true)}
+                          sx={{ ml: 1 }}
+                          aria-label="Show full response procedure"
+                        >
+                          <VisibilityIcon fontSize="small" />
+                        </IconButton>
+                      )}
+                      <Dialog open={openDialog} onClose={() => setOpenDialog(false)} maxWidth="sm" fullWidth>
+                        <DialogTitle
+                          sx={{
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "space-between",
+                            pr: 1,
+                          }}
+                        >
+                          Response Procedure
+                          <IconButton
+                            aria-label="close"
+                            onClick={() => setOpenDialog(false)}
+                            size="small"
+                            sx={{ ml: 2 }}
+                          >
+                            <CloseIcon />
+                          </IconButton>
+                        </DialogTitle>
+                        <DialogContent>
+                          <Typography
+                            variant="body1"
+                            sx={{ whiteSpace: "pre-line", fontFamily }}
+                          >
+                            {responseProcedure}
+                          </Typography>
+                        </DialogContent>
+                      </Dialog>
+                    </Box>
                   ) : (
                     <Box display="flex" alignItems="center" gap={1} mt={1}>
                       <InfoOutlinedIcon color="disabled" />
@@ -355,9 +402,60 @@ function IncidentDetails({
                     </Box>
                   ) : responderScope?.sop_responses?.length > 0 &&
                     responderScope.sop_responses[0]?.sop_description ? (
-                    <Typography variant="subtitle2" sx={{ fontFamily }}>
-                      {responderScope.sop_responses[0].sop_description}
-                    </Typography>
+                    <Box display="flex" alignItems="center">
+                      <Typography
+                        variant="subtitle2"
+                        sx={{
+                          fontFamily,
+                          display: "-webkit-box",
+                          WebkitLineClamp: 2,
+                          WebkitBoxOrient: "vertical",
+                          overflow: "hidden",
+                          whiteSpace: "pre-line",
+                          flex: 1,
+                        }}
+                      >
+                        {getFirstTwoLines(responderScope.sop_responses[0].sop_description)}
+                      </Typography>
+                      {responderScope.sop_responses[0].sop_description.split("\n").length > 2 && (
+                        <IconButton
+                          size="small"
+                          onClick={() => setOpenDialog(true)}
+                          sx={{ ml: 1 }}
+                          aria-label="Show full response procedure"
+                        >
+                          <VisibilityIcon fontSize="small" />
+                        </IconButton>
+                      )}
+                      <Dialog open={openDialog} onClose={() => setOpenDialog(false)} maxWidth="sm" fullWidth>
+                        <DialogTitle
+                          sx={{
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "space-between",
+                            pr: 1,
+                          }}
+                        >
+                          Response Procedure
+                          <IconButton
+                            aria-label="close"
+                            onClick={() => setOpenDialog(false)}
+                            size="small"
+                            sx={{ ml: 2 }}
+                          >
+                            <CloseIcon />
+                          </IconButton>
+                        </DialogTitle>
+                        <DialogContent>
+                          <Typography
+                            variant="body1"
+                            sx={{ whiteSpace: "pre-line", fontFamily }}
+                          >
+                            {responderScope.sop_responses[0].sop_description}
+                          </Typography>
+                        </DialogContent>
+                      </Dialog>
+                    </Box>
                   ) : (
                     <Box display="flex" alignItems="center" gap={1} mt={0.5}>
                       <InfoOutlinedIcon color="disabled" fontSize="small" />
@@ -378,14 +476,15 @@ function IncidentDetails({
 
                   {selectedIncident ? (
                     Array.isArray(incidentDetails?.["responders scope"]) &&
-                    incidentDetails["responders scope"].length > 0 ? (
+                      incidentDetails["responders scope"].length > 0 ? (
                       <Stack spacing={1} mt={1}>
                         <Box display="flex" flexWrap="wrap" gap={1}>
                           {incidentDetails["responders scope"].map(
                             ({ responder_id, responder_name }) => {
-                              const isChecked =
-                                Array.isArray(incident?.responder_scope) &&
-                                incident.responder_scope.includes(responder_id);
+                     const isChecked =
+    Array.isArray(incidentDetails?.["responders scope"]) &&
+    Array.isArray(incident?.responder_scope) &&
+    incident.responder_scope.includes(String(responder_id)); // Convert responder_id to a string
 
                               return (
                                 <Tooltip
