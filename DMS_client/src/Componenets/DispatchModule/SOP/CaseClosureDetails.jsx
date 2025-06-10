@@ -194,7 +194,8 @@ const CaseClosureDetails = ({ darkMode, flag, selectedIncident }) => {
     }
 
     const payload = {
-      Incident_ID: numericIncId, // Pass numeric inc_id (292) instead of string incident_id
+      
+      incident_id: numericIncId, // Pass numeric inc_id (292) instead of string incident_id
       Disaster_Type: selectedIncidentFromSop?.disaster_name || selectedIncident?.disaster_name,
       Alert_Type: getAlertTypeName(selectedIncidentFromSop?.alert_type || selectedIncident?.alert_type),
       inc_id: numericIncId, // Same numeric ID
