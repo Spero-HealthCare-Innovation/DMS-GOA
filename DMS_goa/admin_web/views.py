@@ -816,13 +816,26 @@ class GetResponderList_api(APIView):
         return Response(serializer.data)
 
 
-class Disaster_Responder_post_api(APIView):
-    def post(self,request):
-        serializers=SopSerializer(data=request.data)
+class disaster_responder_Post_api(APIView):
+    def post(self, request):
+        dis_id = request.data.get('dis_id')
+
+        if dis_id is None:
+            return Response({"error": "dis_id is required."}, status=status.HTTP_400_BAD_REQUEST)
+
+        existing = DMS_Disaster_Responder.objects.filter(dis_id=dis_id, dr_is_deleted=False).first()
+
+        if existing:
+            return Response(
+                {"error": "This dis_id already exists."},
+                status=status.HTTP_409_CONFLICT
+            )
+
+        serializers = SopSerializer(data=request.data)
         if serializers.is_valid():
             serializers.save()
-            return Response(serializers.data,status=status.HTTP_201_CREATED)
-        return Response(serializers.errors,status=status.HTTP_400_BAD_REQUEST)
+            return Response(serializers.data, status=status.HTTP_201_CREATED)
+        return Response(serializers.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class Disaster_Responder_put(APIView):
@@ -864,13 +877,13 @@ class Disaster_responder_delete_api(APIView):
         return Response({"message": "Record soft deleted successfully."}, status=status.HTTP_200_OK)
 
 
-class disaster_responder_Post_api(APIView):
-    def post(self,request):
-        serializers=DisasterResponderPostSerializer(data=request.data)
-        if serializers.is_valid():
-            serializers.save()
-            return Response(serializers.data,status=status.HTTP_201_CREATED)
-        return Response(serializers.errors,status=status.HTTP_400_BAD_REQUEST)
+# class disaster_responder_Post_api(APIView):
+#     def post(self,request):
+#         serializers=DisasterResponderPostSerializer(data=request.data)
+#         if serializers.is_valid():
+#             serializers.save()
+#             return Response(serializers.data,status=status.HTTP_201_CREATED)
+#         return Response(serializers.errors,status=status.HTTP_400_BAD_REQUEST)
 
 
 class DMS_Disaster_Responder_GET_API(APIView):
@@ -911,6 +924,16 @@ class closure_Post_api(APIView):
         return Response(serializers.errors,status=status.HTTP_400_BAD_REQUEST)
 
 
+class closure_Post_api2(APIView):
+    def post(self,request):
+        serializers=ClosureSerializer(data=request.data)
+        if serializers.is_valid():
+            serializers.save()
+            return Response(serializers.data,status=status.HTTP_201_CREATED)
+        return Response(serializers.errors,status=status.HTTP_400_BAD_REQUEST)
+
+
+
 class comment_idwise_get_api(APIView):
     def get(self, request, incident_id):
         comments_qs = DMS_Comments.objects.filter(incident_id=incident_id, comm_is_deleted=False)
@@ -927,9 +950,17 @@ class DMS_comment_Get_API(APIView):
         serializers = CommentSerializer(snippet,many=True)
         return Response(serializers.data,status=status.HTTP_200_OK)
 
+# class dispatch_sop_Get_API(APIView):
+#     def get(self,request):
+#         snippet = DMS_Incident.objects.all().order_by('-inc_added_date')
+#         serializers = dispatchsopserializer(snippet,many=True)
+#         print(serializers.data)
+#         return Response(serializers.data,status=status.HTTP_200_OK)
+
+
 class dispatch_sop_Get_API(APIView):
     def get(self,request):
-        snippet = DMS_Incident.objects.all().order_by('-inc_added_date')
+        snippet = DMS_Incident.objects.all()
         serializers = dispatchsopserializer(snippet,many=True)
         return Response(serializers.data,status=status.HTTP_200_OK)
 
@@ -961,22 +992,20 @@ class CommentPostView(APIView):
 
 
 
-
 class incident_get_Api(APIView):
     def get(self, request, inc_id):
-        # Get incident details
-        incident_qs = DMS_Incident.objects.filter(inc_id=inc_id)
+        # Directly get the incident object
+        incident_qs = DMS_Incident.objects.filter(inc_id=inc_id).order_by('inc_added_date')
         incident_serializer = incident_get_serializer(incident_qs, many=True)
-
-        # Extract responder IDs from the first incident
         incident_data = incident_serializer.data
+
+        # Get responder IDs directly from the ArrayField
         responder_ids = []
         if incident_data:
-             raw_ids = incident_data[0].get('responder_scope', [])
-             responder_ids = [int(rid) for rid in raw_ids if str(rid).isdigit()]
+            raw_ids = incident_data[0].get('responder_scope', [])
+            responder_ids = [int(rid) for rid in raw_ids if str(rid).isdigit()]
 
-
-        # Get Responder Names
+        # Get responder details
         responders = DMS_Responder.objects.filter(responder_id__in=responder_ids).values('responder_id', 'responder_name')
         responder_details = list(responders)
 
@@ -984,7 +1013,7 @@ class incident_get_Api(APIView):
         comments_qs = DMS_Comments.objects.filter(incident_id=inc_id, comm_is_deleted=False)
         comment_texts = comments_qs.values('comm_id', 'comments')
 
-        # Combine data
+        # Final response
         data = {
             "incident_details": incident_data,
             "inc_id": inc_id,
