@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useMemo } from "react";
 import {
   Paper,
   Typography,
@@ -177,7 +177,8 @@ function CommentsPanel({
         }),
       });
 
-      if (!secondResponse.ok) throw new Error("Failed to log comment activity.");
+      if (!secondResponse.ok)
+        throw new Error("Failed to log comment activity.");
       setSnackbar({
         open: true,
         message: "Comment sent successfully!",
@@ -248,10 +249,17 @@ function CommentsPanel({
   // };
 
   const getInitials = (name) => name?.charAt(0)?.toUpperCase() || "?";
-
-  const incidentComments = selectedIncident
-    ? allComments.filter((item) => item?.incident_id === selectedIncident?.inc_id)
-    : [];
+  const incidentComments = useMemo(() => {
+    if (Array.isArray(incidentDetails?.comments) && incidentDetails.comments.length > 0) {
+      return incidentDetails.comments;
+    }
+    if (selectedIncident) {
+      return allComments.filter(
+        (item) => String(item?.incident_id) === String(selectedIncident?.inc_id)
+      );
+    }
+    return [];
+  }, [incidentDetails, allComments, selectedIncident]);
 
   return (
     <Paper elevation={1} sx={paperStyle}>
@@ -300,67 +308,79 @@ function CommentsPanel({
               />
             ))
           ) : incidentComments.length > 0 ? (
-            incidentComments.map(({ comm_id, comments: commentMsg, comm_added_by, comm_created_at }) => {
-              const isOwnComment = comm_added_by === userName;
-              return (
-                <Box
-                  key={comm_id}
-                  sx={{
-                    display: "flex",
-                    justifyContent: isOwnComment ? "flex-end" : "flex-start",
-                  }}
-                >
-                  <Stack direction="row" spacing={1} alignItems="flex-end">
-                    {!isOwnComment && (
-                      <Tooltip title={comm_added_by} arrow>
-                        <Avatar sx={{ bgcolor: "#0288d1", fontSize: 14 }}>
-                          {getInitials(comm_added_by)}
-                        </Avatar>
-                      </Tooltip>
-                    )}
-                    <Box
-                      sx={{
-                        backgroundColor: isOwnComment
-                          ? darkMode
-                            ? "#0f766e"
-                            : "#d1fae5"
-                          : darkMode
+            incidentComments.map(
+              ({
+                comm_id,
+                comments: commentMsg,
+                comm_added_by,
+                comm_created_at,
+              }) => {
+                const isOwnComment = comm_added_by === userName;
+                return (
+                  <Box
+                    key={comm_id}
+                    sx={{
+                      display: "flex",
+                      justifyContent: isOwnComment ? "flex-end" : "flex-start",
+                    }}
+                  >
+                    <Stack direction="row" spacing={1} alignItems="flex-end">
+                      {!isOwnComment && (
+                        <Tooltip title={comm_added_by} arrow>
+                          <Avatar sx={{ bgcolor: "#0288d1", fontSize: 14 }}>
+                            {comm_added_by ? comm_added_by : "U"}
+                          </Avatar>
+                        </Tooltip>
+                      )}
+                      <Box
+                        sx={{
+                          backgroundColor: isOwnComment
+                            ? darkMode
+                              ? "#0f766e"
+                              : "#d1fae5"
+                            : darkMode
                             ? "#1e293b"
                             : "#f3f4f6",
-                        color: isOwnComment
-                          ? darkMode
-                            ? "#e0f2f1"
-                            : "#065f46"
-                          : darkMode
+                          color: isOwnComment
+                            ? darkMode
+                              ? "#e0f2f1"
+                              : "#065f46"
+                            : darkMode
                             ? "#e2e8f0"
                             : "#111827",
-                        px: 2,
-                        py: 1,
-                        borderRadius: 2,
-                        maxWidth: "80%",
-                        wordBreak: "break-word",
-                        whiteSpace: "pre-line",
-                        textAlign: "left",
-                      }}
-                    >
-                      <Typography variant="body2">
-                        {commentMsg || "No comment message"}
-                      </Typography>
-                      <Typography variant="caption" sx={{ fontSize: "0.7rem", opacity: 0.7 }}>
-                        {new Date(comm_created_at || Date.now()).toLocaleString()}
-                      </Typography>
-                    </Box>
-                    {isOwnComment && (
-                      <Tooltip title={comm_added_by} arrow>
-                        <Avatar sx={{ bgcolor: "#6a1b9a", fontSize: 14 }}>
-                          {getInitials(comm_added_by)}
-                        </Avatar>
-                      </Tooltip>
-                    )}
-                  </Stack>
-                </Box>
-              );
-            })
+                          px: 2,
+                          py: 1,
+                          borderRadius: 2,
+                          maxWidth: "80%",
+                          wordBreak: "break-word",
+                          whiteSpace: "pre-line",
+                          textAlign: "left",
+                        }}
+                      >
+                        <Typography variant="body2">
+                          {commentMsg || "No comment message"}
+                        </Typography>
+                        <Typography
+                          variant="caption"
+                          sx={{ fontSize: "0.7rem", opacity: 0.7 }}
+                        >
+                          {new Date(
+                            comm_created_at || Date.now()
+                          ).toLocaleString()}
+                        </Typography>
+                      </Box>
+                      {isOwnComment && (
+                        <Tooltip title={comm_added_by} arrow>
+                          <Avatar sx={{ bgcolor: "#6a1b9a", fontSize: 14 }}>
+                            {comm_added_by ? comm_added_by : "?"}
+                          </Avatar>
+                        </Tooltip>
+                      )}
+                    </Stack>
+                  </Box>
+                );
+              }
+            )
           ) : (
             <Typography variant="body2" color="text.secondary">
               No comments for this incident.
