@@ -132,7 +132,6 @@ const Incident = ({ darkMode }) => {
         });
     };
 
-
     const handleSubmit = async () => {
         const payload = {
             inc_type: selectedEmergencyValue,
@@ -468,7 +467,7 @@ const Incident = ({ darkMode }) => {
                                                 })()}
                                             </Typography>
                                         </Tooltip>
-
+                                        
                                         <Dialog open={openSopModal} onClose={() => setOpenSopModal(false)} maxWidth="sm" fullWidth>
                                             <DialogTitle sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                                                 All Response Procedures
