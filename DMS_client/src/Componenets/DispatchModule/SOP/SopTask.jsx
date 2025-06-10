@@ -287,6 +287,36 @@ function SopTask({
   //   }
   // }, [openCancelDialog]);
 
+
+  // brouswer and tab close logout functionality
+//   let isPageReloaded = false;
+
+// // When page loads, mark it as reloaded in sessionStorage
+// window.addEventListener('load', () => {
+//   sessionStorage.setItem('isReloaded', 'true');
+// });
+
+// // In beforeunload, detect if it's a refresh
+// window.addEventListener('beforeunload', (event) => {
+//   const navEntries = performance.getEntriesByType('navigation');
+//   const navType = navEntries.length > 0 ? navEntries[0].type : null;
+
+//   // Detect reload via performance API or sessionStorage flag
+//   isPageReloaded = navType === 'reload' || sessionStorage.getItem('isReloaded') === 'true';
+
+//   if (!isPageReloaded) {
+//     // It's a tab/browser close → perform logout logic
+//     localStorage.setItem('logout', Date.now().toString());
+//     // Optionally: Clear sessionStorage/localStorage/cookies if needed
+//     // sessionStorage.clear();
+//     // localStorage.clear();
+//     // document.cookie = ""; // example to clear cookies
+//   }
+
+//   // Clean up the sessionStorage flag (optional)
+//   sessionStorage.removeItem('isReloaded');
+// });
+
   return (
     <Paper
       elevation={3}
