@@ -436,12 +436,8 @@ class dispatchsopserializer(serializers.ModelSerializer):
     alert_id = serializers.CharField(source='alert_id.disaster_name', read_only=True)
     class Meta:
         model = DMS_Incident
-        fields = ['inc_id','incident_id','alert_id','disaster_type','inc_added_by','inc_added_date','disaster_name','inc_type','mode']
+        fields = ['inc_id','incident_id','alert_id','disaster_type','inc_added_by','inc_added_date','disaster_name','inc_type','mode','alert_type']
         
-    def to_representation(self, instance):
-        rep = super().to_representation(instance)
-        rep['alert_type'] = rep.pop('inc_type')  
-        return rep
 
 
 class incident_get_serializer(serializers.ModelSerializer):
@@ -451,6 +447,6 @@ class incident_get_serializer(serializers.ModelSerializer):
     disaster_name=serializers.CharField(source='disaster_type.disaster_name', read_only=True)
     class Meta:
         model = DMS_Incident
-        fields=['incident_id','disaster_type','inc_type','responder_scope','caller_id','caller_name','caller_no','location','summary','summary_name','disaster_name','alert_type','mode']
+        fields=['incident_id','disaster_type','inc_type','responder_scope','caller_id','caller_name','caller_no','location','summary','summary_name','disaster_name','alert_type','mode','latitude','longitude']
 
 

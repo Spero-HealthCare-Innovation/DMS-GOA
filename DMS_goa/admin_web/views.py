@@ -995,7 +995,7 @@ class CommentPostView(APIView):
 class incident_get_Api(APIView):
     def get(self, request, inc_id):
         # Directly get the incident object
-        incident_qs = DMS_Incident.objects.filter(inc_id=inc_id)
+        incident_qs = DMS_Incident.objects.filter(inc_id=inc_id).order_by('inc_added_date')
         incident_serializer = incident_get_serializer(incident_qs, many=True)
         incident_data = incident_serializer.data
 
