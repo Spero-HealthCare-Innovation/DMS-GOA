@@ -75,6 +75,7 @@ function Sop({ darkMode, setDarkMode }) {
   }, [selectedIncident]);
 
 
+
   useEffect(() => {
     const handleOnline = () => {
       setSnackbarMessage("System is Online ");
@@ -99,6 +100,7 @@ function Sop({ darkMode, setDarkMode }) {
       window.removeEventListener("offline", handleOffline);
     };
   }, []);
+
 
   const Alert = React.forwardRef(function Alert(props, ref) {
     return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;

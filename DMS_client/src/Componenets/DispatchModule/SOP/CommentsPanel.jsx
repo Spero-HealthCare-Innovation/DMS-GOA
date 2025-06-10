@@ -99,6 +99,7 @@ function CommentsPanel({
       inc_added_by: userName,
       latitude: selectedIncident?.latitude,
       longitude: selectedIncident?.longitude,
+      alert_type: selectedIncident?.alert_type,
       mode: "2",
     };
 
