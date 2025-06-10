@@ -11,9 +11,14 @@ import {
 } from "@mui/material";
 import CommentsPanel from "./CommentsPanel";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
-
 import { useAuth } from "../../../Context/ContextAPI";
 import { useEffect, useState } from "react";
+import IconButton from "@mui/material/IconButton";
+import VisibilityIcon from "@mui/icons-material/Visibility";
+import Dialog from "@mui/material/Dialog";
+import DialogTitle from "@mui/material/DialogTitle";
+import DialogContent from "@mui/material/DialogContent";
+import CloseIcon from "@mui/icons-material/Close";
 
 function IncidentDetails({
   darkMode,
@@ -49,7 +54,7 @@ function IncidentDetails({
   // const [selectedResponders, setSelectedResponders] = useState(
   //   responderScope?.responder_scope?.map((item) => item.pk_id)
   // );
-const [selectedResponders, setSelectedResponders] = useState([]);
+  const [selectedResponders, setSelectedResponders] = useState([]);
   console.log(selectedResponders, 'selectedReasdadadaspondersssss');
 
 
@@ -102,14 +107,28 @@ const [selectedResponders, setSelectedResponders] = useState([]);
       </Typography>
     </Box>
   );
-useEffect(() => {
-  if (Array.isArray(responderScope?.responder_scope)) {
-    const defaultSelected = responderScope.responder_scope.map(r => r.res_id);
-    setSelectedResponders(defaultSelected);
-  }
-}, [responderScope]);
+  useEffect(() => {
+    if (Array.isArray(responderScope?.responder_scope)) {
+      const defaultSelected = responderScope.responder_scope.map(r => r.res_id);
+      setSelectedResponders(defaultSelected);
+    }
+  }, [responderScope]);
 
-  
+  const [openDialog, setOpenDialog] = useState(false);
+
+  // Get the response procedure text
+  const responseProcedure =
+    responderScope?.sop_responses?.[0]?.sop_description ||
+    incidentDetails?.sop_responses?.[0]?.sop_description ||
+    "";
+
+  // Helper to get first 2 lines (or less)
+  const getFirstTwoLines = (text) => {
+    if (!text) return "";
+    const lines = text.split("\n");
+    return lines.slice(0, 2).join("\n") + (lines.length > 2 ? "..." : "");
+  };
+
   return (
     <>
       <Typography variant="h6" color={labelColor} sx={{ fontFamily }}>
@@ -243,12 +262,61 @@ useEffect(() => {
                   >
                     Response Procedure
                   </Typography>
-                  {(responderScope?.sop_responses?.[0]?.sop_description ||
-                    incidentDetails?.sop_responses?.[0]?.sop_description) ? (
-                    <Typography variant="subtitle2" sx={{ fontFamily }}>
-                      {responderScope?.sop_responses?.[0]?.sop_description ||
-                        incidentDetails?.sop_responses?.[0]?.sop_description}
-                    </Typography>
+                  {responseProcedure ? (
+                    <Box display="flex" alignItems="center">
+                      <Typography
+                        variant="subtitle2"
+                        sx={{
+                          fontFamily,
+                          display: "-webkit-box",
+                          WebkitLineClamp: 2,
+                          WebkitBoxOrient: "vertical",
+                          overflow: "hidden",
+                          whiteSpace: "pre-line",
+                          flex: 1,
+                        }}
+                      >
+                        {getFirstTwoLines(responseProcedure)}
+                      </Typography>
+                      {responseProcedure.split("\n").length > 2 && (
+                        <IconButton
+                          size="small"
+                          onClick={() => setOpenDialog(true)}
+                          sx={{ ml: 1 }}
+                          aria-label="Show full response procedure"
+                        >
+                          <VisibilityIcon fontSize="small" />
+                        </IconButton>
+                      )}
+                      <Dialog open={openDialog} onClose={() => setOpenDialog(false)} maxWidth="sm" fullWidth>
+                        <DialogTitle
+                          sx={{
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "space-between",
+                            pr: 1,
+                          }}
+                        >
+                          Response Procedure
+                          <IconButton
+                            aria-label="close"
+                            onClick={() => setOpenDialog(false)}
+                            size="small"
+                            sx={{ ml: 2 }}
+                          >
+                            <CloseIcon />
+                          </IconButton>
+                        </DialogTitle>
+                        <DialogContent>
+                          <Typography
+                            variant="body1"
+                            sx={{ whiteSpace: "pre-line", fontFamily }}
+                          >
+                            {responseProcedure}
+                          </Typography>
+                        </DialogContent>
+                      </Dialog>
+                    </Box>
                   ) : (
                     <Box display="flex" alignItems="center" gap={1} mt={1}>
                       <InfoOutlinedIcon color="disabled" />
@@ -334,9 +402,60 @@ useEffect(() => {
                     </Box>
                   ) : responderScope?.sop_responses?.length > 0 &&
                     responderScope.sop_responses[0]?.sop_description ? (
-                    <Typography variant="subtitle2" sx={{ fontFamily }}>
-                      {responderScope.sop_responses[0].sop_description}
-                    </Typography>
+                    <Box display="flex" alignItems="center">
+                      <Typography
+                        variant="subtitle2"
+                        sx={{
+                          fontFamily,
+                          display: "-webkit-box",
+                          WebkitLineClamp: 2,
+                          WebkitBoxOrient: "vertical",
+                          overflow: "hidden",
+                          whiteSpace: "pre-line",
+                          flex: 1,
+                        }}
+                      >
+                        {getFirstTwoLines(responderScope.sop_responses[0].sop_description)}
+                      </Typography>
+                      {responderScope.sop_responses[0].sop_description.split("\n").length > 2 && (
+                        <IconButton
+                          size="small"
+                          onClick={() => setOpenDialog(true)}
+                          sx={{ ml: 1 }}
+                          aria-label="Show full response procedure"
+                        >
+                          <VisibilityIcon fontSize="small" />
+                        </IconButton>
+                      )}
+                      <Dialog open={openDialog} onClose={() => setOpenDialog(false)} maxWidth="sm" fullWidth>
+                        <DialogTitle
+                          sx={{
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "space-between",
+                            pr: 1,
+                          }}
+                        >
+                          Response Procedure
+                          <IconButton
+                            aria-label="close"
+                            onClick={() => setOpenDialog(false)}
+                            size="small"
+                            sx={{ ml: 2 }}
+                          >
+                            <CloseIcon />
+                          </IconButton>
+                        </DialogTitle>
+                        <DialogContent>
+                          <Typography
+                            variant="body1"
+                            sx={{ whiteSpace: "pre-line", fontFamily }}
+                          >
+                            {responderScope.sop_responses[0].sop_description}
+                          </Typography>
+                        </DialogContent>
+                      </Dialog>
+                    </Box>
                   ) : (
                     <Box display="flex" alignItems="center" gap={1} mt={0.5}>
                       <InfoOutlinedIcon color="disabled" fontSize="small" />
