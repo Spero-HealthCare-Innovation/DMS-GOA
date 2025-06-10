@@ -159,7 +159,8 @@ producer = KafkaProducer(
 )
 
 API_KEY = '959e8b3d77615bcdb1659ff5bd74e791'
-CITY = 'Goa'
+# CITY = 'Goa'
+CITY = 'Pune'
 URL = f'https://api.openweathermap.org/data/2.5/weather?q={CITY}&appid={API_KEY}&units=metric'
 
 async def fetch_and_send():
@@ -289,8 +290,13 @@ async def call_open_meteo_api():
     #     f"&current=temperature_2m,rain,precipitation,weather_code"
     # )
 
+    # url = (
+    #     "https://api.open-meteo.com/v1/forecast?latitude=15.5367,15.1261&longitude=73.9458,74.1848&current=temperature_2m,rain,precipitation,weather_code"
+    # )
+    # 18.5329846,73.8216998 PMC
+    # 18.635764, 73.801452  PCMC
     url = (
-        "https://api.open-meteo.com/v1/forecast?latitude=15.5367,15.1261&longitude=73.9458,74.1848&current=temperature_2m,rain,precipitation,weather_code"
+        "https://api.open-meteo.com/v1/forecast?latitude=18.5329846,18.635764&longitude=73.8216998,73.801452&current=temperature_2m,rain,precipitation,weather_code"
     )
     # url = (
     #     "https://api.open-meteo.com/v1/forecast?latitude=15.5367,15.1261&longitude=73.9458,74.1848&hourly=temperature_2m,rain,precipitation,weather_code&models=ecmwf_ifs025"
