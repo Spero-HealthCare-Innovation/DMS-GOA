@@ -306,16 +306,16 @@ function Add_employee({ darkMode }) {
 
   // 1. Add validation functions at the top of your component
   const validateName = (value) => {
-    // Only allow letters, spaces, and common name characters
-    const nameRegex = /^[a-zA-Z\s.''-]+$/;
-    return nameRegex.test(value);
-  };
+  // Allow letters, spaces, underscore, and common name characters
+  const nameRegex = /^[a-zA-Z\s._''-]+$/;
+  return nameRegex.test(value);
+};
 
-  const validateContact = (value) => {
-    // Only allow numbers and common phone formatting characters
-    const contactRegex = /^[0-9+\-\s()]+$/;
-    return contactRegex.test(value) && value.replace(/\D/g, '').length >= 10;
-  };
+ const validateContact = (value) => {
+  // Only allow numbers (remove other characters check)
+  const contactRegex = /^[0-9]+$/;
+  return contactRegex.test(value) && value.length >= 10;
+};
 
   const validateEmail = (value) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -329,31 +329,7 @@ function Add_employee({ darkMode }) {
     empEmail: ''
   });
 
-  // 3. Add validation helper function
-  const validateForm = () => {
-    const errors = {};
-
-    if (!empName.trim()) {
-      errors.empName = 'Employee name is required';
-    } else if (!validateName(empName)) {
-      errors.empName = 'Please enter a valid name (letters only)';
-    }
-
-    if (!empContact.trim()) {
-      errors.empContact = 'Contact number is required';
-    } else if (!validateContact(empContact)) {
-      errors.empContact = 'Please enter a valid contact number';
-    }
-
-    if (!empEmail.trim()) {
-      errors.empEmail = 'Email is required';
-    } else if (!validateEmail(empEmail)) {
-      errors.empEmail = 'Please enter a valid email address';
-    }
-
-    setFormErrors(errors);
-    return Object.keys(errors).length === 0;
-  };
+ 
 
   // / 4. Add new function to handle "Add New Employee" button click
   const handleAddNewEmployee = () => {
@@ -530,6 +506,32 @@ function Add_employee({ darkMode }) {
   );
 
   const paginatedData = filteredEmployees;
+
+  const validateForm = () => {
+  const errors = {};
+
+  if (!empName.trim()) {
+    errors.empName = 'Employee name is required';
+  } else if (!validateName(empName)) {
+    errors.empName = 'Please enter a valid name (letters, spaces, underscore only)';
+  }
+
+  if (!empContact.trim()) {
+    errors.empContact = 'Contact number is required';
+  } else if (!validateContact(empContact)) {
+    errors.empContact = 'Please enter a valid contact number (numbers only, min 10 digits)';
+  }
+
+  if (!empEmail.trim()) {
+    errors.empEmail = 'Email is required';
+  } else if (!validateEmail(empEmail)) {
+    errors.empEmail = 'Please enter a valid email address';
+  }
+
+  setFormErrors(errors);
+  return Object.keys(errors).length === 0;
+};
+
 
   return (
     <div style={{ marginLeft: "3.5rem" }}>
@@ -1025,56 +1027,63 @@ function Add_employee({ darkMode }) {
             <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
               {/* First TextField */}
               <TextField
-                fullWidth
-                value={empName}
-                onChange={(e) => {
-                  const value = e.target.value;
-                  if (value === '' || validateName(value)) {
-                    setEmpName(value);
-                    if (formErrors.empName) {
-                      setFormErrors(prev => ({ ...prev, empName: '' }));
-                    }
-                  }
-                }}
-                placeholder="Employee Name"
-              
-                InputLabelProps={{ shrink: false }}
-                sx={inputStyle}
-              />
+  fullWidth
+  value={empName}
+  onChange={(e) => {
+    const value = e.target.value;
+    if (value === '' || validateName(value)) {
+      setEmpName(value);
+      if (formErrors.empName) {
+        setFormErrors(prev => ({ ...prev, empName: '' }));
+      }
+    }
+  }}
+  placeholder="Employee Name"
+  error={!!formErrors.empName}
+  helperText={formErrors.empName}
+  InputLabelProps={{ shrink: false }}
+  sx={inputStyle}
+/>
+
               {/* Second TextField */}
               <TextField
-                fullWidth
-                placeholder="Emp Contact No"
-                value={empContact}
-                onChange={(e) => {
-                  const value = e.target.value;
-                  if (value === '' || validateContact(value)) {
-                    setEmpContact(value);
-                    if (formErrors.empContact) {
-                      setFormErrors(prev => ({ ...prev, empContact: '' }));
-                    }
-                  }
-                }}
-            
-                sx={inputStyle}
-              />
+  fullWidth
+  placeholder="Emp Contact No"
+  value={empContact}
+  onChange={(e) => {
+    const value = e.target.value;
+    if (value === '' || validateContact(value)) {
+      setEmpContact(value);
+      if (formErrors.empContact) {
+        setFormErrors(prev => ({ ...prev, empContact: '' }));
+      }
+    }
+  }}
+  error={!!formErrors.empContact}
+  helperText={formErrors.empContact}
+  InputLabelProps={{ shrink: false }}
+  sx={inputStyle}
+/>
+
             </Box>
             <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
               {/* First TextField */}
-              <TextField
-                fullWidth
-                placeholder="Employee Email"
-                value={empEmail}
-                onChange={(e) => {
-                  const value = e.target.value;
-                  setEmpEmail(value);
-                  if (formErrors.empEmail) {
-                    setFormErrors(prev => ({ ...prev, empEmail: '' }));
-                  }
-                }}
-             
-                sx={inputStyle}
-              />
+            <TextField
+  fullWidth
+  placeholder="Employee Email"
+  value={empEmail}
+  onChange={(e) => {
+    const value = e.target.value;
+    setEmpEmail(value);
+    if (formErrors.empEmail) {
+      setFormErrors(prev => ({ ...prev, empEmail: '' }));
+    }
+  }}
+  error={!!formErrors.empEmail}
+  helperText={formErrors.empEmail}
+  sx={inputStyle}
+/>
+
               {/* Second TextField */}
 
               <TextField

@@ -180,7 +180,7 @@ function Sop({ darkMode, setDarkMode ,comments}) {
       const incidentData = res.data;
       console.log(
         "Disaster Detail Fetched",
-        incidentData.incident_details[0]?.disaster_type
+        incidentData
       );
 
       // Create enhanced incident object with proper data
