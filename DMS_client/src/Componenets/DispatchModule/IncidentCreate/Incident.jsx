@@ -67,7 +67,8 @@ const Incident = ({ darkMode }) => {
     console.log(googleKey, 'googleKey');
     const navigate = useNavigate();
     const token = localStorage.getItem("access_token");
-    const { newToken, responderScope, setDisasterIncident, disaster, popupText, setPopupText } = useAuth();
+    const { newToken, responderScope, setDisasterIncident, disaster, popupText, setPopupText, lattitude, setLattitude,
+        longitude, setLongitude, } = useAuth();
     console.log(popupText, 'popupTextpopupText');
 
     const { handleSearchChange, handleSelectSuggestion, query } = useAuth();
@@ -132,15 +133,14 @@ const Incident = ({ darkMode }) => {
         });
     };
 
-
     const handleSubmit = async () => {
         const payload = {
             inc_type: selectedEmergencyValue,
             disaster_type: selectedDisaster,
             alert_type: alertType,
             location: popupText || query,
-            latitude: 12344444444454.45,
-            longitude: 1234532.34,
+            latitude: lattitude,
+            longitude: longitude,
             summary: summaryId,
             caller_no: callerNumber,
             caller_name: callerName,

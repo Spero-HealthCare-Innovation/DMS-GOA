@@ -40,16 +40,16 @@ export const AuthProvider = ({ children }) => {
   const [query, setQuery] = useState("");
   const [suggestions, setSuggestions] = useState([]);
   const [selectedPosition, setSelectedPosition] = useState([
-    18.5329846,73.8216998,
+    18.5329846, 73.8216998,
   ]); // Default: Pune
   const [popupText, setPopupText] = useState("");
   // 🔹 sop page
   const [responderScope, setResponderScope] = useState([]);
   const [responderScopeForDispatch, setResponderScopeForDispatch] = useState([]);
   console.log(responderScopeForDispatch, "disasterIncident");
-const [enhancedIncidentData, setEnhancedIncidentData] = useState(null);
+  const [enhancedIncidentData, setEnhancedIncidentData] = useState(null);
   const [selectedIncidentFromSop, setSelectedIncidentFromSop] = useState(null);
-// const [disasterIdFromSop, setDisasterIdFromSop] = useState(null);
+  // const [disasterIdFromSop, setDisasterIdFromSop] = useState(null);
 
   useEffect(() => {
     const disasterValue = disaterid || disasterIncident || disasterIdFromSop;
@@ -345,8 +345,10 @@ const [enhancedIncidentData, setEnhancedIncidentData] = useState(null);
         setDisasterIdFromSop,
         responderScopeForDispatch,
         setResponderScopeForDispatch,
-         enhancedIncidentData,
-      setEnhancedIncidentData,
+        enhancedIncidentData,
+        setEnhancedIncidentData,
+        lattitude, setLattitude,
+        longitude, setLongitude,
       }}
     >
       {children}
