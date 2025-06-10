@@ -12,7 +12,9 @@ import {
   DialogActions,
 } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
-import loginBg from "../../assets/Bg_login1.png";
+// import loginBg from "../../assets/Bg_login1.png";
+import loginBg from "../../assets/pune_login_bg.png";
+import PMCLogo from "../../assets/PMC.png";
 import Spero from "../../assets/spero1.png";
 import { useNavigate } from "react-router-dom";
 import CachedIcon from "@mui/icons-material/Cached";
@@ -317,6 +319,25 @@ function Login() {
               alignItems: "center",
             }}
           >
+            <Box
+    sx={{
+      mb: 1, 
+      display: "flex",
+      justifyContent: "center",
+      alignItems: "center",
+    }}
+  >
+    <Box
+      component="img"
+      src={PMCLogo} 
+      alt="Company Logo"
+      sx={{
+        width: "70px", 
+        height: "auto",
+        objectFit: "contain",
+      }}
+    />
+  </Box>
             <Typography variant="h6" gutterBottom sx={{ color: "white" }}>
               <b>User Login</b>
             </Typography>
@@ -570,7 +591,7 @@ function Login() {
               alt="Spero Logo"
               sx={{
                 width: "100px",
-                mt: 5,
+                // mt: 5,
               }}
             />
           </Box>

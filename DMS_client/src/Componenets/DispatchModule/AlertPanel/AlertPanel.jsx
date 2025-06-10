@@ -188,33 +188,33 @@ const AlertPanel = ({ darkMode }) => {
 
     // brouser and tab close autologout functionality
 
-//     let isPageReloaded = false;
+    //     let isPageReloaded = false;
 
-// // When page loads, mark it as reloaded in sessionStorage
-// window.addEventListener('load', () => {
-//   sessionStorage.setItem('isReloaded', 'true');
-// });
+    // // When page loads, mark it as reloaded in sessionStorage
+    // window.addEventListener('load', () => {
+    //   sessionStorage.setItem('isReloaded', 'true');
+    // });
 
-// // In beforeunload, detect if it's a refresh
-// window.addEventListener('beforeunload', (event) => {
-//   const navEntries = performance.getEntriesByType('navigation');
-//   const navType = navEntries.length > 0 ? navEntries[0].type : null;
+    // // In beforeunload, detect if it's a refresh
+    // window.addEventListener('beforeunload', (event) => {
+    //   const navEntries = performance.getEntriesByType('navigation');
+    //   const navType = navEntries.length > 0 ? navEntries[0].type : null;
 
-//   // Detect reload via performance API or sessionStorage flag
-//   isPageReloaded = navType === 'reload' || sessionStorage.getItem('isReloaded') === 'true';
+    //   // Detect reload via performance API or sessionStorage flag
+    //   isPageReloaded = navType === 'reload' || sessionStorage.getItem('isReloaded') === 'true';
 
-//   if (!isPageReloaded) {
-//     // It's a tab/browser close → perform logout logic
-//     localStorage.setItem('logout', Date.now().toString());
-//     // Optionally: Clear sessionStorage/localStorage/cookies if needed
-//     // sessionStorage.clear();
-//     // localStorage.clear();
-//     // document.cookie = ""; // example to clear cookies
-//   }
+    //   if (!isPageReloaded) {
+    //     // It's a tab/browser close → perform logout logic
+    //     localStorage.setItem('logout', Date.now().toString());
+    //     // Optionally: Clear sessionStorage/localStorage/cookies if needed
+    //     // sessionStorage.clear();
+    //     // localStorage.clear();
+    //     // document.cookie = ""; // example to clear cookies
+    //   }
 
-//   // Clean up the sessionStorage flag (optional)
-//   sessionStorage.removeItem('isReloaded');
-// });
+    //   // Clean up the sessionStorage flag (optional)
+    //   sessionStorage.removeItem('isReloaded');
+    // });
 
     return (
         <Box sx={{ flexGrow: 1, mt: 1, ml: '6em', mr: 1, mb: 2 }}>
@@ -353,7 +353,7 @@ const AlertPanel = ({ darkMode }) => {
                                                         handleTriggerClick(item.pk_id, item.triger_status);
                                                     }}
                                                     style={{
-                                                        width: '62%',
+                                                        width: '70%',
                                                         backgroundColor: item.triger_status === 1 ? '#FF4C4C' : '#00BFA6',
                                                         color: darkMode ? 'white' : 'black',
                                                         borderRadius: '10px',

@@ -26,7 +26,7 @@ const IncidentCreateMap = () => {
   const { query, suggestions, selectedPosition, popupText, handleSearchChange, handleSelectSuggestion, setQuery } = useAuth();
   const [queryMap, setQueryMap] = useState('');
   const [suggestionsMap, setSuggestionsMap] = useState([]);
-  const [selectedPositionMap, setSelectedPositionMap] = useState([15.298430295875988, 74.08868128835907]); // Default: Goa
+  const [selectedPositionMap, setSelectedPositionMap] = useState([18.5329846,73.8216998]); // Default: Pune (PMC)
   const [popupTextMap, setPopupTextMap] = useState('You are here!');
   const [stateData, setStateData] = useState();
   const mapRef = useRef();
@@ -43,7 +43,7 @@ const IncidentCreateMap = () => {
   }, [queryMap]);
 
   useEffect(() => {
-    fetch('/Boundaries/Goa_State.geojson')
+    fetch('/Boundaries/Pune_district_02.geojson')
       .then(res => res.json())
       .then(data => {
         setStateData(data);
@@ -135,7 +135,7 @@ const IncidentCreateMap = () => {
       {/* Leaflet Map */}
       <MapContainer
         center={selectedPosition}
-        zoom={9}
+        zoom={8}
         style={{ height: "55vh", width: "100%", borderRadius: 10 }}
         whenCreated={(mapInstance) => {
           mapRef.current = mapInstance;
