@@ -11,6 +11,10 @@ import {
   Popover,
   Snackbar,
   Modal,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  Tooltip,
 } from "@mui/material";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
@@ -30,6 +34,8 @@ import { Select, MenuItem } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import { useAuth } from "../../../Context/ContextAPI";
 import { getCustomSelectStyles } from "../../../CommonStyle/Style";
+import CloseIcon from "@mui/icons-material/Close"; // Add this import at the top
+
 
 function SopRegister({ darkMode }) {
   const EnquiryCard = styled("div")(() => ({
@@ -55,12 +61,13 @@ function SopRegister({ darkMode }) {
     transition: "all 0.3s ease",
     cursor: "pointer",
     "&:hover": {
-      boxShadow: `0 0 8px ${status === "Completed"
-        ? "#00e67699"
-        : status === "Pending"
+      boxShadow: `0 0 8px ${
+        status === "Completed"
+          ? "#00e67699"
+          : status === "Pending"
           ? "#f4433699"
           : "#88888855"
-        }`,
+      }`,
     },
     height: "45px",
   }));
@@ -326,8 +333,13 @@ function SopRegister({ darkMode }) {
   );
 
   // Then paginate
-  const paginatedData = filteredData.slice((page - 1) * rowsPerPage, page * rowsPerPage);
+  const paginatedData = filteredData.slice(
+    (page - 1) * rowsPerPage,
+    page * rowsPerPage
+  );
 
+  const [descDialogOpen, setDescDialogOpen] = useState(false);
+  const [descDialogText, setDescDialogText] = useState("");
   return (
     <div style={{ marginLeft: "3.5rem" }}>
       <Snackbar
@@ -505,13 +517,40 @@ function SopRegister({ darkMode }) {
                       <StyledCardContent
                         sx={{
                           flex: 2,
-                          justifyContent: "center",
+                          justifyContent: "left",
                           ...fontsTableBody,
                         }}
                       >
-                        <Typography variant="subtitle2">
-                          {item.sop_description || "No Description"}
+                        {/* <Tooltip
+                          title={item.sop_description || ""}
+                          arrow
+                          disableHoverListener={!item.sop_description}
+                        > */}
+                        <Typography
+                          variant="subtitle2"
+                          sx={{
+                            cursor: item.sop_description
+                              ? "pointer"
+                              : "default",
+                            whiteSpace: "nowrap",
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                            maxWidth: 180, // adjust as needed for your layout
+                          }}
+                          onClick={() => {
+                            if (item.sop_description) {
+                              setDescDialogText(item.sop_description);
+                              setDescDialogOpen(true);
+                            }
+                          }}
+                        >
+                          {item.sop_description
+                            ? item.sop_description.length > 45
+                              ? item.sop_description.slice(0, 45) + "..."
+                              : item.sop_description
+                            : "No Description"}
                         </Typography>
+                        {/* </Tooltip> */}
                       </StyledCardContent>
 
                       <StyledCardContent
@@ -532,6 +571,35 @@ function SopRegister({ darkMode }) {
                       </StyledCardContent>
                     </EnquiryCardBody>
                   ))}
+                  <Dialog
+                    open={descDialogOpen}
+                    onClose={() => setDescDialogOpen(false)}
+                    maxWidth="sm"
+                    fullWidth
+                  >
+                    <DialogTitle
+                      sx={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                        pr: 1,
+                      }}
+                    >
+                      Full Description
+                      <Button
+                        onClick={() => setDescDialogOpen(false)}
+                        sx={{ minWidth: 0, color: "grey.700" }}
+                      >
+                        <CloseIcon />
+                      </Button>
+                    </DialogTitle>
+                    <DialogContent>
+                      <Typography>{descDialogText}</Typography>
+                      <Box textAlign="right" mt={2}>
+                       
+                      </Box>
+                    </DialogContent>
+                  </Dialog>
                 </TableBody>
 
                 {open && (
@@ -706,7 +774,6 @@ function SopRegister({ darkMode }) {
                           setIsEditMode(false);
                           setShowSubmitButton(true);
                         }}
-
                       >
                         + Add SOP
                       </Button>
@@ -728,7 +795,7 @@ function SopRegister({ darkMode }) {
                         PaperProps: {
                           style: {
                             maxHeight: 250,
-                            width: '250'
+                            width: "250",
                           },
                         },
                       },
@@ -748,14 +815,25 @@ function SopRegister({ darkMode }) {
                     size="small"
                     placeholder="Description"
                     InputLabelProps={{ shrink: false }}
+                    multiline
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
+                    minRows={1} // initial visible lines
+                    maxRows={6} // maximum visible lines
                   />
                 </Grid>
               </Grid>
             </Box>
 
-            <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, mt: 3, mb: 1 }}>
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "center",
+                gap: 2,
+                mt: 3,
+                mb: 1,
+              }}
+            >
               <Button
                 variant="contained"
                 sx={{
@@ -772,7 +850,7 @@ function SopRegister({ darkMode }) {
                 }}
                 onClick={isEditMode ? handleUpdate : handleSubmit}
               >
-                {showSubmitButton ? 'Submit' : isEditMode ? 'Update' : 'Submit'}
+                {showSubmitButton ? "Submit" : isEditMode ? "Update" : "Submit"}
               </Button>
             </Box>
           </Paper>
