@@ -299,7 +299,7 @@ const AlertPanel = ({ darkMode }) => {
                                     paginatedData.map((item, index) => (
                                         <EnquiryCardBody
                                             key={startIndex + index}
-                                            onClick={() => handleTriggeredData(item.pk_id, item.triger_status)}
+                                            // onClick={() => handleTriggeredData(item.pk_id, item.triger_status)}
                                             sx={{
                                                 backgroundColor: darkMode ? "#1C223C" : "#FFFFFF",
                                                 color: darkMode ? "white" : "black",

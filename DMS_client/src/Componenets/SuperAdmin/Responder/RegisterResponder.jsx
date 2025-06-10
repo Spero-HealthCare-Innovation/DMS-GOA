@@ -165,9 +165,9 @@ const RegisterResponder = ({ darkMode, flag, setFlag, setSelectedIncident }) => 
             if (response.status === 201) {
                 setSnackbarMessage("Responder Registered Successfully");
                 setSnackbarOpen(true);
-                await fetchResponder();
                 setSelectedDisaster("");
                 setSelectedResponders([]);
+                await fetchResponder();
             }
             else if (response.status === 409) {
                 setSnackbarMessage("Responder already exists with this disaster type");

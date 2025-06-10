@@ -256,44 +256,50 @@ const Incident = ({ darkMode }) => {
                                 </TextField>
                             </Grid>
 
-                            <Grid item xs={12} sm={6}>
-                                <TextField
-                                    select
-                                    fullWidth
-                                    size="small"
-                                    label="Disaster Type"
-                                    variant="outlined"
-                                    sx={inputStyle}
-                                    value={selectedDisaster}
-                                    onChange={(e) => setSelectedDisaster(e.target.value)}
-                                >
-                                    <MenuItem disabled value="">
-                                        Select Disaster Type
-                                    </MenuItem>
-                                    {disaster.map((item) => (
-                                        <MenuItem key={item.disaster_id} value={item.disaster_id}>
-                                            {item.disaster_name}
-                                        </MenuItem>
-                                    ))}
-                                </TextField>
-                            </Grid>
+                            {
+                                selectedEmergencyValue === 1 && (
+                                    <>
+                                        <Grid item xs={12} sm={6}>
+                                            <TextField
+                                                select
+                                                fullWidth
+                                                size="small"
+                                                label="Disaster Type"
+                                                variant="outlined"
+                                                sx={inputStyle}
+                                                value={selectedDisaster}
+                                                onChange={(e) => setSelectedDisaster(e.target.value)}
+                                            >
+                                                <MenuItem disabled value="">
+                                                    Select Disaster Type
+                                                </MenuItem>
+                                                {disaster.map((item) => (
+                                                    <MenuItem key={item.disaster_id} value={item.disaster_id}>
+                                                        {item.disaster_name}
+                                                    </MenuItem>
+                                                ))}
+                                            </TextField>
+                                        </Grid>
 
-                            <Grid item xs={12} sm={6}>
-                                <TextField
-                                    select
-                                    fullWidth
-                                    size="small"
-                                    label="Alert Type"
-                                    variant="outlined"
-                                    value={alertType}
-                                    onChange={handleAlertTypeChange}
-                                    sx={inputStyle}
-                                >
-                                    <MenuItem value={1}>High</MenuItem>
-                                    <MenuItem value={2}>Medium</MenuItem>
-                                    <MenuItem value={3}>Low</MenuItem>
-                                </TextField>
-                            </Grid>
+                                        <Grid item xs={12} sm={6}>
+                                            <TextField
+                                                select
+                                                fullWidth
+                                                size="small"
+                                                label="Alert Type"
+                                                variant="outlined"
+                                                value={alertType}
+                                                onChange={handleAlertTypeChange}
+                                                sx={inputStyle}
+                                            >
+                                                <MenuItem value={1}>High</MenuItem>
+                                                <MenuItem value={2}>Medium</MenuItem>
+                                                <MenuItem value={3}>Low</MenuItem>
+                                            </TextField>
+                                        </Grid>
+                                    </>
+                                )
+                            }
 
                             <Grid item xs={12} sm={6}>
                                 <TextField
