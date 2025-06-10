@@ -9,7 +9,7 @@ import IncidentDetails from "../SOP/IncidentDetails";
 import CaseClosureDetails from "./CaseClosureDetails";
 import { useAuth } from "../../../Context/ContextAPI";
 
-function Sop({ darkMode, setDarkMode }) {
+function Sop({ darkMode, setDarkMode ,comments}) {
   // Listen for logout event from other tabs
   window.addEventListener("storage", (e) => {
     if (e.key === "logout") {
@@ -187,7 +187,9 @@ function Sop({ darkMode, setDarkMode }) {
       const enhancedIncident = {
         ...incidentData,
         incident_id: incidentData.IncidentId || incidentData.incident_id,
-        disaster_name: incidentData.incident_details[0]?.disaster_type || incidentData.disaster_name
+        disaster_name: incidentData.incident_details[0]?.disaster_type || incidentData.disaster_name,
+         comments: incidentData.comments || [],
+          respondersScope: incidentData["responders scope"] || [],
       };
 
       setDisasterIdFromSop(incidentData.incident_details[0]?.disaster_type);
