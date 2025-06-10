@@ -490,9 +490,9 @@ class DMS_Summary(models.Model):
 class DMS_Disaster_Severity(models.Model):
     pk_id = models.AutoField(primary_key=True)
     hazard_types = models.CharField(max_length=255,null=True,blank=True)
-    hazard_rng_high = models.CharField(max_length=255,null=True, blank=True)
-    hazard_rng_medium = models.CharField(max_length=255,null=True, blank=True)
     hazard_rng_low = models.CharField(max_length=255,null=True, blank=True)
+    hazard_rng_medium = models.CharField(max_length=255,null=True, blank=True)
+    hazard_rng_high = models.CharField(max_length=255,null=True, blank=True)
     unit = models.CharField(max_length=255,null=True,blank=True)
     is_deleted = models.BooleanField(default=False)
     added_date = models.DateTimeField(auto_now=True,null=True, blank=True)
