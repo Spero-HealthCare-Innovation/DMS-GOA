@@ -50,7 +50,6 @@ export const AuthProvider = ({ children }) => {
   const [enhancedIncidentData, setEnhancedIncidentData] = useState(null);
   const [selectedIncidentFromSop, setSelectedIncidentFromSop] = useState(null);
   // const [disasterIdFromSop, setDisasterIdFromSop] = useState(null);
-
   useEffect(() => {
     const disasterValue = disaterid || disasterIncident || disasterIdFromSop;
     console.log(disasterValue, "passingValue");
