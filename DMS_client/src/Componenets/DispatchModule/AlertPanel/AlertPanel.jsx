@@ -282,7 +282,7 @@ const AlertPanel = ({ darkMode }) => {
                                                 <Typography variant="subtitle2">{item.pk_id}</Typography>
                                             </StyledCardContent>
                                             <StyledCardContent style={{ flex: 1.5 }}>
-                                                <Typography variant="subtitle2">{new Date(item.time).toLocaleString()}</Typography>
+                                                <Typography variant="subtitle2">{new Date(item.alert_datetime).toLocaleString()}</Typography>
                                             </StyledCardContent>
                                             <StyledCardContent style={{ flex: 1 }}>
                                                 <Typography variant="subtitle2">{item.temperature_2m}°C</Typography>
