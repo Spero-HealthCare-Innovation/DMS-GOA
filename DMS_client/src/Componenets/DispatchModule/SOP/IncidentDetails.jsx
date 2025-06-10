@@ -362,9 +362,10 @@ useEffect(() => {
                         <Box display="flex" flexWrap="wrap" gap={1}>
                           {incidentDetails["responders scope"].map(
                             ({ responder_id, responder_name }) => {
-                              const isChecked =
-                                Array.isArray(incident?.responder_scope) &&
-                                incident.responder_scope.includes(responder_id);
+                     const isChecked =
+    Array.isArray(incidentDetails?.["responders scope"]) &&
+    Array.isArray(incident?.responder_scope) &&
+    incident.responder_scope.includes(String(responder_id)); // Convert responder_id to a string
 
                               return (
                                 <Tooltip
