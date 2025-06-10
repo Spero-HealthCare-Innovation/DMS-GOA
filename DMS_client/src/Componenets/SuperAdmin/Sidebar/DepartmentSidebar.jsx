@@ -79,7 +79,7 @@ const Departmentsidebar = ({ darkMode }) => {
 
               transform: "translateY(-50%)",
               background: darkMode
-                ? "linear-gradient(to bottom, #5FECC8, rgba(95, 236, 200, 0.05))"
+                ? "linear-gradient(to bottom, #5FECC8, rgba(32, 43, 40, 0.05))"
                 : "radial-gradient(6035.71% 72.44% at 0% 50%, #00BFA6 0%, #292D45 100%)",
               borderRadius: "30px",
               transition: "width 0.5s ease-in-out",
