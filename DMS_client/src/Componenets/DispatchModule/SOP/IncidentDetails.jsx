@@ -36,11 +36,17 @@ function IncidentDetails({
   });
 
   const userName = localStorage.getItem("userId");
-  console.log(selectedIncident?.inc_id, 'selectedIncidentselectedIncidentselectedIncident');
+  console.log(
+    selectedIncident?.inc_id,
+    "selectedIncidentselectedIncidentselectedIncident"
+  );
   let incident = {};
 
   if (selectedIncident?.inc_id) {
-    console.log(selectedIncident.inc_id, 'selectedIncidentselectedIncidentselectedIncident');
+    console.log(
+      selectedIncident.inc_id,
+      "selectedIncidentselectedIncidentselectedIncident"
+    );
     incident = incidentDetails?.incident_details?.[0] || {};
   }
 
@@ -55,8 +61,7 @@ function IncidentDetails({
   //   responderScope?.responder_scope?.map((item) => item.pk_id)
   // );
   const [selectedResponders, setSelectedResponders] = useState([]);
-  console.log(selectedResponders, 'selectedReasdadadaspondersssss');
-
+  console.log(selectedResponders, "selectedReasdadadaspondersssss");
 
   const comments = incidentDetails?.comments || [];
 
@@ -90,7 +95,6 @@ function IncidentDetails({
     </Box>
   );
 
-
   const renderHorizontalFields = (label, value) => (
     <Box>
       <Typography
@@ -109,7 +113,9 @@ function IncidentDetails({
   );
   useEffect(() => {
     if (Array.isArray(responderScope?.responder_scope)) {
-      const defaultSelected = responderScope.responder_scope.map(r => r.res_id);
+      const defaultSelected = responderScope.responder_scope.map(
+        (r) => r.res_id
+      );
       setSelectedResponders(defaultSelected);
     }
   }, [responderScope]);
@@ -164,16 +170,16 @@ function IncidentDetails({
                   "Time",
                   selectedIncident?.alert_datetime
                     ? new Date(selectedIncident.alert_datetime).toLocaleString(
-                      "en-US",
-                      {
-                        day: "2-digit",
-                        month: "long",
-                        year: "numeric",
-                        hour: "numeric",
-                        minute: "2-digit",
-                        hour12: true,
-                      }
-                    )
+                        "en-US",
+                        {
+                          day: "2-digit",
+                          month: "long",
+                          year: "numeric",
+                          hour: "numeric",
+                          minute: "2-digit",
+                          hour12: true,
+                        }
+                      )
                     : "N/A"
                 )}
                 {/* {renderText("Disaster Id", selectedIncident?.disaster_id_id)} */}
@@ -187,17 +193,23 @@ function IncidentDetails({
                       {renderText("Incident ID", incident?.incident_id)}
                       {renderText(
                         "Incident Type",
-                        incident?.inc_type === 1 ? "Emergency" : incident?.inc_type === 2 ? "Non-Emergency" : "N/A"
+                        incident?.inc_type === 1
+                          ? "Emergency"
+                          : incident?.inc_type === 2
+                          ? "Non-Emergency"
+                          : "N/A"
                       )}
                       {renderText(
                         "Alert Type",
                         incident?.alert_type === 1
                           ? "High"
                           : incident?.alert_type === 2
-                            ? "Medium"
-                            : incident?.alert_type === 3
-                              ? "Low"
-                              : "N/A"
+                          ? "Medium"
+                          : incident?.alert_type === 3
+                          ? "Low"
+                          : incident?.alert_type === 4
+                          ? "very Low"
+                          : "N/A"
                       )}
                     </>
                   ) : (
@@ -206,20 +218,31 @@ function IncidentDetails({
                         { label: "Incident ID", value: incident?.incident_id },
                         {
                           label: "Incident Type",
-                          value: incident?.inc_type === 1 ? "Emergency" : incident?.inc_type === 2 ? "Non-Emergency" : "N/A"
+                          value:
+                            incident?.inc_type === 1
+                              ? "Emergency"
+                              : incident?.inc_type === 2
+                              ? "Non-Emergency"
+                              : "N/A",
                         },
                         {
                           label: "Alert Type",
                           value:
-                            { 1: "High", 2: "Medium", 3: "Low" }[incident?.alert_type] ||
-                            "N/A",
+                            { 1: "High", 2: "Medium", 3: "Low" }[
+                              incident?.alert_type
+                            ] || "N/A",
                         },
                         { label: "Caller Name", value: incident?.caller_name },
                         { label: "Caller Number", value: incident?.caller_no },
                         { label: "Location", value: incident?.location },
                       ].map((item, idx) => (
                         <Grid item xs={12} sm={6} key={idx}>
-                          <Box sx={{ whiteSpace: "pre-wrap", wordBreak: "break-word" }}>
+                          <Box
+                            sx={{
+                              whiteSpace: "pre-wrap",
+                              wordBreak: "break-word",
+                            }}
+                          >
                             {renderHorizontalFields(item.label, item.value)}
                           </Box>
                         </Grid>
@@ -227,15 +250,22 @@ function IncidentDetails({
 
                       {incident?.summary_name && (
                         <Grid item xs={12}>
-                          <Box sx={{ whiteSpace: "pre-wrap", wordBreak: "break-word" }}>
-                            {renderHorizontalFields("Summary", incident?.summary_name)}
+                          <Box
+                            sx={{
+                              whiteSpace: "pre-wrap",
+                              wordBreak: "break-word",
+                            }}
+                          >
+                            {renderHorizontalFields(
+                              "Summary",
+                              incident?.summary_name
+                            )}
                           </Box>
                         </Grid>
                       )}
                     </Grid>
                   )}
                 </>
-
               </>
             )}
           </Grid>
@@ -288,7 +318,12 @@ function IncidentDetails({
                           <VisibilityIcon fontSize="small" />
                         </IconButton>
                       )}
-                      <Dialog open={openDialog} onClose={() => setOpenDialog(false)} maxWidth="sm" fullWidth>
+                      <Dialog
+                        open={openDialog}
+                        onClose={() => setOpenDialog(false)}
+                        maxWidth="sm"
+                        fullWidth
+                      >
                         <DialogTitle
                           sx={{
                             display: "flex",
@@ -415,9 +450,13 @@ function IncidentDetails({
                           flex: 1,
                         }}
                       >
-                        {getFirstTwoLines(responderScope.sop_responses[0].sop_description)}
+                        {getFirstTwoLines(
+                          responderScope.sop_responses[0].sop_description
+                        )}
                       </Typography>
-                      {responderScope.sop_responses[0].sop_description.split("\n").length > 2 && (
+                      {responderScope.sop_responses[0].sop_description.split(
+                        "\n"
+                      ).length > 2 && (
                         <IconButton
                           size="small"
                           onClick={() => setOpenDialog(true)}
@@ -427,7 +466,12 @@ function IncidentDetails({
                           <VisibilityIcon fontSize="small" />
                         </IconButton>
                       )}
-                      <Dialog open={openDialog} onClose={() => setOpenDialog(false)} maxWidth="sm" fullWidth>
+                      <Dialog
+                        open={openDialog}
+                        onClose={() => setOpenDialog(false)}
+                        maxWidth="sm"
+                        fullWidth
+                      >
                         <DialogTitle
                           sx={{
                             display: "flex",
@@ -476,15 +520,19 @@ function IncidentDetails({
 
                   {selectedIncident ? (
                     Array.isArray(incidentDetails?.["responders scope"]) &&
-                      incidentDetails["responders scope"].length > 0 ? (
+                    incidentDetails["responders scope"].length > 0 ? (
                       <Stack spacing={1} mt={1}>
                         <Box display="flex" flexWrap="wrap" gap={1}>
                           {incidentDetails["responders scope"].map(
                             ({ responder_id, responder_name }) => {
-                     const isChecked =
-    Array.isArray(incidentDetails?.["responders scope"]) &&
-    Array.isArray(incident?.responder_scope) &&
-    incident.responder_scope.includes(String(responder_id)); // Convert responder_id to a string
+                              const isChecked =
+                                Array.isArray(
+                                  incidentDetails?.["responders scope"]
+                                ) &&
+                                Array.isArray(incident?.responder_scope) &&
+                                incident.responder_scope.includes(
+                                  String(responder_id)
+                                ); // Convert responder_id to a string
 
                               return (
                                 <Tooltip
