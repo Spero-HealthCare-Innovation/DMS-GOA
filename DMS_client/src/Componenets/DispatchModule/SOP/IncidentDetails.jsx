@@ -131,7 +131,7 @@ function IncidentDetails({
           backgroundColor: darkMode ? "#0a1929" : "#fff",
           color: textColor,
           transition: "all 0.3s ease",
-          marginBottom: 2,
+          marginBottom: 3,
           boxShadow: darkMode
             ? "0px 4px 8px rgba(0, 0, 0, 0.2)"
             : "0px 2px 4px rgba(0, 0, 0, 0.1)",
