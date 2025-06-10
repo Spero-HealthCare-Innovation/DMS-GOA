@@ -186,7 +186,7 @@ const AlertPanel = ({ darkMode }) => {
     };
 
 
-    // brouser and tab close autologout functionality
+// brouser and tab close autologout functionality
 
 //     let isPageReloaded = false;
 
