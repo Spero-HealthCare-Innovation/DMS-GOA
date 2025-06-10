@@ -59,6 +59,7 @@ import {
 import { useAuth } from "../../../Context/ContextAPI";
 import axios from "axios";
 import { select } from "framer-motion/client";
+import Tooltip from "@mui/material/Tooltip";
 
 const RegisterResponder = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
     const port = import.meta.env.VITE_APP_API_KEY;
@@ -425,7 +426,7 @@ const RegisterResponder = ({ darkMode, flag, setFlag, setSelectedIncident }) => 
                                                 sx={{
                                                     flex: 2.2,
                                                     borderRight: "1px solid black",
-                                                    justifyContent: "center",
+                                                    justifyContent: "left",
                                                     ...fontsTableHeading,
                                                 }}
                                             >
@@ -501,9 +502,33 @@ const RegisterResponder = ({ darkMode, flag, setFlag, setSelectedIncident }) => 
                                                                 ...fontsTableBody,
                                                             }}
                                                         >
-                                                            <Typography variant="subtitle2">
-                                                                {item.res_id.map((res) => res.responder_name).join(", ")}
-                                                            </Typography>
+                                                            <Tooltip
+                                                                title={item.res_id.map((res) => res.responder_name).join(", ")}
+                                                                arrow
+                                                                placement="top"
+                                                            >
+                                                                <Typography
+                                                                    variant="subtitle2"
+                                                                    sx={{
+                                                                        overflow: "hidden",
+                                                                        textOverflow: "ellipsis",
+                                                                        whiteSpace: "nowrap",
+                                                                        maxWidth: 500, // adjust as needed
+                                                                        display: "inline-block",
+                                                                        verticalAlign: "middle",
+                                                                    }}
+                                                                >
+                                                                    {(() => {
+                                                                        const names = item.res_id.map((res) => res.responder_name);
+                                                                        const joined = names.join(", ");
+                                                                        // Show as much as fits, then add "..." if truncated
+                                                                        if (joined.length > 35) { // adjust 25 as needed for your width
+                                                                            return joined.slice(0, 35) + "...";
+                                                                        }
+                                                                        return joined;
+                                                                    })()}
+                                                                </Typography>
+                                                            </Tooltip>
                                                         </StyledCardContent>
                                                         <StyledCardContent
                                                             sx={{
