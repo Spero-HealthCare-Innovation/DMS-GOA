@@ -151,28 +151,37 @@ function CommentsPanel({
         }
       );
 
-      if (response.ok) {
-        const newComment = {
-          comments: commentText,
-          comm_added_by: userName,
-          comm_id: Date.now(),
-          incident_id: selectedIncident?.inc_id,
-           comm_created_at: new Date().toISOString(),
-        };
+      if (!response.ok) throw new Error("Failed to send comment.");
 
-        setAllComments((prev) => [...prev, newComment]);
+      const secondResponse = await fetch(`http://164.52.200.41/Spero_CAD/dms/alert_details`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${Token || newToken}`,
+        },
+        body: JSON.stringify({
+          caller_name: selectedIncident,
+          caller_no: selectedIncident?.caller_no,
+          alert_type: selectedIncident?.alert_type,
+          location: selectedIncident?.location,
+          summary: selectedIncident?.summary,
+          units: "1",
+          inc_type: selectedIncident?.inc_type,
+          incident_id: selectedIncident?.incident_id,
+          latitude: "27.6333",
+          longitude: "28.456778"
+        }),
+      });
 
-        setSnackbar({
-          open: true,
-          message: "Comment sent successfully!",
-          severity: "success",
-        });
+      if (!secondResponse.ok) throw new Error("Failed to log comment activity.");
+      setSnackbar({
+        open: true,
+        message: "Comment sent successfully!",
+        severity: "success",
+      });
 
-        setCommentText("");
-        fetchDispatchList();
-      } else {
-        throw new Error("Failed to send comment.");
-      }
+      setCommentText("");
+      fetchDispatchList();
     } catch (err) {
       console.error(err);
       setSnackbar({
@@ -182,6 +191,57 @@ function CommentsPanel({
       });
     }
   };
+
+  // const handleCommentSendClick = async () => {
+  //   if (!commentText.trim()) return;
+
+  //   try {
+  //     const response = await fetch(
+  //       `${port}/admin_web/comments_post/${selectedIncident?.inc_id}/`,
+  //       {
+  //         method: "POST",
+  //         headers: {
+  //           "Content-Type": "application/json",
+  //           Authorization: `Bearer ${Token || newToken}`,
+  //         },
+  //         body: JSON.stringify({
+  //           comments: commentText,
+  //           comm_added_by: userName,
+  //         }),
+  //       }
+  //     );
+
+  //     if (response.ok) {
+  //       const newComment = {
+  //         comments: commentText,
+  //         comm_added_by: userName,
+  //         comm_id: Date.now(),
+  //         incident_id: selectedIncident?.inc_id,
+  //          comm_created_at: new Date().toISOString(),
+  //       };
+
+  //       setAllComments((prev) => [...prev, newComment]);
+
+  //       setSnackbar({
+  //         open: true,
+  //         message: "Comment sent successfully!",
+  //         severity: "success",
+  //       });
+
+  //       setCommentText("");
+  //       fetchDispatchList();
+  //     } else {
+  //       throw new Error("Failed to send comment.");
+  //     }
+  //   } catch (err) {
+  //     console.error(err);
+  //     setSnackbar({
+  //       open: true,
+  //       message: "Failed to send comment.",
+  //       severity: "error",
+  //     });
+  //   }
+  // };
 
   const getInitials = (name) => name?.charAt(0)?.toUpperCase() || "?";
 
@@ -236,7 +296,7 @@ function CommentsPanel({
               />
             ))
           ) : incidentComments.length > 0 ? (
-            incidentComments.map(({ comm_id, comments: commentMsg, comm_added_by,comm_created_at }) => {
+            incidentComments.map(({ comm_id, comments: commentMsg, comm_added_by, comm_created_at }) => {
               const isOwnComment = comm_added_by === userName;
               return (
                 <Box
@@ -261,15 +321,15 @@ function CommentsPanel({
                             ? "#0f766e"
                             : "#d1fae5"
                           : darkMode
-                          ? "#1e293b"
-                          : "#f3f4f6",
+                            ? "#1e293b"
+                            : "#f3f4f6",
                         color: isOwnComment
                           ? darkMode
                             ? "#e0f2f1"
                             : "#065f46"
                           : darkMode
-                          ? "#e2e8f0"
-                          : "#111827",
+                            ? "#e2e8f0"
+                            : "#111827",
                         px: 2,
                         py: 1,
                         borderRadius: 2,
@@ -282,7 +342,7 @@ function CommentsPanel({
                       <Typography variant="body2">
                         {commentMsg || "No comment message"}
                       </Typography>
-                       <Typography variant="caption" sx={{ fontSize: "0.7rem", opacity: 0.7 }}>
+                      <Typography variant="caption" sx={{ fontSize: "0.7rem", opacity: 0.7 }}>
                         {new Date(comm_created_at || Date.now()).toLocaleString()}
                       </Typography>
                     </Box>
