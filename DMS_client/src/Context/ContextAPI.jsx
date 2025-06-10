@@ -47,7 +47,7 @@ export const AuthProvider = ({ children }) => {
   const [responderScope, setResponderScope] = useState([]);
   const [responderScopeForDispatch, setResponderScopeForDispatch] = useState([]);
   console.log(responderScopeForDispatch, "disasterIncident");
-
+const [enhancedIncidentData, setEnhancedIncidentData] = useState(null);
   const [selectedIncidentFromSop, setSelectedIncidentFromSop] = useState(null);
 // const [disasterIdFromSop, setDisasterIdFromSop] = useState(null);
 
@@ -345,6 +345,8 @@ export const AuthProvider = ({ children }) => {
         setDisasterIdFromSop,
         responderScopeForDispatch,
         setResponderScopeForDispatch,
+         enhancedIncidentData,
+      setEnhancedIncidentData,
       }}
     >
       {children}
