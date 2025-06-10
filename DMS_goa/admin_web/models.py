@@ -470,10 +470,11 @@ class DMS_incident_closure(models.Model):
     closure_from_scene=models.DateTimeField(null=True, blank=True)
     closure_back_to_base=models.DateTimeField(null=True, blank=True)
     closure_is_deleted = models.BooleanField(default=False)
+    image = models.FileField(upload_to='media_files/', null=True, blank=True)
     closure_added_by = models.CharField(max_length=255, null=True, blank=True)
     closure_added_date = models.DateTimeField(auto_now=True,null=True, blank=True)
     closure_modified_by = models.CharField(max_length=255, null=True, blank=True)
-    closure_modified_date = models.DateTimeField(null=True, blank=True)
+    closure_modified_date = models.DateTimeField(auto_now=True,null=True, blank=True)
     closure_remark=models.CharField(max_length=255, null=True, blank=True)
 
 
