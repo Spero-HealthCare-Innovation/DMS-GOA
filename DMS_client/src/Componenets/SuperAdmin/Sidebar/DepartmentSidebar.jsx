@@ -104,7 +104,7 @@ const Departmentsidebar = ({ darkMode }) => {
                         onClick={() =>
                           hasSubmenus
                             ? toggleDropdown(sectionName)
-                            : navigate("/" + sectionName.toLowerCase())
+                            : navigate("/" + sectionName)
                         }
                         sx={{
                           flexDirection: open ? "row" : "column",

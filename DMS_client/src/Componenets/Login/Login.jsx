@@ -95,459 +95,158 @@ function Login() {
     console.log("Mounting Login component, fetching captcha...");
   }, []);
 
-  // const handleLogin = async () => {
-  //     setUsernameError('');
-  //     setPasswordError('');
-  //     setCaptchaTextError('');
+  const handleLogin = async () => {
+    setUsernameError("");
+    setPasswordError("");
+    setCaptchaTextError("");
 
-  //     let hasError = false;
+    let hasError = false;
 
-  //     if (!emp_username) {
-  //         setUsernameError('Please enter User ID');
-  //         hasError = true;
-  //     }
+    if (!emp_username) {
+      setUsernameError("Please enter User ID");
+      hasError = true;
+    }
 
-  //     if (!password) {
-  //         setPasswordError('Please enter Password');
-  //         hasError = true;
-  //     }
+    if (!password) {
+      setPasswordError("Please enter Password");
+      hasError = true;
+    }
 
-  //     if (captchaError || (!captchaValue && captchaKey)) {
-  //         setCaptchaTextError('Please enter valid captcha text');
-  //         hasError = true;
-  //     }
+    if (captchaError || (!captchaValue && captchaKey)) {
+      setCaptchaTextError("Please enter valid captcha text");
+      hasError = true;
+    }
 
-  //     if (hasError) {
-  //         return;
-  //     }
+    if (hasError) {
+      return;
+    }
 
-  //     try {
-  //         setLoading(true);
+    try {
+      setLoading(true);
 
-  //         const controller = new AbortController();
-  //         const timeoutId = setTimeout(() => controller.abort(), 5000);
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 5000);
 
-  //         const response = await fetch(`${port}/admin_web/login/`, {
-  //             method: 'POST',
-  //             headers: {
-  //                 'Content-Type': 'application/json',
-  //             },
-  //             body: JSON.stringify({
-  //                 emp_username,
-  //                 password,
-  //                 captcha_key: captchaKey,
-  //                 captcha_value: captchaValue,
-  //             }),
-  //             signal: controller.signal,
-  //         });
+      const response = await fetch(`${port}/admin_web/login/`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          emp_username,
+          password,
+          captcha_key: captchaKey,
+          captcha_value: captchaValue,
+        }),
+        signal: controller.signal,
+      });
 
-  //         clearTimeout(timeoutId);
+      clearTimeout(timeoutId);
 
-  //         const data = await response.json();
-  //         console.log('Login response:', data);
+      const data = await response.json();
+      console.log("Login response:", data);
 
-  //         if (!response.ok) {
-  //             // Handle DRF-style errors first
-  //             if (data.errors?.non_field_errors?.[0]?.toLowerCase().includes('captcha')) {
-  //                 setCaptchaTextError('Invalid captcha. Please try again.');
-  //                 fetchCaptcha();
-  //             } else if (data.errors?.non_field_errors?.[0]) {
-  //                 setPasswordError(data.errors.non_field_errors[0]);
-  //             } else if (data.msg && data.msg.toLowerCase().includes('captcha')) {
-  //                 setCaptchaTextError('Invalid captcha. Please try again.');
-  //                 fetchCaptcha();
-  //             } else {
-  //                 setPasswordError('Invalid User ID or Password');
-  //             }
-  //             return;
-  //         }
-
-  //         // Handle successful login
-  //         // if (data.token) {
-  //         //     localStorage.setItem('token', data.token.access); // or store full token if needed
-  //         //     localStorage.setItem('user', JSON.stringify(data.token.colleague)); // ✅ Store user info
-  //         //     navigate('/alert-panel');
-
-  //         // }
-  //         // Handle successful login
-  //         if (data.token) {
-  //             localStorage.setItem('access_token', data.token.access);
-  //             localStorage.setItem('refresh_token', data.token.refresh);
-  //             localStorage.setItem('user', JSON.stringify(data.token.colleague));
-  //             localStorage.setItem('user_group', data.token.user_group);
-
-  //             // 🔍 Console logs
-  //             console.log('Access Token:', data.token.access);
-  //             console.log('Refresh Token:', data.token.refresh);
-  //             console.log('User Group:', data.token.user_group);
-  //             console.log('User Info:', data.token.colleague);
-
-  //             navigate('/alert-panel');
-  //         }
-
-  //         else {
-  //             console.error('Login response did not contain token');
-  //             setPasswordError('Login failed. Please try again.');
-  //         }
-
-  //     } catch (err) {
-  //         console.error('Login error:', err);
-  //         if (err.name === 'AbortError') {
-  //             setPasswordError('Login request timed out. Server might be down.');
-  //         } else if (err.message?.includes('Failed to fetch')) {
-  //             setPasswordError('Cannot connect to server. Please check if backend is running.');
-  //         } else {
-  //             setPasswordError('Login failed. Please try again.');
-  //         }
-  //     } finally {
-  //         setLoading(false);
-  //     }
-  // };
-
-//   const handleLogin = async () => {
-//     setUsernameError("");
-//     setPasswordError("");
-//     setCaptchaTextError("");
-
-//     let hasError = false;
-
-//     if (!emp_username) {
-//       setUsernameError("Please enter User ID");
-//       hasError = true;
-//     }
-
-//     if (!password) {
-//       setPasswordError("Please enter Password");
-//       hasError = true;
-//     }
-
-//     if (captchaError || (!captchaValue && captchaKey)) {
-//       setCaptchaTextError("Please enter valid captcha text");
-//       hasError = true;
-//     }
-
-//     if (hasError) {
-//       return;
-//     }
-
-//     try {
-//       setLoading(true);
-
-//       const controller = new AbortController();
-//       const timeoutId = setTimeout(() => controller.abort(), 5000);
-
-//       const response = await fetch(`${port}/admin_web/login/`, {
-//         method: "POST",
-//         headers: {
-//           "Content-Type": "application/json",
-//         },
-//         body: JSON.stringify({
-//           emp_username,
-//           password,
-//           captcha_key: captchaKey,
-//           captcha_value: captchaValue,
-//         }),
-//         signal: controller.signal,
-//       });
-
-//       clearTimeout(timeoutId);
-
-//       const data = await response.json();
-//  console.log("Login response:", data); 
-
-// if (!response.ok) {
-//   if (
-//     data.errors?.non_field_errors?.[0]?.toLowerCase().includes("captcha")
-//   ) {
-//     setCaptchaTextError("Invalid captcha. Please try again.");
-//     fetchCaptcha();
-//   } else if (
-//     data.msg &&
-//     data.msg.toLowerCase().includes("captcha")
-//   ) {
-//     setCaptchaTextError("Invalid captcha. Please try again.");
-//     fetchCaptcha();
-//   } else if (
-//     data.msg &&
-//     data.msg.toLowerCase().includes("already logged in")
-//   ) {
-//     setPasswordError("User already logged in on another device/session.");
-//   } else if (data.errors?.non_field_errors?.[0]) {
-//     setPasswordError(data.errors.non_field_errors[0]);
-//   } else if (data.msg) {
-//     setPasswordError(data.msg);
-//   } else {
-//     setPasswordError("Invalid User ID or Password");
-//   }
-//   return;
-// }
-
-// // ✅ Now handle the 200 OK case where token might be missing
-// if (data.token) {
-//   // your success login logic (navigate, store token etc.)
-// } else if (
-//   data.msg &&
-//   data.msg.toLowerCase().includes("already logged in")
-// ) {
-//   setPasswordError("User already logged in on another device/session.");
-// } else if (data.msg) {
-//   setPasswordError(data.msg);
-// } else {
-//   console.error("Login response did not contain token");
-//   setPasswordError("Login failed. Please try again.");
-// }
+      if (!response.ok) {
+        if (data.errors?.non_field_errors?.[0]?.toLowerCase().includes("captcha")) {
+          setCaptchaTextError("Invalid captcha. Please try again.");
+          fetchCaptcha();
+        } else if (data.msg && data.msg.toLowerCase().includes("captcha")) {
+          setCaptchaTextError("Invalid captcha. Please try again.");
+          fetchCaptcha();
+        } else if (data.msg && data.msg.toLowerCase().includes("already logged in")) {
+          setPasswordError("User already logged in on another device/session.");
+        } else if (data.errors?.non_field_errors?.[0]) {
+          setPasswordError(data.errors.non_field_errors[0]);
+        } else if (data.msg) {
+          setPasswordError(data.msg);
+        } else {
+          setPasswordError("Invalid User ID or Password");
+        }
+        return;
+      }
 
 
-
-//       if (data.token) {
-//         localStorage.setItem("access_token", data.token.access);
-//         localStorage.setItem("refresh_token", data.token.refresh);
-//         localStorage.setItem("user", JSON.stringify(data.token.colleague));
-//         localStorage.setItem("user_group", data.token.user_group);
-//         localStorage.setItem("userId", data.token.colleague.emp_name);
-
-//         console.log("Access Token:", data.token.access);
-//         console.log("Refresh Token:", data.token.refresh);
-//         console.log("User Group:", data.token.user_group);
-//         console.log("User Info:", data.token.colleague);
-//         console.log("Iddddd:", data.token.colleague?.emp_name);
-//         const group = data.token.user_group;
-//         console.log(
-//           "Stored group from localStorage:",
-//           localStorage.getItem("user_group")
-//         );
-
-//         if (group === "1") {
-//           navigate("/add-group");
-//         } else if (group === "2") {
-//           navigate("/Map");
-//         } else if (group === "3") {
-//           navigate("/multiscreen");
-//         } else {
-//           console.warn("Unhandled user group:", group);
-//           navigate("/not-authorized");
-//         }
-
-//         if (group === "3") {
-//           console.log(" GROUP 3 DETECTED - WebSocket will be triggered");
-//           navigate("/multiscreen");
-
-//           setTimeout(() => {
-//             try {
-//               console.log(" Creating WebSocket connection for group 3");
-//               // const socket = new WebSocket(`ws://192.168.1.116:7777/send_data`);
-//               //   const socket = new WebSocket(`${socketUrl}/send_data`);
-//               //   socket.onopen = () => {
-//               //     console.log(" WebSocket connected for group 3");
-//               //     socket.send("true");
-//               //     console.log(" Sent 'true' to server for group 3");
-//               //   };
-//               //   socket.onerror = (err) => {
-//               //     console.error(" WebSocket error:", err);
-//               //   };
-//               // } catch (err) {
-//               //   console.error("WebSocket connection failed:", err);
-//               // }
-
-//               fetch('http://localhost:9000/launch')
-//                 .then(res => res.text())
-//                 .then(data => {
-//                   console.log("Dashboard launched:", data);
-//                   alert("Dashboards launched!");
-//                 })
-
-
-//             } catch (err) {
-//               console.error("API call failed:", err);
-//               alert("Failed to launch dashboards.");
-//             }
-//           }, 2000);
-//         } else if (group === "1") {
-//           console.log(
-//             " GROUP 1 DETECTED - NO WebSocket - Navigating to /add-group"
-//           );
-//           navigate("/add-department");
-//         } else if (group === "2") {
-//           console.log(
-//             " GROUP 2 DETECTED - NO WebSocket - Navigating to /alert-panel"
-//           );
-//           navigate("/Map");
-//         } else {
-//           console.warn("Unhandled user group:", group);
-//           navigate("/not-authorized");
-//         }
-//       } else {
-//         console.error("Login response did not contain token");
-//         setPasswordError("Login failed. Please try again.");
-//       }
-//     } catch (err) {
-//       console.error("Login error:", err);
-//       if (err.name === "AbortError") {
-//         setPasswordError("Login request timed out. Server might be down.");
-//       } else if (err.message?.includes("Failed to fetch")) {
-//         setPasswordError(
-//           "Cannot connect to server. Please check if backend is running."
-//         );
-//       } else {
-//         setPasswordError("Login failed. Please try again.");
-//       }
-//     } finally {
-//       setLoading(false);
-//     }
-//   };
-
-const handleLogin = async () => {
-  setUsernameError("");
-  setPasswordError("");
-  setCaptchaTextError("");
-
-  let hasError = false;
-
-  if (!emp_username) {
-    setUsernameError("Please enter User ID");
-    hasError = true;
-  }
-
-  if (!password) {
-    setPasswordError("Please enter Password");
-    hasError = true;
-  }
-
-  if (captchaError || (!captchaValue && captchaKey)) {
-    setCaptchaTextError("Please enter valid captcha text");
-    hasError = true;
-  }
-
-  if (hasError) {
-    return;
-  }
-
-  try {
-    setLoading(true);
-
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 5000);
-
-    const response = await fetch(`${port}/admin_web/login/`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        emp_username,
-        password,
-        captcha_key: captchaKey,
-        captcha_value: captchaValue,
-      }),
-      signal: controller.signal,
-    });
-
-    clearTimeout(timeoutId);
-
-    const data = await response.json();
-    console.log("Login response:", data);
-
-    if (!response.ok) {
-      if (data.errors?.non_field_errors?.[0]?.toLowerCase().includes("captcha")) {
-        setCaptchaTextError("Invalid captcha. Please try again.");
-        fetchCaptcha();
-      } else if (data.msg && data.msg.toLowerCase().includes("captcha")) {
-        setCaptchaTextError("Invalid captcha. Please try again.");
-        fetchCaptcha();
+      if (data.token) {
+        // Success block continues below
       } else if (data.msg && data.msg.toLowerCase().includes("already logged in")) {
-        setPasswordError("User already logged in on another device/session.");
-      } else if (data.errors?.non_field_errors?.[0]) {
-        setPasswordError(data.errors.non_field_errors[0]);
+        setPasswordError("User already logged in!");
+        return;
       } else if (data.msg) {
         setPasswordError(data.msg);
+        return;
       } else {
-        setPasswordError("Invalid User ID or Password");
+        console.error("Login response did not contain token");
+        setPasswordError("Login failed. Please try again.");
+        return;
       }
-      return;
+
+      localStorage.setItem("access_token", data.token.access);
+      localStorage.setItem("refresh_token", data.token.refresh);
+      localStorage.setItem("user", JSON.stringify(data.token.colleague));
+      localStorage.setItem("user_group", data.token.user_group);
+      localStorage.setItem("userId", data.token.colleague.emp_name);
+
+      console.log("Access Token:", data.token.access);
+      console.log("Refresh Token:", data.token.refresh);
+      console.log("User Group:", data.token.user_group);
+      console.log("User Info:", data.token.colleague);
+      console.log("Iddddd:", data.token.colleague?.emp_name);
+
+      const group = data.token.user_group;
+
+      if (group === "1") {
+        navigate("/add-group");
+      } else if (group === "2") {
+        navigate("/Map");
+      } else if (group === "3") {
+        navigate("/multiscreen");
+      } else {
+        console.warn("Unhandled user group:", group);
+        navigate("/not-authorized");
+      }
+
+      if (group === "3") {
+        console.log("GROUP 3 DETECTED - WebSocket will be triggered");
+        navigate("/multiscreen");
+
+        setTimeout(() => {
+          try {
+            console.log("Creating WebSocket connection for group 3");
+
+            fetch("http://localhost:9000/launch")
+              .then((res) => res.text())
+              .then((data) => {
+                console.log("Dashboard launched:", data);
+                alert("Dashboards launched!");
+              });
+          } catch (err) {
+            console.error("API call failed:", err);
+            alert("Failed to launch dashboards.");
+          }
+        }, 2000);
+      } else if (group === "1") {
+        console.log("GROUP 1 DETECTED - Navigating to /add-department");
+        navigate("/add-department");
+      } else if (group === "2") {
+        console.log("GROUP 2 DETECTED - Navigating to /Map");
+        navigate("/Map");
+      } else {
+        console.warn("Unhandled user group:", group);
+        navigate("/not-authorized");
+      }
+    } catch (err) {
+      console.error("Login error:", err);
+      if (err.name === "AbortError") {
+        setPasswordError("Login request timed out. Server might be down.");
+      } else if (err.message?.includes("Failed to fetch")) {
+        setPasswordError("Cannot connect to server. Please check if backend is running.");
+      } else {
+        setPasswordError("Login failed. Please try again.");
+      }
+    } finally {
+      setLoading(false);
     }
-
-    
-    if (data.token) {
-      // Success block continues below
-    } else if (data.msg && data.msg.toLowerCase().includes("already logged in")) {
-      setPasswordError("User already logged in!");
-      return;
-    } else if (data.msg) {
-      setPasswordError(data.msg);
-      return;
-    } else {
-      console.error("Login response did not contain token");
-      setPasswordError("Login failed. Please try again.");
-      return;
-    }
- 
-    localStorage.setItem("access_token", data.token.access);
-    localStorage.setItem("refresh_token", data.token.refresh);
-    localStorage.setItem("user", JSON.stringify(data.token.colleague));
-    localStorage.setItem("user_group", data.token.user_group);
-    localStorage.setItem("userId", data.token.colleague.emp_name);
-
-    console.log("Access Token:", data.token.access);
-    console.log("Refresh Token:", data.token.refresh);
-    console.log("User Group:", data.token.user_group);
-    console.log("User Info:", data.token.colleague);
-    console.log("Iddddd:", data.token.colleague?.emp_name);
-
-    const group = data.token.user_group;
-
-    if (group === "1") {
-      navigate("/add-group");
-    } else if (group === "2") {
-      navigate("/Map");
-    } else if (group === "3") {
-      navigate("/multiscreen");
-    } else {
-      console.warn("Unhandled user group:", group);
-      navigate("/not-authorized");
-    }
-
-    if (group === "3") {
-      console.log("GROUP 3 DETECTED - WebSocket will be triggered");
-      navigate("/multiscreen");
-
-      setTimeout(() => {
-        try {
-          console.log("Creating WebSocket connection for group 3");
-
-          fetch("http://localhost:9000/launch")
-            .then((res) => res.text())
-            .then((data) => {
-              console.log("Dashboard launched:", data);
-              alert("Dashboards launched!");
-            });
-        } catch (err) {
-          console.error("API call failed:", err);
-          alert("Failed to launch dashboards.");
-        }
-      }, 2000);
-    } else if (group === "1") {
-      console.log("GROUP 1 DETECTED - Navigating to /add-department");
-      navigate("/add-department");
-    } else if (group === "2") {
-      console.log("GROUP 2 DETECTED - Navigating to /Map");
-      navigate("/Map");
-    } else {
-      console.warn("Unhandled user group:", group);
-      navigate("/not-authorized");
-    }
-  } catch (err) {
-    console.error("Login error:", err);
-    if (err.name === "AbortError") {
-      setPasswordError("Login request timed out. Server might be down.");
-    } else if (err.message?.includes("Failed to fetch")) {
-      setPasswordError("Cannot connect to server. Please check if backend is running.");
-    } else {
-      setPasswordError("Login failed. Please try again.");
-    }
-  } finally {
-    setLoading(false);
-  }
-};
+  };
 
 
   const handleForgotPasswordSubmit = () => {
