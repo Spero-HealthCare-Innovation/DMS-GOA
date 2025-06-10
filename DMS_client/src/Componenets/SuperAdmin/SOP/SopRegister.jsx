@@ -524,7 +524,7 @@ function SopRegister({ darkMode }) {
                         <MoreHorizIcon
                           onClick={(e) => handleOpen(e, item)}
                           sx={{
-                            fontSize: "2em",
+                            fontSize: "1.6em",
                             color: "#00f0c0",
                             cursor: "pointer",
                           }}

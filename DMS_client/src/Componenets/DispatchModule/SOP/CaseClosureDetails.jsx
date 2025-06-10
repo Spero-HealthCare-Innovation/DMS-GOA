@@ -239,18 +239,18 @@ const CaseClosureDetails = ({ darkMode, flag, selectedIncident }) => {
     }
   };
 
-// Inside your component
-useEffect(() => {
-  if (submitStatus) {
-    const timer = setTimeout(() => {
-      // Clear the submitStatus after 5 seconds
-      setSubmitStatus(null);
-    }, 3000);
+  // Inside your component
+  useEffect(() => {
+    if (submitStatus) {
+      const timer = setTimeout(() => {
+        // Clear the submitStatus after 5 seconds
+        setSubmitStatus(null);
+      }, 3000);
 
-    // Cleanup the timer if component unmounts or submitStatus changes before timeout
-    return () => clearTimeout(timer);
-  }
-}, [submitStatus]);
+      // Cleanup the timer if component unmounts or submitStatus changes before timeout
+      return () => clearTimeout(timer);
+    }
+  }, [submitStatus]);
 
 
   const renderText = (label, value) => (
@@ -273,20 +273,19 @@ useEffect(() => {
 
   return (
     <>
-    {submitStatus && (
-              <Box sx={{
-                  width:"100%",
-      display: "flex",
-      alignItems:"center",
-      justifyContent: "center", // horizontal center
-      alignItems: "center",     // vertical center
-       height: "auto",           // let height adjust to content
-      margin: 0,                // no margin around Box
-      padding: 0,               // no padding around Box
-    }}>
-                <Alert severity={submitStatus.type} >{submitStatus.message}</Alert>
-              </Box>
-            )}
+      {submitStatus && (
+        <Box sx={{
+          width: "100%",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center", // horizontal center
+          height: "auto",           // let height adjust to content
+          margin: 0,                // no margin around Box
+          padding: 0,               // no padding around Box
+        }}>
+          <Alert severity={submitStatus.type} >{submitStatus.message}</Alert>
+        </Box>
+      )}
       <Typography
         variant="h6"
         sx={{
@@ -616,7 +615,7 @@ useEffect(() => {
               </Button>
             </Box>
 
-            
+
           </Grid>
         </Grid>
       </Paper>
