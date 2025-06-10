@@ -275,213 +275,188 @@ const [formData, setFormData] = useState({
     <div style={{ marginLeft: "3.5rem" }}>
 
 
-      <LocalizationProvider dateAdapter={AdapterDateFns}>
-        <Box
-          sx={{
-            display: "flex",
-            alignItems: "center",
-            flexWrap: "wrap", // handles responsiveness
-            gap: 2,
-            pb: 2,
-            mt: 3,
-          }}
-        >
-          {/* Back Button */}
-          <IconButton
-            size="small"
-            onClick={() => {/* handle back */ }}
-            sx={{
-              backgroundColor: "#00f0c0",
-              color: "#fff",
-              "&:hover": {
-                backgroundColor: "#00d8ac",
-              },
-              width: 30,
-              height: 30,
-            }}
-          >
-            <ArrowBackIosIcon
-              sx={{ fontSize: 20, color: darkMode ? "#fff" : "#000" }}
-            />
-          </IconButton>
-
-          {/* Title */}
-          <Typography
-            variant="h6"
-            sx={{
-              color: labelColor,
-              fontWeight: 600,
-              fontFamily,
-              fontSize: 16,
-              minWidth: "120px",
-            }}
-          >
-            Closure Detail
-          </Typography>
-
-          {/* Search Field */}
-          <TextField
-            variant="outlined"
-            size="small"
-            placeholder="Search"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <Search sx={{ color: "gray", fontSize: 18 }} />
-                </InputAdornment>
-              ),
-            }}
-            sx={{
-              width: "200px",
-              "& .MuiOutlinedInput-root": {
-                borderRadius: "25px",
-                backgroundColor: darkMode ? "#1e293b" : "#fff",
-                color: darkMode ? "#fff" : "#000",
-                px: 1,
-                py: 0.2,
-                height: "35px", // reduced height
-              },
-              "& .MuiOutlinedInput-notchedOutline": {
-                borderColor: darkMode ? "#444" : "#ccc",
-              },
-              "& input": {
-                padding: "6px 8px",
-                fontSize: "13px",
-              },
-            }}
-          />
-
-          {/* From Date */}
-          {/* <DatePicker
-            label="From Date"
-            value={formData.fromDate}
-            onChange={(newValue) => handleChange("fromDate", newValue)}
-            renderInput={(params) => (
-              <TextField
-                {...params}
-                placeholder="From Date"
-                size="small"
-                InputProps={{
-                  ...params.InputProps,
-
-                  sx: {
-                    width: "180px",
-                    "& .MuiInputBase-root": {
-                      height: "38px",
-                      borderRadius: "25px",
-                      backgroundColor: darkMode ? "#1e293b" : "#fff",
-                      color: darkMode ? "#fff" : "#000",
-                      px: 1,
-                    },
-                    '& .MuiFilledInput-input': {
-                      fontSize: 14,
-                      height: 'unset',
-                      lineHeight: 1.6,
-                      p: 0
-                    },
-                    "& input": {
-                      padding: "6px 8px",
-                      fontSize: "13px",
-                      color: darkMode ? "#fff" : "#000",
-                    },
-                    "& .MuiSvgIcon-root": {
-                      color: darkMode ? "#ccc" : "#555",
-                    },
-                  },
-                }}
-                sx={{
-                  width: "200px",
-                  "& .MuiOutlinedInput-notchedOutline": {
-                    borderColor: darkMode ? "#444" : "#ccc",
-                  },
-                }}
-              />
-            )}
-          /> */}
-
-          {/* To Date */}
-          {/* <DatePicker
-            label="To Date"
-            value={formData.toDate}
-            onChange={(newValue) => handleChange("toDate", newValue)}
-            renderInput={(params) => (
-              <TextField
-                {...params}
-                placeholder="To Date"
-                size="small"
-                InputProps={{
-                  ...params.InputProps,
-                  sx: {
-                    borderRadius: "25px",
-                    backgroundColor: darkMode ? "#1e293b" : "#fff",
-                    color: darkMode ? "#fff" : "#000",
-                    height: "35px",
-                    px: 1,
-                    py: 0.2,
-                    "& input": {
-                      padding: "6px 8px",
-                      fontSize: "13px",
-                      color: darkMode ? "#fff" : "#000",
-                    },
-                    "& .MuiSvgIcon-root": {
-                      color: darkMode ? "#ccc" : "#555",
-                    },
-                  },
-                }}
-                sx={{
-                  width: "200px",
-                  "& .MuiOutlinedInput-notchedOutline": {
-                    borderColor: darkMode ? "#444" : "#ccc",
-                  },
-                }}
-              />
-            )}
-          /> */}
-
-          <>
-  <div style={{ display: 'flex', flexDirection: 'column', width: '180px' }}>
-    <label
-      style={{
-        color: 'grey',
-        fontSize: '13px',
-        marginBottom: '6px',
-        fontWeight: '500',
-        userSelect: 'none',
+    <LocalizationProvider dateAdapter={AdapterDateFns}>
+  <Box
+    sx={{
+      display: "flex",
+      alignItems: "center",
+      flexWrap: "wrap",
+      gap: 2,
+      pb: 2,
+      mt: 3,
+    }}
+  >
+    {/* Back Button */}
+    <IconButton
+      size="small"
+      onClick={() => {/* handle back */ }}
+      sx={{
+        backgroundColor: "#00f0c0",
+        color: "#fff",
+        "&:hover": { backgroundColor: "#00d8ac" },
+        width: 30,
+        height: 30,
       }}
     >
-      From Date
-    </label>
+      <ArrowBackIosIcon sx={{ fontSize: 20, color: darkMode ? "#fff" : "#000" }} />
+    </IconButton>
 
-    <input
-      type="date"
-      name="fromDate"
-      className="custom-date-input"
-     value={
-  formData.fromDate
-    ? new Date(formData.fromDate).toISOString().split('T')[0]
-    : ''
-}
+    {/* Title */}
+    <Typography
+      variant="h6"
+      sx={{
+        color: labelColor,
+        fontWeight: 600,
+        fontFamily,
+        fontSize: 16,
+        minWidth: "120px",
+      }}
+    >
+      Closure Detail
+    </Typography>
 
-     onChange={(e) =>
-    handleChange("fromDate", new Date(e.target.value)) 
-  }
-      style={{
-        height: '30px',
-        padding: '10px',
-       backgroundColor: bgColor,
-        color: 'grey',
-        border: '1px solid gray',
-        borderRadius: '4px',
-        outline: 'none',
-        fontSize: '14px',
-        cursor: 'pointer',
-        appearance: 'none',
+    {/* Search Field */}
+    <TextField
+      variant="outlined"
+      size="small"
+      placeholder="Search"
+      value={searchTerm}
+      onChange={(e) => setSearchTerm(e.target.value)}
+      InputProps={{
+        startAdornment: (
+          <InputAdornment position="start">
+            <Search sx={{ color: "gray", fontSize: 18 }} />
+          </InputAdornment>
+        ),
+      }}
+      sx={{
+        width: "200px",
+        "& .MuiOutlinedInput-root": {
+          borderRadius: "25px",
+          backgroundColor: darkMode ? "#1e293b" : "#fff",
+          color: darkMode ? "#fff" : "#000",
+          px: 1,
+          py: 0.2,
+          height: "35px",
+        },
+        "& .MuiOutlinedInput-notchedOutline": {
+          borderColor: darkMode ? "#444" : "#ccc",
+        },
+        "& input": {
+          padding: "6px 8px",
+          fontSize: "13px",
+        },
       }}
     />
-  </div>
 
+    {/* From Date */}
+    <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+      <label
+        style={{
+          color: 'grey',
+          fontSize: '13px',
+          fontWeight: '600',
+          userSelect: 'none',
+        }}
+      >
+        From Date
+      </label>
+      <input
+        type="date"
+        name="fromDate"
+        className="custom-date-input"
+        value={
+          formData.fromDate
+            ? new Date(formData.fromDate).toISOString().split('T')[0]
+            : ''
+        }
+        onChange={(e) => handleChange("fromDate", new Date(e.target.value))}
+        style={{
+          width: '150px',
+          height: '35px',
+          padding: '10px',
+          backgroundColor: bgColor,
+          color: 'grey',
+          border: '1px solid gray',
+          borderRadius: '4px',
+          outline: 'none',
+          fontSize: '14px',
+          cursor: 'pointer',
+          appearance: 'none',
+        }}
+      />
+    </Box>
+
+    {/* To Date */}
+    <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+      <label
+        style={{
+          color: 'grey',
+          fontSize: '13px',
+          fontWeight: '600',
+          userSelect: 'none',
+        }}
+      >
+        To Date
+      </label>
+      <input
+        type="date"
+        name="toDate"
+        className="custom-date-input"
+        value={
+          formData.toDate
+            ? new Date(formData.toDate).toISOString().split('T')[0]
+            : ''
+        }
+        onChange={(e) => handleChange("toDate", new Date(e.target.value))}
+        style={{
+          width: '150px',
+          height: '35px',
+          padding: '10px',
+          backgroundColor: bgColor,
+          color: 'grey',
+          border: '1px solid gray',
+          borderRadius: '4px',
+          outline: 'none',
+          fontSize: '14px',
+          cursor: 'pointer',
+          appearance: 'none',
+        }}
+      />
+    </Box>
+
+    {/* Submit Button */}
+    <Button
+      variant="contained"
+      size="small"
+      sx={{
+        backgroundColor: "#00f0c0",
+        "&:hover": { backgroundColor: "#00d8ac" },
+        height: 35,
+        minWidth: 100,
+        color: darkMode ? "black" : "#000",
+      }}
+      onClick={onSubmit}
+    >
+      Submit
+    </Button>
+
+    {/* Download Button */}
+    {showDownload && (
+      <Button
+        variant="outlined"
+        color="success"
+        startIcon={downloadLoading ? <CircularProgress size={16} /> : <DownloadIcon />}
+        size="small"
+        sx={{ height: 35, minWidth: 130 }}
+        onClick={handleDownload}
+      >
+        Download
+      </Button>
+    )}
+  </Box>
+
+  {/* Date icon styling */}
   <style>
     {`
       .custom-date-input::-webkit-calendar-picker-indicator {
@@ -490,88 +465,8 @@ const [formData, setFormData] = useState({
       }
     `}
   </style>
-</>
+</LocalizationProvider>
 
-    <>
-  <div style={{ display: 'flex', flexDirection: 'column', width: '180px' }}>
-    <label
-      style={{
-        color: 'grey',
-        fontSize: '13px',
-        marginBottom: '6px',
-        fontWeight: '500',
-        userSelect: 'none',
-      }}
-    >
-      To Date {/* Changed from "From Date" */}
-    </label>
-
-    <input
-      type="date"
-      id="toDate"
-      name="toDate"
-      className="custom-date-input"
-     value={
-  formData.toDate
-    ? new Date(formData.toDate).toISOString().split('T')[0]
-    : ''
-}
-
-      onChange={(e) =>
-    handleChange("toDate", new Date(e.target.value))
-  }
-      
-      style={{
-        height: '30px',
-        padding: '10px',
-        backgroundColor: bgColor,
-        color: 'grey',
-        border: '1px solid grey',
-        borderRadius: '4px',
-        outline: 'none',
-        fontSize: '14px',
-        cursor: 'pointer',
-        appearance: 'none',
-      }}
-    />
-  </div>
-</>
-
-          {/* Submit */}
-          <Button
-            variant="contained"
-            size="small"
-            sx={{
-              backgroundColor: "#00f0c0",
-              color: "#fff",
-              "&:hover": {
-                backgroundColor: "#00d8ac",
-              },
-              height: 35, minWidth: 100,
-              color: darkMode ? "black" : "#000"
-            }}
-            onClick={onSubmit}
-           
-          >
-          Submit
-          </Button>
-
-          {/* Download */}
-          {showDownload && (
-            <Button
-              variant="outlined"
-              color="success"
-              // startIcon={<DownloadIcon />}
-               startIcon={downloadLoading ? <CircularProgress size={16} /> : <DownloadIcon />}
-              size="small"
-              sx={{ height: 35, minWidth: 130, ml: 2 }}
-              onClick={handleDownload}
-            >
-              Download
-            </Button>
-          )}
-        </Box>
-      </LocalizationProvider>
 
       {error && (
         <Box sx={{ mb: 2 }}>

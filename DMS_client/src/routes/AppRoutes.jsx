@@ -118,7 +118,7 @@ const AppRoutes = ({ darkMode, setIsLoggedIn }) => {
             </PrivateRoute>
           }
         />
-         <Route
+        <Route
           path="/Closure Detail"
           element={
             <PrivateRoute>

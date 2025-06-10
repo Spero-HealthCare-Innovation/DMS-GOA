@@ -100,6 +100,7 @@ const Alerts = [
   "Longitude",
   "Temperature",
   "Rain",
+  "Alert Type",
   "Time",
   "Added By",
   "Actions",
@@ -140,7 +141,7 @@ function SopTask({
   const [openCancelDialog, setOpenCancelDialog] = useState(false);
   const [selectedAlert, setSelectedAlert] = useState(null);
 
-   const {
+  const {
     snackbarOpen,
     snackbarMessage,
     snackbarSeverity,
@@ -148,11 +149,6 @@ function SopTask({
     closeSnackbar,
   } = useSnackbar();
 
-  const [snackbar, setSnackbar] = useState({
-    open: false,
-    message: "",
-    severity: "success",
-  });
   const navigate = useNavigate();
 
   // Decide current list based on flag
@@ -193,7 +189,7 @@ function SopTask({
           setFlag(1);
           setViewmode("incident"); // Set view mode to incident when new data is received
           // Show snackbar when data is received
-          setSnackbarMsg(data.message || "⚠️ New weather alert triggered!");
+          setSnackbarMsg(data.message || "⚠️ New  alert triggered!");
           setOpenSnackbar(true);
         } catch (error) {
           console.error("Invalid JSON:", event.data);
@@ -247,35 +243,79 @@ function SopTask({
     navigate("/create-incident", { state: { startData: "start" } });
   };
 
- 
-const handleCancelTrigger = async () => {
-  const payload = {
-    id: selectedAlert,
+  const handleCancelTrigger = async () => {
+    const payload = {
+      id: selectedAlert,
+    };
+
+    try {
+      const response = await axios.post(
+        `${port}/admin_web/cancel-trigger/`,
+        payload,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${AccessToken || newToken}`,
+          },
+        }
+      );
+
+      showSnackbar("Alert cancelled successfully!", "success");
+      setOpenCancelDialog(false);
+      setFlag(0);
+      fetchDispatchList();
+    } catch (err) {
+      console.error(err);
+      showSnackbar("Failed to cancel alert!", "error");
+    }
   };
 
-  try {
-    const response = await axios.post(
-      `${port}/admin_web/cancel-trigger/`,
-      payload,
-      {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${AccessToken || newToken}`,
-        },
-      }
-    );
+  // useEffect(() => {
+  //   const navEntry = performance.getEntriesByType("navigation")[0];
+  //   const isReload = navEntry?.type === "reload";
 
-    showSnackbar("Alert cancelled successfully!", "success");
-    setOpenCancelDialog(false);
-    setFlag(0);
-    fetchDispatchList();
+  //   if (isReload) {
+  //     setOpenCancelDialog(true);
+  //     setFlag(1); // flag becomes 1 on reload
+  //   }
+  // }, [port, AccessToken, newToken]);
 
-  } catch (err) {
-    console.error(err);
-    showSnackbar("Failed to cancel alert!", "error");
-  }
-};
+  // // Whenever the dialog closes, reset flag to 0
+  // useEffect(() => {
+  //   if (!openCancelDialog) {
+  //     setFlag(0);
+  //   }
+  // }, [openCancelDialog]);
 
+
+  // brouswer and tab close logout functionality
+//   let isPageReloaded = false;
+
+// // When page loads, mark it as reloaded in sessionStorage
+// window.addEventListener('load', () => {
+//   sessionStorage.setItem('isReloaded', 'true');
+// });
+
+// // In beforeunload, detect if it's a refresh
+// window.addEventListener('beforeunload', (event) => {
+//   const navEntries = performance.getEntriesByType('navigation');
+//   const navType = navEntries.length > 0 ? navEntries[0].type : null;
+
+//   // Detect reload via performance API or sessionStorage flag
+//   isPageReloaded = navType === 'reload' || sessionStorage.getItem('isReloaded') === 'true';
+
+//   if (!isPageReloaded) {
+//     // It's a tab/browser close → perform logout logic
+//     localStorage.setItem('logout', Date.now().toString());
+//     // Optionally: Clear sessionStorage/localStorage/cookies if needed
+//     // sessionStorage.clear();
+//     // localStorage.clear();
+//     // document.cookie = ""; // example to clear cookies
+//   }
+
+//   // Clean up the sessionStorage flag (optional)
+//   sessionStorage.removeItem('isReloaded');
+// });
 
   return (
     <Paper
@@ -473,13 +513,24 @@ const handleCancelTrigger = async () => {
                       {item.temperature_2m}
                     </Typography>
                   </StyledCardContent>
+
                   <StyledCardContent sx={{ flex: 1, justifyContent: "center" }}>
                     <Typography variant="subtitle2">{item.rain}</Typography>
                   </StyledCardContent>
                   <StyledCardContent sx={{ flex: 1, justifyContent: "center" }}>
+                    <Typography variant="subtitle2">
+                      {{
+                        1: "High",
+                        2: "Medium",
+                        3: "Low",
+                        4: "Very Low",
+                      }[item.alert_type] || "Unknown"}
+                    </Typography>
+                  </StyledCardContent>
+                  <StyledCardContent sx={{ flex: 1, justifyContent: "center" }}>
                     <Typography
                       variant="subtitle2"
-                      fontSize={12}
+                      sx={{ fontSize: "12px" }}
                       textAlign="center"
                     >
                       {item.alert_datetime
@@ -583,7 +634,10 @@ const handleCancelTrigger = async () => {
                         <StyledCardContent
                           sx={{ flex: 1, justifyContent: "center" }}
                         >
-                          <Typography variant="subtitle2">
+                          <Typography
+                            variant="subtitle2"
+                            sx={{ textAlign: "center", fontSize: "12px" }}
+                          >
                             {item.inc_added_date
                               ? new Date(item.inc_added_date).toLocaleString(
                                   "en-US",
@@ -618,7 +672,7 @@ const handleCancelTrigger = async () => {
                               1: "High",
                               2: "Medium",
                               3: "Low",
-                            }[item.inc_type] || "Unknown"}
+                            }[item.alert_type] || "Unknown"}
                           </Typography>
                         </StyledCardContent>
 
@@ -724,8 +778,7 @@ const handleCancelTrigger = async () => {
         </Alert>
       </Snackbar>
 
-
-<Snackbar
+      <Snackbar
         open={snackbarOpen}
         autoHideDuration={3000}
         onClose={closeSnackbar}
@@ -742,7 +795,7 @@ const handleCancelTrigger = async () => {
         </Alert>
       </Snackbar>
 
-{/* dilog for alert cancel? */}
+      {/* dilog for alert cancel? */}
       <Dialog
         open={openCancelDialog}
         onClose={() => setOpenCancelDialog(false)}
