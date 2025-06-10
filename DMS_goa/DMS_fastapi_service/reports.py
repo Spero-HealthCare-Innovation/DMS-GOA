@@ -44,7 +44,7 @@ def incident_report_daywise(
 ):
     try:
         query = f"""
-            SELECT incident_id, disaster_type_id, closure_acknowledge, closure_start_base_location, 
+            SELECT incident_id, disaster_type_id, inc_added_date, alert_id_id, closure_acknowledge, closure_start_base_location, 
                    closure_at_scene, closure_from_scene, closure_back_to_base, closure_remark 
             FROM closure_report 
             WHERE closure_added_date BETWEEN '{from_date}' AND '{to_date}'
@@ -53,11 +53,15 @@ def incident_report_daywise(
         dt=[] 
         for i in data:
             dstss = DMS_Disaster_Type.objects.get(disaster_id=i['disaster_type_id'])
-            print(dstss,'dstssdstssdstssdstss')
+            # alrt_dt = Weather_alerts.objects.get(pk_id=i['alert_id_id'])
+            # print(i['alert_id_id'])
+            # print(alrt_dt,'alrt_dtalrt_dtalrt_dtalrt_dt')
             nn={
                 "incident_id": i['incident_id'],
-                "disaster_type": dstss.disaster_name,
+                "disaster_type": dstss.disaster_name if dstss else None,
                 "closure_acknowledge": i['closure_acknowledge'],
+                "incident_create_time":i['inc_added_date'],
+                # "alart_time":alrt_dt.alert_datetime if alrt_dt else None,
                 "closure_start_base_location": i['closure_start_base_location'],
                 "closure_at_scene": i['closure_at_scene'],
                 "closure_from_scene": i['closure_from_scene'],
