@@ -165,7 +165,7 @@ function CommentsPanel({
         body: JSON.stringify({
           caller_name: selectedIncident?.incident_details[0]?.caller_name || null,
           caller_no: selectedIncident?.incident_details[0]?.caller_no || null,
-          alert_type: selectedIncident?.alert_type || null,
+          disaster_name: selectedIncident?.incident_details[0]?.disaster_name || null,
           location: selectedIncident?.incident_details[0]?.location || null,
           summary: selectedIncident?.incident_details[0]?.summary || null,
           units: "1",
@@ -173,6 +173,7 @@ function CommentsPanel({
           incident_id: selectedIncident?.incident_id || null,
           latitude: selectedIncident?.incident_details[0]?.latitude || null,
           longitude: selectedIncident?.incident_details[0]?.longitude || null,
+          // alert_type: selectedIncident?.alert_type || null,
         }),
       });
 
