@@ -10,6 +10,7 @@ import {
   Skeleton,
   Avatar,
   Stack,
+  Tooltip,
 } from "@mui/material";
 import { useAuth } from "../../../Context/ContextAPI";
 
@@ -21,14 +22,12 @@ function CommentsPanel({
   selectedResponders,
   setSelectedResponders,
   fetchDispatchList,
-  comments,
   incidentDetails,
 }) {
   const port = import.meta.env.VITE_APP_API_KEY;
   const userName = localStorage.getItem("userId");
   const { newToken } = useAuth();
   const Token = localStorage.getItem("access_token");
-  console.log(selectedIncident?.inc_id, 'selectedIncidentincommentapanel');
 
   const [snackbar, setSnackbar] = useState({
     open: false,
@@ -41,7 +40,7 @@ function CommentsPanel({
   const [allComments, setAllComments] = useState([]);
   const [isLoadingComments, setIsLoadingComments] = useState(false);
 
-  const bottomRef = useRef(null); // 👈 Ref for auto scroll
+  const bottomRef = useRef(null);
 
   const textColor = darkMode ? "#ffffff" : "#000000";
   const bgColor = darkMode ? "#0a1929" : "#ffffff";
@@ -68,10 +67,7 @@ function CommentsPanel({
       setIsLoadingComments(true);
       const response = await fetch(`${port}/admin_web/comment_get`);
       const data = await response.json();
-      setAllComments(data);
-      setTimeout(() => {
-        bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-      }, 100);
+      setAllComments(data || []);
     } catch (error) {
       console.error("Failed to fetch comments:", error);
     } finally {
@@ -80,12 +76,12 @@ function CommentsPanel({
   };
 
   useEffect(() => {
-    if (flag !== 0) {
-      fetchComments();
-    }
-  }, [flag, selectedIncident]);
+    fetchComments();
+  }, []);
 
-
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [allComments]);
 
   const handlealertSaveClick = async () => {
     if (!commentText.trim()) return;
@@ -119,7 +115,6 @@ function CommentsPanel({
           message: "Dispatch alert sent successfully!",
           severity: "success",
         });
-
         setCommentText("");
         setSelectedResponders([]);
         setFlag(0);
@@ -142,7 +137,7 @@ function CommentsPanel({
 
     try {
       const response = await fetch(
-        `${port}/admin_web/comments_post/${incidentDetails?.inc_id}/`,
+        `${port}/admin_web/comments_post/${selectedIncident?.inc_id}/`,
         {
           method: "POST",
           headers: {
@@ -161,6 +156,8 @@ function CommentsPanel({
           comments: commentText,
           comm_added_by: userName,
           comm_id: Date.now(),
+          incident_id: selectedIncident?.inc_id,
+           comm_created_at: new Date().toISOString(),
         };
 
         setAllComments((prev) => [...prev, newComment]);
@@ -173,10 +170,6 @@ function CommentsPanel({
 
         setCommentText("");
         fetchDispatchList();
-
-        setTimeout(() => {
-          bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-        }, 100);
       } else {
         throw new Error("Failed to send comment.");
       }
@@ -192,128 +185,128 @@ function CommentsPanel({
 
   const getInitials = (name) => name?.charAt(0)?.toUpperCase() || "?";
 
+  const incidentComments = selectedIncident
+    ? allComments.filter((item) => item?.incident_id === selectedIncident?.inc_id)
+    : [];
+
   return (
     <Paper elevation={1} sx={paperStyle}>
       <Typography variant="h6" mb={2} color="#5FECC8">
         Comments
       </Typography>
 
-      {/* Comments Display */}
-      {flag !== 1 && (
-        <>
-          {
-            selectedIncident?.inc_id === undefined ? (
-              <Typography variant="body2"></Typography>
-            )
-              :
-              (
+      {flag !== 1 && selectedIncident?.inc_id && (
+        <Box
+          mb={2}
+          sx={{
+            height: 100,
+            overflowY: "auto",
+            display: "flex",
+            flexDirection: "column",
+            gap: 1,
+            px: 1,
+            pr: 0.5,
+            scrollBehavior: "smooth",
+            "&::-webkit-scrollbar": {
+              width: "6px",
+            },
+            "&::-webkit-scrollbar-thumb": {
+              backgroundColor: darkMode ? "#5FECC8" : "#888",
+              borderRadius: 3,
+            },
+            "&::-webkit-scrollbar-thumb:hover": {
+              backgroundColor: darkMode ? "#48c7ab" : "#555",
+            },
+          }}
+        >
+          {isLoadingComments ? (
+            [...Array(3)].map((_, i) => (
+              <Skeleton
+                key={i}
+                variant="rectangular"
+                height={30}
+                animation="wave"
+                sx={{
+                  borderRadius: 2,
+                  my: 0.5,
+                  width: i % 2 === 0 ? "80%" : "60%",
+                  alignSelf: i % 2 === 0 ? "flex-start" : "flex-end",
+                  bgcolor: darkMode ? "#1e293b" : "#e0e0e0",
+                }}
+              />
+            ))
+          ) : incidentComments.length > 0 ? (
+            incidentComments.map(({ comm_id, comments: commentMsg, comm_added_by,comm_created_at }) => {
+              const isOwnComment = comm_added_by === userName;
+              return (
                 <Box
-                  mb={2}
+                  key={comm_id}
                   sx={{
-                    height: 100,
-                    overflowY: "auto",
                     display: "flex",
-                    flexDirection: "column",
-                    gap: 1,
-                    px: 1,
-                    pr: 0.5,
-                    scrollBehavior: "smooth",
-                    "&::-webkit-scrollbar": {
-                      width: "6px",
-                    },
-                    "&::-webkit-scrollbar-thumb": {
-                      backgroundColor: darkMode ? "#5FECC8" : "#888",
-                      borderRadius: 3,
-                    },
-                    "&::-webkit-scrollbar-thumb:hover": {
-                      backgroundColor: darkMode ? "#48c7ab" : "#555",
-                    },
+                    justifyContent: isOwnComment ? "flex-end" : "flex-start",
                   }}
                 >
-                  {isLoadingComments ? (
-                    [...Array(3)].map((_, i) => (
-                      <Skeleton
-                        key={i}
-                        variant="rectangular"
-                        height={30}
-                        animation="wave"
-                        sx={{
-                          borderRadius: 2,
-                          my: 0.5,
-                          width: i % 2 === 0 ? "80%" : "60%",
-                          alignSelf: i % 2 === 0 ? "flex-start" : "flex-end",
-                          bgcolor: darkMode ? "#1e293b" : "#e0e0e0",
-                        }}
-                      />
-                    ))
-                  ) : allComments && allComments.length > 0 ? (
-                    allComments.map(({ comm_id, comments: commentMsg, comm_added_by }) => {
-                      const isOwnComment = comm_added_by === userName;
-                      return (
-                        <Box
-                          key={comm_id}
-                          sx={{
-                            display: "flex",
-                            justifyContent: isOwnComment ? "flex-end" : "flex-start",
-                          }}
-                        >
-                          <Stack direction="row" spacing={1} alignItems="flex-end">
-                            {!isOwnComment && (
-                              <Avatar sx={{ bgcolor: "#0288d1", fontSize: 14 }}>
-                                {getInitials(comm_added_by)}
-                              </Avatar>
-                            )}
-                            <Box
-                              sx={{
-                                backgroundColor: isOwnComment
-                                  ? darkMode
-                                    ? "#0f766e"
-                                    : "#d1fae5"
-                                  : darkMode
-                                    ? "#1e293b"
-                                    : "#f3f4f6",
-                                color: isOwnComment
-                                  ? darkMode
-                                    ? "#e0f2f1"
-                                    : "#065f46"
-                                  : darkMode
-                                    ? "#e2e8f0"
-                                    : "#111827",
-                                px: 2,
-                                py: 1,
-                                borderRadius: 2,
-                                maxWidth: "80%",
-                                wordBreak: "break-word",
-                                whiteSpace: "pre-line",
-                                textAlign: "left",
-                              }}
-                            >
-                              <Typography variant="body2">
-                                {commentMsg || "no comment Message"}
-                              </Typography>
-                            </Box>
-                            {isOwnComment && (
-                              <Avatar sx={{ bgcolor: "#6a1b9a", fontSize: 14 }}>
-                                {getInitials(comm_added_by)}
-                              </Avatar>
-                            )}
-                          </Stack>
-                        </Box>
-                      );
-                    })
-                  ) : (
-                    <Typography variant="body2" color="text.secondary">
-                      No comments yet.
-                    </Typography>
-                  )}
-                  <div ref={bottomRef} />
+                  <Stack direction="row" spacing={1} alignItems="flex-end">
+                    {!isOwnComment && (
+                      <Tooltip title={comm_added_by} arrow>
+                        <Avatar sx={{ bgcolor: "#0288d1", fontSize: 14 }}>
+                          {getInitials(comm_added_by)}
+                        </Avatar>
+                      </Tooltip>
+                    )}
+                    <Box
+                      sx={{
+                        backgroundColor: isOwnComment
+                          ? darkMode
+                            ? "#0f766e"
+                            : "#d1fae5"
+                          : darkMode
+                          ? "#1e293b"
+                          : "#f3f4f6",
+                        color: isOwnComment
+                          ? darkMode
+                            ? "#e0f2f1"
+                            : "#065f46"
+                          : darkMode
+                          ? "#e2e8f0"
+                          : "#111827",
+                        px: 2,
+                        py: 1,
+                        borderRadius: 2,
+                        maxWidth: "80%",
+                        wordBreak: "break-word",
+                        whiteSpace: "pre-line",
+                        textAlign: "left",
+                      }}
+                    >
+                      <Typography variant="body2">
+                        {commentMsg || "No comment message"}
+                      </Typography>
+                       <Typography variant="caption" sx={{ fontSize: "0.7rem", opacity: 0.7 }}>
+                        {new Date(comm_created_at || Date.now()).toLocaleString()}
+                      </Typography>
+                    </Box>
+                    {isOwnComment && (
+                      <Tooltip title={comm_added_by} arrow>
+                        <Avatar sx={{ bgcolor: "#6a1b9a", fontSize: 14 }}>
+                          {getInitials(comm_added_by)}
+                        </Avatar>
+                      </Tooltip>
+                    )}
+                  </Stack>
                 </Box>
-              )
-          }
-        </>
+              );
+            })
+          ) : (
+            <Typography variant="body2" color="text.secondary">
+              No comments for this incident.
+            </Typography>
+          )}
+          <div ref={bottomRef} />
+        </Box>
       )}
 
-      {/* Input + Send/Save Button */}
+      {/* Input + Button */}
       <Box
         sx={{
           display: "flex",
@@ -361,7 +354,6 @@ function CommentsPanel({
         </Button>
       </Box>
 
-      {/* Snackbar Message */}
       <Snackbar
         open={snackbar.open}
         autoHideDuration={4000}
