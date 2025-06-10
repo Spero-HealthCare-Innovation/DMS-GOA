@@ -35,6 +35,9 @@ function CommentsPanel({
     severity: "success",
   });
 
+  console.log(selectedIncident, 'selectedIncident in Comment');
+
+
   const [commentText, setCommentText] = useState("");
   const [placeholderVisible, setPlaceholderVisible] = useState(true);
   const [allComments, setAllComments] = useState([]);
@@ -153,28 +156,25 @@ function CommentsPanel({
 
       if (!response.ok) throw new Error("Failed to send comment.");
 
-      const secondResponse = await fetch(
-        `http://164.52.200.41/Spero_CAD/dms/alert_details`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${Token || newToken}`,
-          },
-          body: JSON.stringify({
-            caller_name: selectedIncident,
-            caller_no: selectedIncident?.caller_no,
-            alert_type: selectedIncident?.alert_type,
-            location: selectedIncident?.location,
-            summary: selectedIncident?.summary,
-            units: "1",
-            inc_type: selectedIncident?.inc_type,
-            incident_id: selectedIncident?.incident_id,
-            latitude: "27.6333",
-            longitude: "28.456778",
-          }),
-        }
-      );
+      const secondResponse = await fetch(`http://164.52.200.41/Spero_CAD/dms/alert_details`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${Token || newToken}`,
+        },
+        body: JSON.stringify({
+          caller_name: selectedIncident?.incident_details[0]?.caller_name || null,
+          caller_no: selectedIncident?.incident_details[0]?.caller_no || null,
+          alert_type: selectedIncident?.alert_type || null,
+          location: selectedIncident?.incident_details[0]?.location || null,
+          summary: selectedIncident?.incident_details[0]?.summary || null,
+          units: "1",
+          inc_type: selectedIncident?.incident_details[0]?.inc_type || null,
+          incident_id: selectedIncident?.incident_id || null,
+          latitude: selectedIncident?.incident_details[0]?.latitude || null,
+          longitude: selectedIncident?.incident_details[0]?.longitude || null,
+        }),
+      });
 
       if (!secondResponse.ok)
         throw new Error("Failed to log comment activity.");
