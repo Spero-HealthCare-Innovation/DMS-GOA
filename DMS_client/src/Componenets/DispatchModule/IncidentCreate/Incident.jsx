@@ -16,6 +16,13 @@ import IncidentCreateMap from "./IncidentCreateMap";
 import { Snackbar, Alert } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { useLocation } from "react-router-dom";
+import Tooltip from "@mui/material/Tooltip";
+import VisibilityIcon from "@mui/icons-material/Visibility";
+import Dialog from "@mui/material/Dialog";
+import DialogTitle from "@mui/material/DialogTitle";
+import DialogContent from "@mui/material/DialogContent";
+import IconButton from "@mui/material/IconButton";
+import CloseIcon from "@mui/icons-material/Close";
 
 const inputStyle = {
     mb: 1.2,
@@ -190,7 +197,10 @@ const Incident = ({ darkMode }) => {
         if (selectedDisaster) {
             setDisasterIncident(selectedDisaster);
         }
-    }, [selectedDisaster]);;
+    }, [selectedDisaster]);
+
+    const [openSopModal, setOpenSopModal] = useState(false);
+
 
     useEffect(() => {
         const fetchSummary = async () => {
@@ -403,14 +413,88 @@ const Incident = ({ darkMode }) => {
                                 {/* SOP Section */}
                                 <Grid item xs={12} md={5} sx={{ px: 2, borderRight: { md: `1px solid white` } }}>
                                     <Box sx={boxStyle}>
-                                        <Typography variant="subtitle2" sx={{ color: labelColor, fontWeight: 500, fontFamily }}>
-                                            Response Procedure
-                                        </Typography>
-                                        <Typography variant="subtitle2" sx={{ fontFamily }}>
+                                        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                                            <Typography variant="subtitle2" sx={{ color: labelColor, fontWeight: 500, fontFamily }}>
+                                                Response Procedure
+                                            </Typography>
+                                            <IconButton
+                                                size="small"
+                                                onClick={() => setOpenSopModal(true)}
+                                                sx={{ color: labelColor, ml: 1 }}
+                                            >
+                                                <VisibilityIcon />
+                                            </IconButton>
+                                        </Box>
+                                        {/* <Typography variant="subtitle2" sx={{ fontFamily }}>
                                             {responderScope?.sop_responses?.map((sop) => (
                                                 <div key={sop.sop_id}>{sop?.sop_description || "No SOP description"}</div>
                                             ))}
-                                        </Typography>
+                                        </Typography> */}
+                                        <Tooltip
+                                            title={
+                                                responderScope?.sop_responses?.length > 0
+                                                    ? (
+                                                        <div>
+                                                            {responderScope.sop_responses.map((sop) => (
+                                                                <div key={sop.sop_id}>{sop?.sop_description || "No SOP description"}</div>
+                                                            ))}
+                                                        </div>
+                                                    )
+                                                    : "No SOP description"
+                                            }
+                                            arrow
+                                            placement="top"
+                                        >
+                                            <Typography
+                                                variant="subtitle2"
+                                                sx={{
+                                                    fontFamily,
+                                                    cursor: "pointer",
+                                                    display: "-webkit-box",
+                                                    WebkitLineClamp: 2,
+                                                    WebkitBoxOrient: "vertical",
+                                                    overflow: "hidden",
+                                                    textOverflow: "ellipsis",
+                                                    maxWidth: 300, // adjust as needed
+                                                }}
+                                            >
+                                                {(() => {
+                                                    const sops = responderScope?.sop_responses || [];
+                                                    if (sops.length === 0) return "No SOP description";
+                                                    const shown = sops.slice(0, 2).map(sop => sop.sop_description || "No SOP description");
+                                                    let text = shown.join(", ");
+                                                    if (sops.length > 2) text += " ...";
+                                                    return text;
+                                                })()}
+                                            </Typography>
+                                        </Tooltip>
+
+                                        <Dialog open={openSopModal} onClose={() => setOpenSopModal(false)} maxWidth="sm" fullWidth>
+                                            <DialogTitle sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                                                All Response Procedures
+                                                <IconButton
+                                                    aria-label="close"
+                                                    onClick={() => setOpenSopModal(false)}
+                                                    sx={{
+                                                        color: (theme) => theme.palette.grey[500],
+                                                        ml: 2,
+                                                    }}
+                                                    size="small"
+                                                >
+                                                    <CloseIcon />
+                                                </IconButton>
+                                            </DialogTitle>
+                                            <DialogContent dividers>
+                                                {(responderScope?.sop_responses?.length > 0)
+                                                    ? responderScope.sop_responses.map((sop, idx) => (
+                                                        <Typography key={sop.sop_id || idx} sx={{ mb: 1 }}>
+                                                            {sop?.sop_description || "No SOP description"}
+                                                        </Typography>
+                                                    ))
+                                                    : <Typography>No SOP description</Typography>
+                                                }
+                                            </DialogContent>
+                                        </Dialog>
                                     </Box>
 
                                     <Box>

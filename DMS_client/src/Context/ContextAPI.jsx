@@ -40,8 +40,8 @@ export const AuthProvider = ({ children }) => {
   const [query, setQuery] = useState("");
   const [suggestions, setSuggestions] = useState([]);
   const [selectedPosition, setSelectedPosition] = useState([
-    15.298430295875988, 74.08868128835907,
-  ]); // Default: Goa
+    18.5329846,73.8216998,
+  ]); // Default: Pune
   const [popupText, setPopupText] = useState("");
   // 🔹 sop page
   const [responderScope, setResponderScope] = useState([]);
