@@ -53,8 +53,8 @@ def incident_report_daywise(
         to_date_obj = datetime.strptime(to_date, "%Y-%m-%d") + timedelta(days=1)
         to_date_plus_one = to_date_obj.strftime("%Y-%m-%d")
         query = f"""
-            SELECT incident_id, disaster_type_id, alert_id_id, inc_added_date, closure_acknowledge, closure_start_base_location, 
-                   closure_at_scene, closure_from_scene, closure_back_to_base, closure_remark 
+            SELECT incident_id, disaster_type_id, alert_id_id, inc_added_date, mode, alert_type,caller_id_id, location, latitude, longitude, closure_acknowledge, closure_start_base_location, 
+                   closure_at_scene, closure_from_scene, closure_back_to_base, closure_remark, closure_added_date 
             FROM closure_report 
             WHERE closure_added_date BETWEEN '{from_date}' AND '{to_date_plus_one}'
         """
@@ -70,17 +70,34 @@ def incident_report_daywise(
             else:
                 alrt = None  
             
-            nn={
-                "incident_id": i['incident_id'],
-                "disaster_type": dstss.disaster_name,
-                "alart_time":alrt.alert_datetime.astimezone(india_tz).replace(tzinfo=None) if alrt else "",
-                "dispatch_time":i['inc_added_date'],
-                "closure_acknowledge": i['closure_acknowledge'],
-                "closure_start_base_location": i['closure_start_base_location'],
-                "closure_at_scene": i['closure_at_scene'],
-                "closure_from_scene": i['closure_from_scene'],
-                "closure_back_to_base": i['closure_back_to_base'],
-                "closure_remark": i['closure_remark']
+            caller_dtls = DMS_Caller.objects.filter(caller_pk_id=i['caller_id_id'])
+            print(caller_dtls,'caller_dtlscaller_dtlscaller_dtls')
+            if caller_dtls.exists():
+                caller=caller_dtls.first()
+            else:
+                caller=None
+            
+            nn={ 
+                # caller no, name, alert type, alert source, inc type, add , lat-long, 
+
+                "Incident Id": i['incident_id'],
+                "Alert Source":"System Alert" if  i['mode'] == 2 else "Manual Calls",
+                "Disaster Type": dstss.disaster_name,
+                "Alert Type": "High" if i['alert_type'] == 1 else "Medium" if i['alert_type'] == 2 else "Low" if i['alert_type'] == 3 else "Very Low" if i['alert_type'] == 4 else "Unknown",
+                "Alert Time" : alrt.alert_datetime.astimezone(india_tz).replace(tzinfo=None) if alrt else "",
+                "Incident Dispatch Time" : i['inc_added_date'],
+                "Closure Time": i['closure_added_date'],
+                "Closure Acknowledge" : i['closure_acknowledge'],
+                "Closure Start Base location" : i['closure_start_base_location'],
+                "Closure At Scene" : i['closure_at_scene'],
+                "Closure From Scene" : i['closure_from_scene'],
+                "Closure Back To Base" : i['closure_back_to_base'],
+                "Closure Remark" : i['closure_remark'],
+                "Caller Number" : caller.caller_no if caller else None,
+                "Caller Name" : caller.caller_name if caller else None,
+                "Address" : i['location'],
+                "Lattitude" : i['latitude'],
+                "Longitude" : i['longitude']
             }
             dt.append(nn)
         df = pd.DataFrame(dt)
