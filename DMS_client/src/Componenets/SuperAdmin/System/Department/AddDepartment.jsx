@@ -704,7 +704,7 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
                     >
                       <StyledCardContent
                         sx={{
-                          flex: 0.9,
+                          flex: 0.3,
                           borderRight: "1px solid black",
                           justifyContent: "center",
                         }}
@@ -1083,7 +1083,7 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
                 <Box
                   onClick={() =>
                     page <
-                      Math.ceil(filteredDepartments.length / rowsPerPage) &&
+                    Math.ceil(filteredDepartments.length / rowsPerPage) &&
                     setPage(page + 1)
                   }
                   sx={{
