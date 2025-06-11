@@ -450,3 +450,7 @@ class incident_get_serializer(serializers.ModelSerializer):
         fields=['incident_id','disaster_type','inc_type','responder_scope','caller_id','caller_name','caller_no','location','summary','summary_name','disaster_name','alert_type','mode','latitude','longitude','inc_datetime','location']
 
 
+class Responder_Scope_post_Serializer(serializers.ModelSerializer):
+    class Meta:
+        model = DMS_Disaster_Responder
+        fields = ['res_id','res_id','dr_added_by','dr_modified_by']
