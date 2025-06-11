@@ -259,6 +259,7 @@ function Sop({ darkMode, setDarkMode, comments }) {
               flag={flag}
               setFlag={setFlag}
               selectedIncident={selectedIncident}
+              setSelectedIncident={setSelectedIncident}
               responderScope={responderScope}
               fetchResponderScope={fetchResponderScope}
               dispatchList={dispatchList}

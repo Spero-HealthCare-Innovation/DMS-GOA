@@ -28,6 +28,7 @@ function IncidentDetails({
   responderScope,
   fetchDispatchList,
   incidentDetails,
+  setSelectedIncident,
 }) {
   window.addEventListener("storage", (e) => {
     if (e.key === "logout") {
@@ -518,78 +519,68 @@ function IncidentDetails({
                     Responder Scope
                   </Typography>
 
-                  {selectedIncident ? (
-                    Array.isArray(incidentDetails?.["responders scope"]) &&
-                      incidentDetails["responders scope"].length > 0 ? (
-                      <Stack spacing={1} mt={1}>
-                        <Box display="flex" flexWrap="wrap" gap={1}>
-                          {incidentDetails["responders scope"].map(
-                            ({ responder_id, responder_name }) => {
-                              const assignedScope = incidentDetails?.incident_details?.[0]?.responder_scope || [];
-                              const isChecked = assignedScope.includes(String(responder_id));
-                              {/* const isChecked =
-                                Array.isArray(
-                                  incidentDetails?.["responders scope"].includes(responder_id)
-                                )  */}
-                              {/* && */ }
-                              {/* Array.isArray(incident?.responder_scope) &&
-                                incident.responder_scope.includes(
-                                  String(responder_id) 
-                                ); // Convert responder_id to a string */}
-
-                              return (
-                                <Tooltip
-                                  key={responder_id}
-                                  title={
-                                    isChecked
-                                      ? "Pre-assigned responder"
-                                      : "Responder not assigned"
-                                  }
-                                  placement="top"
-                                >
-                                  <FormControlLabel
-                                    control={
-                                      <Checkbox
-                                        checked={isChecked}
-                                        disabled
-                                        sx={{
-                                          color: labelColor,
-                                          "&.Mui-checked": {
-                                            color: "#00bfa5",
-                                          },
-                                          "&:hover": {
-                                            backgroundColor:
-                                              "rgba(0, 191, 165, 0.1)",
-                                            borderRadius: "6px",
-                                          },
-                                        }}
-                                      />
-                                    }
-                                    label={
-                                      <Typography
-                                        variant="subtitle2"
-                                        sx={{ fontFamily }}
-                                      >
-                                        {responder_name}
-                                      </Typography>
-                                    }
-                                  />
-                                </Tooltip>
+                  {Array.isArray(incidentDetails?.["responders scope"]) &&
+                  incidentDetails["responders scope"].length > 0 ? (
+                    <Stack spacing={1} mt={1}>
+                      <Box display="flex" flexWrap="wrap" gap={1}>
+                        {incidentDetails["responders scope"].map(
+                          ({ responder_id, responder_name }) => {
+                            const isChecked =
+                              Array.isArray(incident?.responder_scope) &&
+                              incident.responder_scope.includes(
+                                String(responder_id)
                               );
-                            }
-                          )}
-                        </Box>
-                      </Stack>
-                    ) : (
-                      <Box display="flex" alignItems="center" gap={1} mt={1}>
-                        <InfoOutlinedIcon color="disabled" />
-                        <Typography variant="subtitle2" sx={{ fontFamily }}>
-                          Responder scope data not available.
-                        </Typography>
+
+                            return (
+                              <Tooltip
+                                key={responder_id}
+                                title={
+                                  isChecked
+                                    ? "Pre-assigned responder"
+                                    : "Responder not assigned"
+                                }
+                                placement="top"
+                              >
+                                <FormControlLabel
+                                  control={
+                                    <Checkbox
+                                      checked={isChecked}
+                                      disabled
+                                      sx={{
+                                        color: labelColor,
+                                        "&.Mui-checked": {
+                                          color: "#00bfa5",
+                                        },
+                                        "&:hover": {
+                                          backgroundColor:
+                                            "rgba(0, 191, 165, 0.1)",
+                                          borderRadius: "6px",
+                                        },
+                                      }}
+                                    />
+                                  }
+                                  label={
+                                    <Typography
+                                      variant="subtitle2"
+                                      sx={{ fontFamily }}
+                                    >
+                                      {responder_name}
+                                    </Typography>
+                                  }
+                                />
+                              </Tooltip>
+                            );
+                          }
+                        )}
                       </Box>
-                    )
+                    </Stack>
                   ) : (
-                    <Skeleton variant="rectangular" height={60} width="100%" />
+                    <Box display="flex" alignItems="center" gap={1} mt={1}>
+                      <InfoOutlinedIcon color="disabled" />
+                      <Typography variant="subtitle2" sx={{ fontFamily }}>
+                        No responder scope assigned.
+                      </Typography>
+                    </Box>
                   )}
                 </Box>
               </>
@@ -597,26 +588,31 @@ function IncidentDetails({
           </Grid>
 
           {/* Right Column */}
-          <Grid item xs={12} md={5} pl={{ md: 2 }}>
-            {selectedIncident ? (
-              <CommentsPanel
-                darkMode={darkMode}
-                flag={flag}
-                setFlag={setFlag}
-                selectedResponders={selectedResponders}
-                setSelectedResponders={setSelectedResponders}
-                selectedIncident={selectedIncident}
-                incidentDetails={incidentDetails}
-                comments={comments} // Pass comments to
-                fetchDispatchList={fetchDispatchList} // Pass fetchDispatchList to CommentsPanel
-              />
-            ) : (
-              <>
-                <Skeleton variant="text" width="80%" height={24} />
-                <Skeleton variant="rectangular" height={100} sx={{ mt: 2 }} />
-              </>
-            )}
-          </Grid>
+        <Grid item xs={12} md={5} pl={{ md: 2 }}>
+  {selectedIncident ? (
+    <CommentsPanel
+      darkMode={darkMode}
+      flag={flag}
+      setFlag={setFlag}
+      selectedResponders={selectedResponders}
+      setSelectedResponders={setSelectedResponders}
+      selectedIncident={selectedIncident}
+      setSelectedIncident={setSelectedIncident}
+      incidentDetails={incidentDetails}
+      comments={comments}
+      fetchDispatchList={fetchDispatchList}
+      
+    />
+  ) : (
+    <Typography
+      variant="subtitle2"
+      sx={{ fontFamily, color: "#fff", mt: 1 }}
+    >
+      Please select an incident to view comments.
+    </Typography>
+  )}
+</Grid>
+
         </Grid>
       </Paper>
     </>
