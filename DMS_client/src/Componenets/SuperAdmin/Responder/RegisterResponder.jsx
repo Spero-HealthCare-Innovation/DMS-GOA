@@ -144,7 +144,26 @@ const RegisterResponder = ({ darkMode, flag, setFlag, setSelectedIncident }) => 
         setSelectedResponders(event.target.value);
     };
 
+    const [disasterError, setDisasterError] = useState(false);
+    const [responderError, setResponderError] = useState(false);
+
     const handleSubmit = async () => {
+        let hasError = false;
+
+        if (!selectedDisaster) {
+            setDisasterError(true);
+            hasError = true;
+        } else {
+            setDisasterError(false);
+        }
+
+        if (selectedResponders.length === 0) {
+            setResponderError(true);
+            hasError = true;
+        } else {
+            setResponderError(false);
+        }
+
         const payload = {
             res_id: selectedResponders,
             dis_id: selectedDisaster,
@@ -170,6 +189,10 @@ const RegisterResponder = ({ darkMode, flag, setFlag, setSelectedIncident }) => 
                 setSelectedResponders([]);
                 await fetchResponder();
             }
+            // else if (response.status === 400) {
+            //     setSnackbarMessage("Select Fields To SUbmit the Form");
+            //     setSnackbarOpen(true);
+            // }
             else if (response.status === 409) {
                 setSnackbarMessage("Responder already exists with this disaster type");
                 setSnackbarOpen(true);
@@ -755,6 +778,8 @@ const RegisterResponder = ({ darkMode, flag, setFlag, setSelectedIncident }) => 
                                         variant="outlined"
                                         value={selectedDisaster || ""}
                                         onChange={(e) => setSelectedDisaster(e.target.value)}
+                                        error={disasterError}
+                                        helperText={disasterError ? "Please select a disaster type." : ""}
                                         SelectProps={{
                                             MenuProps: {
                                                 PaperProps: {
@@ -775,7 +800,7 @@ const RegisterResponder = ({ darkMode, flag, setFlag, setSelectedIncident }) => 
                                 </Grid>
 
                                 <Grid item xs={12} sm={6}>
-                                    <FormControl fullWidth>
+                                    <FormControl fullWidth error={responderError}>
                                         <Select
                                             multiple
                                             value={selectedResponders}
@@ -811,6 +836,11 @@ const RegisterResponder = ({ darkMode, flag, setFlag, setSelectedIncident }) => 
                                                 </MenuItem>
                                             ))}
                                         </Select>
+                                        {responderError && (
+                                            <Typography variant="caption" color="error">
+                                                Please select at least one responder.
+                                            </Typography>
+                                        )}
                                     </FormControl>
                                 </Grid>
                             </Grid>
