@@ -861,7 +861,7 @@ class disaster_responder_Post_api(APIView):
                 status=status.HTTP_409_CONFLICT
             )
 
-        serializers = SopSerializer(data=request.data)
+        serializers = Responder_Scope_post_Serializer(data=request.data)
         if serializers.is_valid():
             serializers.save()
             return Response(serializers.data, status=status.HTTP_201_CREATED)
