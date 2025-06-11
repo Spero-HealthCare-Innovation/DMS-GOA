@@ -25,6 +25,7 @@ from django.utils.http import urlsafe_base64_encode
 from django.utils.encoding import force_bytes
 from django.core.mail import send_mail
 from rest_framework_simplejwt.tokens import AccessToken
+from geopy.geocoders import Nominatim
 
 class DMS_department_post_api(APIView):
     def post(self,request):
@@ -622,7 +623,27 @@ class DMS_Incident_Post_api(APIView):
         serializers=Incident_Serializer(data=request.data)
         if serializers.is_valid():
             serializers.save()
+            # print("serializers.data-- ", serializers.data)
+            alert_id = request.data['alert_id']
+        
+            # Initialize the geocoder
+            geolocator = Nominatim(user_agent="nikita.speroinfosystems@gmail.com")
+
+            if alert_id:
+                Inc_obj = DMS_Incident.objects.get(alert_id=alert_id)
+                print("inc obj-", Inc_obj)
+                # Coordinates
+                latitude = Inc_obj.latitude
+                longitude = Inc_obj.longitude
+
+                # Reverse geocoding
+                location = geolocator.reverse((latitude, longitude), language='en')
+                print("location.address---",location.address)
+
+                Inc_obj.location = location.address
+                Inc_obj.save()
             return Response(serializers.data,status=status.HTTP_201_CREATED)
+            pass
         return Response(serializers.errors,status=status.HTTP_400_BAD_REQUEST)
 
 
