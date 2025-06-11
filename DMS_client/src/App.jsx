@@ -55,7 +55,7 @@ function App() {
         }}
       >
         <div style={{ flex: 1 }}>
-          {!isAuthRoute && (
+          {!isAuthRoute && userGroup !== null && (
             <>
               <Navbar
                 darkMode={darkMode}

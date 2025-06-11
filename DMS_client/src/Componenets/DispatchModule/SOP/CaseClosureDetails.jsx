@@ -463,7 +463,9 @@ const CaseClosureDetails = ({ darkMode, flag, selectedIncident, fetchDispatchLis
                           setValidationErrors(prev => ({ ...prev, acknowledge: null }));
                         }
                       }}
-                      inputFormat="yyyy-MM-dd | HH:mm"
+                        ampm={false} // 24-hour format
+                     inputFormat="yyyy-MM-dd | HH:mm" 
+                      views={['year', 'month', 'day', 'hours', 'minutes']}
                       renderInput={(params) => (
                         <TextField
                           {...params}
@@ -500,6 +502,8 @@ const CaseClosureDetails = ({ darkMode, flag, selectedIncident, fetchDispatchLis
                           setValidationErrors(prev => ({ ...prev, startBaseLocation: null }));
                         }
                       }}
+                        ampm={false} // 24-hour format
+
                       minDateTime={formData.acknowledge || new Date()}
                       inputFormat="yyyy-MM-dd | HH:mm"
                       renderInput={(params) => (
@@ -539,6 +543,8 @@ const CaseClosureDetails = ({ darkMode, flag, selectedIncident, fetchDispatchLis
                           setValidationErrors(prev => ({ ...prev, atScene: null }));
                         }
                       }}
+                        ampm={false} // 24-hour format
+
                       minDateTime={formData.acknowledge || new Date()}
                       inputFormat="yyyy-MM-dd | HH:mm"
                       renderInput={(params) => (
@@ -578,6 +584,8 @@ const CaseClosureDetails = ({ darkMode, flag, selectedIncident, fetchDispatchLis
                           setValidationErrors(prev => ({ ...prev, fromScene: null }));
                         }
                       }}
+                        ampm={false} // 24-hour format
+
                       minDateTime={formData.acknowledge || new Date()}
                       inputFormat="yyyy-MM-dd | HH:mm"
                       renderInput={(params) => (
@@ -616,6 +624,8 @@ const CaseClosureDetails = ({ darkMode, flag, selectedIncident, fetchDispatchLis
                           setValidationErrors(prev => ({ ...prev, backToBase: null }));
                         }
                       }}
+                        ampm={false} // 24-hour format
+
                       minDateTime={formData.acknowledge || new Date()}
                       inputFormat="yyyy-MM-dd | HH:mm"
                       renderInput={(params) => (
