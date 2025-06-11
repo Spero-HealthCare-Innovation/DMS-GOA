@@ -16,9 +16,13 @@ const customIcon = new L.Icon({
 
 const HERE_API_KEY = import.meta.env.VITE_APP_GOOGLE_MAPS_API_KEY;
 
-const PanToLocation = ({ position }) => {
+const FlyToLocation = ({ position, zoom }) => {
   const map = useMap();
-  if (position) map.panTo(position, 5);
+  useEffect(() => {
+    if (position) {
+      map.flyTo(position, zoom ?? map.getZoom(), { duration: 2.0 });
+    }
+  }, [position, zoom]);
   return null;
 };
 
@@ -29,7 +33,10 @@ const IncidentCreateMap = () => {
   const [selectedPositionMap, setSelectedPositionMap] = useState([18.5329846,73.8216998]); // Default: Pune (PMC)
   const [popupTextMap, setPopupTextMap] = useState('You are here!');
   const [stateData, setStateData] = useState();
+  const [mapZoom, setMapZoom] = useState(7);
   const mapRef = useRef();
+
+  
 
   useEffect(() => {
     setQueryMap(query);
@@ -60,6 +67,8 @@ const IncidentCreateMap = () => {
   // const handleSearchChange = async (e) => {
   //   const value = e.target.value;
   //   setQuery(value);
+
+  
   //   if (value.length < 3) return;
 
   //   const response = await axios.get('https://autosuggest.search.hereapi.com/v1/autosuggest', {
@@ -124,9 +133,16 @@ const IncidentCreateMap = () => {
         {suggestions.length > 0 && (
           <ul style={{ listStyle: 'none', padding: 0, margin: 0, background: 'white', color: 'black', fontFamily: 'initial' }}>
             {suggestions.map((item, idx) => (
-              <li key={idx} onClick={() => handleSelectSuggestion(item)} style={{ padding: '5px', cursor: 'pointer', borderBottom: '1px solid #ccc' }}>
-                {item.address.label}
-              </li>
+              <li
+  key={idx}
+  onClick={() => {
+    handleSelectSuggestion(item);
+    setMapZoom(13);
+  }}
+  style={{ padding: '5px', cursor: 'pointer', borderBottom: '1px solid #ccc' }}
+>
+  {item.address.label}
+</li>
             ))}
           </ul>
         )}
@@ -135,7 +151,7 @@ const IncidentCreateMap = () => {
       {/* Leaflet Map */}
       <MapContainer
         center={selectedPosition}
-        zoom={8}
+        zoom={mapZoom}
         style={{ height: "55vh", width: "100%", borderRadius: 10 }}
         whenCreated={(mapInstance) => {
           mapRef.current = mapInstance;
@@ -147,7 +163,7 @@ const IncidentCreateMap = () => {
           attribution='&copy; Google Maps'
         />
         {stateData && <GeoJSON data={stateData} style={geoJsonStyle} />}
-        <PanToLocation position={selectedPosition} />
+        <FlyToLocation position={selectedPosition} zoom={mapZoom} />
         <Marker
           position={selectedPosition}
           draggable={true}
@@ -157,6 +173,7 @@ const IncidentCreateMap = () => {
               const marker = e.target;
               const position = marker.getLatLng();
               setSelectedPositionMap([position.lat, position.lng]);
+              setMapZoom(13);
 
               try {
                 const response = await axios.get(

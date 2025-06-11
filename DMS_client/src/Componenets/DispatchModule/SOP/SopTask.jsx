@@ -55,15 +55,15 @@ const EnquiryCard = styled("div")(() => ({
   color: "black",
   height: "40px",
 }));
-
-const EnquiryCardBody = styled("tr")(({ theme, alertType }) => {
+const EnquiryCardBody = styled("tr")(({ theme, alertType, isHighlighted }) => {
   const alertColors = {
-    1: "#f44336", // High - red
-    2: "#ff9800", // Medium - orange
-    3: "#888888", // Low - gray
+    1: "#f44336", // High
+    2: "#ff9800", // Medium
+    3: "#888888", // Low
   };
 
   const glowColor = alertColors[alertType] || "transparent";
+  const highlightBorder = isHighlighted ? "5px solid #00f0c0" : "5px solid transparent";
 
   return {
     display: "flex",
@@ -76,16 +76,15 @@ const EnquiryCardBody = styled("tr")(({ theme, alertType }) => {
     padding: "10px 12px",
     transition: "box-shadow 0.3s ease, border-color 0.3s ease",
     cursor: "pointer",
-    border: `1px solid transparent`,
     height: "45px",
-
-    "&:hover": {
-      boxShadow: `0 0 8px 3px ${glowColor}88`, // glowing shadow on hover
-      borderColor: "transparent",
-    },
+    border: `1px solid transparent`,
+    borderLeft: highlightBorder,
+    borderRight: highlightBorder, // ⭐ Right border added
+    // "&:hover": {
+    //   boxShadow: `0 0 8px 3px ${glowColor}88`,
+    // },
   };
 });
-
 const StyledCardContent = styled("td")({
   padding: "0 8px",
   display: "flex",
@@ -126,6 +125,9 @@ function SopTask({
   setIncidentId,
   incidentId,
   fetchDispatchList,
+  highlightedId,
+  setHighlightedId
+  
 }) {
   const port = import.meta.env.VITE_APP_API_KEY;
   const socketUrl = import.meta.env.VITE_SOCKET_API_KEY;
@@ -140,6 +142,7 @@ function SopTask({
   const [rowsPerPage, setRowsPerPage] = useState(3);
   const [openCancelDialog, setOpenCancelDialog] = useState(false);
   const [selectedAlert, setSelectedAlert] = useState(null);
+
 
   const {
     snackbarOpen,
@@ -620,6 +623,7 @@ function SopTask({
                       <EnquiryCardBody
                         key={item.incident_id}
                         alertType={item.inc_type}
+                       isHighlighted={item.incident_id === highlightedId}
                       >
                         {/* Incident ID */}
                         <StyledCardContent
@@ -672,6 +676,7 @@ function SopTask({
                               1: "High",
                               2: "Medium",
                               3: "Low",
+                              4: "Very Low",
                             }[item.alert_type] || "Unknown"}
                           </Typography>
                         </StyledCardContent>
@@ -701,6 +706,7 @@ function SopTask({
                                 setIncidentId(item.inc_id);
                                 setSelectedIncidentFromSop(item);
                                 setDisasterIdFromSop(item.disaster_name);
+                                setHighlightedId(item.incident_id);
                                 console.log("Incident idd", setIncidentId);
                                 setFlag(0);
                                 setViewmode("incident");
@@ -718,6 +724,7 @@ function SopTask({
                                 setSelectedIncident(item);
                                 setFlag(0);
                                 setViewmode("closure");
+                                  setHighlightedId(item.incident_id);
                               }}
                               size="large"
                             >

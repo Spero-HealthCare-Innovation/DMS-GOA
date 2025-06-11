@@ -18,6 +18,7 @@ import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
 import { useTheme } from "@mui/material/styles";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import CircularProgress from '@mui/material/CircularProgress';
+import Tooltip from "@mui/material/Tooltip";
 import {
   CustomTextField,
   getThemeBgColors,
@@ -176,6 +177,11 @@ function Add_employee({ darkMode }) {
       showAlertMessage("Please fix the form errors before submitting.", 'error');
       return;
     }
+    if (empContact.length !== 10) {
+      setFormErrors(prev => ({ ...prev, empContact: "Contact must be 10 digits" }));
+      showAlertMessage("Contact must be exactly 10 digits.", 'error');
+      return;
+    }
 
 
     if (!empName || !empContact || !empEmail || !empDOJ || !empDOB || !groupId ||
@@ -268,7 +274,7 @@ function Add_employee({ darkMode }) {
   // const paginatedData = employees; 
 
   const fetchEmployees = async () => {
-     setLoading1(true);
+    setLoading1(true);
     try {
       const response = await axios.get(`${port}/admin_web/employee_get/`, {
         headers: {
@@ -295,8 +301,8 @@ function Add_employee({ darkMode }) {
     } catch (error) {
       console.error("Failed to fetch employees:", error);
     } finally {
-    setLoading1(false); 
-  }
+      setLoading1(false);
+    }
   };
 
 
@@ -304,22 +310,103 @@ function Add_employee({ darkMode }) {
     fetchEmployees();
   }, []);
 
-  // 1. Add validation functions at the top of your component
   const validateName = (value) => {
-  // Allow letters, spaces, underscore, and common name characters
-  const nameRegex = /^[a-zA-Z\s._''-]+$/;
-  return nameRegex.test(value);
-};
+    // Only letters and spaces allowed, no numbers or special characters
+    const nameRegex = /^[a-zA-Z\s]+$/;
+    return nameRegex.test(value);
+  };
 
- const validateContact = (value) => {
-  // Only allow numbers (remove other characters check)
-  const contactRegex = /^[0-9]+$/;
-  return contactRegex.test(value) && value.length >= 10;
-};
+  const validateContact = (value) => {
+    // Only numbers, exactly 10 digits
+    const contactRegex = /^[0-9]{10}$/;
+    return contactRegex.test(value);
+  };
 
   const validateEmail = (value) => {
+    // Standard email validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(value);
+  };
+
+  // Replace the validateForm function with this:
+  const validateForm = () => {
+    const errors = {};
+
+    // Name validation
+    if (!empName.trim()) {
+      errors.empName = 'Employee name is required';
+    } else if (!validateName(empName)) {
+      errors.empName = 'Name should contain only letters and spaces';
+    }
+
+    // Contact validation
+    if (!empContact.trim()) {
+      errors.empContact = 'Contact number is required';
+    } else if (!validateContact(empContact)) {
+      errors.empContact = 'Contact must be exactly 10 digits';
+    }
+
+    // Email validation
+    if (!empEmail.trim()) {
+      errors.empEmail = 'Email is required';
+    } else if (!validateEmail(empEmail)) {
+      errors.empEmail = 'Please enter a valid email address';
+    }
+
+    // State validation
+    if (!selectedStateId) {
+      errors.selectedStateId = 'Please select a state';
+    }
+
+    // District validation
+    if (!selectedDistrictId) {
+      errors.selectedDistrictId = 'Please select a district';
+    }
+
+    // Tehsil validation
+    if (!selectedTehsilId) {
+      errors.selectedTehsilId = 'Please select a tehsil';
+    }
+
+    // City validation
+    if (!selectedCityID) {
+      errors.selectedCityID = 'Please select a city';
+    }
+
+    // Group validation
+    if (!groupId) {
+      errors.groupId = 'Please select a group';
+    }
+
+    // DOJ validation
+    if (!empDOJ) {
+      errors.empDOJ = 'Please select date of joining';
+    }
+
+    // DOB validation
+    if (!empDOB) {
+      errors.empDOB = 'Please select date of birth';
+    } else {
+      // Check if DOB is not in future
+      const today = new Date();
+      const dobDate = new Date(empDOB);
+      if (dobDate > today) {
+        errors.empDOB = 'Date of birth cannot be in future';
+      }
+
+      // Check minimum age (e.g., 18 years)
+      const age = today.getFullYear() - dobDate.getFullYear();
+      const monthDiff = today.getMonth() - dobDate.getMonth();
+      if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < dobDate.getDate())) {
+        age--;
+      }
+      if (age < 18) {
+        errors.empDOB = 'Employee must be at least 18 years old';
+      }
+    }
+
+    setFormErrors(errors);
+    return Object.keys(errors).length === 0;
   };
 
   // 2. Add new state for form validation
@@ -329,7 +416,7 @@ function Add_employee({ darkMode }) {
     empEmail: ''
   });
 
- 
+
 
   // / 4. Add new function to handle "Add New Employee" button click
   const handleAddNewEmployee = () => {
@@ -507,30 +594,30 @@ function Add_employee({ darkMode }) {
 
   const paginatedData = filteredEmployees;
 
-  const validateForm = () => {
-  const errors = {};
+  // const validateForm = () => {
+  //   const errors = {};
 
-  if (!empName.trim()) {
-    errors.empName = 'Employee name is required';
-  } else if (!validateName(empName)) {
-    errors.empName = 'Please enter a valid name (letters, spaces, underscore only)';
-  }
+  //   if (!empName.trim()) {
+  //     errors.empName = 'Employee name is required';
+  //   } else if (!validateName(empName)) {
+  //     errors.empName = 'Please enter a valid name (letters, spaces, underscore only)';
+  //   }
 
-  if (!empContact.trim()) {
-    errors.empContact = 'Contact number is required';
-  } else if (!validateContact(empContact)) {
-    errors.empContact = 'Please enter a valid contact number (numbers only, min 10 digits)';
-  }
+  //   if (!empContact.trim()) {
+  //     errors.empContact = 'Contact number is required';
+  //   } else if (!validateContact(empContact)) {
+  //     errors.empContact = 'Please enter a valid contact number (numbers only, min 10 digits)';
+  //   }
 
-  if (!empEmail.trim()) {
-    errors.empEmail = 'Email is required';
-  } else if (!validateEmail(empEmail)) {
-    errors.empEmail = 'Please enter a valid email address';
-  }
+  //   if (!empEmail.trim()) {
+  //     errors.empEmail = 'Email is required';
+  //   } else if (!validateEmail(empEmail)) {
+  //     errors.empEmail = 'Please enter a valid email address';
+  //   }
 
-  setFormErrors(errors);
-  return Object.keys(errors).length === 0;
-};
+  //   setFormErrors(errors);
+  //   return Object.keys(errors).length === 0;
+  // };
 
 
   return (
@@ -698,102 +785,124 @@ function Add_employee({ darkMode }) {
 
 
                 <TableBody>
-                   {loading1 ? (
-                      <TableRow>
-                        <TableCell colSpan={6} align="center">
-                          <CircularProgress size={30} sx={{ color: "#5FECC8" }} />
-                        </TableCell>
-                      </TableRow>
-                    ) :
-                  filteredEmployees.length === 0 ? (
-                    <Box p={2}>
-                      <Typography align="center" color="textSecondary">
-                        {searchTerm ? "No employees found matching your search." : "No employees available."}
-                      </Typography>
-                    </Box>
-                  ) : (
-                    filteredEmployees
-                      .slice((page - 1) * rowsPerPage, page * rowsPerPage)
-                      .map((item, index) => (
+                  {loading1 ? (
+                    <TableRow>
+                      <TableCell colSpan={6} align="center">
+                        <CircularProgress size={30} sx={{ color: "#5FECC8" }} />
+                      </TableCell>
+                    </TableRow>
+                  ) :
+                    filteredEmployees.length === 0 ? (
+                      <Box p={2}>
+                        <Typography align="center" color="textSecondary">
+                          {searchTerm ? "No employees found matching your search." : "No employees available."}
+                        </Typography>
+                      </Box>
+                    ) : (
+                      filteredEmployees
+                        .slice((page - 1) * rowsPerPage, page * rowsPerPage)
+                        .map((item, index) => (
 
-                        <EnquiryCardBody
-                          key={index}
-                          sx={{
-                            backgroundColor: inputBgColor,
-                            p: 2,
-                            borderRadius: 2,
-                            color: textColor,
-                            display: "flex",
-                            width: "100%",
-                            mb: 1,
-                          }}
-                        >
-                          <StyledCardContent
-                            sx={{ flex: 0.6, justifyContent: "center" }}
-                          >
-                            <Typography variant="subtitle2" sx={fontsTableBody}>
-                              {(page - 1) * rowsPerPage + index + 1}
-                            </Typography>
-                          </StyledCardContent>
-
-                          <StyledCardContent
+                          <EnquiryCardBody
+                            key={index}
                             sx={{
-                              flex: 2,
-                              justifyContent: "center",
-                              ...fontsTableBody,
+                              backgroundColor: inputBgColor,
+                              p: 2,
+                              borderRadius: 2,
+                              color: textColor,
+                              display: "flex",
+                              width: "100%",
+                              mb: 1,
                             }}
                           >
-                            <Typography variant="subtitle2">
-                              {item.empName}
-                            </Typography>
-                          </StyledCardContent>
-                          <StyledCardContent
-                            sx={{
-                              flex: 2,
-                              justifyContent: "center",
-                              ...fontsTableBody,
-                            }}
-                          >
-                            <Typography variant="subtitle2">
-                              {item.empContact}
-                            </Typography>
-                          </StyledCardContent>
+                            <StyledCardContent
+                              sx={{ flex: 0.6, justifyContent: "center" }}
+                            >
+                              <Typography variant="subtitle2" sx={fontsTableBody}>
+                                {(page - 1) * rowsPerPage + index + 1}
+                              </Typography>
+                            </StyledCardContent>
 
-
-                          <StyledCardContent
-                            sx={{
-                              flex: 2,
-                              justifyContent: "center",
-                              ...fontsTableBody,
-                            }}
-                          >
-                            <Typography variant="subtitle2">
-                              {item.groupID}
-                            </Typography>
-                          </StyledCardContent>
-
-                          <StyledCardContent
-                            sx={{
-                              flex: 1,
-                              justifyContent: "center",
-                              ...fontsTableBody,
-                            }}
-                          >
-                            <MoreHorizIcon
-                              onClick={(e) => handleOpen(e, item)}
+                            <StyledCardContent
                               sx={{
-                                color: "#00f0c0",
-                                cursor: "pointer",
-                                fontSize: 28,
+                                flex: 2,
                                 justifyContent: "center",
                                 ...fontsTableBody,
                               }}
-                            />
-                          </StyledCardContent>
-                        </EnquiryCardBody>
-                      ))
-  )}
-                  
+                            >
+                              <Tooltip title={item.empName} arrow placement="top">
+                                <Typography
+                                  variant="subtitle2"
+                                  sx={{
+                                    overflow: "hidden",
+                                    textOverflow: "ellipsis",
+                                    whiteSpace: "nowrap",
+                                    maxWidth: 150, // adjust as needed
+                                  }}
+                                >
+                                  {item.empName.length > 35 ? item.empName.slice(0, 35) + "..." : item.empName}
+                                </Typography>
+                              </Tooltip>
+
+                            </StyledCardContent>
+                            <StyledCardContent
+                              sx={{
+                                flex: 2,
+                                justifyContent: "center",
+                                ...fontsTableBody,
+                              }}
+                            >
+                              <Typography variant="subtitle2">
+                                {item.empContact}
+                              </Typography>
+                            </StyledCardContent>
+
+
+                            <StyledCardContent
+                              sx={{
+                                flex: 2,
+                                justifyContent: "center",
+                                ...fontsTableBody,
+                              }}
+                            >
+                              <Tooltip title={item.groupID} arrow placement="top">
+                                <Typography
+                                  variant="subtitle2"
+                                  sx={{
+                                    overflow: "hidden",
+                                    textOverflow: "ellipsis",
+                                    whiteSpace: "nowrap",
+                                    maxWidth: 150, // adjust based on layout
+                                  }}
+                                >
+                                  {item.groupID.length > 35 ? item.groupID.slice(0, 35) + "..." : item.groupID}
+                                </Typography>
+                              </Tooltip>
+
+                            </StyledCardContent>
+
+                            <StyledCardContent
+                              sx={{
+                                flex: 1,
+                                justifyContent: "center",
+                                ...fontsTableBody,
+                              }}
+                            >
+                              <MoreHorizIcon
+                                onClick={(e) => handleOpen(e, item)}
+                                sx={{
+                                  color: "#00f0c0",
+                                  cursor: "pointer",
+                                  fontSize: 28,
+                                  justifyContent: "center",
+                                  ...fontsTableBody,
+                                }}
+                              />
+                            </StyledCardContent>
+                          </EnquiryCardBody>
+                        ))
+                    )}
+
                 </TableBody>
               </Table>
             </TableContainer>
@@ -1022,67 +1131,67 @@ function Add_employee({ darkMode }) {
               </Button>
             </Box>
 
+            <Grid container spacing={2} sx={{ mb: 3 }}>
+              {/* Employee Name Field */}
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  fullWidth
+                  value={empName}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    setEmpName(value);
+                    if (formErrors.empName) {
+                      setFormErrors(prev => ({ ...prev, empName: '' }));
+                    }
+                  }}
+                  placeholder="Employee Name"
+                  error={!!formErrors.empName}
+                  helperText={formErrors.empName}
+                  InputLabelProps={{ shrink: false }}
+                  sx={inputStyle}
+                />
+              </Grid>
 
+              {/* Employee Contact Number Field */}
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  fullWidth
+                  placeholder="Emp Contact No"
+                  value={empContact}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    if (/^[0-9]*$/.test(value) && value.length <= 10) {
+                      setEmpContact(value);
+                      if (formErrors.empContact) {
+                        setFormErrors(prev => ({ ...prev, empContact: '' }));
+                      }
+                    }
+                  }}
+                  error={!!formErrors.empContact}
+                  helperText={formErrors.empContact}
+                  InputLabelProps={{ shrink: false }}
+                  sx={inputStyle}
+                />
+              </Grid>
+            </Grid>
 
-            <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
+            <Box sx={{ display: 'flex', gap: 2, mb: 3 }}>
               {/* First TextField */}
               <TextField
-  fullWidth
-  value={empName}
-  onChange={(e) => {
-    const value = e.target.value;
-    if (value === '' || validateName(value)) {
-      setEmpName(value);
-      if (formErrors.empName) {
-        setFormErrors(prev => ({ ...prev, empName: '' }));
-      }
-    }
-  }}
-  placeholder="Employee Name"
-  error={!!formErrors.empName}
-  helperText={formErrors.empName}
-  InputLabelProps={{ shrink: false }}
-  sx={inputStyle}
-/>
-
-              {/* Second TextField */}
-              <TextField
-  fullWidth
-  placeholder="Emp Contact No"
-  value={empContact}
-  onChange={(e) => {
-    const value = e.target.value;
-    if (value === '' || validateContact(value)) {
-      setEmpContact(value);
-      if (formErrors.empContact) {
-        setFormErrors(prev => ({ ...prev, empContact: '' }));
-      }
-    }
-  }}
-  error={!!formErrors.empContact}
-  helperText={formErrors.empContact}
-  InputLabelProps={{ shrink: false }}
-  sx={inputStyle}
-/>
-
-            </Box>
-            <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
-              {/* First TextField */}
-            <TextField
-  fullWidth
-  placeholder="Employee Email"
-  value={empEmail}
-  onChange={(e) => {
-    const value = e.target.value;
-    setEmpEmail(value);
-    if (formErrors.empEmail) {
-      setFormErrors(prev => ({ ...prev, empEmail: '' }));
-    }
-  }}
-  error={!!formErrors.empEmail}
-  helperText={formErrors.empEmail}
-  sx={inputStyle}
-/>
+                fullWidth
+                placeholder="Employee Email"
+                value={empEmail}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  setEmpEmail(value);
+                  if (formErrors.empEmail) {
+                    setFormErrors(prev => ({ ...prev, empEmail: '' }));
+                  }
+                }}
+                error={!!formErrors.empEmail}
+                helperText={formErrors.empEmail}
+                sx={inputStyle}
+              />
 
               {/* Second TextField */}
 
@@ -1090,7 +1199,14 @@ function Add_employee({ darkMode }) {
                 fullWidth
                 type="date"
                 value={empDOJ}
-                onChange={(e) => setEmpDOJ(e.target.value)}
+                onChange={(e) => {
+                  setEmpDOJ(e.target.value);
+                  if (formErrors.empDOJ) {
+                    setFormErrors(prev => ({ ...prev, empDOJ: '' }));
+                  }
+                }}
+                error={!!formErrors.empDOJ}
+                helperText={formErrors.empDOJ}
                 sx={{
                   ...selectStyles,
                   "& input[type='date']::-webkit-calendar-picker-indicator": {
@@ -1119,185 +1235,266 @@ function Add_employee({ darkMode }) {
                 }}
               />
             </Box>
-            <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
-              {/* First TextField */}
 
-
-              <Select
-                value={groupId}
-                onChange={(e) => setGroupId(e.target.value)}
-                fullWidth
-                displayEmpty
-                placeholder="Select Group"
-                defaultValue=""
-                inputProps={{
-                  "aria-label": "Select Group",
-                }}
-                sx={selectStyles}
-                IconComponent={KeyboardArrowDownIcon} // Use outlined dropdown arrow
-              >
-                <MenuItem value="" disabled sx={inputStyle}>
-                  Group Name
-                </MenuItem>
-
-
-                {groupList.map((group) => (
-                  <MenuItem key={group.grp_id} value={group.grp_id.toString()}>
-                    {group.grp_name}
+            <Grid container spacing={2} sx={{ mb: 2 }}>
+              {/* Group Select */}
+              <Grid item xs={12} sm={6}>
+                <Select
+                  value={groupId}
+                  onChange={(e) => {
+                    setGroupId(e.target.value);
+                    if (formErrors.groupId) {
+                      setFormErrors((prev) => ({ ...prev, groupId: '' }));
+                    }
+                  }}
+                  fullWidth
+                  displayEmpty
+                  placeholder="Select Group"
+                  defaultValue=""
+                  error={!!formErrors.groupId}
+                  inputProps={{
+                    "aria-label": "Select Group",
+                  }}
+                  sx={{
+                    ...selectStyles,
+                    ...(formErrors.groupId && {
+                      '& .MuiOutlinedInput-notchedOutline': {
+                        borderColor: '#d32f2f',
+                      },
+                    }),
+                  }}
+                  IconComponent={KeyboardArrowDownIcon}
+                >
+                  <MenuItem value="" disabled sx={inputStyle}>
+                    Group Name
                   </MenuItem>
-                ))}
+                  {groupList.map((group) => (
+                    <MenuItem key={group.grp_id} value={group.grp_id.toString()}>
+                      {group.grp_name}
+                    </MenuItem>
+                  ))}
+                </Select>
+                {formErrors.groupId && (
+                  <Typography variant="caption" color="error" sx={{ ml: 1, fontSize: '0.75rem' }}>
+                    {formErrors.groupId}
+                  </Typography>
+                )}
+              </Grid>
 
-
-
-
-                {/* Add more options as needed */}
-              </Select>
-              <Select
-                value={selectedStateId}
-                onChange={handleStateChange}
-                fullWidth
-                displayEmpty
-                placeholder="Select State"
-                defaultValue=""
-                inputProps={{
-                  "aria-label": "Select State",
-                }}
-                sx={selectStyles}
-                IconComponent={KeyboardArrowDownIcon} // Use outlined dropdown arrow
-              >
-                <MenuItem value="" disabled sx={inputStyle}>
-                  Select State
-                </MenuItem>
-                {states.map(state => (
-                  <MenuItem key={state.state_id} value={state.state_id}>{state.state_name}</MenuItem>
-                ))}
-
-
-                {/* Add more options as needed */}
-              </Select>
-            </Box>
-
-            <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
-              {/* First Dropdown */}
-              <Select
-                fullWidth
-                displayEmpty
-                placeholder="Select District"
-                defaultValue=""
-                value={selectedDistrictId}
-                onChange={handleDistrictChange}
-                inputProps={{
-                  "aria-label": "Select Name",
-                }}
-                sx={selectStyles}
-                IconComponent={KeyboardArrowDownIcon} // Use outlined dropdown arrow
-              >
-                <MenuItem value="" disabled>
-                  Select District
-                </MenuItem>
-                {districts.map((district) => (
-                  <MenuItem key={district.dis_id} value={district.dis_id}>
-                    {district.dis_name}
+              {/* State Select */}
+              <Grid item xs={12} sm={6}>
+                <Select
+                  value={selectedStateId}
+                  onChange={(e) => {
+                    handleStateChange(e);
+                    if (formErrors.selectedStateId) {
+                      setFormErrors((prev) => ({ ...prev, selectedStateId: '' }));
+                    }
+                  }}
+                  fullWidth
+                  displayEmpty
+                  placeholder="Select State"
+                  defaultValue=""
+                  error={!!formErrors.selectedStateId}
+                  inputProps={{
+                    "aria-label": "Select State",
+                  }}
+                  sx={{
+                    ...selectStyles,
+                    ...(formErrors.selectedStateId && {
+                      '& .MuiOutlinedInput-notchedOutline': {
+                        borderColor: '#d32f2f',
+                      },
+                    }),
+                  }}
+                  IconComponent={KeyboardArrowDownIcon}
+                >
+                  <MenuItem value="" disabled sx={inputStyle}>
+                    Select State
                   </MenuItem>
-                ))}
-                {/* Add more options as needed */}
-              </Select>
+                  {states.map((state) => (
+                    <MenuItem key={state.state_id} value={state.state_id}>
+                      {state.state_name}
+                    </MenuItem>
+                  ))}
+                </Select>
+                {formErrors.selectedStateId && (
+                  <Typography variant="caption" color="error" sx={{ ml: 1, fontSize: '0.75rem' }}>
+                    {formErrors.selectedStateId}
+                  </Typography>
+                )}
+              </Grid>
+            </Grid>
 
-              {/* Second Dropdown */}
-              <Select
-                fullWidth
-                value={selectedTehsilId}
-                onChange={handleTehsilChange}
-                displayEmpty
-                placeholder="Select Tehsil"
-                defaultValue=""
-                inputProps={{
-                  "aria-label": "Select Name",
-                }}
-                sx={selectStyles}
-                IconComponent={KeyboardArrowDownIcon} // Use outlined dropdown arrow
-              >
-                <MenuItem value="" disabled>
-                  Select Tehsil
-                </MenuItem>
-                {Tehsils.map((tehsil) => (
-                  <MenuItem key={tehsil.tah_id} value={tehsil.tah_id}>
-                    {tehsil.tah_name}
+            <Grid container spacing={2} sx={{ mb: 2 }}>
+              {/* District Select */}
+              <Grid item xs={12} sm={6}>
+                <Select
+                  fullWidth
+                  displayEmpty
+                  placeholder="Select District"
+                  defaultValue=""
+                  value={selectedDistrictId}
+                  onChange={(e) => {
+                    handleDistrictChange(e);
+                    if (formErrors.selectedDistrictId) {
+                      setFormErrors(prev => ({ ...prev, selectedDistrictId: '' }));
+                    }
+                  }}
+                  error={!!formErrors.selectedDistrictId}
+                  inputProps={{ "aria-label": "Select District" }}
+                  sx={{
+                    ...selectStyles,
+                    ...(formErrors.selectedDistrictId && {
+                      '& .MuiOutlinedInput-notchedOutline': { borderColor: '#d32f2f' }
+                    })
+                  }}
+                  IconComponent={KeyboardArrowDownIcon}
+                >
+                  <MenuItem value="" disabled>Select District</MenuItem>
+                  {districts.map((district) => (
+                    <MenuItem key={district.dis_id} value={district.dis_id}>
+                      {district.dis_name}
+                    </MenuItem>
+                  ))}
+                </Select>
+
+                {formErrors.selectedDistrictId && (
+                  <Typography variant="caption" color="error" sx={{ ml: 1, fontSize: '0.75rem' }}>
+                    {formErrors.selectedDistrictId}
+                  </Typography>
+                )}
+              </Grid>
+
+              {/* Tehsil Select */}
+              <Grid item xs={12} sm={6}>
+                <Select
+                  fullWidth
+                  displayEmpty
+                  placeholder="Select Tehsil"
+                  defaultValue=""
+                  value={selectedTehsilId}
+                  onChange={(e) => {
+                    handleTehsilChange(e);
+                    if (formErrors.selectedTehsilId) {
+                      setFormErrors(prev => ({ ...prev, selectedTehsilId: '' }));
+                    }
+                  }}
+                  error={!!formErrors.selectedTehsilId}
+                  inputProps={{ "aria-label": "Select Tehsil" }}
+                  sx={{
+                    ...selectStyles,
+                    ...(formErrors.selectedTehsilId && {
+                      '& .MuiOutlinedInput-notchedOutline': { borderColor: '#d32f2f' }
+                    })
+                  }}
+                  IconComponent={KeyboardArrowDownIcon}
+                >
+                  <MenuItem value="" disabled>Select Tehsil</MenuItem>
+                  {Tehsils.map((tehsil) => (
+                    <MenuItem key={tehsil.tah_id} value={tehsil.tah_id}>
+                      {tehsil.tah_name}
+                    </MenuItem>
+                  ))}
+                </Select>
+
+                {formErrors.selectedTehsilId && (
+                  <Typography variant="caption" color="error" sx={{ ml: 1, fontSize: '0.75rem' }}>
+                    {formErrors.selectedTehsilId}
+                  </Typography>
+                )}
+              </Grid>
+            </Grid>
+
+            <Grid container spacing={2} sx={{ mb: 2 }}>
+              {/* City Select */}
+              <Grid item xs={12} sm={6}>
+                <Select
+                  fullWidth
+                  displayEmpty
+                  value={selectedCityID}
+                  onChange={(e) => {
+                    handleCityChange(e);
+                    if (formErrors.selectedCityID) {
+                      setFormErrors(prev => ({ ...prev, selectedCityID: '' }));
+                    }
+                  }}
+                  placeholder="Select City"
+                  defaultValue=""
+                  error={!!formErrors.selectedCityID}
+                  inputProps={{
+                    "aria-label": "Select City",
+                  }}
+                  sx={{
+                    ...selectStyles,
+                    ...(formErrors.selectedCityID && {
+                      '& .MuiOutlinedInput-notchedOutline': {
+                        borderColor: '#d32f2f',
+                      }
+                    })
+                  }}
+                  IconComponent={KeyboardArrowDownIcon}
+                >
+                  <MenuItem value="" disabled>
+                    Select City
                   </MenuItem>
-                ))}
+                  {Citys.map((city) => (
+                    <MenuItem key={city.cit_id} value={city.cit_id}>
+                      {city.cit_name}
+                    </MenuItem>
+                  ))}
+                </Select>
 
+                {formErrors.selectedCityID && (
+                  <Typography variant="caption" color="error" sx={{ ml: 1, fontSize: '0.75rem' }}>
+                    {formErrors.selectedCityID}
+                  </Typography>
+                )}
+              </Grid>
 
-                {/* Add more options as needed */}
-              </Select>
-            </Box>
-
-            <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
-              {/* First Dropdown */}
-              <Select
-                fullWidth
-                displayEmpty
-                value={selectedCityID}
-                onChange={handleCityChange}
-                placeholder="Select City"
-                defaultValue=""
-                inputProps={{
-                  "aria-label": "Select Name",
-                }}
-                sx={selectStyles}
-                IconComponent={KeyboardArrowDownIcon} // Use outlined dropdown arrow
-              >
-                <MenuItem value="" disabled>
-                  Select City
-                </MenuItem>
-
-                {Citys.map((city) => (
-                  <MenuItem key={city.cit_id} value={city.cit_id}>
-                    {city.cit_name}
-                  </MenuItem>
-                ))}
-
-                {/* Add more options as needed */}
-              </Select>
-
-              {/* Second Textfield */}
-
-
-              <TextField
-                fullWidth
-                type="date"
-                value={empDOB}
-                onChange={(e) => setEmpDOB(e.target.value)}
-                sx={{
-                  ...selectStyles,
-                  "& input[type='date']::-webkit-calendar-picker-indicator": {
-                    opacity: 0,
-                    cursor: "pointer"
-                  },
-                  "& input[type='date']": {
-                    color: empDOB ? (darkMode ? "#9e9e9e" : "#000") : "transparent",
-                    fontSize: "13px",
-                  },
-                  "& input[type='date']:focus": {
-                    color: darkMode ? "#000" : "#000",
-                  },
-                  "& input[type='date']:before": {
-                    content: empDOB ? '""' : '"Employee DOB"',
-                    color: "#9e9e9e",
-                    position: "absolute",
-                    fontSize: "13px",
-                  }
-                }}
-                InputProps={{
-                  placeholder: "Employee DOB"
-                }}
-                onFocus={(e) => {
-                  e.target.showPicker();
-                }}
-              />
-
-
-            </Box>
-
+              {/* DOB TextField */}
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  fullWidth
+                  type="date"
+                  value={empDOB}
+                  onChange={(e) => {
+                    setEmpDOB(e.target.value);
+                    if (formErrors.empDOB) {
+                      setFormErrors(prev => ({ ...prev, empDOB: '' }));
+                    }
+                  }}
+                  error={!!formErrors.empDOB}
+                  helperText={formErrors.empDOB}
+                  sx={{
+                    ...selectStyles,
+                    "& input[type='date']::-webkit-calendar-picker-indicator": {
+                      opacity: 0,
+                      cursor: "pointer"
+                    },
+                    "& input[type='date']": {
+                      color: empDOB ? (darkMode ? "#9e9e9e" : "#000") : "transparent",
+                      fontSize: "13px",
+                    },
+                    "& input[type='date']:focus": {
+                      color: darkMode ? "#000" : "#000",
+                    },
+                    "& input[type='date']:before": {
+                      content: empDOB ? '""' : '"Employee DOB"',
+                      color: "#9e9e9e",
+                      position: "absolute",
+                      fontSize: "13px",
+                    }
+                  }}
+                  InputProps={{
+                    placeholder: "Employee DOB"
+                  }}
+                  onFocus={(e) => {
+                    e.target.showPicker();
+                  }}
+                />
+              </Grid>
+            </Grid>
 
 
             <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, mt: 3, mb: 1 }}>

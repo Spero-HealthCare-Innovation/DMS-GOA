@@ -72,18 +72,16 @@ const AlertPanel = ({ darkMode }) => {
     const [showSnackbar, setShowSnackbar] = useState(false);
     const [snackbarMessage, setSnackbarMessage] = useState("");
 
-    const startIndex = (page - 1) * rowsPerPage;
-    const endIndex = startIndex + rowsPerPage;
-    const paginatedData = alertData.slice(startIndex, endIndex);
-    const totalPages = Math.ceil(alertData.length / rowsPerPage);
+    // const startIndex = (page - 1) * rowsPerPage;
+    // const endIndex = startIndex + rowsPerPage;
+    // const paginatedData = alertData.slice(startIndex, endIndex);
+    // const totalPages = Math.ceil(alertData.length / rowsPerPage);
 
     window.addEventListener('storage', (e) => {
         if (e.key === 'logout') {
             location.href = '/login';
         }
     });
-
-
 
     useEffect(() => {
         document.title = "DMS-AlertPanel";
@@ -185,9 +183,6 @@ const AlertPanel = ({ darkMode }) => {
         }
     };
 
-    const [searchText, setSearchText] = useState("");
-
-
     // brouser and tab close autologout functionality
 
     //     let isPageReloaded = false;
@@ -217,6 +212,18 @@ const AlertPanel = ({ darkMode }) => {
     //   // Clean up the sessionStorage flag (optional)
     //   sessionStorage.removeItem('isReloaded');
     // });
+
+    const [searchText, setSearchText] = useState("");
+
+    const filteredData = alertData.filter(item =>
+        item.pk_id.toString().toLowerCase().includes(searchText.toLowerCase())
+    );
+
+    const startIndex = (page - 1) * rowsPerPage;
+    const endIndex = startIndex + rowsPerPage;
+    const paginatedData = filteredData.slice(startIndex, endIndex);
+    const totalPages = Math.ceil(filteredData.length / rowsPerPage);
+
 
     return (
         <Box sx={{ flexGrow: 1, mt: 1, ml: '6em', mr: 1, mb: 2 }}>
@@ -275,7 +282,7 @@ const AlertPanel = ({ darkMode }) => {
                                             <Typography variant="subtitle2">Time</Typography>
                                         </StyledCardContent>
                                         <StyledCardContent style={{ flex: 1, borderRight: "1px solid black" }}>
-                                            <Typography variant="subtitle2">Temps (°C)</Typography>
+                                            <Typography variant="subtitle2">Temp (°C)</Typography>
                                         </StyledCardContent>
                                         <StyledCardContent style={{ flex: 1, borderRight: "1px solid black" }}>
                                             <Typography variant="subtitle2">Rain (mm)</Typography>
