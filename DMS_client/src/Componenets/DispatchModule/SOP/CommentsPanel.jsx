@@ -122,7 +122,7 @@ function CommentsPanel({
         setSelectedResponders([]);
         setFlag(0);
         // await fetchDispatchList();
-        window.location.reload();
+        // window.location.reload();
       } else {
         throw new Error("API Error");
       }

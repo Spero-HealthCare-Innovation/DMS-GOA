@@ -185,6 +185,8 @@ const AlertPanel = ({ darkMode }) => {
         }
     };
 
+    const [searchText, setSearchText] = useState("");
+
 
     // brouser and tab close autologout functionality
 
@@ -226,7 +228,9 @@ const AlertPanel = ({ darkMode }) => {
                             <TextField
                                 variant="outlined"
                                 size="small"
-                                placeholder="Search"
+                                placeholder="Search by Alert ID"
+                                value={searchText}
+                                onChange={(e) => setSearchText(e.target.value)}
                                 InputProps={{
                                     startAdornment: (
                                         <InputAdornment position="start">
