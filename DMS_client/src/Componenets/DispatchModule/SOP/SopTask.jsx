@@ -80,9 +80,9 @@ const EnquiryCardBody = styled("tr")(({ theme, alertType, isHighlighted }) => {
     border: `1px solid transparent`,
     borderLeft: highlightBorder,
     borderRight: highlightBorder, // ⭐ Right border added
-    "&:hover": {
-      boxShadow: `0 0 8px 3px ${glowColor}88`,
-    },
+    // "&:hover": {
+    //   boxShadow: `0 0 8px 3px ${glowColor}88`,
+    // },
   };
 });
 const StyledCardContent = styled("td")({
