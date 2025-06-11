@@ -945,13 +945,33 @@ class DMS_Disaster_Responder_GET_API(APIView):
 
 
 
+# class closure_Post_api(APIView):
+#     def post(self,request):
+#         serializers=ClosureSerializer(data=request.data)
+#         if serializers.is_valid():
+#             serializers.save()
+#             return Response(serializers.data,status=status.HTTP_201_CREATED)
+#         return Response(serializers.errors,status=status.HTTP_400_BAD_REQUEST)
+
+
+
 class closure_Post_api(APIView):
-    def post(self,request):
-        serializers=ClosureSerializer(data=request.data)
-        if serializers.is_valid():
-            serializers.save()
-            return Response(serializers.data,status=status.HTTP_201_CREATED)
-        return Response(serializers.errors,status=status.HTTP_400_BAD_REQUEST)
+    def post(self, request):
+        
+        inccc = request.data.get('incident_id')
+        print(inccc,'innnnnnnnn')
+        nnnnnn = DMS_Incident.objects.get(inc_id=inccc)
+        nnnnnn.clouser_status = False
+        nnnnnn.save()
+        serializer = ClosureSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+
+            # incident = closure_instance.incident_id 
+
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 
 class closure_Post_api2(APIView):
@@ -990,7 +1010,7 @@ class DMS_comment_Get_API(APIView):
 
 class dispatch_sop_Get_API(APIView):
     def get(self,request):
-        snippet = DMS_Incident.objects.all().order_by('-inc_added_date')
+        snippet = DMS_Incident.objects.filter(clouser_status=False).order_by('-inc_added_date')
         serializers = dispatchsopserializer(snippet,many=True)
         return Response(serializers.data,status=status.HTTP_200_OK)
 
