@@ -18,6 +18,7 @@ import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import { useTheme } from "@mui/material/styles";
 import { useAuth } from "./../../../../Context/ContextAPI";
+import Tooltip from "@mui/material/Tooltip";
 import {
   TableDataCardBody,
   TableHeadingCard,
@@ -164,27 +165,27 @@ function Add_group({ darkMode }) {
 
   };
 
-  const validateForm = () => {
-    let isValid = true;
+  // const validateForm = () => {
+  //   let isValid = true;
 
-    // Reset errors
-    setGroupNameError("");
-    setDepartmentError("");
+  //   // Reset errors
+  //   setGroupNameError("");
+  //   setDepartmentError("");
 
-    // Validate group name
-    if (!groupName.trim()) {
-      setGroupNameError("Group name is required");
-      isValid = false;
-    }
+  //   // Validate group name
+  //   if (!groupName.trim()) {
+  //     setGroupNameError("Group name is required");
+  //     isValid = false;
+  //   }
 
-    // Validate department selection
-    if (!departmentId) {
-      setDepartmentError("Please select a department");
-      isValid = false;
-    }
+  //   // Validate department selection
+  //   if (!departmentId) {
+  //     setDepartmentError("Please select a department");
+  //     isValid = false;
+  //   }
 
-    return isValid;
-  };
+  //   return isValid;
+  // };
 
 
   const handleAddNewGroup = () => {
@@ -340,6 +341,28 @@ function Add_group({ darkMode }) {
     }
   };
 
+  const validateForm = () => {
+  let isValid = true;
+
+  // Reset errors
+  setGroupNameError("");
+  setDepartmentError("");
+
+  // Validate group name
+  if (!groupName.trim()) {
+    setGroupNameError("Please fill Group Name");
+    isValid = false;
+  }
+
+  // Validate department selection
+  if (!departmentId) {
+    setDepartmentError("Please select Department");
+    isValid = false;
+  }
+
+  return isValid;
+};
+
   return (
     <div style={{ marginLeft: "3.5rem" }}>
       <Snackbar
@@ -486,74 +509,100 @@ function Add_group({ darkMode }) {
                 </TableHead>
 
                 <TableBody>
-  {loading ? (
-    <TableRow>
-      <TableCell colSpan={6} align="center">
-        <CircularProgress size={30} sx={{ color: "#5FECC8" }} />
-      </TableCell>
-    </TableRow>
-  ) : paginatedData.length === 0 ? (
-    <TableRow>
-      <TableCell colSpan={6}>
-        <Box p={2}>
-          <Typography align="center" color="textSecondary">
-            {searchTerm
-              ? "No groups found matching your search."
-              : "No groups available."}
-          </Typography>
-        </Box>
-      </TableCell>
-    </TableRow>
-  ) : (
-    paginatedData.map((item, index) => (
-      <EnquiryCardBody
-        key={index}
-        sx={{
-          backgroundColor: inputBgColor,
-          p: 2,
-          borderRadius: 2,
-          color: textColor,
-          display: "flex",
-          width: "100%",
-          mb: 1,
-        }}
-      >
-        <StyledCardContent sx={{ flex: 0.6, justifyContent: "center" }}>
-          <Typography variant="subtitle2" sx={fontsTableBody}>
-            {(page - 1) * rowsPerPage + index + 1}
-          </Typography>
-        </StyledCardContent>
+                  {loading ? (
+                    <TableRow>
+                      <TableCell colSpan={6} align="center">
+                        <CircularProgress size={30} sx={{ color: "#5FECC8" }} />
+                      </TableCell>
+                    </TableRow>
+                  ) : paginatedData.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={6}>
+                        <Box p={2}>
+                          <Typography align="center" color="textSecondary">
+                            {searchTerm
+                              ? "No groups found matching your search."
+                              : "No groups available."}
+                          </Typography>
+                        </Box>
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    paginatedData.map((item, index) => (
+                      <EnquiryCardBody
+                        key={index}
+                        sx={{
+                          backgroundColor: inputBgColor,
+                          p: 2,
+                          borderRadius: 2,
+                          color: textColor,
+                          display: "flex",
+                          width: "100%",
+                          mb: 1,
+                        }}
+                      >
+                        <StyledCardContent sx={{ flex: 0.6, justifyContent: "center" }}>
+                          <Typography variant="subtitle2" sx={fontsTableBody}>
+                            {(page - 1) * rowsPerPage + index + 1}
+                          </Typography>
+                        </StyledCardContent>
 
-        <StyledCardContent
-          sx={{ flex: 2, justifyContent: "center", ...fontsTableBody }}
-        >
-          <Typography variant="subtitle2">{item.groupName}</Typography>
-        </StyledCardContent>
+                        <StyledCardContent
+                          sx={{ flex: 2, justifyContent: "center", ...fontsTableBody }}
+                        >
+                          <Tooltip title={item.groupName} arrow placement="top">
+                            <Typography
+                              variant="subtitle2"
+                              sx={{
+                                overflow: "hidden",
+                                textOverflow: "ellipsis",
+                                whiteSpace: "nowrap",
+                                maxWidth: 150, // adjust width as per layout
+                              }}
+                            >
+                              {item.groupName.length > 35 ? item.groupName.slice(0, 35) + "..." : item.groupName}
+                            </Typography>
+                          </Tooltip>
 
-        <StyledCardContent
-          sx={{ flex: 2, justifyContent: "center", ...fontsTableBody }}
-        >
-          <Typography variant="subtitle2">{item.departmentID}</Typography>
-        </StyledCardContent>
+                        </StyledCardContent>
 
-        <StyledCardContent
-          sx={{ flex: 1.2, justifyContent: "center", ...fontsTableBody }}
-        >
-          <MoreHorizIcon
-            onClick={(e) => handleOpen(e, item)}
-            sx={{
-              color: "#00f0c0",
-              cursor: "pointer",
-              fontSize: 28,
-              justifyContent: "center",
-              ...fontsTableBody,
-            }}
-          />
-        </StyledCardContent>
-      </EnquiryCardBody>
-    ))
-  )}
-</TableBody>
+                        <StyledCardContent
+                          sx={{ flex: 2, justifyContent: "center", ...fontsTableBody }}
+                        >
+                          <Tooltip title={item.departmentID} arrow placement="top">
+                            <Typography
+                              variant="subtitle2"
+                              sx={{
+                                overflow: "hidden",
+                                textOverflow: "ellipsis",
+                                whiteSpace: "nowrap",
+                                maxWidth: 150,
+                              }}
+                            >
+                              {item.departmentID.length > 35 ? item.departmentID.slice(0, 35) + "..." : item.departmentID}
+                            </Typography>
+                          </Tooltip>
+
+                        </StyledCardContent>
+
+                        <StyledCardContent
+                          sx={{ flex: 1.2, justifyContent: "center", ...fontsTableBody }}
+                        >
+                          <MoreHorizIcon
+                            onClick={(e) => handleOpen(e, item)}
+                            sx={{
+                              color: "#00f0c0",
+                              cursor: "pointer",
+                              fontSize: 28,
+                              justifyContent: "center",
+                              ...fontsTableBody,
+                            }}
+                          />
+                        </StyledCardContent>
+                      </EnquiryCardBody>
+                    ))
+                  )}
+                </TableBody>
 
               </Table>
             </TableContainer>
@@ -719,7 +768,7 @@ function Add_group({ darkMode }) {
                 startIcon={<AddCircleOutline />}
                 onClick={handleAddNewGroup}
                 disabled={!isEditing} // Show only when in edit mode
-               sx={{
+                sx={{
                   backgroundColor: "#5FECC8",
                   color: "#000",
                   fontWeight: 600,
@@ -738,80 +787,99 @@ function Add_group({ darkMode }) {
             </Box>
 
 
-            <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
-              {/* Group Name TextField */}
-              {/* <TextField
-                fullWidth
-                placeholder="Group Name"
-                label={groupName ? "" : "Group Name"} // Show placeholder only when empty
-                InputLabelProps={{ shrink: false }}
-                sx={inputStyle}
-                value={groupName}
-                onChange={(e) => setGroupName(e.target.value)}
-              /> */}
-              {/* Department Select */}
-              <TextField
-                fullWidth
-                placeholder="Group Name"
-                label={groupName ? "" : "Group Name"}
-                InputLabelProps={{ shrink: false }}
-                sx={inputStyle}
-                value={groupName}
-                onChange={(e) => {
-                  const value = e.target.value;
-                  // Only allow letters, spaces, and common punctuation for group names
-                  const regex = /^[a-zA-Z\s]*$/;
-                  if (regex.test(value) || value === '') {
-                    setGroupName(value);
-                    if (groupNameError) setGroupNameError(""); // Clear error on change
-                  }
-                }}
-                onKeyPress={(e) => {
-                  // Prevent numbers and special characters except space
-                  const regex = /^[a-zA-Z\s]$/;
-                  if (!regex.test(e.key)) {
-                    e.preventDefault();
-                  }
-                }}
+       <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
+  {/* Group Name TextField with Box wrapper */}
+  <Box sx={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
+    <TextField
+      fullWidth
+      placeholder="Group Name"
+      label={groupName ? "" : "Group Name"}
+      InputLabelProps={{ shrink: false }}
+      sx={{
+        ...inputStyle,
+        ...(groupNameError && {
+          "& .MuiOutlinedInput-notchedOutline": {
+            borderColor: "#d32f2f !important",
+          },
+        }),
+      }}
+      value={groupName}
+      onChange={(e) => {
+        const value = e.target.value;
+        const regex = /^[a-zA-Z\s]*$/;
+        if (regex.test(value) || value === '') {
+          setGroupName(value);
+          if (groupNameError) setGroupNameError(""); // Clear error on change
+        }
+      }}
+      onKeyPress={(e) => {
+        const regex = /^[a-zA-Z\s]$/;
+        if (!regex.test(e.key)) {
+          e.preventDefault();
+        }
+      }}
+    />
+    {groupNameError && (
+      <Typography
+        sx={{
+          color: "#d32f2f",
+          fontSize: "12px",
+          marginTop: "4px",
+          marginLeft: "14px",
+        }}
+      >
+        {groupNameError}
+      </Typography>
+    )}
+  </Box>
 
-              />
-
-
-              {/* // 8. Update Department Select with validation */}
-              <Select
-                fullWidth
-                displayEmpty
-                placeholder="Select Department"
-                value={departmentId}
-                onChange={(e) => {
-                  setDepartmentId(e.target.value);
-                  if (departmentError) setDepartmentError(""); // Clear error on change
-                }}
-                inputProps={{
-                  "aria-label": "Select Department",
-                }}
-                sx={{
-                  ...selectStyles,
-                  ...(departmentError && {
-                    "& .MuiOutlinedInput-notchedOutline": {
-                      borderColor: "#d32f2f !important",
-                    },
-                  }),
-                }}
-                IconComponent={KeyboardArrowDownIcon}
-                error={!!departmentError}
-              >
-                <MenuItem value="" disabled>
-                  Select Department
-                </MenuItem>
-                {departmentList.map((department) => (
-                  <MenuItem key={department.dep_id} value={department.dep_id.toString()}>
-                    {department.dep_name}
-                  </MenuItem>
-                ))}
-              </Select>
-
-            </Box>
+  {/* Department Select with Box wrapper */}
+  <Box sx={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
+    <Select
+      fullWidth
+      displayEmpty
+      placeholder="Select Department"
+      value={departmentId}
+      onChange={(e) => {
+        setDepartmentId(e.target.value);
+        if (departmentError) setDepartmentError(""); // Clear error on change
+      }}
+      inputProps={{
+        "aria-label": "Select Department",
+      }}
+      sx={{
+        ...selectStyles,
+        ...(departmentError && {
+          "& .MuiOutlinedInput-notchedOutline": {
+            borderColor: "#d32f2f !important",
+          },
+        }),
+      }}
+      IconComponent={KeyboardArrowDownIcon}
+    >
+      <MenuItem value="" disabled>
+        Select Department
+      </MenuItem>
+      {departmentList.map((department) => (
+        <MenuItem key={department.dep_id} value={department.dep_id.toString()}>
+          {department.dep_name}
+        </MenuItem>
+      ))}
+    </Select>
+    {departmentError && (
+      <Typography
+        sx={{
+          color: "#d32f2f",
+          fontSize: "12px",
+          marginTop: "4px",
+          marginLeft: "14px",
+        }}
+      >
+        {departmentError}
+      </Typography>
+    )}
+  </Box>
+</Box>
 
             <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, mt: 3, mb: 1 }}>
               <Button
