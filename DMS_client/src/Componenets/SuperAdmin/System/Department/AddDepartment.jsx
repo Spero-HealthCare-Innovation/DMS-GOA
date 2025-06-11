@@ -403,11 +403,18 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
     if (e) e.preventDefault(); // Prevent form refresh
 
     // Field validations
+    setDepartmentError(false);
+    setDepartmentErrorMsg("");
+    setStateError(false);
+    setDistrictError(false);
+    setTehsilError(false);
+    setCityError(false);
+    setDisasterError(false);
     let isValid = true;
 
     if (!departmentName.trim()) {
       setDepartmentError(true);
-      setDepartmentErrorMsg("Department name is required.");
+      // setDepartmentErrorMsg("Department name is required.");
       isValid = false;
     }
 
@@ -581,6 +588,43 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
     setIsEditMode(false);
     setEditId(null);
     setDeptId(null); // if used
+  };
+
+  const validateForm = () => {
+    let isValid = true;
+
+    if (!departmentName.trim()) {
+      setDepartmentError(true);
+      setDepartmentErrorMsg("Please enter department name");
+      isValid = false;
+    }
+
+    if (!selectedStateId) {
+      setStateError(true);
+      isValid = false;
+    }
+
+    if (!selectedDistrictId) {
+      setDistrictError(true);
+      isValid = false;
+    }
+
+    if (!selectedTehsilId) {
+      setTehsilError(true);
+      isValid = false;
+    }
+
+    if (!selectedCityID) {
+      setCityError(true);
+      isValid = false;
+    }
+
+    if (!selectedDisasterId) {
+      setDisasterError(true);
+      isValid = false;
+    }
+
+    return isValid;
   };
 
   return (
@@ -1171,9 +1215,24 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
                     setDepartmentError(false);
                     setDepartmentErrorMsg("");
                   }}
+                  error={departmentError}
+                  helperText={departmentErrorMsg}
                   InputLabelProps={{ shrink: false }}
                   sx={selectStyles}
-                />
+                  
+                ></TextField>
+                {departmentError && (
+                  <FormHelperText
+                    error
+                    sx={{
+                      marginLeft: "14px",
+                      marginTop: "3px",
+                      fontSize: "0.75rem",
+                    }}
+                  >
+                    {departmentErrorMsg || "Please enter a department name"}
+                  </FormHelperText>
+                )}
               </Grid>
 
               <Grid item xs={12} sm={6}>
@@ -1198,8 +1257,18 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
                     </MenuItem>
                   ))}
                 </Select>
+
                 {stateError && (
-                  <FormHelperText>Please select a state</FormHelperText>
+                  <FormHelperText
+                    error
+                    sx={{
+                      marginLeft: "14px",
+                      marginTop: "3px",
+                      fontSize: "0.75rem",
+                    }}
+                  >
+                    Please select a state
+                  </FormHelperText>
                 )}
               </Grid>
 
@@ -1213,6 +1282,7 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
                   }}
                   fullWidth
                   error={districtError}
+                  helperText={districtError ? "Please select a district" : ""}
                   displayEmpty
                   inputProps={{ "aria-label": "Select District" }}
                   disabled={!selectedStateId}
@@ -1228,7 +1298,16 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
                   ))}
                 </Select>
                 {districtError && (
-                  <FormHelperText>Please select a district</FormHelperText>
+                  <FormHelperText
+                    error
+                    sx={{
+                      marginLeft: "14px",
+                      marginTop: "3px",
+                      fontSize: "0.75rem",
+                    }}
+                  >
+                    Please select a district
+                  </FormHelperText>
                 )}
               </Grid>
 
@@ -1241,6 +1320,7 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
                   }}
                   fullWidth
                   error={tehsilError}
+                  helperText={tehsilError ? "Please select a tehsil" : ""}
                   displayEmpty
                   inputProps={{ "aria-label": "Select Tehsil" }}
                   sx={selectStyles}
@@ -1255,7 +1335,16 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
                   ))}
                 </Select>
                 {tehsilError && (
-                  <FormHelperText>Please select a tehsil</FormHelperText>
+                  <FormHelperText
+                    error
+                    sx={{
+                      marginLeft: "14px",
+                      marginTop: "3px",
+                      fontSize: "0.75rem",
+                    }}
+                  >
+                    Please select a tehsil
+                  </FormHelperText>
                 )}
               </Grid>
 
@@ -1268,6 +1357,7 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
                   }}
                   fullWidth
                   error={cityError}
+                  helperText={cityError ? "Please select a city" : ""}
                   displayEmpty
                   inputProps={{ "aria-label": "Select City" }}
                   sx={selectStyles}
@@ -1282,7 +1372,16 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
                   ))}
                 </Select>
                 {cityError && (
-                  <FormHelperText>Please select a city</FormHelperText>
+                  <FormHelperText
+                    error
+                    sx={{
+                      marginLeft: "14px",
+                      marginTop: "3px",
+                      fontSize: "0.75rem",
+                    }}
+                  >
+                    Please select a city
+                  </FormHelperText>
                 )}
               </Grid>
 
@@ -1294,6 +1393,7 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
                     setDisasterError(false);
                   }}
                   error={disasterError}
+                  helperText={disasterError ? "Please select a disaster" : ""}
                   displayEmpty
                   fullWidth
                   inputProps={{ "aria-label": "Select Disaster" }}
@@ -1309,7 +1409,16 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
                   ))}
                 </Select>
                 {disasterError && (
-                  <FormHelperText>Please select a disaster</FormHelperText>
+                  <FormHelperText
+                    error
+                    sx={{
+                      marginLeft: "14px",
+                      marginTop: "3px",
+                      fontSize: "0.75rem",
+                    }}
+                  >
+                    Please select a disaster
+                  </FormHelperText>
                 )}
               </Grid>
 
