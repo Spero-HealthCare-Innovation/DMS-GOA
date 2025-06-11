@@ -620,9 +620,12 @@ class DMS_Alert_idwise_get_api(APIView):
 
 class DMS_Incident_Post_api(APIView):
     def post(self,request):
+        print("hiiiiiii")
         serializers=Incident_Serializer(data=request.data)
         if serializers.is_valid():
+            print("hiiiiiii in if")
             serializers.save()
+            print(serializers.data.get('inc_id'))
             # print("serializers.data-- ", serializers.data)
             alert_id = request.data['alert_id']
         
@@ -630,7 +633,7 @@ class DMS_Incident_Post_api(APIView):
             geolocator = Nominatim(user_agent="nikita.speroinfosystems@gmail.com")
 
             if alert_id:
-                Inc_obj = DMS_Incident.objects.get(alert_id=alert_id)
+                Inc_obj = DMS_Incident.objects.filter(alert_id=alert_id).last()
                 print("inc obj-", Inc_obj)
                 # Coordinates
                 latitude = Inc_obj.latitude
@@ -642,10 +645,46 @@ class DMS_Incident_Post_api(APIView):
 
                 Inc_obj.location = location.address
                 Inc_obj.save()
-            return Response(serializers.data,status=status.HTTP_201_CREATED)
-           
             # return Response(serializers.data,status=status.HTTP_201_CREATED)
-        return Response(serializers.errors,status=status.HTTP_400_BAD_REQUEST)
+
+            sinc = serializers.data.get('inc_id')
+            incc = DMS_Incident.objects.get(inc_id=sinc)
+
+            external_api_payload = {
+                "caller_name": "",
+                "caller_no": "",
+                "location": "",
+                "summary": "",
+                "disaster_name": incc.disaster_type.disaster_name,
+                "inc_type": "NON_MCI",
+                "incident_id": str(incc.incident_id),
+                "latitude": str(incc.latitude),
+                "longitude": str(incc.longitude)
+            }
+            print(external_api_payload)
+            external_response = requests.post(
+                "http://210.212.165.119/Spero_DMS/dms/alert_details",
+                json=external_api_payload,
+                headers={"Content-Type": "application/json"},
+                timeout=10
+            )
+
+            if external_response.status_code == 200:
+                external_api_result = external_response.json()
+            else:
+                external_api_result = {
+                    "error": f"Status {external_response.status_code}",
+                    "response": external_response.text
+                }
+            data = {
+                "sr_dt":serializers.data,
+                "external_api_result":external_api_result
+            }
+            # return Response(serializers.data, external_api_result, status=status.HTTP_201_CREATED)
+            return Response(data, status=status.HTTP_201_CREATED)
+        else:
+            print("hiiiiiii else")
+            return Response(serializers.errors,status=status.HTTP_400_BAD_REQUEST)
 
 
 class DMS_Comments_Post_api(APIView):
