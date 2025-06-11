@@ -28,6 +28,7 @@ import {
   DialogActions,
   TableCell,
   CircularProgress,
+  Tooltip,
 } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import SearchIcon from "@mui/icons-material/Search";
@@ -66,6 +67,8 @@ import { select } from "framer-motion/client";
 
 const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
   const [anchorEl, setAnchorEl] = useState(null);
+  console.log(anchorEl, "anchorEl");
+
   const port = import.meta.env.VITE_APP_API_KEY;
   const { newToken } = useAuth();
   const group = localStorage.getItem("user_group");
@@ -818,6 +821,7 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
                               {(page - 1) * rowsPerPage + index + 1}
                             </Typography>
                           </StyledCardContent>
+
                           <StyledCardContent
                             sx={{
                               flex: 2.4,
@@ -827,16 +831,25 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
                               minWidth: 0,
                             }}
                           >
-                            <Typography
-                              variant="subtitle2"
-                              sx={{
-                                overflow: "hidden",
-                                textOverflow: "ellipsis",
-                                whiteSpace: "nowrap", // or use line clamp if multiline allowed
-                              }}
+                            <Tooltip
+                              title={item.dep_name || "No Department Name"}
+                              arrow
+                              placement="top"
                             >
-                              {item.dep_name}
-                            </Typography>
+                              <Typography
+                                variant="subtitle2"
+                                sx={{
+                                  overflow: "hidden",
+                                  textOverflow: "ellipsis",
+                                  whiteSpace: "nowrap",
+                                  maxWidth: 150,
+                                }}
+                              >
+                                {item.dep_name && item.dep_name.length > 35
+                                  ? item.dep_name.slice(0, 35) + "..."
+                                  : item.dep_name || "No Department Name"}
+                              </Typography>
+                            </Tooltip>
                           </StyledCardContent>
 
                           {/* <StyledCardContent
