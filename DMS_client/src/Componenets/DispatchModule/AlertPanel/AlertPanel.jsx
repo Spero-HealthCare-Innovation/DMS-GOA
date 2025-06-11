@@ -72,18 +72,16 @@ const AlertPanel = ({ darkMode }) => {
     const [showSnackbar, setShowSnackbar] = useState(false);
     const [snackbarMessage, setSnackbarMessage] = useState("");
 
-    const startIndex = (page - 1) * rowsPerPage;
-    const endIndex = startIndex + rowsPerPage;
-    const paginatedData = alertData.slice(startIndex, endIndex);
-    const totalPages = Math.ceil(alertData.length / rowsPerPage);
+    // const startIndex = (page - 1) * rowsPerPage;
+    // const endIndex = startIndex + rowsPerPage;
+    // const paginatedData = alertData.slice(startIndex, endIndex);
+    // const totalPages = Math.ceil(alertData.length / rowsPerPage);
 
     window.addEventListener('storage', (e) => {
         if (e.key === 'logout') {
             location.href = '/login';
         }
     });
-
-
 
     useEffect(() => {
         document.title = "DMS-AlertPanel";
@@ -185,7 +183,6 @@ const AlertPanel = ({ darkMode }) => {
         }
     };
 
-
     // brouser and tab close autologout functionality
 
     //     let isPageReloaded = false;
@@ -216,6 +213,18 @@ const AlertPanel = ({ darkMode }) => {
     //   sessionStorage.removeItem('isReloaded');
     // });
 
+    const [searchText, setSearchText] = useState("");
+
+    const filteredData = alertData.filter(item =>
+        item.pk_id.toString().toLowerCase().includes(searchText.toLowerCase())
+    );
+
+    const startIndex = (page - 1) * rowsPerPage;
+    const endIndex = startIndex + rowsPerPage;
+    const paginatedData = filteredData.slice(startIndex, endIndex);
+    const totalPages = Math.ceil(filteredData.length / rowsPerPage);
+
+
     return (
         <Box sx={{ flexGrow: 1, mt: 1, ml: '6em', mr: 1, mb: 2 }}>
             <Sidebar darkMode={darkMode} />
@@ -226,7 +235,9 @@ const AlertPanel = ({ darkMode }) => {
                             <TextField
                                 variant="outlined"
                                 size="small"
-                                placeholder="Search"
+                                placeholder="Search by Alert ID"
+                                value={searchText}
+                                onChange={(e) => setSearchText(e.target.value)}
                                 InputProps={{
                                     startAdornment: (
                                         <InputAdornment position="start">
