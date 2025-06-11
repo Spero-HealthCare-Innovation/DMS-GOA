@@ -6,7 +6,7 @@ def get_hive_connection():
         host='210.212.165.124',  
         port=10000,              
         username='admin',       
-        database='reports'
+        database='final_closure_report'
         # database='processed_dms'
         # database = 'raw_dms'      
     )
