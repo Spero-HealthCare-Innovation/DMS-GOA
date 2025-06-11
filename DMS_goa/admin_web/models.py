@@ -364,7 +364,7 @@ class DMS_Incident(models.Model):
     mode = models.IntegerField(null=True,blank=True)
     time = models.CharField(max_length=255,null=True,blank=True)
     inc_is_deleted = models.BooleanField(default=False)
-    clouser_status = models.BooleanField(default=True)
+    clouser_status = models.BooleanField(default=True,null=True,blank=True)
     inc_added_by=models.CharField(max_length=255,null=True,blank=True)
     inc_added_date = models.DateTimeField(auto_now=True)
     inc_modified_by = models.CharField(max_length=255, null=True, blank=True)
