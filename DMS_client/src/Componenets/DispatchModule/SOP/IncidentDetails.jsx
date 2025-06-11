@@ -170,16 +170,16 @@ function IncidentDetails({
                   "Time",
                   selectedIncident?.alert_datetime
                     ? new Date(selectedIncident.alert_datetime).toLocaleString(
-                        "en-US",
-                        {
-                          day: "2-digit",
-                          month: "long",
-                          year: "numeric",
-                          hour: "numeric",
-                          minute: "2-digit",
-                          hour12: true,
-                        }
-                      )
+                      "en-US",
+                      {
+                        day: "2-digit",
+                        month: "long",
+                        year: "numeric",
+                        hour: "numeric",
+                        minute: "2-digit",
+                        hour12: true,
+                      }
+                    )
                     : "N/A"
                 )}
                 {/* {renderText("Disaster Id", selectedIncident?.disaster_id_id)} */}
@@ -196,20 +196,20 @@ function IncidentDetails({
                         incident?.inc_type === 1
                           ? "Emergency"
                           : incident?.inc_type === 2
-                          ? "Non-Emergency"
-                          : "N/A"
+                            ? "Non-Emergency"
+                            : "N/A"
                       )}
                       {renderText(
                         "Alert Type",
                         incident?.alert_type === 1
                           ? "High"
                           : incident?.alert_type === 2
-                          ? "Medium"
-                          : incident?.alert_type === 3
-                          ? "Low"
-                          : incident?.alert_type === 4
-                          ? "very Low"
-                          : "N/A"
+                            ? "Medium"
+                            : incident?.alert_type === 3
+                              ? "Low"
+                              : incident?.alert_type === 4
+                                ? "very Low"
+                                : "N/A"
                       )}
                     </>
                   ) : (
@@ -222,14 +222,14 @@ function IncidentDetails({
                             incident?.inc_type === 1
                               ? "Emergency"
                               : incident?.inc_type === 2
-                              ? "Non-Emergency"
-                              : "N/A",
+                                ? "Non-Emergency"
+                                : "N/A",
                         },
                         {
                           label: "Alert Type",
                           value:
                             { 1: "High", 2: "Medium", 3: "Low" }[
-                              incident?.alert_type
+                            incident?.alert_type
                             ] || "N/A",
                         },
                         { label: "Caller Name", value: incident?.caller_name },
@@ -457,15 +457,15 @@ function IncidentDetails({
                       {responderScope.sop_responses[0].sop_description.split(
                         "\n"
                       ).length > 2 && (
-                        <IconButton
-                          size="small"
-                          onClick={() => setOpenDialog(true)}
-                          sx={{ ml: 1 }}
-                          aria-label="Show full response procedure"
-                        >
-                          <VisibilityIcon fontSize="small" />
-                        </IconButton>
-                      )}
+                          <IconButton
+                            size="small"
+                            onClick={() => setOpenDialog(true)}
+                            sx={{ ml: 1 }}
+                            aria-label="Show full response procedure"
+                          >
+                            <VisibilityIcon fontSize="small" />
+                          </IconButton>
+                        )}
                       <Dialog
                         open={openDialog}
                         onClose={() => setOpenDialog(false)}
@@ -520,19 +520,22 @@ function IncidentDetails({
 
                   {selectedIncident ? (
                     Array.isArray(incidentDetails?.["responders scope"]) &&
-                    incidentDetails["responders scope"].length > 0 ? (
+                      incidentDetails["responders scope"].length > 0 ? (
                       <Stack spacing={1} mt={1}>
                         <Box display="flex" flexWrap="wrap" gap={1}>
                           {incidentDetails["responders scope"].map(
                             ({ responder_id, responder_name }) => {
-                              const isChecked =
+                              const assignedScope = incidentDetails?.incident_details?.[0]?.responder_scope || [];
+                              const isChecked = assignedScope.includes(String(responder_id));
+                              {/* const isChecked =
                                 Array.isArray(
-                                  incidentDetails?.["responders scope"]
-                                ) &&
-                                Array.isArray(incident?.responder_scope) &&
+                                  incidentDetails?.["responders scope"].includes(responder_id)
+                                )  */}
+                              {/* && */ }
+                              {/* Array.isArray(incident?.responder_scope) &&
                                 incident.responder_scope.includes(
-                                  String(responder_id)
-                                ); // Convert responder_id to a string
+                                  String(responder_id) 
+                                ); // Convert responder_id to a string */}
 
                               return (
                                 <Tooltip
