@@ -5,6 +5,7 @@ from io import BytesIO
 import pandas as pd
 from admin_web.models import *
 from fastapi.responses import StreamingResponse
+from datetime import datetime, timedelta
 
 router = APIRouter()
 
@@ -43,20 +44,31 @@ def incident_report_daywise(
     to_date: Optional[str] = Query(..., description="End date in YYYY-MM-DD format")
 ):
     try:
+        to_date_obj = datetime.strptime(to_date, "%Y-%m-%d") + timedelta(days=1)
+        to_date_plus_one = to_date_obj.strftime("%Y-%m-%d")
         query = f"""
-            SELECT incident_id, disaster_type_id, closure_acknowledge, closure_start_base_location, 
+            SELECT incident_id, disaster_type_id, alert_id_id, inc_added_date, closure_acknowledge, closure_start_base_location, 
                    closure_at_scene, closure_from_scene, closure_back_to_base, closure_remark 
             FROM closure_report 
-            WHERE closure_added_date BETWEEN '{from_date}' AND '{to_date}'
+            WHERE closure_added_date BETWEEN '{from_date}' AND '{to_date_plus_one}'
         """
         data = hive_connecter_execution(query)
         dt=[] 
         for i in data:
             dstss = DMS_Disaster_Type.objects.get(disaster_id=i['disaster_type_id'])
             print(dstss,'dstssdstssdstssdstss')
+            # alrt = Weather_alerts.objects.get(pk_id=i['alert_id_id'] if i['alert_id_id'] else 0)
+            alrt_qs = Weather_alerts.objects.filter(pk_id=i['alert_id_id'])
+            if alrt_qs.exists():
+                alrt = alrt_qs.first()
+            else:
+                alrt = None  
+            
             nn={
                 "incident_id": i['incident_id'],
                 "disaster_type": dstss.disaster_name,
+                "alart_time":alrt.alert_datetime.replace(tzinfo=None) if alrt else "",
+                "dispatch_time":i['inc_added_date'],
                 "closure_acknowledge": i['closure_acknowledge'],
                 "closure_start_base_location": i['closure_start_base_location'],
                 "closure_at_scene": i['closure_at_scene'],
