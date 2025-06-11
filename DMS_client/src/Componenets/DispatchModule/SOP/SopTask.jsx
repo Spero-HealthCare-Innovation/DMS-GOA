@@ -125,6 +125,9 @@ function SopTask({
   setIncidentId,
   incidentId,
   fetchDispatchList,
+  highlightedId,
+  setHighlightedId
+  
 }) {
   const port = import.meta.env.VITE_APP_API_KEY;
   const socketUrl = import.meta.env.VITE_SOCKET_API_KEY;
@@ -139,7 +142,7 @@ function SopTask({
   const [rowsPerPage, setRowsPerPage] = useState(3);
   const [openCancelDialog, setOpenCancelDialog] = useState(false);
   const [selectedAlert, setSelectedAlert] = useState(null);
-  const [highlightedId, setHighlightedId] = useState(null);
+
 
   const {
     snackbarOpen,
@@ -620,7 +623,7 @@ function SopTask({
                       <EnquiryCardBody
                         key={item.incident_id}
                         alertType={item.inc_type}
-                        isHighlighted={item.inc_id === highlightedId}
+                       isHighlighted={item.incident_id === highlightedId}
                       >
                         {/* Incident ID */}
                         <StyledCardContent
@@ -702,7 +705,7 @@ function SopTask({
                                 setIncidentId(item.inc_id);
                                 setSelectedIncidentFromSop(item);
                                 setDisasterIdFromSop(item.disaster_name);
-                                setHighlightedId(item.inc_id);
+                                setHighlightedId(item.incident_id);
                                 console.log("Incident idd", setIncidentId);
                                 setFlag(0);
                                 setViewmode("incident");
@@ -720,7 +723,7 @@ function SopTask({
                                 setSelectedIncident(item);
                                 setFlag(0);
                                 setViewmode("closure");
-                                  setHighlightedId(item.inc_id);
+                                  setHighlightedId(item.incident_id);
                               }}
                               size="large"
                             >
