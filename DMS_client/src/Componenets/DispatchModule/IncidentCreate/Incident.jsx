@@ -430,26 +430,6 @@ const Incident = ({ darkMode }) => {
                                                 <VisibilityIcon />
                                             </IconButton>
                                         </Box>
-                                        {/* <Typography variant="subtitle2" sx={{ fontFamily }}>
-                                            {responderScope?.sop_responses?.map((sop) => (
-                                                <div key={sop.sop_id}>{sop?.sop_description || "No SOP description"}</div>
-                                            ))}
-                                        </Typography> */}
-                                        {/* <Tooltip
-                                            title={
-                                                responderScope?.sop_responses?.length > 0
-                                                    ? (
-                                                        <div>
-                                                            {responderScope.sop_responses.map((sop) => (
-                                                                <div key={sop.sop_id}>{sop?.sop_description || "No SOP description"}</div>
-                                                            ))}
-                                                        </div>
-                                                    )
-                                                    : "No SOP description"
-                                            }
-                                            arrow
-                                            placement="top"
-                                        > */}
                                         <Typography
                                             variant="subtitle2"
                                             sx={{
@@ -460,7 +440,7 @@ const Incident = ({ darkMode }) => {
                                                 WebkitBoxOrient: "vertical",
                                                 overflow: "hidden",
                                                 textOverflow: "ellipsis",
-                                                maxWidth: 300, // adjust as needed
+                                                maxWidth: 300, 
                                             }}
                                         >
                                             {(() => {
