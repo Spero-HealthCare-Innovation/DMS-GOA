@@ -660,7 +660,7 @@ class DMS_Incident_Post_api(APIView):
                 "incident_id": str(incc.incident_id),
                 "latitude": str(incc.latitude),
                 "longitude": str(incc.longitude)
-            }
+            } 
             print(external_api_payload)
             external_response = requests.post(
                 "http://210.212.165.119/Spero_DMS/dms/alert_details",
