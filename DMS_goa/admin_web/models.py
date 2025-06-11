@@ -355,7 +355,7 @@ class DMS_Incident(models.Model):
     summary = models.ForeignKey('DMS_Summary',on_delete=models.CASCADE,null=True,blank=True)
     latitude = models.FloatField(null=True,blank=True)
     longitude = models.FloatField(null=True,blank=True)
-    inc_type =  models.IntegerField(null=True,blank=True)
+    inc_type =  models.IntegerField(null=True,blank=True,default=1)#emergency=1 2=nonemergency
     disaster_type = models.ForeignKey(DMS_Disaster_Type,on_delete=models.CASCADE,null=True,blank=True)
     comment_id = models.ForeignKey('DMS_Comments',on_delete=models.CASCADE,null=True,blank=True)
     alert_code = models.CharField(max_length=255,null=True,blank=True)
@@ -364,7 +364,7 @@ class DMS_Incident(models.Model):
     mode = models.IntegerField(null=True,blank=True)
     time = models.CharField(max_length=255,null=True,blank=True)
     inc_is_deleted = models.BooleanField(default=False)
-    clouser_status = models.BooleanField(default=True,null=True,blank=True)
+    clouser_status = models.BooleanField(default=False,null=True,blank=True)
     inc_added_by=models.CharField(max_length=255,null=True,blank=True)
     inc_added_date = models.DateTimeField(auto_now=True)
     inc_modified_by = models.CharField(max_length=255, null=True, blank=True)
