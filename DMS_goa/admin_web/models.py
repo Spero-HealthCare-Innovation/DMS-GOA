@@ -350,7 +350,7 @@ class DMS_Incident(models.Model):
     caller_id = models.ForeignKey(DMS_Caller,on_delete=models.CASCADE,null=True,blank=True)
     notify_id = models.ForeignKey('DMS_Notify',on_delete=models.CASCADE,null=True,blank=True)
     alert_type = models.IntegerField(null=True,blank=True)
-    location = models.CharField(max_length=255,null=True,blank=True)  
+    location = models.CharField(max_length=510,null=True,blank=True)  
     summary = models.ForeignKey('DMS_Summary',on_delete=models.CASCADE,null=True,blank=True)
     latitude = models.FloatField(null=True,blank=True)
     longitude = models.FloatField(null=True,blank=True)
