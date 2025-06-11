@@ -18,6 +18,7 @@ import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
 import { useTheme } from "@mui/material/styles";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import CircularProgress from '@mui/material/CircularProgress';
+import Tooltip from "@mui/material/Tooltip";
 import {
   CustomTextField,
   getThemeBgColors,
@@ -176,6 +177,11 @@ function Add_employee({ darkMode }) {
       showAlertMessage("Please fix the form errors before submitting.", 'error');
       return;
     }
+    if (empContact.length !== 10) {
+      setFormErrors(prev => ({ ...prev, empContact: "Contact must be 10 digits" }));
+      showAlertMessage("Contact must be exactly 10 digits.", 'error');
+      return;
+    }
 
 
     if (!empName || !empContact || !empEmail || !empDOJ || !empDOB || !groupId ||
@@ -268,7 +274,7 @@ function Add_employee({ darkMode }) {
   // const paginatedData = employees; 
 
   const fetchEmployees = async () => {
-     setLoading1(true);
+    setLoading1(true);
     try {
       const response = await axios.get(`${port}/admin_web/employee_get/`, {
         headers: {
@@ -295,8 +301,8 @@ function Add_employee({ darkMode }) {
     } catch (error) {
       console.error("Failed to fetch employees:", error);
     } finally {
-    setLoading1(false); 
-  }
+      setLoading1(false);
+    }
   };
 
 
@@ -306,16 +312,15 @@ function Add_employee({ darkMode }) {
 
   // 1. Add validation functions at the top of your component
   const validateName = (value) => {
-  // Allow letters, spaces, underscore, and common name characters
-  const nameRegex = /^[a-zA-Z\s._''-]+$/;
-  return nameRegex.test(value);
-};
+    // Allow letters, spaces, underscore, and common name characters
+    const nameRegex = /^[a-zA-Z\s._''-]+$/;
+    return nameRegex.test(value);
+  };
 
- const validateContact = (value) => {
-  // Only allow numbers (remove other characters check)
-  const contactRegex = /^[0-9]+$/;
-  return contactRegex.test(value) && value.length >= 10;
-};
+  const validateContact = (value) => {
+    return /^[0-9]{0,10}$/.test(value); // allow typing up to 10 digits
+  };
+
 
   const validateEmail = (value) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -329,7 +334,7 @@ function Add_employee({ darkMode }) {
     empEmail: ''
   });
 
- 
+
 
   // / 4. Add new function to handle "Add New Employee" button click
   const handleAddNewEmployee = () => {
@@ -508,29 +513,29 @@ function Add_employee({ darkMode }) {
   const paginatedData = filteredEmployees;
 
   const validateForm = () => {
-  const errors = {};
+    const errors = {};
 
-  if (!empName.trim()) {
-    errors.empName = 'Employee name is required';
-  } else if (!validateName(empName)) {
-    errors.empName = 'Please enter a valid name (letters, spaces, underscore only)';
-  }
+    if (!empName.trim()) {
+      errors.empName = 'Employee name is required';
+    } else if (!validateName(empName)) {
+      errors.empName = 'Please enter a valid name (letters, spaces, underscore only)';
+    }
 
-  if (!empContact.trim()) {
-    errors.empContact = 'Contact number is required';
-  } else if (!validateContact(empContact)) {
-    errors.empContact = 'Please enter a valid contact number (numbers only, min 10 digits)';
-  }
+    if (!empContact.trim()) {
+      errors.empContact = 'Contact number is required';
+    } else if (!validateContact(empContact)) {
+      errors.empContact = 'Please enter a valid contact number (numbers only, min 10 digits)';
+    }
 
-  if (!empEmail.trim()) {
-    errors.empEmail = 'Email is required';
-  } else if (!validateEmail(empEmail)) {
-    errors.empEmail = 'Please enter a valid email address';
-  }
+    if (!empEmail.trim()) {
+      errors.empEmail = 'Email is required';
+    } else if (!validateEmail(empEmail)) {
+      errors.empEmail = 'Please enter a valid email address';
+    }
 
-  setFormErrors(errors);
-  return Object.keys(errors).length === 0;
-};
+    setFormErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
 
 
   return (
@@ -698,102 +703,124 @@ function Add_employee({ darkMode }) {
 
 
                 <TableBody>
-                   {loading1 ? (
-                      <TableRow>
-                        <TableCell colSpan={6} align="center">
-                          <CircularProgress size={30} sx={{ color: "#5FECC8" }} />
-                        </TableCell>
-                      </TableRow>
-                    ) :
-                  filteredEmployees.length === 0 ? (
-                    <Box p={2}>
-                      <Typography align="center" color="textSecondary">
-                        {searchTerm ? "No employees found matching your search." : "No employees available."}
-                      </Typography>
-                    </Box>
-                  ) : (
-                    filteredEmployees
-                      .slice((page - 1) * rowsPerPage, page * rowsPerPage)
-                      .map((item, index) => (
+                  {loading1 ? (
+                    <TableRow>
+                      <TableCell colSpan={6} align="center">
+                        <CircularProgress size={30} sx={{ color: "#5FECC8" }} />
+                      </TableCell>
+                    </TableRow>
+                  ) :
+                    filteredEmployees.length === 0 ? (
+                      <Box p={2}>
+                        <Typography align="center" color="textSecondary">
+                          {searchTerm ? "No employees found matching your search." : "No employees available."}
+                        </Typography>
+                      </Box>
+                    ) : (
+                      filteredEmployees
+                        .slice((page - 1) * rowsPerPage, page * rowsPerPage)
+                        .map((item, index) => (
 
-                        <EnquiryCardBody
-                          key={index}
-                          sx={{
-                            backgroundColor: inputBgColor,
-                            p: 2,
-                            borderRadius: 2,
-                            color: textColor,
-                            display: "flex",
-                            width: "100%",
-                            mb: 1,
-                          }}
-                        >
-                          <StyledCardContent
-                            sx={{ flex: 0.6, justifyContent: "center" }}
-                          >
-                            <Typography variant="subtitle2" sx={fontsTableBody}>
-                              {(page - 1) * rowsPerPage + index + 1}
-                            </Typography>
-                          </StyledCardContent>
-
-                          <StyledCardContent
+                          <EnquiryCardBody
+                            key={index}
                             sx={{
-                              flex: 2,
-                              justifyContent: "center",
-                              ...fontsTableBody,
+                              backgroundColor: inputBgColor,
+                              p: 2,
+                              borderRadius: 2,
+                              color: textColor,
+                              display: "flex",
+                              width: "100%",
+                              mb: 1,
                             }}
                           >
-                            <Typography variant="subtitle2">
-                              {item.empName}
-                            </Typography>
-                          </StyledCardContent>
-                          <StyledCardContent
-                            sx={{
-                              flex: 2,
-                              justifyContent: "center",
-                              ...fontsTableBody,
-                            }}
-                          >
-                            <Typography variant="subtitle2">
-                              {item.empContact}
-                            </Typography>
-                          </StyledCardContent>
+                            <StyledCardContent
+                              sx={{ flex: 0.6, justifyContent: "center" }}
+                            >
+                              <Typography variant="subtitle2" sx={fontsTableBody}>
+                                {(page - 1) * rowsPerPage + index + 1}
+                              </Typography>
+                            </StyledCardContent>
 
-
-                          <StyledCardContent
-                            sx={{
-                              flex: 2,
-                              justifyContent: "center",
-                              ...fontsTableBody,
-                            }}
-                          >
-                            <Typography variant="subtitle2">
-                              {item.groupID}
-                            </Typography>
-                          </StyledCardContent>
-
-                          <StyledCardContent
-                            sx={{
-                              flex: 1,
-                              justifyContent: "center",
-                              ...fontsTableBody,
-                            }}
-                          >
-                            <MoreHorizIcon
-                              onClick={(e) => handleOpen(e, item)}
+                            <StyledCardContent
                               sx={{
-                                color: "#00f0c0",
-                                cursor: "pointer",
-                                fontSize: 28,
+                                flex: 2,
                                 justifyContent: "center",
                                 ...fontsTableBody,
                               }}
-                            />
-                          </StyledCardContent>
-                        </EnquiryCardBody>
-                      ))
-  )}
-                  
+                            >
+                              <Tooltip title={item.empName} arrow placement="top">
+                                <Typography
+                                  variant="subtitle2"
+                                  sx={{
+                                    overflow: "hidden",
+                                    textOverflow: "ellipsis",
+                                    whiteSpace: "nowrap",
+                                    maxWidth: 150, // adjust as needed
+                                  }}
+                                >
+                                  {item.empName.length > 35 ? item.empName.slice(0, 35) + "..." : item.empName}
+                                </Typography>
+                              </Tooltip>
+
+                            </StyledCardContent>
+                            <StyledCardContent
+                              sx={{
+                                flex: 2,
+                                justifyContent: "center",
+                                ...fontsTableBody,
+                              }}
+                            >
+                              <Typography variant="subtitle2">
+                                {item.empContact}
+                              </Typography>
+                            </StyledCardContent>
+
+
+                            <StyledCardContent
+                              sx={{
+                                flex: 2,
+                                justifyContent: "center",
+                                ...fontsTableBody,
+                              }}
+                            >
+                              <Tooltip title={item.groupID} arrow placement="top">
+                                <Typography
+                                  variant="subtitle2"
+                                  sx={{
+                                    overflow: "hidden",
+                                    textOverflow: "ellipsis",
+                                    whiteSpace: "nowrap",
+                                    maxWidth: 150, // adjust based on layout
+                                  }}
+                                >
+                                  {item.groupID.length > 35 ? item.groupID.slice(0, 35) + "..." : item.groupID}
+                                </Typography>
+                              </Tooltip>
+
+                            </StyledCardContent>
+
+                            <StyledCardContent
+                              sx={{
+                                flex: 1,
+                                justifyContent: "center",
+                                ...fontsTableBody,
+                              }}
+                            >
+                              <MoreHorizIcon
+                                onClick={(e) => handleOpen(e, item)}
+                                sx={{
+                                  color: "#00f0c0",
+                                  cursor: "pointer",
+                                  fontSize: 28,
+                                  justifyContent: "center",
+                                  ...fontsTableBody,
+                                }}
+                              />
+                            </StyledCardContent>
+                          </EnquiryCardBody>
+                        ))
+                    )}
+
                 </TableBody>
               </Table>
             </TableContainer>
@@ -1027,62 +1054,63 @@ function Add_employee({ darkMode }) {
             <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
               {/* First TextField */}
               <TextField
-  fullWidth
-  value={empName}
-  onChange={(e) => {
-    const value = e.target.value;
-    if (value === '' || validateName(value)) {
-      setEmpName(value);
-      if (formErrors.empName) {
-        setFormErrors(prev => ({ ...prev, empName: '' }));
-      }
-    }
-  }}
-  placeholder="Employee Name"
-  error={!!formErrors.empName}
-  helperText={formErrors.empName}
-  InputLabelProps={{ shrink: false }}
-  sx={inputStyle}
-/>
+                fullWidth
+                value={empName}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  if (value === '' || validateName(value)) {
+                    setEmpName(value);
+                    if (formErrors.empName) {
+                      setFormErrors(prev => ({ ...prev, empName: '' }));
+                    }
+                  }
+                }}
+                placeholder="Employee Name"
+                error={!!formErrors.empName}
+                helperText={formErrors.empName}
+                InputLabelProps={{ shrink: false }}
+                sx={inputStyle}
+              />
 
               {/* Second TextField */}
               <TextField
-  fullWidth
-  placeholder="Emp Contact No"
-  value={empContact}
-  onChange={(e) => {
-    const value = e.target.value;
-    if (value === '' || validateContact(value)) {
-      setEmpContact(value);
-      if (formErrors.empContact) {
-        setFormErrors(prev => ({ ...prev, empContact: '' }));
-      }
-    }
-  }}
-  error={!!formErrors.empContact}
-  helperText={formErrors.empContact}
-  InputLabelProps={{ shrink: false }}
-  sx={inputStyle}
-/>
+                fullWidth
+                placeholder="Emp Contact No"
+                value={empContact}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  if (value === '' || validateContact(value)) {
+                    setEmpContact(value);
+                    if (formErrors.empContact) {
+                      setFormErrors(prev => ({ ...prev, empContact: '' }));
+                    }
+                  }
+                }}
+                error={!!formErrors.empContact}
+                helperText={formErrors.empContact}
+                InputLabelProps={{ shrink: false }}
+                sx={inputStyle}
+              />
+
 
             </Box>
             <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
               {/* First TextField */}
-            <TextField
-  fullWidth
-  placeholder="Employee Email"
-  value={empEmail}
-  onChange={(e) => {
-    const value = e.target.value;
-    setEmpEmail(value);
-    if (formErrors.empEmail) {
-      setFormErrors(prev => ({ ...prev, empEmail: '' }));
-    }
-  }}
-  error={!!formErrors.empEmail}
-  helperText={formErrors.empEmail}
-  sx={inputStyle}
-/>
+              <TextField
+                fullWidth
+                placeholder="Employee Email"
+                value={empEmail}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  setEmpEmail(value);
+                  if (formErrors.empEmail) {
+                    setFormErrors(prev => ({ ...prev, empEmail: '' }));
+                  }
+                }}
+                error={!!formErrors.empEmail}
+                helperText={formErrors.empEmail}
+                sx={inputStyle}
+              />
 
               {/* Second TextField */}
 

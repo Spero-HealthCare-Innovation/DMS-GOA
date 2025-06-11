@@ -18,6 +18,7 @@ import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import { useTheme } from "@mui/material/styles";
 import { useAuth } from "./../../../../Context/ContextAPI";
+import Tooltip from "@mui/material/Tooltip";
 import {
   TableDataCardBody,
   TableHeadingCard,
@@ -486,74 +487,100 @@ function Add_group({ darkMode }) {
                 </TableHead>
 
                 <TableBody>
-  {loading ? (
-    <TableRow>
-      <TableCell colSpan={6} align="center">
-        <CircularProgress size={30} sx={{ color: "#5FECC8" }} />
-      </TableCell>
-    </TableRow>
-  ) : paginatedData.length === 0 ? (
-    <TableRow>
-      <TableCell colSpan={6}>
-        <Box p={2}>
-          <Typography align="center" color="textSecondary">
-            {searchTerm
-              ? "No groups found matching your search."
-              : "No groups available."}
-          </Typography>
-        </Box>
-      </TableCell>
-    </TableRow>
-  ) : (
-    paginatedData.map((item, index) => (
-      <EnquiryCardBody
-        key={index}
-        sx={{
-          backgroundColor: inputBgColor,
-          p: 2,
-          borderRadius: 2,
-          color: textColor,
-          display: "flex",
-          width: "100%",
-          mb: 1,
-        }}
-      >
-        <StyledCardContent sx={{ flex: 0.6, justifyContent: "center" }}>
-          <Typography variant="subtitle2" sx={fontsTableBody}>
-            {(page - 1) * rowsPerPage + index + 1}
-          </Typography>
-        </StyledCardContent>
+                  {loading ? (
+                    <TableRow>
+                      <TableCell colSpan={6} align="center">
+                        <CircularProgress size={30} sx={{ color: "#5FECC8" }} />
+                      </TableCell>
+                    </TableRow>
+                  ) : paginatedData.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={6}>
+                        <Box p={2}>
+                          <Typography align="center" color="textSecondary">
+                            {searchTerm
+                              ? "No groups found matching your search."
+                              : "No groups available."}
+                          </Typography>
+                        </Box>
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    paginatedData.map((item, index) => (
+                      <EnquiryCardBody
+                        key={index}
+                        sx={{
+                          backgroundColor: inputBgColor,
+                          p: 2,
+                          borderRadius: 2,
+                          color: textColor,
+                          display: "flex",
+                          width: "100%",
+                          mb: 1,
+                        }}
+                      >
+                        <StyledCardContent sx={{ flex: 0.6, justifyContent: "center" }}>
+                          <Typography variant="subtitle2" sx={fontsTableBody}>
+                            {(page - 1) * rowsPerPage + index + 1}
+                          </Typography>
+                        </StyledCardContent>
 
-        <StyledCardContent
-          sx={{ flex: 2, justifyContent: "center", ...fontsTableBody }}
-        >
-          <Typography variant="subtitle2">{item.groupName}</Typography>
-        </StyledCardContent>
+                        <StyledCardContent
+                          sx={{ flex: 2, justifyContent: "center", ...fontsTableBody }}
+                        >
+                          <Tooltip title={item.groupName} arrow placement="top">
+                            <Typography
+                              variant="subtitle2"
+                              sx={{
+                                overflow: "hidden",
+                                textOverflow: "ellipsis",
+                                whiteSpace: "nowrap",
+                                maxWidth: 150, // adjust width as per layout
+                              }}
+                            >
+                              {item.groupName.length > 35 ? item.groupName.slice(0, 35) + "..." : item.groupName}
+                            </Typography>
+                          </Tooltip>
 
-        <StyledCardContent
-          sx={{ flex: 2, justifyContent: "center", ...fontsTableBody }}
-        >
-          <Typography variant="subtitle2">{item.departmentID}</Typography>
-        </StyledCardContent>
+                        </StyledCardContent>
 
-        <StyledCardContent
-          sx={{ flex: 1.2, justifyContent: "center", ...fontsTableBody }}
-        >
-          <MoreHorizIcon
-            onClick={(e) => handleOpen(e, item)}
-            sx={{
-              color: "#00f0c0",
-              cursor: "pointer",
-              fontSize: 28,
-              justifyContent: "center",
-              ...fontsTableBody,
-            }}
-          />
-        </StyledCardContent>
-      </EnquiryCardBody>
-    ))
-  )}
-</TableBody>
+                        <StyledCardContent
+                          sx={{ flex: 2, justifyContent: "center", ...fontsTableBody }}
+                        >
+                          <Tooltip title={item.departmentID} arrow placement="top">
+                            <Typography
+                              variant="subtitle2"
+                              sx={{
+                                overflow: "hidden",
+                                textOverflow: "ellipsis",
+                                whiteSpace: "nowrap",
+                                maxWidth: 150,
+                              }}
+                            >
+                              {item.departmentID.length > 35 ? item.departmentID.slice(0, 35) + "..." : item.departmentID}
+                            </Typography>
+                          </Tooltip>
+
+                        </StyledCardContent>
+
+                        <StyledCardContent
+                          sx={{ flex: 1.2, justifyContent: "center", ...fontsTableBody }}
+                        >
+                          <MoreHorizIcon
+                            onClick={(e) => handleOpen(e, item)}
+                            sx={{
+                              color: "#00f0c0",
+                              cursor: "pointer",
+                              fontSize: 28,
+                              justifyContent: "center",
+                              ...fontsTableBody,
+                            }}
+                          />
+                        </StyledCardContent>
+                      </EnquiryCardBody>
+                    ))
+                  )}
+                </TableBody>
 
               </Table>
             </TableContainer>
@@ -719,7 +746,7 @@ function Add_group({ darkMode }) {
                 startIcon={<AddCircleOutline />}
                 onClick={handleAddNewGroup}
                 disabled={!isEditing} // Show only when in edit mode
-               sx={{
+                sx={{
                   backgroundColor: "#5FECC8",
                   color: "#000",
                   fontWeight: 600,
