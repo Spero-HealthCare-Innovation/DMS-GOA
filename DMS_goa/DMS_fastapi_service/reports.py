@@ -77,10 +77,7 @@ def incident_report_daywise(
             else:
                 caller=None
             
-            nn={ 
-                # caller no, name, alert type, alert source, inc type, add , lat-long, 
-
-                "Incident Id": i['incident_id'],
+            nn={"Incident Id": i['incident_id'],
                 "Alert Source":"System Alert" if  i['mode'] == 2 else "Manual Calls",
                 "Disaster Type": dstss.disaster_name,
                 "Alert Type": "High" if i['alert_type'] == 1 else "Medium" if i['alert_type'] == 2 else "Low" if i['alert_type'] == 3 else "Very Low" if i['alert_type'] == 4 else "Unknown",
