@@ -67,8 +67,8 @@ const MapView = ({ data }) => {
       <strong>Elevation:</strong> {triggeredData.elevation}<br />
       <strong>Precipitation:</strong> {triggeredData.precipitation}<br />
       <strong>Rain:</strong> {triggeredData.rain}<br />
-      <strong>Temperature 2m:</strong> {triggeredData.temperature_2m}<br />
-      <strong>Time:</strong> {new Date(triggeredData.time).toLocaleString()}<br />
+      <strong>Temperature:</strong> {triggeredData.temperature_2m}<br />
+      <strong>Time:</strong> {new Date(triggeredData.alert_datetime).toLocaleString()}<br />
     </div>
   ) : "No data";
 
