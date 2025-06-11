@@ -527,6 +527,18 @@ const [formData, setFormData] = useState({
                         Disaster Type
                       </Typography>
                     </StyledCardContent>
+                       <StyledCardContent
+                      sx={{
+                        flex: 1.6,
+                        borderRight: "1px solid black",
+                        justifyContent: "center",
+                        ...fontsTableHeading,
+                      }}
+                    >
+                      <Typography variant="subtitle2">
+                        Acknowledgement
+                      </Typography>
+                    </StyledCardContent>
                     <StyledCardContent
                       sx={{
                         flex: 1.6,
@@ -566,7 +578,7 @@ const [formData, setFormData] = useState({
                     <StyledCardContent
                       sx={{
                         flex: 1.6,
-                        borderRight: "1px solid black",
+                        // borderRight: "1px solid black",
                         justifyContent: "center",
                         ...fontsTableHeading,
                       }}
@@ -575,7 +587,7 @@ const [formData, setFormData] = useState({
                         Back to Base
                       </Typography>
                     </StyledCardContent>
-                    <StyledCardContent
+                    {/* <StyledCardContent
                       sx={{
                         flex: 1.6,
                         // borderRight: "1px solid black",
@@ -586,7 +598,7 @@ const [formData, setFormData] = useState({
                       <Typography variant="subtitle2">
                         Remark
                       </Typography>
-                    </StyledCardContent>
+                    </StyledCardContent> */}
 
                     {/* <StyledCardContent
                               sx={{
@@ -641,6 +653,9 @@ const [formData, setFormData] = useState({
                         <Typography variant="subtitle2" sx={{fontSize:"12px"}}>{item.incident_id || 'N/A'}</Typography>
                       </StyledCardContent>
                       <StyledCardContent sx={{ flex: 2, justifyContent: "center", ...fontsTableBody }}>
+                        <Typography variant="subtitle2" sx={{fontSize:"12px"}}>{item.disaster_type}</Typography>
+                      </StyledCardContent>
+                        <StyledCardContent sx={{ flex: 2, justifyContent: "center", ...fontsTableBody }}>
                         <Typography variant="subtitle2" sx={{fontSize:"12px"}}>{formatDateTime(item.closure_acknowledge)}</Typography>
                       </StyledCardContent>
                       <StyledCardContent sx={{ flex: 2, justifyContent: "center", ...fontsTableBody }}>
@@ -655,9 +670,9 @@ const [formData, setFormData] = useState({
                       <StyledCardContent sx={{ flex: 2, justifyContent: "center", ...fontsTableBody }}>
                         <Typography variant="subtitle2" sx={{fontSize:"12px"}}>{formatDateTime(item.closure_back_to_base)}</Typography>
                       </StyledCardContent>
-                      <StyledCardContent sx={{ flex: 2, justifyContent: "center", ...fontsTableBody }}>
+                      {/* <StyledCardContent sx={{ flex: 2, justifyContent: "center", ...fontsTableBody }}>
                         <Typography variant="subtitle2" sx={{fontSize:"12px"}}>{item.closure_remark || 'N/A'}</Typography>
-                      </StyledCardContent>
+                      </StyledCardContent> */}
                     </EnquiryCardBody>
                   ))
                 )}

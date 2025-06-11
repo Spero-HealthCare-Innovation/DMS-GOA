@@ -430,7 +430,7 @@ const Incident = ({ darkMode }) => {
                                                 <div key={sop.sop_id}>{sop?.sop_description || "No SOP description"}</div>
                                             ))}
                                         </Typography> */}
-                                        <Tooltip
+                                        {/* <Tooltip
                                             title={
                                                 responderScope?.sop_responses?.length > 0
                                                     ? (
@@ -444,7 +444,7 @@ const Incident = ({ darkMode }) => {
                                             }
                                             arrow
                                             placement="top"
-                                        >
+                                        > */}
                                             <Typography
                                                 variant="subtitle2"
                                                 sx={{
@@ -467,7 +467,7 @@ const Incident = ({ darkMode }) => {
                                                     return text;
                                                 })()}
                                             </Typography>
-                                        </Tooltip>
+                                        {/* </Tooltip> */}
 
                                         <Dialog open={openSopModal} onClose={() => setOpenSopModal(false)} maxWidth="sm" fullWidth>
                                             <DialogTitle sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
