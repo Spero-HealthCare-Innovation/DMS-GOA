@@ -86,7 +86,7 @@ const Sidebar = ({ darkMode }) => {
                 </List>
             </Drawer>
 
-            {showWeatherPanel && (
+            {/* {showWeatherPanel && (
                 <Box
                     sx={{
                         position: "absolute",
@@ -116,7 +116,7 @@ const Sidebar = ({ darkMode }) => {
                         </Box>
                     </Box>
                 </Box>
-            )}
+            )} */}
         </Box>
     );
 };

@@ -192,7 +192,6 @@ function Sop({ darkMode, setDarkMode, comments }) {
         comments: incidentData.comments || [],
         respondersScope: incidentData["responders scope"] || [],
       };
-
       // Create enhanced incident object with proper data
 
 
@@ -273,7 +272,7 @@ function Sop({ darkMode, setDarkMode, comments }) {
               selectedIncident={selectedIncident}
               responderScope={responderScope}
               fetchResponderScope={fetchResponderScope}
-
+              fetchDispatchList={fetchDispatchList}
             />
           </Grid>
         )}
