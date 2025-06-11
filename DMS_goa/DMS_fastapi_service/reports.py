@@ -70,8 +70,6 @@ def incident_report_daywise(
                 "alart_time":alrt.alert_datetime.replace(tzinfo=None) if alrt else "",
                 "dispatch_time":i['inc_added_date'],
                 "closure_acknowledge": i['closure_acknowledge'],
-                "incident_create_time":i['inc_added_date'],
-                # "alart_time":alrt_dt.alert_datetime if alrt_dt else None,
                 "closure_start_base_location": i['closure_start_base_location'],
                 "closure_at_scene": i['closure_at_scene'],
                 "closure_from_scene": i['closure_from_scene'],
