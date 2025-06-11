@@ -961,7 +961,7 @@ class closure_Post_api(APIView):
         inccc = request.data.get('incident_id')
         print(inccc,'innnnnnnnn')
         nnnnnn = DMS_Incident.objects.get(inc_id=inccc)
-        nnnnnn.clouser_status = False
+        nnnnnn.clouser_status = True
         nnnnnn.save()
         serializer = ClosureSerializer(data=request.data)
         if serializer.is_valid():
@@ -976,6 +976,13 @@ class closure_Post_api(APIView):
 
 class closure_Post_api2(APIView):
     def post(self,request):
+        
+        inccc = request.data.get('closure_inc_id')
+        print(inccc,'innnnnnnnn')
+        nnnnnn = DMS_Incident.objects.get(incident_id=inccc)
+        nnnnnn.clouser_status = True
+        nnnnnn.save()
+        
         serializers=ClosureSerializer(data=request.data)
         if serializers.is_valid():
             serializers.save()
