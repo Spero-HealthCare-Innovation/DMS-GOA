@@ -6,6 +6,10 @@ import pandas as pd
 from admin_web.models import *
 from fastapi.responses import StreamingResponse
 from datetime import datetime, timedelta
+import pytz
+
+india_tz = pytz.timezone('Asia/Kolkata')
+
 
 router = APIRouter()
 
@@ -14,7 +18,9 @@ def incident_report_daywise(
     from_date: Optional[str] = Query(..., description="Start date in YYYY-MM-DD format"),
     to_date: Optional[str] = Query(..., description="End date in YYYY-MM-DD format")):
     try:
-        query = f"SELECT incident_id, disaster_type_id, closure_acknowledge, closure_start_base_location, closure_at_scene, closure_from_scene, closure_back_to_base, closure_remark FROM closure_report where closure_added_date between '{from_date}' and '{to_date}'"
+        to_date_obj = datetime.strptime(to_date, "%Y-%m-%d") + timedelta(days=1)
+        to_date_plus_one = to_date_obj.strftime("%Y-%m-%d")
+        query = f"SELECT incident_id, disaster_type_id, closure_acknowledge, closure_start_base_location, closure_at_scene, closure_from_scene, closure_back_to_base, closure_remark FROM closure_report where closure_added_date between '{from_date}' and '{to_date_plus_one}'"
         data = hive_connecter_execution(query)  
         dt=[] 
         for i in data:
@@ -67,7 +73,7 @@ def incident_report_daywise(
             nn={
                 "incident_id": i['incident_id'],
                 "disaster_type": dstss.disaster_name,
-                "alart_time":alrt.alert_datetime.replace(tzinfo=None) if alrt else "",
+                "alart_time":alrt.alert_datetime.astimezone(india_tz).replace(tzinfo=None) if alrt else "",
                 "dispatch_time":i['inc_added_date'],
                 "closure_acknowledge": i['closure_acknowledge'],
                 "closure_start_base_location": i['closure_start_base_location'],
