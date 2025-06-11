@@ -244,7 +244,7 @@ const Incident = ({ darkMode }) => {
                             <Typography variant="h6" gutterBottom>
                                 Create Incident
                             </Typography>
-                            <Typography variant="h6" sx={{ fontSize: '16px' }} gutterBottom>
+                            <Typography variant="h6" sx={{ fontSize: '16px', }} gutterBottom>
                                 Time : {formattedTime}
                             </Typography>
                         </Box>

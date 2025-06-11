@@ -36,7 +36,6 @@ import { useAuth } from "../../../Context/ContextAPI";
 import { getCustomSelectStyles } from "../../../CommonStyle/Style";
 import CloseIcon from "@mui/icons-material/Close"; // Add this import at the top
 
-
 function SopRegister({ darkMode }) {
   const EnquiryCard = styled("div")(() => ({
     display: "flex",
@@ -130,6 +129,29 @@ function SopRegister({ darkMode }) {
   const [open, setOpen] = useState(false);
   const iconRef = useRef(null);
   const popoverRef = useRef(null);
+
+  const [disasterError, setDisasterError] = useState(false);
+  const [descriptionError, setDescriptionError] = useState(false);
+
+  const validateForm = () => {
+    let isValid = true;
+
+    if (!selectedDisaster) {
+      setDisasterError(true);
+      isValid = false;
+    } else {
+      setDisasterError(false);
+    }
+
+    if (!description.trim()) {
+      setDescriptionError(true);
+      isValid = false;
+    } else {
+      setDescriptionError(false);
+    }
+
+    return isValid;
+  };
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -595,9 +617,7 @@ function SopRegister({ darkMode }) {
                     </DialogTitle>
                     <DialogContent>
                       <Typography>{descDialogText}</Typography>
-                      <Box textAlign="right" mt={2}>
-                       
-                      </Box>
+                      <Box textAlign="right" mt={2}></Box>
                     </DialogContent>
                   </Dialog>
                 </TableBody>
@@ -789,7 +809,14 @@ function SopRegister({ darkMode }) {
                     label="Disaster Type"
                     variant="outlined"
                     value={selectedDisaster || ""}
-                    onChange={(e) => setSelectedDisaster(e.target.value)}
+                    onChange={(e) => {
+                      setSelectedDisaster(e.target.value);
+                      setDisasterError(false); // reset on change
+                    }}
+                    error={disasterError}
+                    helperText={
+                      disasterError ? "Please select a disaster type" : ""
+                    }
                     SelectProps={{
                       MenuProps: {
                         PaperProps: {
@@ -817,7 +844,12 @@ function SopRegister({ darkMode }) {
                     InputLabelProps={{ shrink: false }}
                     multiline
                     value={description}
-                    onChange={(e) => setDescription(e.target.value)}
+                     onChange={(e) => {
+    setDescription(e.target.value);
+    setDescriptionError(false); // reset on change
+  }}
+   error={descriptionError}
+  helperText={descriptionError ? "Please enter a valid description" : ""}
                     minRows={1} // initial visible lines
                     maxRows={6} // maximum visible lines
                   />
@@ -848,7 +880,11 @@ function SopRegister({ darkMode }) {
                     color: "white !important",
                   },
                 }}
-                onClick={isEditMode ? handleUpdate : handleSubmit}
+              onClick={() => {
+  if (validateForm()) {
+    isEditMode ? handleUpdate() : handleSubmit();
+  }
+}}
               >
                 {showSubmitButton ? "Submit" : isEditMode ? "Update" : "Submit"}
               </Button>
