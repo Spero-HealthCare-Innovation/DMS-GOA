@@ -38,6 +38,8 @@ const Incident = ({ darkMode }) => {
     const location = useLocation();
     const [secondsElapsed, setSecondsElapsed] = useState(0);
     const [timerActive, setTimerActive] = useState(false);
+    const now = new Date();
+    const formattedDate = now.toLocaleDateString('en-GB').slice(0, 8).replace(/\//g, '/').slice(0, -2) + now.getFullYear().toString().slice(2);
 
     useEffect(() => {
         if (location.state?.startData) {
@@ -244,8 +246,11 @@ const Incident = ({ darkMode }) => {
                             <Typography variant="h6" gutterBottom>
                                 Create Incident
                             </Typography>
-                            <Typography variant="h6" sx={{ fontSize: '16px', }} gutterBottom>
+                            {/* <Typography variant="h6" sx={{ fontSize: '16px', }} gutterBottom>
                                 Time : {formattedTime}
+                            </Typography> */}
+                            <Typography variant="h6" sx={{ fontSize: '15px', backgroundColor: 'white', color: "black", borderRadius: '2em', p: 1, }} gutterBottom>
+                                Date: {formattedDate}  |  Time: {formattedTime}
                             </Typography>
                         </Box>
 
@@ -425,48 +430,28 @@ const Incident = ({ darkMode }) => {
                                                 <VisibilityIcon />
                                             </IconButton>
                                         </Box>
-                                        {/* <Typography variant="subtitle2" sx={{ fontFamily }}>
-                                            {responderScope?.sop_responses?.map((sop) => (
-                                                <div key={sop.sop_id}>{sop?.sop_description || "No SOP description"}</div>
-                                            ))}
-                                        </Typography> */}
-                                        {/* <Tooltip
-                                            title={
-                                                responderScope?.sop_responses?.length > 0
-                                                    ? (
-                                                        <div>
-                                                            {responderScope.sop_responses.map((sop) => (
-                                                                <div key={sop.sop_id}>{sop?.sop_description || "No SOP description"}</div>
-                                                            ))}
-                                                        </div>
-                                                    )
-                                                    : "No SOP description"
-                                            }
-                                            arrow
-                                            placement="top"
-                                        > */}
-                                            <Typography
-                                                variant="subtitle2"
-                                                sx={{
-                                                    fontFamily,
-                                                    cursor: "pointer",
-                                                    display: "-webkit-box",
-                                                    WebkitLineClamp: 2,
-                                                    WebkitBoxOrient: "vertical",
-                                                    overflow: "hidden",
-                                                    textOverflow: "ellipsis",
-                                                    maxWidth: 300, // adjust as needed
-                                                }}
-                                            >
-                                                {(() => {
-                                                    const sops = responderScope?.sop_responses || [];
-                                                    if (sops.length === 0) return "No SOP description";
-                                                    const shown = sops.slice(0, 2).map(sop => sop.sop_description || "No SOP description");
-                                                    let text = shown.join(", ");
-                                                    if (sops.length > 2) text += " ...";
-                                                    return text;
-                                                })()}
-                                            </Typography>
+                                        <Typography
+                                            variant="subtitle2"
+                                            sx={{
+                                                fontFamily,
+                                                cursor: "pointer",
+                                                display: "-webkit-box",
+                                                WebkitLineClamp: 2,
+                                                WebkitBoxOrient: "vertical",
+                                                overflow: "hidden",
+                                                textOverflow: "ellipsis",
+                                                maxWidth: 300, 
+                                            }}
+                                        >
+                                            {(() => {
+                                                const sops = responderScope?.sop_responses || [];
+                                                if (sops.length === 0) return "No SOP description";
+                                                const shown = sops.slice(0, 2).map(sop => sop.sop_description || "No SOP description");
+                                                let text = shown.join(", ");
+                                                if (sops.length > 2) text += " ...";
+                                                return text;
+                                            })()}
+                                        </Typography>
                                         {/* </Tooltip> */}
 
                                         <Dialog open={openSopModal} onClose={() => setOpenSopModal(false)} maxWidth="sm" fullWidth>
