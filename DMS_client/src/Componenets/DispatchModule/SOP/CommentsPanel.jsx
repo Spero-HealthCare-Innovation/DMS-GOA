@@ -121,7 +121,8 @@ function CommentsPanel({
         setCommentText("");
         setSelectedResponders([]);
         setFlag(0);
-        fetchDispatchList();
+        // await fetchDispatchList();
+        window.location.reload();
       } else {
         throw new Error("API Error");
       }
@@ -154,9 +155,9 @@ function CommentsPanel({
         }
       );
 
-      if (!response.ok) throw new Error("Failed to send comment.");
+      // if (!response.ok) throw new Error("Failed to send comment.");
 
-      const secondResponse = await fetch(`http://164.52.200.41/Spero_CAD/dms/alert_details`, {
+      const secondResponse = await fetch(`http://210.212.165.119/Spero_DMS/dms/alert_details`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -186,7 +187,7 @@ function CommentsPanel({
       });
 
       setCommentText("");
-      fetchDispatchList();
+      await fetchDispatchList();
     } catch (err) {
       console.error(err);
       setSnackbar({
@@ -339,15 +340,15 @@ function CommentsPanel({
                               ? "#0f766e"
                               : "#d1fae5"
                             : darkMode
-                            ? "#1e293b"
-                            : "#f3f4f6",
+                              ? "#1e293b"
+                              : "#f3f4f6",
                           color: isOwnComment
                             ? darkMode
                               ? "#e0f2f1"
                               : "#065f46"
                             : darkMode
-                            ? "#e2e8f0"
-                            : "#111827",
+                              ? "#e2e8f0"
+                              : "#111827",
                           px: 2,
                           py: 1,
                           borderRadius: 2,

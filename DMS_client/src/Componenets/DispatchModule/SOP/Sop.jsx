@@ -184,14 +184,14 @@ function Sop({ darkMode, setDarkMode, comments }) {
       );
 
       const enhancedIncident = {
-      ...incidentData,
-      incident_id: incidentData.incident_details[0]?.incident_id, // Get from incident_details array
-      disaster_name: incidentData.incident_details[0]?.disaster_name,
-      alert_type: incidentData.incident_details[0]?.alert_type,
-      inc_id: incidentData.inc_id, // This is the numeric ID for POST
-      comments: incidentData.comments || [],
-      respondersScope: incidentData["responders scope"] || [],
-    };
+        ...incidentData,
+        incident_id: incidentData.incident_details[0]?.incident_id, // Get from incident_details array
+        disaster_name: incidentData.incident_details[0]?.disaster_name,
+        alert_type: incidentData.incident_details[0]?.alert_type,
+        inc_id: incidentData.inc_id, // This is the numeric ID for POST
+        comments: incidentData.comments || [],
+        respondersScope: incidentData["responders scope"] || [],
+      };
       // Create enhanced incident object with proper data
 
 
@@ -272,7 +272,7 @@ function Sop({ darkMode, setDarkMode, comments }) {
               selectedIncident={selectedIncident}
               responderScope={responderScope}
               fetchResponderScope={fetchResponderScope}
-
+              fetchDispatchList={fetchDispatchList}
             />
           </Grid>
         )}

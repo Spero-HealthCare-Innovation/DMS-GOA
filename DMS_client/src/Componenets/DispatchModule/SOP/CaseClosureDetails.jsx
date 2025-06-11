@@ -18,7 +18,7 @@ import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
 import { useAuth } from "../../../Context/ContextAPI";
 
 
-const CaseClosureDetails = ({ darkMode, flag, selectedIncident }) => {
+const CaseClosureDetails = ({ darkMode, flag, selectedIncident, fetchDispatchList }) => {
   const port = import.meta.env.VITE_APP_API_KEY;
   const token = localStorage.getItem("accessToken");
   const userName = localStorage.getItem("userId");
@@ -194,7 +194,7 @@ const CaseClosureDetails = ({ darkMode, flag, selectedIncident }) => {
     }
 
     const payload = {
-      
+
       incident_id: numericIncId, // Pass numeric inc_id (292) instead of string incident_id
       Disaster_Type: selectedIncidentFromSop?.disaster_name || selectedIncident?.disaster_name,
       Alert_Type: getAlertTypeName(selectedIncidentFromSop?.alert_type || selectedIncident?.alert_type),
@@ -243,6 +243,7 @@ const CaseClosureDetails = ({ darkMode, flag, selectedIncident }) => {
       });
       setSelectedIncidentFromSop(null);
       setIsDataCleared(true);
+      fetchDispatchList()
 
     } catch (error) {
       console.error("API Error:", error); // Debug log
