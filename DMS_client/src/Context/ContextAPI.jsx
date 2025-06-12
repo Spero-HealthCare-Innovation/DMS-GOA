@@ -43,6 +43,8 @@ export const AuthProvider = ({ children }) => {
     18.5329846, 73.8216998,
   ]); // Default: Pune
   const [popupText, setPopupText] = useState("");
+  const [commentText, setCommentText] = useState("");
+
   // 🔹 sop page
   const [responderScope, setResponderScope] = useState([]);
   const [responderScopeForDispatch, setResponderScopeForDispatch] = useState([]);
@@ -348,6 +350,7 @@ export const AuthProvider = ({ children }) => {
         setEnhancedIncidentData,
         lattitude, setLattitude,
         longitude, setLongitude,
+        commentText, setCommentText
       }}
     >
       {children}
