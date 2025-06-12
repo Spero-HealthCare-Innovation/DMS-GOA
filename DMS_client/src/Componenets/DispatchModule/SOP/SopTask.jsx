@@ -127,7 +127,7 @@ function SopTask({
   fetchDispatchList,
   highlightedId,
   setHighlightedId
-  
+
 }) {
   const port = import.meta.env.VITE_APP_API_KEY;
   const socketUrl = import.meta.env.VITE_SOCKET_API_KEY;
@@ -163,7 +163,7 @@ function SopTask({
   const endIndex = startIndex + rowsPerPage;
   // Get sliced data for current page
   const dispatchListdata = dataList.slice(startIndex, endIndex);
-  const { setSelectedIncidentFromSop, setDisasterIdFromSop } = useAuth();
+  const { setSelectedIncidentFromSop, setDisasterIdFromSop, setCommentText } = useAuth();
 
   window.addEventListener("storage", (e) => {
     if (e.key === "logout") {
@@ -174,8 +174,7 @@ function SopTask({
     let socket;
     const timer = setTimeout(() => {
       socket = new WebSocket(
-        `${socketUrl}/ws/weather_alerts_trigger2?token=${
-          AccessToken || newToken
+        `${socketUrl}/ws/weather_alerts_trigger2?token=${AccessToken || newToken
         }`
       );
 
@@ -194,6 +193,7 @@ function SopTask({
           // Show snackbar when data is received
           setSnackbarMsg(data.message || "⚠️ New  alert triggered!");
           setOpenSnackbar(true);
+          setCommentText("");
         } catch (error) {
           console.error("Invalid JSON:", event.data);
         }
@@ -292,33 +292,33 @@ function SopTask({
 
 
   // brouswer and tab close logout functionality
-//   let isPageReloaded = false;
+  //   let isPageReloaded = false;
 
-// // When page loads, mark it as reloaded in sessionStorage
-// window.addEventListener('load', () => {
-//   sessionStorage.setItem('isReloaded', 'true');
-// });
+  // // When page loads, mark it as reloaded in sessionStorage
+  // window.addEventListener('load', () => {
+  //   sessionStorage.setItem('isReloaded', 'true');
+  // });
 
-// // In beforeunload, detect if it's a refresh
-// window.addEventListener('beforeunload', (event) => {
-//   const navEntries = performance.getEntriesByType('navigation');
-//   const navType = navEntries.length > 0 ? navEntries[0].type : null;
+  // // In beforeunload, detect if it's a refresh
+  // window.addEventListener('beforeunload', (event) => {
+  //   const navEntries = performance.getEntriesByType('navigation');
+  //   const navType = navEntries.length > 0 ? navEntries[0].type : null;
 
-//   // Detect reload via performance API or sessionStorage flag
-//   isPageReloaded = navType === 'reload' || sessionStorage.getItem('isReloaded') === 'true';
+  //   // Detect reload via performance API or sessionStorage flag
+  //   isPageReloaded = navType === 'reload' || sessionStorage.getItem('isReloaded') === 'true';
 
-//   if (!isPageReloaded) {
-//     // It's a tab/browser close → perform logout logic
-//     localStorage.setItem('logout', Date.now().toString());
-//     // Optionally: Clear sessionStorage/localStorage/cookies if needed
-//     // sessionStorage.clear();
-//     // localStorage.clear();
-//     // document.cookie = ""; // example to clear cookies
-//   }
+  //   if (!isPageReloaded) {
+  //     // It's a tab/browser close → perform logout logic
+  //     localStorage.setItem('logout', Date.now().toString());
+  //     // Optionally: Clear sessionStorage/localStorage/cookies if needed
+  //     // sessionStorage.clear();
+  //     // localStorage.clear();
+  //     // document.cookie = ""; // example to clear cookies
+  //   }
 
-//   // Clean up the sessionStorage flag (optional)
-//   sessionStorage.removeItem('isReloaded');
-// });
+  //   // Clean up the sessionStorage flag (optional)
+  //   sessionStorage.removeItem('isReloaded');
+  // });
 
   return (
     <Paper
@@ -538,16 +538,16 @@ function SopTask({
                     >
                       {item.alert_datetime
                         ? new Date(item.alert_datetime).toLocaleString(
-                            "en-US",
-                            {
-                              day: "2-digit",
-                              month: "long",
-                              year: "numeric",
-                              hour: "numeric",
-                              minute: "2-digit",
-                              hour12: true,
-                            }
-                          )
+                          "en-US",
+                          {
+                            day: "2-digit",
+                            month: "long",
+                            year: "numeric",
+                            hour: "numeric",
+                            minute: "2-digit",
+                            hour12: true,
+                          }
+                        )
                         : "N/A"}
                     </Typography>
                   </StyledCardContent>
@@ -623,7 +623,7 @@ function SopTask({
                       <EnquiryCardBody
                         key={item.incident_id}
                         alertType={item.inc_type}
-                       isHighlighted={item.incident_id === highlightedId}
+                        isHighlighted={item.incident_id === highlightedId}
                       >
                         {/* Incident ID */}
                         <StyledCardContent
@@ -644,16 +644,16 @@ function SopTask({
                           >
                             {item.inc_added_date
                               ? new Date(item.inc_added_date).toLocaleString(
-                                  "en-US",
-                                  {
-                                    day: "2-digit",
-                                    month: "long",
-                                    year: "numeric",
-                                    hour: "numeric",
-                                    minute: "2-digit",
-                                    hour12: true,
-                                  }
-                                )
+                                "en-US",
+                                {
+                                  day: "2-digit",
+                                  month: "long",
+                                  year: "numeric",
+                                  hour: "numeric",
+                                  minute: "2-digit",
+                                  hour12: true,
+                                }
+                              )
                               : "N/A"}
                           </Typography>
                         </StyledCardContent>
@@ -724,7 +724,7 @@ function SopTask({
                                 setSelectedIncident(item);
                                 setFlag(0);
                                 setViewmode("closure");
-                                  setHighlightedId(item.incident_id);
+                                setHighlightedId(item.incident_id);
                               }}
                               size="large"
                             >
