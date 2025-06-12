@@ -69,3 +69,4 @@ django_enumfield
 pyhive
 thrift
 thrift-sasl
+geopy 

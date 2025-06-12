@@ -20,7 +20,7 @@ def incident_report_daywise(
     try:
         to_date_obj = datetime.strptime(to_date, "%Y-%m-%d") + timedelta(days=1)
         to_date_plus_one = to_date_obj.strftime("%Y-%m-%d")
-        query = f"SELECT incident_id, disaster_type_id, closure_acknowledge, closure_start_base_location, closure_at_scene, closure_from_scene, closure_back_to_base, closure_remark FROM closure_report where closure_added_date between '{from_date}' and '{to_date_plus_one}'"
+        query = f"SELECT incident_id, disaster_type_id, closure_acknowledge, closure_start_base_location, closure_at_scene, closure_from_scene, closure_back_to_base, closure_remark FROM final_closure_report where closure_added_date between '{from_date}' and '{to_date_plus_one}'"
         data = hive_connecter_execution(query)  
         dt=[] 
         for i in data:
@@ -55,7 +55,7 @@ def incident_report_daywise(
         query = f"""
             SELECT incident_id, disaster_type_id, alert_id_id, inc_added_date, mode, alert_type,caller_id_id, location, latitude, longitude, closure_acknowledge, closure_start_base_location, 
                    closure_at_scene, closure_from_scene, closure_back_to_base, closure_remark, closure_added_date 
-            FROM closure_report 
+            FROM final_closure_report 
             WHERE closure_added_date BETWEEN '{from_date}' AND '{to_date_plus_one}'
         """
         data = hive_connecter_execution(query)
@@ -77,10 +77,7 @@ def incident_report_daywise(
             else:
                 caller=None
             
-            nn={ 
-                # caller no, name, alert type, alert source, inc type, add , lat-long, 
-
-                "Incident Id": i['incident_id'],
+            nn={"Incident Id": i['incident_id'],
                 "Alert Source":"System Alert" if  i['mode'] == 2 else "Manual Calls",
                 "Disaster Type": dstss.disaster_name,
                 "Alert Type": "High" if i['alert_type'] == 1 else "Medium" if i['alert_type'] == 2 else "Low" if i['alert_type'] == 3 else "Very Low" if i['alert_type'] == 4 else "Unknown",
