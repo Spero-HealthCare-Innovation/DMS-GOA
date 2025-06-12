@@ -11,7 +11,7 @@ import {
   Avatar,
   Stack,
   Tooltip,
-  
+
 } from "@mui/material";
 import { useAuth } from "../../../Context/ContextAPI";
 
@@ -88,9 +88,9 @@ function CommentsPanel({
   useEffect(() => {
     fetchComments();
   }, []);
-useEffect(() => {
-  bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-}, [fetchIncidentDetails]);
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [fetchIncidentDetails]);
 
   const handlealertSaveClick = async () => {
     if (!commentText.trim()) return;
@@ -127,7 +127,7 @@ useEffect(() => {
         setCommentText("");
         setSelectedResponders([]);
         setFlag(0);
-        
+
         setHighlightedId(null);
         await fetchDispatchList();
       } else {
@@ -208,45 +208,45 @@ useEffect(() => {
 
 
   const handleCommentSendClick = async () => {
-  if (!commentText.trim()) return;
+    if (!commentText.trim()) return;
 
-  try {
-    const response = await fetch(
-      `${port}/admin_web/comments_post/${selectedIncident?.inc_id}/`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${Token || newToken}`,
-        },
-        body: JSON.stringify({
-          comments: commentText,
-          comm_added_by: userName,
-        }),
-      }
-    );
+    try {
+      const response = await fetch(
+        `${port}/admin_web/comments_post/${selectedIncident?.inc_id}/`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${Token || newToken}`,
+          },
+          body: JSON.stringify({
+            comments: commentText,
+            comm_added_by: userName,
+          }),
+        }
+      );
 
-    if (!response.ok)
-      throw new Error("Failed to log comment activity.");
+      if (!response.ok)
+        throw new Error("Failed to log comment activity.");
 
-    setSnackbar({
-      open: true,
-      message: "Comment sent successfully!",
-      severity: "success",
-    });
+      setSnackbar({
+        open: true,
+        message: "Comment sent successfully!",
+        severity: "success",
+      });
 
-    setCommentText("");
-    await fetchDispatchList();
-    fetchIncidentDetails();
-  } catch (err) {
-    console.error(err);
-    setSnackbar({
-      open: true,
-      message: "Failed to send comment.",
-      severity: "error",
-    });
-  }
-};
+      setCommentText("");
+      await fetchDispatchList();
+      fetchIncidentDetails();
+    } catch (err) {
+      console.error(err);
+      setSnackbar({
+        open: true,
+        message: "Failed to send comment.",
+        severity: "error",
+      });
+    }
+  };
 
 
   // const handleCommentSendClick = async () => {

@@ -59,7 +59,10 @@ const Sidebar = ({ darkMode }) => {
                         overflowX: "hidden",
                         paddingBottom: 3,
                         marginTop: "7em",
-                        marginLeft: "1em",
+                        marginLeft: "0.8em",
+                        "&:hover": {
+                            background: "radial-gradient(6035.71% 72.44% at 0% 50%, #00BFA6 0%, #292D45 100%)",
+                        },
                     },
                 }}
             >
@@ -78,6 +81,10 @@ const Sidebar = ({ darkMode }) => {
                             </ListItemIcon>
                             <ListItemText
                                 primary={item.text}
+                                primaryTypographyProps={{
+                                    fontSize: "14px",
+                                    lineHeight: 1.3,
+                                }}
                                 sx={{ opacity: open ? 1 : 0, whiteSpace: "nowrap" }}
                             />
                         </ListItemButton>
