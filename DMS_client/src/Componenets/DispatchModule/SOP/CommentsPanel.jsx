@@ -11,6 +11,7 @@ import {
   Avatar,
   Stack,
   Tooltip,
+  
 } from "@mui/material";
 import { useAuth } from "../../../Context/ContextAPI";
 
@@ -23,7 +24,9 @@ function CommentsPanel({
   setSelectedResponders,
   fetchDispatchList,
   incidentDetails,
-  fetchIncidentDetails
+  fetchIncidentDetails,
+  highlightedId,
+  setHighlightedId
 }) {
   const port = import.meta.env.VITE_APP_API_KEY;
   const userName = localStorage.getItem("userId");
@@ -85,10 +88,9 @@ function CommentsPanel({
   useEffect(() => {
     fetchComments();
   }, []);
-
-  useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [allComments]);
+useEffect(() => {
+  bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+}, [fetchIncidentDetails]);
 
   const handlealertSaveClick = async () => {
     if (!commentText.trim()) return;
@@ -125,6 +127,8 @@ function CommentsPanel({
         setCommentText("");
         setSelectedResponders([]);
         setFlag(0);
+        
+        setHighlightedId(null);
         await fetchDispatchList();
       } else {
         throw new Error("API Error");

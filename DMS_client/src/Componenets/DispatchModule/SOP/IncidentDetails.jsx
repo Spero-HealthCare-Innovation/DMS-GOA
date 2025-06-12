@@ -30,6 +30,8 @@ function IncidentDetails({
   incidentDetails,
   setSelectedIncident,
   fetchIncidentDetails,
+  highlightedId,
+  setHighlightedId,
 }) {
   window.addEventListener("storage", (e) => {
     if (e.key === "logout") {
@@ -603,6 +605,8 @@ function IncidentDetails({
       comments={comments}
       fetchDispatchList={fetchDispatchList}
          fetchIncidentDetails={fetchIncidentDetails}
+         highlightedId={highlightedId}
+         setHighlightedId={setHighlightedId}
       
     />
   ) : (
