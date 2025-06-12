@@ -204,18 +204,21 @@ const Incident = ({ darkMode }) => {
     const [openSopModal, setOpenSopModal] = useState(false);
 
 
+    const fetchSummary = async () => {
+        const res = await fetch(`${port}/admin_web/DMS_Summary_Get/${selectedEmergencyValue}/`, {
+            headers: {
+                Authorization: `Bearer ${token || newToken}`,
+            }
+        });
+        const data = await res.json();
+        setSummary(data);
+    };
+
     useEffect(() => {
-        const fetchSummary = async () => {
-            const res = await fetch(`${port}/admin_web/DMS_Summary_Get/`, {
-                headers: {
-                    Authorization: `Bearer ${token || newToken}`,
-                }
-            });
-            const data = await res.json();
-            setSummary(data);
-        };
-        fetchSummary();
-    }, []);
+        if (selectedEmergencyValue) {
+            fetchSummary();
+        }
+    }, [selectedEmergencyValue]);
 
     return (
         <Box sx={{ minHeight: "100vh", backgroundColor: darkMode ? "#0a1929" : "#f5f5f5", px: 2, py: 3 }}>
@@ -249,8 +252,19 @@ const Incident = ({ darkMode }) => {
                             {/* <Typography variant="h6" sx={{ fontSize: '16px', }} gutterBottom>
                                 Time : {formattedTime}
                             </Typography> */}
-                            <Typography variant="h6" sx={{ fontSize: '15px', backgroundColor: 'white', color: "black", borderRadius: '2em', p: 1, }} gutterBottom>
-                                Date: {formattedDate}  |  Time: {formattedTime}
+                            <Typography
+                                variant="h6"
+                                sx={{
+                                    fontSize: '15px',
+                                    borderRadius: '2em',
+                                    p: 1,
+                                    ...(darkMode
+                                        ? { backgroundColor: 'white', color: "black" }
+                                        : { backgroundColor: 'lightgrey', color: 'black' }),
+                                }}
+                                gutterBottom
+                            >
+                                Date: {formattedDate} | Time: {formattedTime}
                             </Typography>
                         </Box>
 
@@ -440,7 +454,7 @@ const Incident = ({ darkMode }) => {
                                                 WebkitBoxOrient: "vertical",
                                                 overflow: "hidden",
                                                 textOverflow: "ellipsis",
-                                                maxWidth: 300, 
+                                                maxWidth: 300,
                                             }}
                                         >
                                             {(() => {
@@ -550,7 +564,7 @@ const Incident = ({ darkMode }) => {
                     </Box>
                 </Grid>
             </Grid>
-        </Box>
+        </Box >
     );
 };
 
