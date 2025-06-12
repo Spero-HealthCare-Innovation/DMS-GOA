@@ -655,7 +655,8 @@ class DMS_Incident_Post_api(APIView):
                 "inc_type": "NON_MCI",
                 "incident_id": str(incc.incident_id),
                 "latitude": str(incc.latitude),
-                "longitude": str(incc.longitude)
+                "longitude": str(incc.longitude),
+                "alert_priority_type": ("High" if incc.alert_type == 1 else"Medium" if incc.alert_type == 2 else"Low" if incc.alert_type == 3 else"Very Low" if incc.alert_type == 4 else"")
             } 
             print(external_api_payload)
             external_response = requests.post(
@@ -675,7 +676,7 @@ class DMS_Incident_Post_api(APIView):
             aaa = DMS_Comments.objects.filter(incident_id=incc).last()
             nn = {"incident_id": incc.incident_id,"alert_comment": aaa.comments}
             external_response = requests.post(
-                    "http://210.212.165.119/Spero_DMS/dms/alert_details",
+                    "http://210.212.165.119/Spero_DMS/dms/alert_comments",
                     json=nn,
                     headers={"Content-Type": "application/json"},
                     timeout=10
@@ -854,7 +855,7 @@ class Manual_Call_Incident_api(APIView):
         
         nn = {"incident_id": incident_instance.incident_id,"alert_comment": comments_instance.comments}
         external_response = requests.post(
-                "http://210.212.165.119/Spero_DMS/dms/alert_details",
+                "http://210.212.165.119/Spero_DMS/dms/alert_comments",
                 json=nn,
                 headers={"Content-Type": "application/json"},
                 timeout=10
@@ -907,7 +908,9 @@ class Manual_Call_Incident_api(APIView):
         "inc_type": "NON_MCI" if incident_instance.inc_type == 1 else "NON_EME_CALL" if incident_instance.inc_type == 2 else "",
         "incident_id": str(incident_instance.incident_id),
         "latitude": str(incident_instance.latitude),
-        "longitude": str(incident_instance.longitude)
+        "longitude": str(incident_instance.longitude),
+        "alert_priority_type": ("High" if incident_instance.alert_type == 1 else"Medium" if incident_instance.alert_type == 2 else"Low" if incident_instance.alert_type == 3 else"Very Low" if incident_instance.alert_type == 4 else""
+)
     }
         print("Sending to external API:", external_api_payload)
 
