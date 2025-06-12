@@ -29,6 +29,7 @@ function IncidentDetails({
   fetchDispatchList,
   incidentDetails,
   setSelectedIncident,
+  fetchIncidentDetails,
 }) {
   window.addEventListener("storage", (e) => {
     if (e.key === "logout") {
@@ -229,8 +230,13 @@ function IncidentDetails({
                         {
                           label: "Alert Type",
                           value:
+<<<<<<< HEAD
                             { 1: "High", 2: "Medium", 3: "Low" }[
                             incident?.alert_type
+=======
+                            { 1: "High", 2: "Medium", 3: "Low", 4: "Very Low" }[
+                              incident?.alert_type
+>>>>>>> Development
                             ] || "N/A",
                         },
                         { label: "Caller Name", value: incident?.caller_name },
@@ -601,6 +607,7 @@ function IncidentDetails({
       incidentDetails={incidentDetails}
       comments={comments}
       fetchDispatchList={fetchDispatchList}
+         fetchIncidentDetails={fetchIncidentDetails}
       
     />
   ) : (
