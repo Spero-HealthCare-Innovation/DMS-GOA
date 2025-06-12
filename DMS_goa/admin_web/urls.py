@@ -99,7 +99,7 @@ urlpatterns = [
     path('manual_call_incident/', Manual_Call_Incident_api.as_view(), name='manual-call-create'),  
     path('Responder_Scope_Get/<int:disaster_id>/', Responder_Scope_Get_api.as_view(), name='Responder_Scope_Get'), 
     
-    path('DMS_Summary_Get/', DMS_Summary_Get_API.as_view(), name='DMS_Summary_Get'),
+    path('DMS_Summary_Get/<int:summary_type>/', DMS_Summary_Get_API.as_view(), name='DMS_Summary_Get'),
     
     
     path('comments_post/<int:incident_id>/', CommentPostView.as_view(), name='comments_post'),
