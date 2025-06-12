@@ -369,7 +369,7 @@ function SopTask({
             lineHeight: "32px",
           }}
         >
-          {flag === 1 ? "Alert Task" : "Dispatch SOP"}
+          {flag === 1 ? "Alert Task" : "Dispatch List"}
         </Typography>
 
         {/* Search Field */}
