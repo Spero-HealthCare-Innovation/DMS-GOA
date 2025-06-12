@@ -27,7 +27,7 @@ function CommentsPanel({
 }) {
   const port = import.meta.env.VITE_APP_API_KEY;
   const userName = localStorage.getItem("userId");
-  const { newToken } = useAuth();
+  const { newToken, commentText, setCommentText } = useAuth();
   const Token = localStorage.getItem("access_token");
 
   const [snackbar, setSnackbar] = useState({
@@ -39,9 +39,12 @@ function CommentsPanel({
   console.log(selectedIncident, 'selectedIncident in Comment');
 
 
-  const [commentText, setCommentText] = useState("");
+  // const [commentText, setCommentText] = useState("");
+
   const [placeholderVisible, setPlaceholderVisible] = useState(true);
   const [allComments, setAllComments] = useState([]);
+  console.log(commentText, 'allCommentsssssssssss');
+
   const [isLoadingComments, setIsLoadingComments] = useState(false);
 
   const bottomRef = useRef(null);
