@@ -620,13 +620,10 @@ class DMS_Alert_idwise_get_api(APIView):
 
 class DMS_Incident_Post_api(APIView):
     def post(self,request):
-        print("hiiiiiii")
         serializers=Incident_Serializer(data=request.data)
         if serializers.is_valid():
-            print("hiiiiiii in if")
             serializers.save()
             print(serializers.data.get('inc_id'))
-            # print("serializers.data-- ", serializers.data)
             alert_id = request.data['alert_id']
         
             # Initialize the geocoder
@@ -645,7 +642,6 @@ class DMS_Incident_Post_api(APIView):
 
                 Inc_obj.location = location.address
                 Inc_obj.save()
-            # return Response(serializers.data,status=status.HTTP_201_CREATED)
 
             sinc = serializers.data.get('inc_id')
             incc = DMS_Incident.objects.get(inc_id=sinc)
@@ -676,15 +672,27 @@ class DMS_Incident_Post_api(APIView):
                     "error": f"Status {external_response.status_code}",
                     "response": external_response.text
                 }
+            aaa = DMS_Comments.objects.filter(incident_id=incc).last()
+            nn = {"incident_id": incc.incident_id,"alert_comment": aaa.comments}
+            external_response = requests.post(
+                    "http://210.212.165.119/Spero_DMS/dms/alert_details",
+                    json=nn,
+                    headers={"Content-Type": "application/json"},
+                    timeout=10
+                )
+            print(external_response.json())
+
             data = {
                 "sr_dt":serializers.data,
                 "external_api_result":external_api_result
             }
-            # return Response(serializers.data, external_api_result, status=status.HTTP_201_CREATED)
             return Response(data, status=status.HTTP_201_CREATED)
         else:
             print("hiiiiiii else")
             return Response(serializers.errors,status=status.HTTP_400_BAD_REQUEST)
+
+
+
 
 
 class DMS_Comments_Post_api(APIView):
@@ -810,9 +818,6 @@ from .serializers import (
 class Manual_Call_Incident_api(APIView):
     def post(self, request, *args, **kwargs):
         data = request.data
-
-        print("Received request data:", data)
-
         incident_fields = [
             'inc_type', 'disaster_type', 'alert_type', 'location', 'summary',
             'responder_scope', 'latitude', 'longitude', 'caller_id',
@@ -825,45 +830,39 @@ class Manual_Call_Incident_api(APIView):
         caller_data = {field: data.get(field) for field in caller_fields}
         comments_data = {field: data.get(field) for field in comments_fields}
 
-        print("Caller data:", caller_data)
-        print("Incident data:", incident_data)
-        print("Comments data:", comments_data)
-
-        # Step 1: Save caller
+       
         caller_serializer = Manual_call_data_Serializer(data=caller_data)
         if not caller_serializer.is_valid():
-            print("Caller serializer errors:", caller_serializer.errors)
             return Response({"caller_errors": caller_serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
         caller_instance = caller_serializer.save()
-        print("Saved caller:", caller_instance.pk)
         incident_data['caller_id'] = caller_instance.pk
-
-        # Step 2: Save incident
         incident_serializer = Manual_call_incident_dispatch_Serializer(data=incident_data)
         if not incident_serializer.is_valid():
-            print("Incident serializer errors:", incident_serializer.errors)
             return Response({"incident_errors": incident_serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
         incident_instance = incident_serializer.save()
-        print("Saved incident:", incident_instance.inc_id)
-
         base_code = incident_instance.incident_id
         alert_code = f"CALL-{base_code}"
         incident_instance.alert_code = alert_code
         incident_instance.save()
-        print("Generated alert code:", alert_code)
-
-        # Step 3: Save comments
         comments_data['incident_id'] = incident_instance.inc_id
         comments_serializer = manual_Comments_Serializer(data=comments_data)
         if not comments_serializer.is_valid():
-            print("Comments serializer errors:", comments_serializer.errors)
             return Response({"comments_errors": comments_serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
         comments_instance = comments_serializer.save()
         incident_instance.comment_id = comments_instance
         incident_instance.save()
-        print("Saved comments for incident.")
-
-        # Step 4: Save weather alert
+        
+        nn = {"incident_id": incident_instance.incident_id,"alert_comment": comments_instance.comments}
+        external_response = requests.post(
+                "http://210.212.165.119/Spero_DMS/dms/alert_details",
+                json=nn,
+                headers={"Content-Type": "application/json"},
+                timeout=10
+            )
+        print(external_response.json()
+ )
+ 
+       
         weather_alert_data = {
             "alert_code": alert_code,
             "disaster_id": incident_instance.disaster_type.pk if incident_instance.disaster_type else None,
@@ -973,8 +972,8 @@ class Responder_Scope_Get_api(APIView):
 
         
 class DMS_Summary_Get_API(APIView):
-    def get(self,request):
-        snippet = DMS_Summary.objects.all()
+    def get(self,request,summary_type):
+        snippet = DMS_Summary.objects.filter(summary_type=summary_type)
         serializers = DMS_Summary_Serializer(snippet,many=True)
         return Response(serializers.data,status=status.HTTP_200_OK)
     
@@ -1223,15 +1222,72 @@ class dispatch_sop_Idwise_Get_API(APIView):
 
 
 from django.shortcuts import get_object_or_404
+# class CommentPostView(APIView):
+#     def post(self, request, incident_id):
+#         # Use correct PK field: inc_id
+#         incident_instance = get_object_or_404(DMS_Incident, inc_id=incident_id)
+
+#         serializer = Comment_Post_Serializer(data=request.data)
+#         if serializer.is_valid():
+#             serializer.save(incident_id=incident_instance)
+            
+#             aaa=DMS_Incident.objects.filter(inc_id=incident_id)
+            
+#             nn = {"incident_id": aaa.incident_id,"alert_comment": serializer.data.get('comments')}
+#             external_response = requests.post(
+#                     "http://210.212.165.119/Spero_DMS/dms/alert_details",
+#                     json=nn,
+#                     headers={"Content-Type": "application/json"},
+#                     timeout=10
+#                 )
+#             print(external_response.json()
+#  )
+            
+            
+#             return Response(serializer.data, status=status.HTTP_201_CREATED)
+#         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+
+
+from django.shortcuts import get_object_or_404
+from rest_framework.response import Response
+from rest_framework.views import APIView
+from rest_framework import status
+import requests
+
 class CommentPostView(APIView):
     def post(self, request, incident_id):
-        # Use correct PK field: inc_id
         incident_instance = get_object_or_404(DMS_Incident, inc_id=incident_id)
 
         serializer = Comment_Post_Serializer(data=request.data)
         if serializer.is_valid():
             serializer.save(incident_id=incident_instance)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+            
+            aaa = DMS_Incident.objects.get(inc_id=incident_id)
+            
+            nn = {
+                "incident_id": aaa.incident_id,
+                "alert_comment": serializer.data.get('comments')
+            }
+
+            try:
+                external_response = requests.post(
+                    "http://210.212.165.119/Spero_DMS/dms/alert_details",
+                    json=nn,
+                    headers={"Content-Type": "application/json"},
+                    timeout=10
+                )
+                external_data = external_response.json()
+            except requests.exceptions.RequestException as e:
+                external_data = {"error": str(e)}
+
+            return Response({
+                "local_data": serializer.data,
+                "external_api_response": external_data
+            }, status=status.HTTP_201_CREATED)
+
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
