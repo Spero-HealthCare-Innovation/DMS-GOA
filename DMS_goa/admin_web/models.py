@@ -6,6 +6,12 @@ from django_enumfield import enum
 
 
 
+
+
+class summary_enum(enum.Enum):
+    Emergency=1
+    Non_Emergency=2
+
 class division_enum(enum.Enum):
     South=1
     North=2
@@ -483,6 +489,7 @@ class DMS_Summary(models.Model):
     sum_id = models.AutoField(primary_key=True)
     summary = models.CharField(max_length=5555, null=True, blank=True)
     sum_is_deleted = models.BooleanField(default=False)
+    summary_type=enum.EnumField(summary_enum,null=True,blank=True)
     sum_added_date = models.DateTimeField(auto_now=True,null=True, blank=True)
     sum_added_by = models.CharField(max_length=255, null=True, blank=True)
     sum_modified_by = models.CharField(max_length=255, null=True, blank=True)

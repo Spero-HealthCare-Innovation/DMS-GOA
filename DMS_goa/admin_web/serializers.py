@@ -321,8 +321,6 @@ class Incident_Serializer(serializers.ModelSerializer):
         return incident
 
 
-
-
         
 class Comments_Serializer(serializers.ModelSerializer):
     class Meta:

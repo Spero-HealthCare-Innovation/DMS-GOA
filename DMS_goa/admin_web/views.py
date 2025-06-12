@@ -653,14 +653,14 @@ class DMS_Incident_Post_api(APIView):
         serializers=Incident_Serializer(data=request.data)
         if serializers.is_valid():
             serializers.save()
-            # print("serializers.data-- ", serializers.data)
+            print(serializers.data.get('inc_id'))
             alert_id = request.data['alert_id']
         
             # Initialize the geocoder
             geolocator = Nominatim(user_agent="nikita.speroinfosystems@gmail.com")
 
             if alert_id:
-                Inc_obj = DMS_Incident.objects.get(alert_id=alert_id)
+                Inc_obj = DMS_Incident.objects.filter(alert_id=alert_id).last()
                 print("inc obj-", Inc_obj)
                 # Coordinates
                 latitude = Inc_obj.latitude
@@ -672,9 +672,57 @@ class DMS_Incident_Post_api(APIView):
 
                 Inc_obj.location = location.address
                 Inc_obj.save()
-            return Response(serializers.data,status=status.HTTP_201_CREATED)
-            pass
-        return Response(serializers.errors,status=status.HTTP_400_BAD_REQUEST)
+
+            sinc = serializers.data.get('inc_id')
+            incc = DMS_Incident.objects.get(inc_id=sinc)
+
+            external_api_payload = {
+                "caller_name": "",
+                "caller_no": "",
+                "location": "",
+                "summary": "",
+                "disaster_name": incc.disaster_type.disaster_name,
+                "inc_type": "NON_MCI",
+                "incident_id": str(incc.incident_id),
+                "latitude": str(incc.latitude),
+                "longitude": str(incc.longitude)
+            } 
+            print(external_api_payload)
+            external_response = requests.post(
+                "http://210.212.165.119/Spero_DMS/dms/alert_details",
+                json=external_api_payload,
+                headers={"Content-Type": "application/json"},
+                timeout=10
+            )
+
+            if external_response.status_code == 200:
+                external_api_result = external_response.json()
+            else:
+                external_api_result = {
+                    "error": f"Status {external_response.status_code}",
+                    "response": external_response.text
+                }
+            aaa = DMS_Comments.objects.filter(incident_id=incc).last()
+            nn = {"incident_id": incc.incident_id,"alert_comment": aaa.comments}
+            external_response = requests.post(
+                    "http://210.212.165.119/Spero_DMS/dms/alert_details",
+                    json=nn,
+                    headers={"Content-Type": "application/json"},
+                    timeout=10
+                )
+            print(external_response.json())
+
+            data = {
+                "sr_dt":serializers.data,
+                "external_api_result":external_api_result
+            }
+            return Response(data, status=status.HTTP_201_CREATED)
+        else:
+            print("hiiiiiii else")
+            return Response(serializers.errors,status=status.HTTP_400_BAD_REQUEST)
+
+
+
 
 
 class DMS_Comments_Post_api(APIView):
@@ -692,14 +740,118 @@ class alerts_get_api(APIView):
         return Response(sop_serializer.data, status=status.HTTP_200_OK)
     
     
+# class Manual_Call_Incident_api(APIView):
+#     def post(self, request, *args, **kwargs):
+#         data = request.data
+
+#         incident_fields = [
+#             'inc_type', 'disaster_type', 'alert_type', 'location', 'summary',
+#             'responder_scope', 'latitude', 'longitude', 'caller_id',
+#             'inc_added_by', 'inc_modified_by', 'incident_id', 'inc_id','time','mode',
+#         ]
+#         caller_fields = ['caller_no', 'caller_name', 'caller_added_by', 'caller_modified_by']
+#         comments_fields = ['comments', 'comm_added_by', 'comm_modified_by']
+
+#         incident_data = {field: data.get(field) for field in incident_fields}
+#         caller_data = {field: data.get(field) for field in caller_fields}
+#         comments_data = {field: data.get(field) for field in comments_fields}
+
+#         # Step 1: Save caller
+#         caller_serializer = Manual_call_data_Serializer(data=caller_data)
+#         if not caller_serializer.is_valid():
+#             return Response({"caller_errors": caller_serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+#         caller_instance = caller_serializer.save()
+#         incident_data['caller_id'] = caller_instance.pk
+
+#         # Step 2: Save incident
+#         incident_serializer = Manual_call_incident_dispatch_Serializer(data=incident_data)
+#         if not incident_serializer.is_valid():
+#             return Response({"incident_errors": incident_serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+#         incident_instance = incident_serializer.save()
+
+#         base_code = incident_instance.incident_id
+#         total_calls = DMS_Incident.objects.filter(alert_code__icontains='CALL-').count()
+#         new_call_number = total_calls + 1
+#         alert_code = f"CALL-{base_code}"
+#         incident_instance.alert_code = alert_code
+#         incident_instance.save()
+
+#         # Step 3: Save comments with incident_id = incident_instance.inc_id
+#         comments_data['incident_id'] = incident_instance.inc_id  # IMPORTANT: assign inc_id
+#         comments_serializer = manual_Comments_Serializer(data=comments_data)
+#         if not comments_serializer.is_valid():
+#             return Response({"comments_errors": comments_serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+#         comments_instance = comments_serializer.save()
+
+#         incident_instance.comment_id = comments_instance
+#         incident_instance.save()
+
+#         # Step 4: Save Weather Alert
+#         weather_alert_data = {
+#             "alert_code": incident_instance.alert_code,
+#             "disaster_id": incident_instance.disaster_type.pk if incident_instance.disaster_type else None,
+#             "latitude": incident_instance.latitude,
+#             "longitude": incident_instance.longitude,
+#             "added_by": incident_instance.inc_added_by,
+#             "modified_by": incident_instance.inc_modified_by,
+#             "alert_type": incident_instance.alert_type
+#         }
+#         weather_alert_serializer = WeatherAlertSerializer(data=weather_alert_data)
+#         if not weather_alert_serializer.is_valid():
+#             return Response({"weather_alert_errors": weather_alert_serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+#         weather_alert_instance = weather_alert_serializer.save()
+
+#         # views.py (inside Manual_Call_Incident_api)
+#         dms_notify_data = {
+#             "incident_id": incident_instance.inc_id,  # <-- This line adds inc_id to the notify record
+#             "disaster_type": incident_instance.disaster_type.pk if incident_instance.disaster_type else None,
+#             "alert_type_id": incident_instance.responder_scope,
+#             "added_by": incident_instance.inc_added_by
+#         }
+
+#         dms_notify_serializer = DMS_NotifySerializer(data=dms_notify_data)
+#         if not dms_notify_serializer.is_valid():
+#             return Response({"dms_notify_errors": dms_notify_serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+
+#         dms_notify_instance = dms_notify_serializer.save()
+
+#         incident_instance.notify_id = dms_notify_instance
+#         incident_instance.save()
+
+
+#         return Response({
+#             "message": "Manual call, caller, comment, weather alert, and DMS notify created successfully.",
+#             "incident": incident_serializer.data,
+#             "caller": caller_serializer.data,
+#             "comments": comments_serializer.data,
+#             "weather_alert": weather_alert_serializer.data,
+#             "dms_notify": dms_notify_serializer.data
+#         }, status=status.HTTP_201_CREATED)
+
+
+
+import requests
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+
+from .models import DMS_Incident
+from .serializers import (
+    Manual_call_data_Serializer,
+    Manual_call_incident_dispatch_Serializer,
+    manual_Comments_Serializer,
+    WeatherAlertSerializer,
+    DMS_NotifySerializer,
+)
+
+
 class Manual_Call_Incident_api(APIView):
     def post(self, request, *args, **kwargs):
         data = request.data
-
         incident_fields = [
             'inc_type', 'disaster_type', 'alert_type', 'location', 'summary',
             'responder_scope', 'latitude', 'longitude', 'caller_id',
-            'inc_added_by', 'inc_modified_by', 'incident_id', 'inc_id','time','mode',
+            'inc_added_by', 'inc_modified_by', 'incident_id', 'inc_id', 'time', 'mode',
         ]
         caller_fields = ['caller_no', 'caller_name', 'caller_added_by', 'caller_modified_by']
         comments_fields = ['comments', 'comm_added_by', 'comm_modified_by']
@@ -708,39 +860,41 @@ class Manual_Call_Incident_api(APIView):
         caller_data = {field: data.get(field) for field in caller_fields}
         comments_data = {field: data.get(field) for field in comments_fields}
 
-        # Step 1: Save caller
+       
         caller_serializer = Manual_call_data_Serializer(data=caller_data)
         if not caller_serializer.is_valid():
             return Response({"caller_errors": caller_serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
         caller_instance = caller_serializer.save()
         incident_data['caller_id'] = caller_instance.pk
-
-        # Step 2: Save incident
         incident_serializer = Manual_call_incident_dispatch_Serializer(data=incident_data)
         if not incident_serializer.is_valid():
             return Response({"incident_errors": incident_serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
         incident_instance = incident_serializer.save()
-
         base_code = incident_instance.incident_id
-        total_calls = DMS_Incident.objects.filter(alert_code__icontains='CALL-').count()
-        new_call_number = total_calls + 1
         alert_code = f"CALL-{base_code}"
         incident_instance.alert_code = alert_code
         incident_instance.save()
-
-        # Step 3: Save comments with incident_id = incident_instance.inc_id
-        comments_data['incident_id'] = incident_instance.inc_id  # IMPORTANT: assign inc_id
+        comments_data['incident_id'] = incident_instance.inc_id
         comments_serializer = manual_Comments_Serializer(data=comments_data)
         if not comments_serializer.is_valid():
             return Response({"comments_errors": comments_serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
         comments_instance = comments_serializer.save()
-
         incident_instance.comment_id = comments_instance
         incident_instance.save()
-
-        # Step 4: Save Weather Alert
+        
+        nn = {"incident_id": incident_instance.incident_id,"alert_comment": comments_instance.comments}
+        external_response = requests.post(
+                "http://210.212.165.119/Spero_DMS/dms/alert_details",
+                json=nn,
+                headers={"Content-Type": "application/json"},
+                timeout=10
+            )
+        print(external_response.json()
+ )
+ 
+       
         weather_alert_data = {
-            "alert_code": incident_instance.alert_code,
+            "alert_code": alert_code,
             "disaster_id": incident_instance.disaster_type.pk if incident_instance.disaster_type else None,
             "latitude": incident_instance.latitude,
             "longitude": incident_instance.longitude,
@@ -748,37 +902,78 @@ class Manual_Call_Incident_api(APIView):
             "modified_by": incident_instance.inc_modified_by,
             "alert_type": incident_instance.alert_type
         }
+        print("Weather alert data:", weather_alert_data)
         weather_alert_serializer = WeatherAlertSerializer(data=weather_alert_data)
         if not weather_alert_serializer.is_valid():
+            print("Weather alert serializer errors:", weather_alert_serializer.errors)
             return Response({"weather_alert_errors": weather_alert_serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
         weather_alert_instance = weather_alert_serializer.save()
+        print("Saved weather alert.")
 
-        # views.py (inside Manual_Call_Incident_api)
+        # Step 5: Save DMS notify
         dms_notify_data = {
-            "incident_id": incident_instance.inc_id,  # <-- This line adds inc_id to the notify record
+            "incident_id": incident_instance.inc_id,
             "disaster_type": incident_instance.disaster_type.pk if incident_instance.disaster_type else None,
             "alert_type_id": incident_instance.responder_scope,
             "added_by": incident_instance.inc_added_by
         }
-
+        print("DMS notify data:", dms_notify_data)
         dms_notify_serializer = DMS_NotifySerializer(data=dms_notify_data)
         if not dms_notify_serializer.is_valid():
+            print("DMS notify serializer errors:", dms_notify_serializer.errors)
             return Response({"dms_notify_errors": dms_notify_serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
-
         dms_notify_instance = dms_notify_serializer.save()
-
         incident_instance.notify_id = dms_notify_instance
         incident_instance.save()
+        print("Saved DMS notify.")
 
+        # Step 6: Send to external API
+        external_api_payload = {
+        "caller_name": caller_instance.caller_name,
+        "caller_no": caller_instance.caller_no,
+        "disaster_name": str(incident_instance.disaster_type.disaster_name) if incident_instance.disaster_type else "",
+        "location": incident_instance.location,
+        "summary": str(incident_instance.summary.summary),
+        "inc_type": "NON_MCI" if incident_instance.inc_type == 1 else "NON_EME_CALL" if incident_instance.inc_type == 2 else "",
+        "incident_id": str(incident_instance.incident_id),
+        "latitude": str(incident_instance.latitude),
+        "longitude": str(incident_instance.longitude)
+    }
+        print("Sending to external API:", external_api_payload)
 
+        try:
+            external_response = requests.post(
+                "http://210.212.165.119/Spero_DMS/dms/alert_details",
+                json=external_api_payload,
+                headers={"Content-Type": "application/json"},
+                timeout=10
+            )
+            print("External API status:", external_response.status_code)
+            print("External API raw response:", external_response.text)
+            if external_response.status_code == 200:
+                external_api_result = external_response.json()
+            else:
+                external_api_result = {
+                    "error": f"Status {external_response.status_code}",
+                    "response": external_response.text
+                }
+        except Exception as e:
+            print("Exception during external API call:", str(e))
+            external_api_result = {"error": str(e)}
+
+        # Final response
         return Response({
-            "message": "Manual call, caller, comment, weather alert, and DMS notify created successfully.",
+            "message": "Manual call, caller, comment, weather alert, DMS notify created successfully and external API called.",
             "incident": incident_serializer.data,
             "caller": caller_serializer.data,
             "comments": comments_serializer.data,
             "weather_alert": weather_alert_serializer.data,
-            "dms_notify": dms_notify_serializer.data
+            "dms_notify": dms_notify_serializer.data,
+            "external_api_response": external_api_result
         }, status=status.HTTP_201_CREATED)
+
+
+
 
 
 
@@ -807,8 +1002,8 @@ class Responder_Scope_Get_api(APIView):
 
         
 class DMS_Summary_Get_API(APIView):
-    def get(self,request):
-        snippet = DMS_Summary.objects.all()
+    def get(self,request,summary_type):
+        snippet = DMS_Summary.objects.filter(summary_type=summary_type)
         serializers = DMS_Summary_Serializer(snippet,many=True)
         return Response(serializers.data,status=status.HTTP_200_OK)
     
@@ -1057,15 +1252,72 @@ class dispatch_sop_Idwise_Get_API(APIView):
 
 
 from django.shortcuts import get_object_or_404
+# class CommentPostView(APIView):
+#     def post(self, request, incident_id):
+#         # Use correct PK field: inc_id
+#         incident_instance = get_object_or_404(DMS_Incident, inc_id=incident_id)
+
+#         serializer = Comment_Post_Serializer(data=request.data)
+#         if serializer.is_valid():
+#             serializer.save(incident_id=incident_instance)
+            
+#             aaa=DMS_Incident.objects.filter(inc_id=incident_id)
+            
+#             nn = {"incident_id": aaa.incident_id,"alert_comment": serializer.data.get('comments')}
+#             external_response = requests.post(
+#                     "http://210.212.165.119/Spero_DMS/dms/alert_details",
+#                     json=nn,
+#                     headers={"Content-Type": "application/json"},
+#                     timeout=10
+#                 )
+#             print(external_response.json()
+#  )
+            
+            
+#             return Response(serializer.data, status=status.HTTP_201_CREATED)
+#         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+
+
+from django.shortcuts import get_object_or_404
+from rest_framework.response import Response
+from rest_framework.views import APIView
+from rest_framework import status
+import requests
+
 class CommentPostView(APIView):
     def post(self, request, incident_id):
-        # Use correct PK field: inc_id
         incident_instance = get_object_or_404(DMS_Incident, inc_id=incident_id)
 
         serializer = Comment_Post_Serializer(data=request.data)
         if serializer.is_valid():
             serializer.save(incident_id=incident_instance)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+            
+            aaa = DMS_Incident.objects.get(inc_id=incident_id)
+            
+            nn = {
+                "incident_id": aaa.incident_id,
+                "alert_comment": serializer.data.get('comments')
+            }
+
+            try:
+                external_response = requests.post(
+                    "http://210.212.165.119/Spero_DMS/dms/alert_details",
+                    json=nn,
+                    headers={"Content-Type": "application/json"},
+                    timeout=10
+                )
+                external_data = external_response.json()
+            except requests.exceptions.RequestException as e:
+                external_data = {"error": str(e)}
+
+            return Response({
+                "local_data": serializer.data,
+                "external_api_response": external_data
+            }, status=status.HTTP_201_CREATED)
+
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
