@@ -135,11 +135,40 @@ const Incident = ({ darkMode }) => {
         });
     };
 
+    const [errors, setErrors] = useState({});
+
     const handleSubmit = async () => {
+
+        const newErrors = {};
+
+        if (!selectedEmergencyValue) newErrors.inc_type = "Incident Type is required";
+        // if (selectedEmergencyValue === 1 && !selectedDisaster) newErrors.disaster_type = "Disaster Type is required";
+        // if (selectedEmergencyValue === 1 && !alertType) newErrors.alert_type = "Alert Type is required";
+        if (!callerNumber) newErrors.caller_no = "Caller Number is required";
+        if (!callerName) newErrors.caller_name = "Caller Name is required";
+        if (!query && !popupText) newErrors.location = "Location is required";
+        if (!summaryId) newErrors.summary = "Summary is required";
+        // Only validate these if selectedEmergencyValue === 1 (Emergency)
+        if (selectedEmergencyValue === 1) {
+            if (!selectedDisaster) newErrors.disaster_type = "Disaster Type is required";
+            if (!alertType) newErrors.alert_type = "Alert Type is required";
+            if (!comments) newErrors.comments = "Comment is required";
+        }
+
+        if (Object.keys(newErrors).length > 0) {
+            setErrors(newErrors);
+            return;
+        }
+
+        if (Object.keys(newErrors).length > 0) {
+            setErrors(newErrors);
+            return;
+        }
+
         const payload = {
             inc_type: selectedEmergencyValue,
             disaster_type: selectedDisaster,
-            alert_type: alertType,
+            alert_type: alertType || null,
             location: popupText || query,
             latitude: lattitude,
             longitude: longitude,
@@ -279,6 +308,8 @@ const Incident = ({ darkMode }) => {
                                     sx={inputStyle}
                                     value={selectedEmergencyValue}
                                     onChange={handleEmergencyChange}
+                                    error={!!errors.inc_type}
+                                    helperText={errors.inc_type}
                                 >
                                     <MenuItem value={1}>Emergency</MenuItem>
                                     <MenuItem value={2}>Non Emergency</MenuItem>
@@ -298,6 +329,8 @@ const Incident = ({ darkMode }) => {
                                                 sx={inputStyle}
                                                 value={selectedDisaster}
                                                 onChange={(e) => setSelectedDisaster(e.target.value)}
+                                                error={!!errors.disaster_type}
+                                                helperText={errors.disaster_type}
                                             >
                                                 <MenuItem disabled value="">
                                                     Select Disaster Type
@@ -320,6 +353,8 @@ const Incident = ({ darkMode }) => {
                                                 value={alertType}
                                                 onChange={handleAlertTypeChange}
                                                 sx={inputStyle}
+                                                error={!!errors.alert_type}
+                                                helperText={errors.alert_type}
                                             >
                                                 <MenuItem value={1}>High</MenuItem>
                                                 <MenuItem value={2}>Medium</MenuItem>
@@ -349,6 +384,8 @@ const Incident = ({ darkMode }) => {
                                         inputMode: 'numeric',
                                         pattern: '[0-9]*'
                                     }}
+                                    error={!!errors.caller_no}
+                                    helperText={errors.caller_no}
                                 />
                             </Grid>
 
@@ -360,7 +397,15 @@ const Incident = ({ darkMode }) => {
                                     variant="outlined"
                                     sx={inputStyle}
                                     value={callerName}
-                                    onChange={(e) => setCallerName(e.target.value)}
+                                    // onChange={(e) => setCallerName(e.target.value)}
+                                    onChange={(e) => {
+                                        const value = e.target.value;
+                                        if (/^[a-zA-Z\s]*$/.test(value)) {
+                                            setCallerName(value);
+                                        }
+                                    }}
+                                    error={!!errors.caller_name}
+                                    helperText={errors.caller_name}
                                 />
                             </Grid>
 
@@ -374,6 +419,8 @@ const Incident = ({ darkMode }) => {
                                     onChange={handleSearchChange}
                                     onClick={() => handleSelectSuggestion(item)}
                                     value={query}
+                                    error={!!errors.location}
+                                    helperText={errors.location}
                                 />
                             </Grid>
 
@@ -387,6 +434,8 @@ const Incident = ({ darkMode }) => {
                                     sx={inputStyle}
                                     value={summaryId}
                                     onChange={(e) => setSummaryId(e.target.value)}
+                                    error={!!errors.summary}
+                                    helperText={errors.summary}
                                 >
                                     <MenuItem disabled value="">
                                         Select Summary
@@ -538,6 +587,8 @@ const Incident = ({ darkMode }) => {
                                         sx={{ ...inputStyle }}
                                         value={comments}
                                         onChange={(e) => setComments(e.target.value)}
+                                        error={!!errors.comments}
+                                        helperText={errors.comments}
                                     />
                                 </Grid>
                             </Grid>
