@@ -397,7 +397,13 @@ const Incident = ({ darkMode }) => {
                                     variant="outlined"
                                     sx={inputStyle}
                                     value={callerName}
-                                    onChange={(e) => setCallerName(e.target.value)}
+                                    // onChange={(e) => setCallerName(e.target.value)}
+                                    onChange={(e) => {
+                                        const value = e.target.value;
+                                        if (/^[a-zA-Z\s]*$/.test(value)) {
+                                            setCallerName(value);
+                                        }
+                                    }}
                                     error={!!errors.caller_name}
                                     helperText={errors.caller_name}
                                 />
