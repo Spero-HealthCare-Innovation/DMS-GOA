@@ -35,7 +35,7 @@ const screenConfig = {
     icon: <AddCircleOutlineOutlinedIcon />,
     screens: [],
   },
-  "Closure Detail": {
+  "Closure Report": {
     icon: <TextSnippetOutlinedIcon />,
     screens: [],
   },
