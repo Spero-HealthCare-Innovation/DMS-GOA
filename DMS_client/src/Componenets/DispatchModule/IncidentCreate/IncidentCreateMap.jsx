@@ -42,8 +42,9 @@ const IncidentCreateMap = () => {
     setQueryMap(query);
     setSuggestionsMap(suggestions);
     setSelectedPositionMap(selectedPosition);
-    setPopupTextMap(popupText);
-  }, [query, suggestions, selectedPosition, popupText]);
+     if (!document.activeElement || document.activeElement.tagName !== 'INPUT') {
+    setPopupTextMap(query);}
+  }, [query, suggestions, selectedPosition]);
 
   useEffect(() => {
     setQuery(queryMap);  // send value to context
@@ -197,7 +198,7 @@ const IncidentCreateMap = () => {
             },
           }}
         >
-          <Popup>{query}</Popup>
+          <Popup>{popupTextMap}</Popup>
         </Marker>
       </MapContainer>
     </div>
