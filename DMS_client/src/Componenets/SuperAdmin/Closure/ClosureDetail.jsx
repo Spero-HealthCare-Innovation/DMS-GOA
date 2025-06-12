@@ -312,7 +312,7 @@ const [formData, setFormData] = useState({
         minWidth: "120px",
       }}
     >
-      Closure Detail
+      Closure Report
     </Typography>
 
     {/* Search Field */}
