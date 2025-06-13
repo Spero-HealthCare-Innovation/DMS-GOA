@@ -89,6 +89,7 @@ const Departmentsidebar = ({ darkMode }) => {
               height: "50vh",
               maxHeight: "90vh",
               marginLeft: "0.5em",
+              fontSize:'18px',
               alignContent: "left",
               "&:hover": {
                 background: "radial-gradient(6035.71% 72.44% at 0% 50%, #00BFA6 0%, #292D45 100%)",
