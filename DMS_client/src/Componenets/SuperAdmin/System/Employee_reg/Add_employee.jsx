@@ -642,7 +642,7 @@ function Add_employee({ darkMode }) {
       <Box sx={{ display: "flex", alignItems: "center", gap: 2, pb: 2, mt: 3 }}>
 
         {/* Back Arrow */}
-        <IconButton size="small" onClick={() => {/* handle back action here */ }} sx={{
+        {/* <IconButton size="small" sx={{
           backgroundColor: "#00f0c0",
           color: "#fff",
           "&:hover": {
@@ -652,7 +652,7 @@ function Add_employee({ darkMode }) {
           height: 30,
         }}>
           <ArrowBackIosIcon sx={{ fontSize: 20, color: darkMode ? "#fff" : "#000", }} />
-        </IconButton>
+        </IconButton> */}
 
         {/* Label */}
 
@@ -662,6 +662,7 @@ function Add_employee({ darkMode }) {
             fontWeight: 600,
             fontSize: 16,
             fontFamily,
+            marginLeft: "2em",
           }}
         >
           {isEditing ? "Edit Employee" : "Add Employee"}
