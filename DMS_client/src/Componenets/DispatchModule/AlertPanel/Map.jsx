@@ -56,7 +56,7 @@ const MapView = ({ data }) => {
 
   const geoJsonStyle = {
     weight: 2,
-    color: 'Orange',
+    color: '#BE5103',
     fillOpacity: 0.1,
   };
 
