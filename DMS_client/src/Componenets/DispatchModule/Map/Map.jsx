@@ -92,7 +92,7 @@ window.addEventListener('storage', (e) => {
         title="Windy"
         width="100%"
         height="100%"
-        src="https://embed.windy.com/embed2.html?lat=18.53&lon=73.82&detailLat=28.61&detailLon=77.23&width=1000&height=1000&zoom=10&level=surface&overlay=wind&menu=&message=true&marker=&calendar=now&pressure=true&type=map&location=coordinates&detail=&metricWind=default&metricTemp=default&radarRange=-1"
+        src="https://embed.windy.com/embed2.html?lat=18.53&lon=73.82&detailLat=28.61&detailLon=77.23&width=1000&height=1000&zoom=15&level=surface&overlay=wind&menu=&message=true&marker=&calendar=now&pressure=true&type=map&location=coordinates&detail=&metricWind=default&metricTemp=default&radarRange=-1"
         frameBorder="1"
       ></iframe>
     </div>
