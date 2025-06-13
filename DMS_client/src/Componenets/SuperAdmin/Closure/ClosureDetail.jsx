@@ -44,21 +44,21 @@ function ClosureDetail({ darkMode, fromDate, toDate, onChange, onDownload }) {
     ? "rgba(255, 255, 255, 0.16)"
     : "rgba(0, 0, 0, 0.04)";
 
- 
-const port = import.meta.env.VITE_SOCKET1_API_KEY;
- const { newToken } = useAuth(); 
+
+  const port = import.meta.env.VITE_SOCKET1_API_KEY;
+  const { newToken } = useAuth();
   const [showDownload, setShowDownload] = useState(false);
   const [closureData, setClosureData] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const [hasSubmitted, setHasSubmitted] = useState(false);
-    const [downloadLoading, setDownloadLoading] = useState(false);
+  const [downloadLoading, setDownloadLoading] = useState(false);
 
   const [page, setPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(5);
 
-    // Determine effective token (context token takes priority)
+  // Determine effective token (context token takes priority)
   const effectiveToken = newToken || localStorage.getItem("access_token");
 
   //  const onSubmit = () => {
@@ -74,16 +74,16 @@ const port = import.meta.env.VITE_SOCKET1_API_KEY;
   // };
 
   const handleChange = (fieldName, value) => {
-  setFormData(prev => ({
-    ...prev,
-    [fieldName]: value
-  }));
-};
+    setFormData(prev => ({
+      ...prev,
+      [fieldName]: value
+    }));
+  };
 
-const [formData, setFormData] = useState({
-  fromDate: '',
-  toDate: ''
-});
+  const [formData, setFormData] = useState({
+    fromDate: '',
+    toDate: ''
+  });
 
   const mockData = [
     {
@@ -135,9 +135,9 @@ const [formData, setFormData] = useState({
 
 
   const formatDateForAPI = (date) => {
-  const d = typeof date === "string" ? new Date(date) : date;
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-};
+    const d = typeof date === "string" ? new Date(date) : date;
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  };
 
   const formatDateTime = (dateTimeString) => {
     if (!dateTimeString) return '';
@@ -170,8 +170,8 @@ const [formData, setFormData] = useState({
         {
           method: 'GET',
           headers: {
-          Authorization: `Bearer ${effectiveToken}`,
-           "Content-Type": "application/json",
+            Authorization: `Bearer ${effectiveToken}`,
+            "Content-Type": "application/json",
           },
         }
       );
@@ -196,16 +196,16 @@ const [formData, setFormData] = useState({
   };
 
   const onSubmit = () => {
-     setShowDownload(true);
-   
-     if (effectiveToken) {
+    setShowDownload(true);
+
+    if (effectiveToken) {
       fetchClosureData();
     } else {
       console.warn("No token found for department fetch.");
     }
   };
 
-   // Download function to handle the download API call
+  // Download function to handle the download API call
   const handleDownload = async () => {
     if (!formData.fromDate || !formData.toDate) {
       setError('Please select both from and to dates before downloading');
@@ -236,7 +236,7 @@ const [formData, setFormData] = useState({
       // Get the filename from response headers or use a default name
       const contentDisposition = response.headers.get('content-disposition');
       let filename = 'incident_closure_report.xlsx'; // default filename
-      
+
       if (contentDisposition) {
         const filenameMatch = contentDisposition.match(/filename="?([^"]+)"?/);
         if (filenameMatch) {
@@ -246,7 +246,7 @@ const [formData, setFormData] = useState({
 
       // Create blob from response
       const blob = await response.blob();
-      
+
       // Create download link
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
@@ -254,7 +254,7 @@ const [formData, setFormData] = useState({
       link.download = filename;
       document.body.appendChild(link);
       link.click();
-      
+
       // Clean up
       window.URL.revokeObjectURL(url);
       document.body.removeChild(link);
@@ -268,28 +268,27 @@ const [formData, setFormData] = useState({
     }
   };
 
-  
+
 
 
   return (
     <div style={{ marginLeft: "3.5rem" }}>
 
 
-    <LocalizationProvider dateAdapter={AdapterDateFns}>
-  <Box
-    sx={{
-      display: "flex",
-      alignItems: "center",
-      flexWrap: "wrap",
-      gap: 2,
-      pb: 2,
-      mt: 3,
-    }}
-  >
-    {/* Back Button */}
-    <IconButton
+      <LocalizationProvider dateAdapter={AdapterDateFns}>
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            flexWrap: "wrap",
+            gap: 2,
+            pb: 2,
+            mt: 3,
+          }}
+        >
+          {/* Back Button */}
+          {/* <IconButton
       size="small"
-      onClick={() => {/* handle back */ }}
       sx={{
         backgroundColor: "#00f0c0",
         color: "#fff",
@@ -299,173 +298,174 @@ const [formData, setFormData] = useState({
       }}
     >
       <ArrowBackIosIcon sx={{ fontSize: 20, color: darkMode ? "#fff" : "#000" }} />
-    </IconButton>
+    </IconButton> */}
 
-    {/* Title */}
-    <Typography
-      variant="h6"
-      sx={{
-        color: labelColor,
-        fontWeight: 600,
-        fontFamily,
-        fontSize: 16,
-        minWidth: "120px",
-      }}
-    >
-      Closure Report
-    </Typography>
+          {/* Title */}
+          <Typography
+            variant="h6"
+            sx={{
+              color: labelColor,
+              fontWeight: 600,
+              fontFamily,
+              fontSize: 16,
+              minWidth: "120px",
+              marginLeft: "2em",
+            }}
+          >
+            Closure Report
+          </Typography>
 
-    {/* Search Field */}
-    <TextField
-      variant="outlined"
-      size="small"
-      placeholder="Search"
-      value={searchTerm}
-      onChange={(e) => setSearchTerm(e.target.value)}
-      InputProps={{
-        startAdornment: (
-          <InputAdornment position="start">
-            <Search sx={{ color: "gray", fontSize: 18 }} />
-          </InputAdornment>
-        ),
-      }}
-      sx={{
-        width: "200px",
-        "& .MuiOutlinedInput-root": {
-          borderRadius: "25px",
-          backgroundColor: darkMode ? "#1e293b" : "#fff",
-          color: darkMode ? "#fff" : "#000",
-          px: 1,
-          py: 0.2,
-          height: "35px",
-        },
-        "& .MuiOutlinedInput-notchedOutline": {
-          borderColor: darkMode ? "#444" : "#ccc",
-        },
-        "& input": {
-          padding: "6px 8px",
-          fontSize: "13px",
-        },
-      }}
-    />
+          {/* Search Field */}
+          <TextField
+            variant="outlined"
+            size="small"
+            placeholder="Search"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <Search sx={{ color: "gray", fontSize: 18 }} />
+                </InputAdornment>
+              ),
+            }}
+            sx={{
+              width: "200px",
+              "& .MuiOutlinedInput-root": {
+                borderRadius: "25px",
+                backgroundColor: darkMode ? "#1e293b" : "#fff",
+                color: darkMode ? "#fff" : "#000",
+                px: 1,
+                py: 0.2,
+                height: "35px",
+              },
+              "& .MuiOutlinedInput-notchedOutline": {
+                borderColor: darkMode ? "#444" : "#ccc",
+              },
+              "& input": {
+                padding: "6px 8px",
+                fontSize: "13px",
+              },
+            }}
+          />
 
-    {/* From Date */}
-    <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-      <label
-        style={{
-          color: 'grey',
-          fontSize: '13px',
-          fontWeight: '600',
-          userSelect: 'none',
-        }}
-      >
-        From Date
-      </label>
-      <input
-        type="date"
-        name="fromDate"
-        className="custom-date-input"
-        value={
-          formData.fromDate
-            ? new Date(formData.fromDate).toISOString().split('T')[0]
-            : ''
-        }
-        onChange={(e) => handleChange("fromDate", new Date(e.target.value))}
-        style={{
-          width: '150px',
-          height: '35px',
-          padding: '10px',
-          backgroundColor: bgColor,
-          color: 'grey',
-          border: '1px solid gray',
-          borderRadius: '4px',
-          outline: 'none',
-          fontSize: '14px',
-          cursor: 'pointer',
-          appearance: 'none',
-        }}
-      />
-    </Box>
+          {/* From Date */}
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+            <label
+              style={{
+                color: 'grey',
+                fontSize: '13px',
+                fontWeight: '600',
+                userSelect: 'none',
+              }}
+            >
+              From Date
+            </label>
+            <input
+              type="date"
+              name="fromDate"
+              className="custom-date-input"
+              value={
+                formData.fromDate
+                  ? new Date(formData.fromDate).toISOString().split('T')[0]
+                  : ''
+              }
+              onChange={(e) => handleChange("fromDate", new Date(e.target.value))}
+              style={{
+                width: '150px',
+                height: '35px',
+                padding: '10px',
+                backgroundColor: bgColor,
+                color: 'grey',
+                border: '1px solid gray',
+                borderRadius: '4px',
+                outline: 'none',
+                fontSize: '14px',
+                cursor: 'pointer',
+                appearance: 'none',
+              }}
+            />
+          </Box>
 
-    {/* To Date */}
-    <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-      <label
-        style={{
-          color: 'grey',
-          fontSize: '13px',
-          fontWeight: '600',
-          userSelect: 'none',
-        }}
-      >
-        To Date
-      </label>
-      <input
-        type="date"
-        name="toDate"
-        className="custom-date-input"
-        value={
-          formData.toDate
-            ? new Date(formData.toDate).toISOString().split('T')[0]
-            : ''
-        }
-        onChange={(e) => handleChange("toDate", new Date(e.target.value))}
-        style={{
-          width: '150px',
-          height: '35px',
-          padding: '10px',
-          backgroundColor: bgColor,
-          color: 'grey',
-          border: '1px solid gray',
-          borderRadius: '4px',
-          outline: 'none',
-          fontSize: '14px',
-          cursor: 'pointer',
-          appearance: 'none',
-        }}
-      />
-    </Box>
+          {/* To Date */}
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+            <label
+              style={{
+                color: 'grey',
+                fontSize: '13px',
+                fontWeight: '600',
+                userSelect: 'none',
+              }}
+            >
+              To Date
+            </label>
+            <input
+              type="date"
+              name="toDate"
+              className="custom-date-input"
+              value={
+                formData.toDate
+                  ? new Date(formData.toDate).toISOString().split('T')[0]
+                  : ''
+              }
+              onChange={(e) => handleChange("toDate", new Date(e.target.value))}
+              style={{
+                width: '150px',
+                height: '35px',
+                padding: '10px',
+                backgroundColor: bgColor,
+                color: 'grey',
+                border: '1px solid gray',
+                borderRadius: '4px',
+                outline: 'none',
+                fontSize: '14px',
+                cursor: 'pointer',
+                appearance: 'none',
+              }}
+            />
+          </Box>
 
-    {/* Submit Button */}
-    <Button
-      variant="contained"
-      size="small"
-      sx={{
-        backgroundColor: "#00f0c0",
-        "&:hover": { backgroundColor: "#00d8ac" },
-        height: 35,
-        minWidth: 100,
-        color: darkMode ? "black" : "#000",
-      }}
-      onClick={onSubmit}
-    >
-      Submit
-    </Button>
+          {/* Submit Button */}
+          <Button
+            variant="contained"
+            size="small"
+            sx={{
+              backgroundColor: "#00f0c0",
+              "&:hover": { backgroundColor: "#00d8ac" },
+              height: 35,
+              minWidth: 100,
+              color: darkMode ? "black" : "#000",
+            }}
+            onClick={onSubmit}
+          >
+            Submit
+          </Button>
 
-    {/* Download Button */}
-    {showDownload && (
-      <Button
-        variant="outlined"
-        color="success"
-        startIcon={downloadLoading ? <CircularProgress size={16} /> : <DownloadIcon />}
-        size="small"
-        sx={{ height: 35, minWidth: 130 }}
-        onClick={handleDownload}
-      >
-        Download
-      </Button>
-    )}
-  </Box>
+          {/* Download Button */}
+          {showDownload && (
+            <Button
+              variant="outlined"
+              color="success"
+              startIcon={downloadLoading ? <CircularProgress size={16} /> : <DownloadIcon />}
+              size="small"
+              sx={{ height: 35, minWidth: 130 }}
+              onClick={handleDownload}
+            >
+              Download
+            </Button>
+          )}
+        </Box>
 
-  {/* Date icon styling */}
-  <style>
-    {`
+        {/* Date icon styling */}
+        <style>
+          {`
       .custom-date-input::-webkit-calendar-picker-indicator {
         filter: invert(1);
         cursor: pointer;
       }
     `}
-  </style>
-</LocalizationProvider>
+        </style>
+      </LocalizationProvider>
 
 
       {error && (
@@ -527,7 +527,7 @@ const [formData, setFormData] = useState({
                         Disaster Type
                       </Typography>
                     </StyledCardContent>
-                       <StyledCardContent
+                    <StyledCardContent
                       sx={{
                         flex: 1.6,
                         borderRight: "1px solid black",
@@ -650,25 +650,25 @@ const [formData, setFormData] = useState({
                         </Typography>
                       </StyledCardContent>
                       <StyledCardContent sx={{ flex: 2, justifyContent: "center", ...fontsTableBody }}>
-                        <Typography variant="subtitle2" sx={{fontSize:"12px"}}>{item.incident_id || 'N/A'}</Typography>
+                        <Typography variant="subtitle2" sx={{ fontSize: "12px" }}>{item.incident_id || 'N/A'}</Typography>
                       </StyledCardContent>
                       <StyledCardContent sx={{ flex: 2, justifyContent: "center", ...fontsTableBody }}>
-                        <Typography variant="subtitle2" sx={{fontSize:"12px"}}>{item.disaster_type}</Typography>
-                      </StyledCardContent>
-                        <StyledCardContent sx={{ flex: 2, justifyContent: "center", ...fontsTableBody }}>
-                        <Typography variant="subtitle2" sx={{fontSize:"12px"}}>{formatDateTime(item.closure_acknowledge)}</Typography>
+                        <Typography variant="subtitle2" sx={{ fontSize: "12px" }}>{item.disaster_type}</Typography>
                       </StyledCardContent>
                       <StyledCardContent sx={{ flex: 2, justifyContent: "center", ...fontsTableBody }}>
-                        <Typography variant="subtitle2" sx={{fontSize:"12px"}}>{formatDateTime(item.closure_start_base_location)}</Typography>
+                        <Typography variant="subtitle2" sx={{ fontSize: "12px" }}>{formatDateTime(item.closure_acknowledge)}</Typography>
                       </StyledCardContent>
                       <StyledCardContent sx={{ flex: 2, justifyContent: "center", ...fontsTableBody }}>
-                        <Typography variant="subtitle2" sx={{fontSize:"12px"}}>{formatDateTime(item.closure_at_scene)}</Typography>
+                        <Typography variant="subtitle2" sx={{ fontSize: "12px" }}>{formatDateTime(item.closure_start_base_location)}</Typography>
                       </StyledCardContent>
                       <StyledCardContent sx={{ flex: 2, justifyContent: "center", ...fontsTableBody }}>
-                        <Typography variant="subtitle2" sx={{fontSize:"12px"}}>{formatDateTime(item.closure_from_scene)}</Typography>
+                        <Typography variant="subtitle2" sx={{ fontSize: "12px" }}>{formatDateTime(item.closure_at_scene)}</Typography>
                       </StyledCardContent>
                       <StyledCardContent sx={{ flex: 2, justifyContent: "center", ...fontsTableBody }}>
-                        <Typography variant="subtitle2" sx={{fontSize:"12px"}}>{formatDateTime(item.closure_back_to_base)}</Typography>
+                        <Typography variant="subtitle2" sx={{ fontSize: "12px" }}>{formatDateTime(item.closure_from_scene)}</Typography>
+                      </StyledCardContent>
+                      <StyledCardContent sx={{ flex: 2, justifyContent: "center", ...fontsTableBody }}>
+                        <Typography variant="subtitle2" sx={{ fontSize: "12px" }}>{formatDateTime(item.closure_back_to_base)}</Typography>
                       </StyledCardContent>
                       {/* <StyledCardContent sx={{ flex: 2, justifyContent: "center", ...fontsTableBody }}>
                         <Typography variant="subtitle2" sx={{fontSize:"12px"}}>{item.closure_remark || 'N/A'}</Typography>
