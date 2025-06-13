@@ -24,11 +24,15 @@ def incident_report_daywise(
         data = hive_connecter_execution(query)  
         dt=[] 
         for i in data:
-            dstss = DMS_Disaster_Type.objects.get(disaster_id=i['disaster_type_id'])
+            dstss_dt = DMS_Disaster_Type.objects.filter(disaster_id=i['disaster_type_id'])
+            if dstss_dt.exists():
+                dstss = dstss_dt.first()
+            else:
+                dstss = None
             print(dstss,'dstssdstssdstssdstss')
             nn={
                 "incident_id": i['incident_id'],
-                "disaster_type": dstss.disaster_name,
+                "disaster_type": dstss.disaster_name if dstss else None,
                 "closure_acknowledge": i['closure_acknowledge'],
                 "closure_start_base_location": i['closure_start_base_location'],
                 "closure_at_scene": i['closure_at_scene'],
@@ -61,7 +65,11 @@ def incident_report_daywise(
         data = hive_connecter_execution(query)
         dt=[] 
         for i in data:
-            dstss = DMS_Disaster_Type.objects.get(disaster_id=i['disaster_type_id'])
+            dstss_dt = DMS_Disaster_Type.objects.filter(disaster_id=i['disaster_type_id'])
+            if dstss_dt.exists():
+                dstss = dstss_dt.first()
+            else:
+                dstss = None
             print(dstss,'dstssdstssdstssdstss')
             # alrt = Weather_alerts.objects.get(pk_id=i['alert_id_id'] if i['alert_id_id'] else 0)
             alrt_qs = Weather_alerts.objects.filter(pk_id=i['alert_id_id'])
@@ -79,7 +87,7 @@ def incident_report_daywise(
             
             nn={"Incident Id": i['incident_id'],
                 "Alert Source":"System Alert" if  i['mode'] == 2 else "Manual Calls",
-                "Disaster Type": dstss.disaster_name,
+                "Disaster Type": dstss.disaster_name if dstss else None,
                 "Alert Type": "High" if i['alert_type'] == 1 else "Medium" if i['alert_type'] == 2 else "Low" if i['alert_type'] == 3 else "Very Low" if i['alert_type'] == 4 else "Unknown",
                 "Alert Time" : alrt.alert_datetime.astimezone(india_tz).replace(tzinfo=None) if alrt else "",
                 "Incident Dispatch Time" : i['inc_added_date'],
