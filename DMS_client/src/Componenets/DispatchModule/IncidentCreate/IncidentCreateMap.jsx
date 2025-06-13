@@ -33,7 +33,7 @@ const IncidentCreateMap = () => {
   const [selectedPositionMap, setSelectedPositionMap] = useState([18.519566133802865, 73.85534807018765]); // Default: Pune (PMC)
   const [popupTextMap, setPopupTextMap] = useState('You are here!');
   const [stateData, setStateData] = useState();
-  const [mapZoom, setMapZoom] = useState(10.8);
+  const [mapZoom, setMapZoom] = useState(10.5);
   const mapRef = useRef();
  
  
