@@ -233,7 +233,7 @@ function IncidentDetails({
                           label: "Alert Type",
                           value:
                             { 1: "High", 2: "Medium", 3: "Low", 4: "Very Low" }[
-                              incident?.alert_type
+                            incident?.alert_type
                             ] || "N/A",
                         },
                         { label: "Caller Name", value: incident?.caller_name },
@@ -523,16 +523,16 @@ function IncidentDetails({
                   </Typography>
 
                   {Array.isArray(incidentDetails?.["responders scope"]) &&
-                  incidentDetails["responders scope"].length > 0 ? (
+                    incidentDetails["responders scope"].length > 0 ? (
                     <Stack spacing={1} mt={1}>
                       <Box display="flex" flexWrap="wrap" gap={1}>
                         {incidentDetails["responders scope"].map(
                           ({ responder_id, responder_name }) => {
                             const isChecked =
                               Array.isArray(incident?.responder_scope) &&
-                              incident.responder_scope.includes(
-                                String(responder_id)
-                              );
+                              incident.responder_scope
+                                .map(String)
+                                .includes(String(responder_id));
 
                             return (
                               <Tooltip
@@ -555,18 +555,14 @@ function IncidentDetails({
                                           color: "#00bfa5",
                                         },
                                         "&:hover": {
-                                          backgroundColor:
-                                            "rgba(0, 191, 165, 0.1)",
+                                          backgroundColor: "rgba(0, 191, 165, 0.1)",
                                           borderRadius: "6px",
                                         },
                                       }}
                                     />
                                   }
                                   label={
-                                    <Typography
-                                      variant="subtitle2"
-                                      sx={{ fontFamily }}
-                                    >
+                                    <Typography variant="subtitle2" sx={{ fontFamily }}>
                                       {responder_name}
                                     </Typography>
                                   }
@@ -591,33 +587,33 @@ function IncidentDetails({
           </Grid>
 
           {/* Right Column */}
-        <Grid item xs={12} md={5} pl={{ md: 2 }}>
-  {selectedIncident ? (
-    <CommentsPanel
-      darkMode={darkMode}
-      flag={flag}
-      setFlag={setFlag}
-      selectedResponders={selectedResponders}
-      setSelectedResponders={setSelectedResponders}
-      selectedIncident={selectedIncident}
-      setSelectedIncident={setSelectedIncident}
-      incidentDetails={incidentDetails}
-      comments={comments}
-      fetchDispatchList={fetchDispatchList}
-         fetchIncidentDetails={fetchIncidentDetails}
-         highlightedId={highlightedId}
-         setHighlightedId={setHighlightedId}
-      
-    />
-  ) : (
-    <Typography
-      variant="subtitle2"
-      sx={{ fontFamily, color: "#fff", mt: 1 }}
-    >
-      Please select an incident to view comments.
-    </Typography>
-  )}
-</Grid>
+          <Grid item xs={12} md={5} pl={{ md: 2 }}>
+            {selectedIncident ? (
+              <CommentsPanel
+                darkMode={darkMode}
+                flag={flag}
+                setFlag={setFlag}
+                selectedResponders={selectedResponders}
+                setSelectedResponders={setSelectedResponders}
+                selectedIncident={selectedIncident}
+                setSelectedIncident={setSelectedIncident}
+                incidentDetails={incidentDetails}
+                comments={comments}
+                fetchDispatchList={fetchDispatchList}
+                fetchIncidentDetails={fetchIncidentDetails}
+                highlightedId={highlightedId}
+                setHighlightedId={setHighlightedId}
+
+              />
+            ) : (
+              <Typography
+                variant="subtitle2"
+                sx={{ fontFamily, color: "#fff", mt: 1 }}
+              >
+                Please select an incident to view comments.
+              </Typography>
+            )}
+          </Grid>
 
         </Grid>
       </Paper>

@@ -40,6 +40,19 @@ const Incident = ({ darkMode }) => {
     const [timerActive, setTimerActive] = useState(false);
     const now = new Date();
     const formattedDate = now.toLocaleDateString('en-GB').slice(0, 8).replace(/\//g, '/').slice(0, -2) + now.getFullYear().toString().slice(2);
+  
+  
+    window.addEventListener("storage", (e) => {
+    if (e.key === "logout") {
+      location.href = "/login";
+    }
+  });
+
+  useEffect(() => {
+    document.title = "DMS|Incident Create";
+  }, []);
+
+
 
     useEffect(() => {
         if (location.state?.startData) {

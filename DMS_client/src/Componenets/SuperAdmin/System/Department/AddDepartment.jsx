@@ -638,7 +638,7 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
         message={snackbarmsgAddDept}
       />
       <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
-        <Box
+        {/* <Box
           sx={{
             width: 30,
             height: 30,
@@ -653,7 +653,7 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
           <ArrowBackIosIcon
             sx={{ fontSize: 20, color: darkMode ? "#fff" : "#000" }}
           />{" "}
-        </Box>
+        </Box> */}
         <Box
           sx={{
             display: "flex",
@@ -671,6 +671,7 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
                 fontWeight: 600,
                 fontFamily,
                 fontSize: 16,
+                marginLeft: "1em"
               }}
             >
               Add Department
@@ -1219,7 +1220,7 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
                   helperText={departmentErrorMsg}
                   InputLabelProps={{ shrink: false }}
                   sx={selectStyles}
-                  
+
                 ></TextField>
                 {departmentError && (
                   <FormHelperText
