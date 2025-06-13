@@ -229,7 +229,7 @@ const RegisterResponder = ({ darkMode, flag, setFlag, setSelectedIncident }) => 
             if (response.status === 200) {
                 setSnackbarMessage("Responder Data Updated Successfully");
                 setSnackbarOpen(true);
-                await fetchResponder();
+                await getResponderData();
                 setSelectedDisaster("");
                 setSelectedResponders([]);
             }
@@ -302,7 +302,7 @@ const RegisterResponder = ({ darkMode, flag, setFlag, setSelectedIncident }) => 
 
             console.log("Delete success:", res.data);
             setSnackbarMessage("Responder Data Deleted Successfully");
-            await fetchResponder();
+            await getResponderData();
             setSnackbarOpen(true);
             handleClose();
         } catch (err) {
