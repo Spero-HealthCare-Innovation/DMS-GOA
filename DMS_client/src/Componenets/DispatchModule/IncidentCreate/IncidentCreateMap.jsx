@@ -30,10 +30,10 @@ const IncidentCreateMap = () => {
   const { query, suggestions, selectedPosition, popupText, handleSearchChange, handleSelectSuggestion, setQuery } = useAuth();
   const [queryMap, setQueryMap] = useState('');
   const [suggestionsMap, setSuggestionsMap] = useState([]);
-  const [selectedPositionMap, setSelectedPositionMap] = useState([18.5329846,73.8216998]); // Default: Pune (PMC)
+  const [selectedPositionMap, setSelectedPositionMap] = useState([18.519566133802865, 73.85534807018765]); // Default: Pune (PMC)
   const [popupTextMap, setPopupTextMap] = useState('You are here!');
   const [stateData, setStateData] = useState();
-  const [mapZoom, setMapZoom] = useState(7);
+  const [mapZoom, setMapZoom] = useState(10.5);
   const mapRef = useRef();
  
  
@@ -51,7 +51,7 @@ const IncidentCreateMap = () => {
   }, [queryMap]);
  
   useEffect(() => {
-    fetch('/Boundaries/Pune_district_02.geojson')
+    fetch('/Boundaries/pune-2022-wards.geojson')
       .then(res => res.json())
       .then(data => {
         setStateData(data);
