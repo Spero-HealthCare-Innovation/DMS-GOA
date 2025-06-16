@@ -652,11 +652,11 @@ class DMS_Incident_Post_api(APIView):
                 "location": "",
                 "summary": "",
                 "disaster_name": incc.disaster_type.disaster_name,
-                "inc_type": "NON_MCI",
+                "inc_type": incc.disaster_type.disaster_id,
                 "incident_id": str(incc.incident_id),
                 "latitude": str(incc.latitude),
                 "longitude": str(incc.longitude),
-                "alert_priority_type": ("High" if incc.alert_type == 1 else"Medium" if incc.alert_type == 2 else"Low" if incc.alert_type == 3 else"Very Low" if incc.alert_type == 4 else"")
+                "alert_type": ("High" if incc.alert_type == 1 else"Medium" if incc.alert_type == 2 else"Low" if incc.alert_type == 3 else"Very Low" if incc.alert_type == 4 else"")
             } 
             print(external_api_payload)
             external_response = requests.post(
@@ -905,13 +905,15 @@ class Manual_Call_Incident_api(APIView):
         "disaster_name": str(incident_instance.disaster_type.disaster_name) if incident_instance.disaster_type else "",
         "location": incident_instance.location,
         "summary": str(incident_instance.summary.summary),
-        "inc_type": "NON_MCI" if incident_instance.inc_type == 1 else "NON_EME_CALL" if incident_instance.inc_type == 2 else "",
+        # "inc_type": "NON_MCI" if incident_instance.inc_type == 1 else "NON_EME_CALL" if incident_instance.inc_type == 2 else "",
+        "inc_type": incident_instance.disaster_type.disaster_id,
         "incident_id": str(incident_instance.incident_id),
         "latitude": str(incident_instance.latitude),
         "longitude": str(incident_instance.longitude),
-        "alert_priority_type": ("High" if incident_instance.alert_type == 1 else"Medium" if incident_instance.alert_type == 2 else"Low" if incident_instance.alert_type == 3 else"Very Low" if incident_instance.alert_type == 4 else""
+        "alert_type": ("High" if incident_instance.alert_type == 1 else"Medium" if incident_instance.alert_type == 2 else"Low" if incident_instance.alert_type == 3 else"Very Low" if incident_instance.alert_type == 4 else""
 )
     }
+        print("ssssssssssssssssssssssssss",external_api_payload)
         print("Sending to external API:", external_api_payload)
 
         try:
