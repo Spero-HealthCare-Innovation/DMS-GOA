@@ -420,9 +420,24 @@ class DisasterResponderPostSerializer(serializers.ModelSerializer):
          fields = ['dis_id','res_id']
 
 class ClosureSerializer(serializers.ModelSerializer):
+    closure_inc_id = serializers.CharField()  # Required in both input and output
+
     class Meta:
-         model = DMS_incident_closure
-         fields = '__all__'
+        model = DMS_incident_closure
+        fields = '__all__'
+
+    def create(self, validated_data):
+        closure_inc_id = validated_data.get('closure_inc_id')
+
+        try:
+            incident_obj = DMS_Incident.objects.get(incident_id=closure_inc_id)
+            validated_data['incident_id'] = incident_obj
+        except DMS_Incident.DoesNotExist:
+            raise serializers.ValidationError({'closure_inc_id': 'Invalid incident ID'})
+
+        return super().create(validated_data)
+
+
 
 class CommentSerializer(serializers.ModelSerializer):
     class Meta:
