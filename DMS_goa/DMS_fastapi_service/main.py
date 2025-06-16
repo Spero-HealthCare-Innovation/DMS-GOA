@@ -301,12 +301,12 @@ async def call_open_meteo_api():
     # 18.528468, 73.847792 PMC
     # 18.5284, 73.8477 PMC
     # 18.15052868617488, 73.84245072042478
-    url = (
-        "https://api.open-meteo.com/v1/forecast?latitude=18.1505,18.635764&longitude=73.8424,73.801452&current=temperature_2m,rain,precipitation,weather_code"
-    )
     # url = (
-    #     "https://api.open-meteo.com/v1/forecast?latitude=18.5329846,18.635764&longitude=73.8216998,73.801452&current=temperature_2m,rain,precipitation,weather_code"
+    #     "https://api.open-meteo.com/v1/forecast?latitude=18.1505,18.635764&longitude=73.8424,73.801452&current=temperature_2m,rain,precipitation,weather_code"
     # )
+    url = (
+        "https://api.open-meteo.com/v1/forecast?latitude=18.52380565246535&longitude=73.85260317930653&current=temperature_2m,rain,precipitation,weather_code"
+    )
     # url = (
     #     "https://api.open-meteo.com/v1/forecast?latitude=15.5367,15.1261&longitude=73.9458,74.1848&hourly=temperature_2m,rain,precipitation,weather_code&models=ecmwf_ifs025"
     # )
