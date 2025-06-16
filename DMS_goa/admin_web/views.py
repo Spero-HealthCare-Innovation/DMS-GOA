@@ -1163,20 +1163,38 @@ class closure_Post_api(APIView):
 
 
 
+# class closure_Post_api2(APIView):
+#     def post(self,request):
+        
+#         inccc = request.data.get('closure_inc_id')
+#         print(inccc,'innnnnnnnn')
+#         nnnnnn = DMS_Incident.objects.get(incident_id=inccc)
+#         nnnnnn.clouser_status = True
+#         nnnnnn.save()
+        
+#         serializers=ClosureSerializer(data=request.data)
+#         if serializers.is_valid():
+#             serializers.save()
+#             return Response(serializers.data,status=status.HTTP_201_CREATED)
+#         return Response(serializers.errors,status=status.HTTP_400_BAD_REQUEST)
+
 class closure_Post_api2(APIView):
-    def post(self,request):
-        
-        inccc = request.data.get('closure_inc_id')
-        print(inccc,'innnnnnnnn')
-        nnnnnn = DMS_Incident.objects.get(incident_id=inccc)
-        nnnnnn.clouser_status = True
-        nnnnnn.save()
-        
-        serializers=ClosureSerializer(data=request.data)
-        if serializers.is_valid():
-            serializers.save()
-            return Response(serializers.data,status=status.HTTP_201_CREATED)
-        return Response(serializers.errors,status=status.HTTP_400_BAD_REQUEST)
+    def post(self, request):
+        closure_inc_id = request.data.get('closure_inc_id')
+        print(closure_inc_id, 'closure_inc_id')
+
+        try:
+            incident_obj = DMS_Incident.objects.get(incident_id=closure_inc_id)
+            incident_obj.clouser_status = True
+            incident_obj.save()
+        except DMS_Incident.DoesNotExist:
+            return Response({"error": "Incident not found"}, status=status.HTTP_400_BAD_REQUEST)
+
+        serializer = ClosureSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 
