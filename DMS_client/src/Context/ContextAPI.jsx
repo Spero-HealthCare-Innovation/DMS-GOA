@@ -40,7 +40,7 @@ export const AuthProvider = ({ children }) => {
   const [query, setQuery] = useState("");
   const [suggestions, setSuggestions] = useState([]);
   const [selectedPosition, setSelectedPosition] = useState([
-    18.5329846, 73.8216998,
+    18.519566133802865, 73.85534807018765,
   ]); // Default: Pune
   const [popupText, setPopupText] = useState("");
   const [commentText, setCommentText] = useState("");

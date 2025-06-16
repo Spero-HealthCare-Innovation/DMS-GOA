@@ -11,6 +11,7 @@ import {
   Avatar,
   Stack,
   Tooltip,
+
 } from "@mui/material";
 import { useAuth } from "../../../Context/ContextAPI";
 
@@ -23,6 +24,9 @@ function CommentsPanel({
   setSelectedResponders,
   fetchDispatchList,
   incidentDetails,
+  fetchIncidentDetails,
+  highlightedId,
+  setHighlightedId
 }) {
   const port = import.meta.env.VITE_APP_API_KEY;
   const userName = localStorage.getItem("userId");
@@ -84,10 +88,9 @@ function CommentsPanel({
   useEffect(() => {
     fetchComments();
   }, []);
-
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [allComments]);
+  }, [fetchIncidentDetails]);
 
   const handlealertSaveClick = async () => {
     if (!commentText.trim()) return;
@@ -124,6 +127,8 @@ function CommentsPanel({
         setCommentText("");
         setSelectedResponders([]);
         setFlag(0);
+
+        setHighlightedId(null);
         await fetchDispatchList();
       } else {
         throw new Error("API Error");
@@ -137,6 +142,70 @@ function CommentsPanel({
       });
     }
   };
+
+  // const handleCommentSendClick = async () => {
+  //   if (!commentText.trim()) return;
+
+  //   try {
+  //     const response = await fetch(
+  //       `${port}/admin_web/comments_post/${selectedIncident?.inc_id}/`,
+  //       {
+  //         method: "POST",
+  //         headers: {
+  //           "Content-Type": "application/json",
+  //           Authorization: `Bearer ${Token || newToken}`,
+  //         },
+  //         body: JSON.stringify({
+  //           comments: commentText,
+  //           comm_added_by: userName,
+  //         }),
+  //       }
+  //     );
+
+  //     // if (!response.ok) throw new Error("Failed to send comment.");
+
+  //     // const secondResponse = await fetch(`http://210.212.165.119/Spero_DMS/dms/alert_details`, {
+  //     //   method: "POST",
+  //     //   headers: {
+  //     //     "Content-Type": "application/json",
+  //     //     Authorization: `Bearer ${Token || newToken}`,
+  //     //   },
+  //     //   body: JSON.stringify({
+  //     //     caller_name: selectedIncident?.incident_details[0]?.caller_name || null,
+  //     //     caller_no: selectedIncident?.incident_details[0]?.caller_no || null,
+  //     //     disaster_name: selectedIncident?.incident_details[0]?.disaster_name || null,
+  //     //     location: selectedIncident?.incident_details[0]?.location || null,
+  //     //     summary: selectedIncident?.incident_details[0]?.summary || null,
+  //     //     units: "1",
+  //     //     inc_type: selectedIncident?.incident_details[0]?.inc_type || null,
+  //     //     incident_id: selectedIncident?.incident_id || null,
+  //     //     latitude: selectedIncident?.incident_details[0]?.latitude || null,
+  //     //     longitude: selectedIncident?.incident_details[0]?.longitude || null,
+  //     //     // alert_type: selectedIncident?.alert_type || null,
+  //     //   }),
+  //     // });
+
+  //     if (!response.ok)
+  //       throw new Error("Failed to log comment activity.");
+  //     setSnackbar({
+  //       open: true,
+  //       message: "Comment sent successfully!",
+  //       severity: "success",
+  //     });
+
+  //     setCommentText("");
+  //     await fetchDispatchList();
+  //     fetchIncidentDetails();
+  //   } catch (err) {
+  //     console.error(err);
+  //     setSnackbar({
+  //       open: true,
+  //       message: "Failed to send comment.",
+  //       severity: "error",
+  //     });
+  //   }
+  // };
+
 
   const handleCommentSendClick = async () => {
     if (!commentText.trim()) return;
@@ -157,31 +226,9 @@ function CommentsPanel({
         }
       );
 
-      // if (!response.ok) throw new Error("Failed to send comment.");
-
-      const secondResponse = await fetch(`http://210.212.165.119/Spero_DMS/dms/alert_details`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${Token || newToken}`,
-        },
-        body: JSON.stringify({
-          caller_name: selectedIncident?.incident_details[0]?.caller_name || null,
-          caller_no: selectedIncident?.incident_details[0]?.caller_no || null,
-          disaster_name: selectedIncident?.incident_details[0]?.disaster_name || null,
-          location: selectedIncident?.incident_details[0]?.location || null,
-          summary: selectedIncident?.incident_details[0]?.summary || null,
-          units: "1",
-          inc_type: selectedIncident?.incident_details[0]?.inc_type || null,
-          incident_id: selectedIncident?.incident_id || null,
-          latitude: selectedIncident?.incident_details[0]?.latitude || null,
-          longitude: selectedIncident?.incident_details[0]?.longitude || null,
-          // alert_type: selectedIncident?.alert_type || null,
-        }),
-      });
-
-      if (!secondResponse.ok)
+      if (!response.ok)
         throw new Error("Failed to log comment activity.");
+
       setSnackbar({
         open: true,
         message: "Comment sent successfully!",
@@ -190,6 +237,7 @@ function CommentsPanel({
 
       setCommentText("");
       await fetchDispatchList();
+      fetchIncidentDetails();
     } catch (err) {
       console.error(err);
       setSnackbar({
@@ -199,6 +247,7 @@ function CommentsPanel({
       });
     }
   };
+
 
   // const handleCommentSendClick = async () => {
   //   if (!commentText.trim()) return;

@@ -76,7 +76,6 @@ const Departmentsidebar = ({ darkMode }) => {
               width: open ? 200 : 50,
               position: "absolute",
               top: "50%",
-
               transform: "translateY(-50%)",
               background: darkMode
                 ? "linear-gradient(to bottom, #5FECC8, rgba(32, 43, 40, 0.05))"
@@ -89,8 +88,12 @@ const Departmentsidebar = ({ darkMode }) => {
               overflow: "hidden",
               height: "50vh",
               maxHeight: "90vh",
-              // marginLeft: "0.2em",
+              marginLeft: "0.5em",
+              fontSize:'18px',
               alignContent: "left",
+              "&:hover": {
+                background: "radial-gradient(6035.71% 72.44% at 0% 50%, #00BFA6 0%, #292D45 100%)",
+              },
             },
           }}
         >
@@ -106,7 +109,7 @@ const Departmentsidebar = ({ darkMode }) => {
                         onClick={() =>
                           hasSubmenus
                             ? toggleDropdown(sectionName)
-                            : navigate("/" + sectionName)
+                            : navigate(sectionName)
                         }
                         sx={{
                           flexDirection: open ? "row" : "column",

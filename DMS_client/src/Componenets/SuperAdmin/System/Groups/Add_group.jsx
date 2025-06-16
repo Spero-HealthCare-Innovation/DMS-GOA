@@ -342,26 +342,26 @@ function Add_group({ darkMode }) {
   };
 
   const validateForm = () => {
-  let isValid = true;
+    let isValid = true;
 
-  // Reset errors
-  setGroupNameError("");
-  setDepartmentError("");
+    // Reset errors
+    setGroupNameError("");
+    setDepartmentError("");
 
-  // Validate group name
-  if (!groupName.trim()) {
-    setGroupNameError("Please fill Group Name");
-    isValid = false;
-  }
+    // Validate group name
+    if (!groupName.trim()) {
+      setGroupNameError("Please fill Group Name");
+      isValid = false;
+    }
 
-  // Validate department selection
-  if (!departmentId) {
-    setDepartmentError("Please select Department");
-    isValid = false;
-  }
+    // Validate department selection
+    if (!departmentId) {
+      setDepartmentError("Please select Department");
+      isValid = false;
+    }
 
-  return isValid;
-};
+    return isValid;
+  };
 
   return (
     <div style={{ marginLeft: "3.5rem" }}>
@@ -383,7 +383,7 @@ function Add_group({ darkMode }) {
 
       <Box sx={{ display: "flex", alignItems: "center", gap: 2, pb: 2, mt: 3 }}>
         {/* Back Arrow */}
-        <IconButton size="small" onClick={() => {/* handle back action here */ }} sx={{
+        {/* <IconButton size="small" sx={{
           backgroundColor: "#00f0c0",
           color: "#fff",
           "&:hover": {
@@ -393,7 +393,7 @@ function Add_group({ darkMode }) {
           height: 30,
         }}>
           <ArrowBackIosIcon sx={{ fontSize: 20, color: darkMode ? "#fff" : "#000", }} />
-        </IconButton>
+        </IconButton> */}
 
         {/* Label */}
         <Typography variant="h6" sx={{
@@ -401,6 +401,7 @@ function Add_group({ darkMode }) {
           fontWeight: 600,
           fontFamily,
           fontSize: 16,
+          marginLeft: "1.5em",
         }}>
           {isEditing ? 'Edit Group' : 'Add Group'}
         </Typography>
@@ -787,99 +788,99 @@ function Add_group({ darkMode }) {
             </Box>
 
 
-       <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
-  {/* Group Name TextField with Box wrapper */}
-  <Box sx={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
-    <TextField
-      fullWidth
-      placeholder="Group Name"
-      label={groupName ? "" : "Group Name"}
-      InputLabelProps={{ shrink: false }}
-      sx={{
-        ...inputStyle,
-        ...(groupNameError && {
-          "& .MuiOutlinedInput-notchedOutline": {
-            borderColor: "#d32f2f !important",
-          },
-        }),
-      }}
-      value={groupName}
-      onChange={(e) => {
-        const value = e.target.value;
-        const regex = /^[a-zA-Z\s]*$/;
-        if (regex.test(value) || value === '') {
-          setGroupName(value);
-          if (groupNameError) setGroupNameError(""); // Clear error on change
-        }
-      }}
-      onKeyPress={(e) => {
-        const regex = /^[a-zA-Z\s]$/;
-        if (!regex.test(e.key)) {
-          e.preventDefault();
-        }
-      }}
-    />
-    {groupNameError && (
-      <Typography
-        sx={{
-          color: "#d32f2f",
-          fontSize: "12px",
-          marginTop: "4px",
-          marginLeft: "14px",
-        }}
-      >
-        {groupNameError}
-      </Typography>
-    )}
-  </Box>
+            <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
+              {/* Group Name TextField with Box wrapper */}
+              <Box sx={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
+                <TextField
+                  fullWidth
+                  placeholder="Group Name"
+                  label={groupName ? "" : "Group Name"}
+                  InputLabelProps={{ shrink: false }}
+                  sx={{
+                    ...inputStyle,
+                    ...(groupNameError && {
+                      "& .MuiOutlinedInput-notchedOutline": {
+                        borderColor: "#d32f2f !important",
+                      },
+                    }),
+                  }}
+                  value={groupName}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    const regex = /^[a-zA-Z\s]*$/;
+                    if (regex.test(value) || value === '') {
+                      setGroupName(value);
+                      if (groupNameError) setGroupNameError(""); // Clear error on change
+                    }
+                  }}
+                  onKeyPress={(e) => {
+                    const regex = /^[a-zA-Z\s]$/;
+                    if (!regex.test(e.key)) {
+                      e.preventDefault();
+                    }
+                  }}
+                />
+                {groupNameError && (
+                  <Typography
+                    sx={{
+                      color: "#d32f2f",
+                      fontSize: "12px",
+                      marginTop: "4px",
+                      marginLeft: "14px",
+                    }}
+                  >
+                    {groupNameError}
+                  </Typography>
+                )}
+              </Box>
 
-  {/* Department Select with Box wrapper */}
-  <Box sx={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
-    <Select
-      fullWidth
-      displayEmpty
-      placeholder="Select Department"
-      value={departmentId}
-      onChange={(e) => {
-        setDepartmentId(e.target.value);
-        if (departmentError) setDepartmentError(""); // Clear error on change
-      }}
-      inputProps={{
-        "aria-label": "Select Department",
-      }}
-      sx={{
-        ...selectStyles,
-        ...(departmentError && {
-          "& .MuiOutlinedInput-notchedOutline": {
-            borderColor: "#d32f2f !important",
-          },
-        }),
-      }}
-      IconComponent={KeyboardArrowDownIcon}
-    >
-      <MenuItem value="" disabled>
-        Select Department
-      </MenuItem>
-      {departmentList.map((department) => (
-        <MenuItem key={department.dep_id} value={department.dep_id.toString()}>
-          {department.dep_name}
-        </MenuItem>
-      ))}
-    </Select>
-    {departmentError && (
-      <Typography
-        sx={{
-          color: "#d32f2f",
-          fontSize: "12px",
-          marginTop: "4px",
-          marginLeft: "14px",
-        }}
-      >
-        {departmentError}
-      </Typography>
-    )}
-  </Box>
-</Box>
+              {/* Department Select with Box wrapper */}
+              <Box sx={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
+                <Select
+                  fullWidth
+                  displayEmpty
+                  placeholder="Select Department"
+                  value={departmentId}
+                  onChange={(e) => {
+                    setDepartmentId(e.target.value);
+                    if (departmentError) setDepartmentError(""); // Clear error on change
+                  }}
+                  inputProps={{
+                    "aria-label": "Select Department",
+                  }}
+                  sx={{
+                    ...selectStyles,
+                    ...(departmentError && {
+                      "& .MuiOutlinedInput-notchedOutline": {
+                        borderColor: "#d32f2f !important",
+                      },
+                    }),
+                  }}
+                  IconComponent={KeyboardArrowDownIcon}
+                >
+                  <MenuItem value="" disabled>
+                    Select Department
+                  </MenuItem>
+                  {departmentList.map((department) => (
+                    <MenuItem key={department.dep_id} value={department.dep_id.toString()}>
+                      {department.dep_name}
+                    </MenuItem>
+                  ))}
+                </Select>
+                {departmentError && (
+                  <Typography
+                    sx={{
+                      color: "#d32f2f",
+                      fontSize: "12px",
+                      marginTop: "4px",
+                      marginLeft: "14px",
+                    }}
+                  >
+                    {departmentError}
+                  </Typography>
+                )}
+              </Box>
+            </Box>
 
             <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, mt: 3, mb: 1 }}>
               <Button

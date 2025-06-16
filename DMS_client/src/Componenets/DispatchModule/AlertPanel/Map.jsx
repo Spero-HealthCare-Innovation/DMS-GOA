@@ -24,17 +24,17 @@ const FlyToLocation = ({ position, zoom }) => {
 };
 
 const MapView = ({ data }) => {
-  const position = [18.5329846, 73.8216998]; // Default location (Goa)
+  const position = [18.51956674674116, 73.85536020335581]; // Default location (Goa)
   const [stateData, setStateData] = useState();
   const [triggeredData, setTriggeredData] = useState(null);
-  const [mapZoom, setMapZoom] = useState(8);
+  const [mapZoom, setMapZoom] = useState(11);
 
   useEffect(() => {
     setTriggeredData(data);
   }, [data]);
 
   useEffect(() => {
-    fetch('/Boundaries/Pune_district_02.geojson')
+    fetch('/Boundaries/pune-2022-wards.geojson')
       .then(res => res.json())
       .then(data => setStateData(data));
   }, []);
@@ -50,13 +50,13 @@ const MapView = ({ data }) => {
     if (triggeredData?.latitude && triggeredData?.longitude) {
       setMapZoom(13); // Zoom in on update
     } else {
-      setMapZoom(8); // Default zoom
+      setMapZoom(11); // Default zoom
     }
   }, [triggeredData]);
 
   const geoJsonStyle = {
     weight: 2,
-    color: 'Orange',
+    color: '#BE5103',
     fillOpacity: 0.1,
   };
 

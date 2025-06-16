@@ -5,7 +5,7 @@ import L from 'leaflet';
 import axios from 'axios';
 import customIconUrl from '../../../assets/Rectangle.png';
 import { useAuth } from '../../../Context/ContextAPI';
-
+ 
 const customIcon = new L.Icon({
   iconUrl: customIconUrl,
   iconSize: [32, 32],
@@ -13,9 +13,9 @@ const customIcon = new L.Icon({
   popupAnchor: [0, -32],
   shadowUrl: null
 });
-
+ 
 const HERE_API_KEY = import.meta.env.VITE_APP_GOOGLE_MAPS_API_KEY;
-
+ 
 const FlyToLocation = ({ position, zoom }) => {
   const map = useMap();
   useEffect(() => {
@@ -25,52 +25,53 @@ const FlyToLocation = ({ position, zoom }) => {
   }, [position, zoom]);
   return null;
 };
-
+ 
 const IncidentCreateMap = () => {
   const { query, suggestions, selectedPosition, popupText, handleSearchChange, handleSelectSuggestion, setQuery } = useAuth();
   const [queryMap, setQueryMap] = useState('');
   const [suggestionsMap, setSuggestionsMap] = useState([]);
-  const [selectedPositionMap, setSelectedPositionMap] = useState([18.5329846,73.8216998]); // Default: Pune (PMC)
+  const [selectedPositionMap, setSelectedPositionMap] = useState([18.519566133802865, 73.85534807018765]); // Default: Pune (PMC)
   const [popupTextMap, setPopupTextMap] = useState('You are here!');
   const [stateData, setStateData] = useState();
-  const [mapZoom, setMapZoom] = useState(7);
+  const [mapZoom, setMapZoom] = useState(10.5);
   const mapRef = useRef();
-
-  
-
+ 
+ 
+ 
   useEffect(() => {
     setQueryMap(query);
     setSuggestionsMap(suggestions);
     setSelectedPositionMap(selectedPosition);
-    setPopupTextMap(popupText);
-  }, [query, suggestions, selectedPosition, popupText]);
-
+     if (!document.activeElement || document.activeElement.tagName !== 'INPUT') {
+    setPopupTextMap(query);}
+  }, [query, suggestions, selectedPosition]);
+ 
   useEffect(() => {
     setQuery(queryMap);  // send value to context
   }, [queryMap]);
-
+ 
   useEffect(() => {
-    fetch('/Boundaries/Pune_district_02.geojson')
+    fetch('/Boundaries/pune-2022-wards.geojson')
       .then(res => res.json())
       .then(data => {
         setStateData(data);
       });
   }, []);
-
+ 
   const geoJsonStyle = {
     weight: 2,
     color: 'Orange',
     fillOpacity: 0.1,
   };
-
-
+ 
+ 
   // const handleSearchChange = async (e) => {
   //   const value = e.target.value;
   //   setQuery(value);
-
-  
+ 
+ 
   //   if (value.length < 3) return;
-
+ 
   //   const response = await axios.get('https://autosuggest.search.hereapi.com/v1/autosuggest', {
   //     params: {
   //       apiKey: HERE_API_KEY,
@@ -79,11 +80,11 @@ const IncidentCreateMap = () => {
   //       limit: 5
   //     }
   //   });
-
+ 
   //   setSuggestions(response.data.items.filter(item => item.position));
-
+ 
   // };
-
+ 
   // const handleSelectSuggestion = async (item) => {
   //   const { position, address } = item;
   //   setSelectedPosition([position.lat, position.lng]);
@@ -91,7 +92,7 @@ const IncidentCreateMap = () => {
   //   setQuery(address.label);
   //   setSuggestions([]);
   // };
-
+ 
   // const handleMapClick = async (e) => {
   //   console.log("I am called")
   //   const { lat, lng } = e.latlng;
@@ -101,12 +102,12 @@ const IncidentCreateMap = () => {
   //       at: `${lat},${lng}`,
   //     }
   //   });
-
+ 
   //   const label = response.data.items[0]?.address?.label || 'No address found';
   //   setSelectedPosition([lat, lng]);
   //   setPopupText(label);
   // };
-
+ 
   return (
     <div style={{ position: "relative", width: "100%"}}>
       {/* Search input & suggestions */}
@@ -147,7 +148,7 @@ const IncidentCreateMap = () => {
           </ul>
         )}
       </div>
-
+ 
       {/* Leaflet Map */}
       <MapContainer
         center={selectedPosition}
@@ -174,7 +175,7 @@ const IncidentCreateMap = () => {
               const position = marker.getLatLng();
               setSelectedPositionMap([position.lat, position.lng]);
               setMapZoom(13);
-
+ 
               try {
                 const response = await axios.get(
                   "https://revgeocode.search.hereapi.com/v1/revgeocode",
@@ -185,7 +186,7 @@ const IncidentCreateMap = () => {
                     },
                   }
                 );
-
+ 
                 const label =
                   response.data.items[0]?.address?.label || "No address found";
                 setPopupTextMap(label);
@@ -197,12 +198,12 @@ const IncidentCreateMap = () => {
             },
           }}
         >
-          <Popup>{popupText}</Popup>
+          <Popup>{popupTextMap}</Popup>
         </Marker>
       </MapContainer>
     </div>
   );
-
+ 
 };
-
-export default IncidentCreateMap;
+ 
+export default IncidentCreateMap

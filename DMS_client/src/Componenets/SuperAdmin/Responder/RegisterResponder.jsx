@@ -167,8 +167,8 @@ const RegisterResponder = ({ darkMode, flag, setFlag, setSelectedIncident }) => 
         const payload = {
             res_id: selectedResponders,
             dis_id: selectedDisaster,
-            sop_added_by: userName,
-            sop_modified_by: userName
+            dr_added_by: userName,
+            dr_modified_by: userName
         };
 
         try {
@@ -187,7 +187,7 @@ const RegisterResponder = ({ darkMode, flag, setFlag, setSelectedIncident }) => 
                 setSnackbarOpen(true);
                 setSelectedDisaster("");
                 setSelectedResponders([]);
-                await fetchResponder();
+                await getResponderData();
             }
             // else if (response.status === 400) {
             //     setSnackbarMessage("Select Fields To SUbmit the Form");
@@ -212,8 +212,8 @@ const RegisterResponder = ({ darkMode, flag, setFlag, setSelectedIncident }) => 
         const payload = {
             res_id: selectedResponders,
             dis_id: selectedDisaster,
-            sop_added_by: userName,
-            sop_modified_by: userName
+            dr_added_by: userName,
+            dr_modified_by: userName
         };
 
         try {
