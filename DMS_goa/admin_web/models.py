@@ -218,7 +218,6 @@ class DMS_Employee(AbstractBaseUser):
     dist_id = models.ForeignKey(DMS_District, on_delete=models.CASCADE,null=True, blank=True)
     tahsil_id = models.ForeignKey(DMS_Tahsil, on_delete=models.CASCADE,null=True, blank=True)
     city_id = models.ForeignKey(DMS_City, on_delete=models.CASCADE,null=True, blank=True)
-
     # grp_id = models.CharField(max_length=255, null=True, blank=True)
     # state_id = models.CharField(max_length=255, null=True, blank=True)
     # dist_id = models.CharField(max_length=255, null=True, blank=True)
