@@ -49,7 +49,7 @@ const EnquiryCard = styled("div")(() => ({
   display: "flex",
   alignItems: "center",
   justifyContent: "space-between",
-  background: "#5FECC8",
+  background: "#5FC8EC",
   borderRadius: "8px 10px 0 0",
   padding: "6px 12px",
   color: "black",
@@ -63,13 +63,13 @@ const EnquiryCardBody = styled("tr")(({ theme, alertType, isHighlighted }) => {
   };
 
   const glowColor = alertColors[alertType] || "transparent";
-  const highlightBorder = isHighlighted ? "5px solid #00f0c0" : "5px solid transparent";
+  const highlightBorder = isHighlighted ? "0.8px solid #5FC8EC" : "1px solid transparent";
 
   return {
     display: "flex",
     alignItems: "center",
     justifyContent: "space-between",
-    background: theme.palette.mode === "dark" ? "#112240" : "#fff",
+    background: theme.palette.mode === "dark" ? "rgb(122, 126, 134)" : "#fff",
     color: theme.palette.mode === "dark" ? "#fff" : "#000",
     marginTop: "0.5em",
     borderRadius: "8px",
@@ -77,9 +77,9 @@ const EnquiryCardBody = styled("tr")(({ theme, alertType, isHighlighted }) => {
     transition: "box-shadow 0.3s ease, border-color 0.3s ease",
     cursor: "pointer",
     height: "45px",
-    border: `1px solid transparent`,
-    borderLeft: highlightBorder,
-    borderRight: highlightBorder, // ⭐ Right border added
+    // border: `1px solid transparent`,
+    border: highlightBorder,
+    // border: highlightBorder, // ⭐ Right border added
     // "&:hover": {
     //   boxShadow: `0 0 8px 3px ${glowColor}88`,
     // },
@@ -239,7 +239,7 @@ function SopTask({
   // };
 
   const textColor = darkMode ? "#ffffff" : "#000000";
-  const bgColor = darkMode ? "#0a1929" : "#ffffff";
+  const bgColor = darkMode ? "rgb(77, 77, 77)" : "#ffffff";
   const borderColor = darkMode ? "#7F7F7F" : "#ccc";
 
   const handleClick = () => {
@@ -413,11 +413,12 @@ function SopTask({
           size="small"
           sx={{
             ml: "auto",
-            backgroundColor: "#5FECC8",
+            backgroundColor: "rgb(223, 76, 76)",
             color: "black",
             borderRadius: "18px",
             "&:hover": {
-              backgroundColor: "#5FECC8",
+              backgroundColor: "rgb(223, 76, 76)",
+              border: `1px solid ${darkMode ? "#fff" : "#000"}`,
             },
             // width: isHovered ? 140 : 36,
             height: 36,
@@ -429,13 +430,13 @@ function SopTask({
             // paddingRight: isHovered ? 1 : 1,
           }}
         >
-          <Add sx={{ color: darkMode ? "#000000" : "#000000" }} />
+          <Add sx={{ color: darkMode ? "#fff" : "#000000" }} />
           {/* {isHovered && ( */}
           <Typography
             variant="body2"
             sx={{
               marginLeft: 1,
-              color: "black",
+              color: "#fff",
               whiteSpace: "nowrap",
             }}
           >
@@ -533,7 +534,7 @@ function SopTask({
                   <StyledCardContent sx={{ flex: 1, justifyContent: "center" }}>
                     <Typography
                       variant="subtitle2"
-                      sx={{ fontSize: "12px" }}
+                      // sx={{ fontSize: "12px" }}
                       textAlign="center"
                     >
                       {item.alert_datetime
@@ -713,7 +714,7 @@ function SopTask({
                               }}
                             >
                               <Visibility
-                                sx={{ color: "#00f0c0", fontSize: 28 }}
+                                sx={{ color: "	#FFA500", fontSize: 28 }}
                               />
                             </IconButton>
                           </Tooltip>
@@ -729,7 +730,7 @@ function SopTask({
                               size="large"
                             >
                               <TextSnippetIcon
-                                sx={{ color: "#4caf50", fontSize: 20 }}
+                                sx={{ color: "#ffccf2", fontSize: 20 }}
                               />
                             </IconButton>
                           </Tooltip>

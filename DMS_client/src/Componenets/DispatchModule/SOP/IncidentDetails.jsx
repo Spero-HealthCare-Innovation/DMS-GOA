@@ -70,7 +70,7 @@ function IncidentDetails({
   const comments = incidentDetails?.comments || [];
 
   // Define colors and styles based on dark mode
-  const labelColor = darkMode ? "#5FECC8" : "#1976d2";
+  const labelColor = darkMode ? "#5FC8EC" : "#1976d2";
   const textColor = darkMode ? "#ffffff" : "#000000";
   const borderColor = darkMode ? "#7F7F7F" : "#ccc";
   const fontFamily = "Roboto, sans-serif";
@@ -150,7 +150,7 @@ function IncidentDetails({
         sx={{
           p: 2,
           borderRadius: 2,
-          backgroundColor: darkMode ? "#0a1929" : "#fff",
+          backgroundColor: darkMode ? "rgb(77, 77, 77)" : "#fff",
           color: textColor,
           transition: "all 0.3s ease",
           mb: 3,

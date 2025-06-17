@@ -53,7 +53,7 @@ function CommentsPanel({
   const bottomRef = useRef(null);
 
   const textColor = darkMode ? "#ffffff" : "#000000";
-  const bgColor = darkMode ? "#0a1929" : "#ffffff";
+  const bgColor = darkMode ? "rgb(122, 126, 134)" : "#ffffff";
 
   const paperStyle = {
     padding: 1,
@@ -315,7 +315,7 @@ function CommentsPanel({
 
   return (
     <Paper elevation={1} sx={paperStyle}>
-      <Typography variant="h6" mb={2} color="#5FECC8">
+      <Typography variant="subtitle2" mb={2} color="#5FC8EC">
         Comments
       </Typography>
 
@@ -335,11 +335,11 @@ function CommentsPanel({
               width: "6px",
             },
             "&::-webkit-scrollbar-thumb": {
-              backgroundColor: darkMode ? "#5FECC8" : "#888",
+              backgroundColor: darkMode ? "#5FC8EC" : "#888",
               borderRadius: 3,
             },
             "&::-webkit-scrollbar-thumb:hover": {
-              backgroundColor: darkMode ? "#48c7ab" : "#555",
+              backgroundColor: darkMode ? "#5FC8EC" : "#555",
             },
           }}
         >
@@ -355,7 +355,7 @@ function CommentsPanel({
                   my: 0.5,
                   width: i % 2 === 0 ? "80%" : "60%",
                   alignSelf: i % 2 === 0 ? "flex-start" : "flex-end",
-                  bgcolor: darkMode ? "#1e293b" : "#e0e0e0",
+                  bgcolor: darkMode ? "#5FC8EC" : "#e0e0e0",
                 }}
               />
             ))
@@ -391,7 +391,7 @@ function CommentsPanel({
                               ? "#0f766e"
                               : "#d1fae5"
                             : darkMode
-                              ? "#1e293b"
+                              ? "rgb(77,77,77)"
                               : "#f3f4f6",
                           color: isOwnComment
                             ? darkMode
@@ -448,7 +448,7 @@ function CommentsPanel({
           display: "flex",
           alignItems: "center",
           gap: 1,
-          backgroundColor: darkMode ? "#1e293b" : "#f9f9f9",
+          backgroundColor: darkMode ? "rgb(77,77,77)" : "#f9f9f9",
           borderRadius: 2,
           px: 1,
           py: 0.5,
