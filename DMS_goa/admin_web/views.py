@@ -651,11 +651,13 @@ class DMS_Incident_Post_api(APIView):
                 "caller_no": "",
                 "location": "",
                 "summary": "",
-                "disaster_name": incc.disaster_type.disaster_name,
-                "inc_type": incc.disaster_type.disaster_id,
+                "disaster_name": incc.disaster_type.disaster_name if incc.disaster_type else None,
+                "inc_type": incc.disaster_type.disaster_id if incc.disaster_type else None,
                 "incident_id": str(incc.incident_id),
                 "latitude": str(incc.latitude),
                 "longitude": str(incc.longitude),
+                "dms_lat": str(incc.latitude),
+                "dms_lng": str(incc.longitude),
                 "alert_type": ("High" if incc.alert_type == 1 else"Medium" if incc.alert_type == 2 else"Low" if incc.alert_type == 3 else"Very Low" if incc.alert_type == 4 else"")
             } 
             print(external_api_payload)
@@ -906,10 +908,12 @@ class Manual_Call_Incident_api(APIView):
         "location": incident_instance.location,
         "summary": str(incident_instance.summary.summary),
         # "inc_type": "NON_MCI" if incident_instance.inc_type == 1 else "NON_EME_CALL" if incident_instance.inc_type == 2 else "",
-        "inc_type": incident_instance.disaster_type.disaster_id,
+        "inc_type": incident_instance.disaster_type.disaster_id if incident_instance.disaster_type else None,
         "incident_id": str(incident_instance.incident_id),
         "latitude": str(incident_instance.latitude),
         "longitude": str(incident_instance.longitude),
+        "dms_lat": str(incident_instance.latitude),
+        "dms_lng": str(incident_instance.longitude),
         "alert_type": ("High" if incident_instance.alert_type == 1 else"Medium" if incident_instance.alert_type == 2 else"Low" if incident_instance.alert_type == 3 else"Very Low" if incident_instance.alert_type == 4 else""
 )
     }
