@@ -420,7 +420,7 @@ class DisasterResponderPostSerializer(serializers.ModelSerializer):
          fields = ['dis_id','res_id']
 
 class ClosureSerializer(serializers.ModelSerializer):
-    closure_inc_id = serializers.CharField()  # Required in both input and output
+    closure_inc_id = serializers.CharField()  
 
     class Meta:
         model = DMS_incident_closure
