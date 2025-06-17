@@ -458,18 +458,16 @@ function IncidentDetails({
                           responderScope.sop_responses[0].sop_description
                         )}
                       </Typography>
-                      {responderScope.sop_responses[0].sop_description.split(
-                        "\n"
-                      ).length > 2 && (
-                          <IconButton
-                            size="small"
-                            onClick={() => setOpenDialog(true)}
-                            sx={{ ml: 1 }}
-                            aria-label="Show full response procedure"
-                          >
-                            <VisibilityIcon fontSize="small" />
-                          </IconButton>
-                        )}
+                      {responderScope.sop_responses[0].sop_description && (
+                        <IconButton
+                          size="small"
+                          onClick={() => setOpenDialog(true)}
+                          sx={{ ml: 1 }}
+                          aria-label="Show full response procedure"
+                        >
+                          <VisibilityIcon fontSize="small" />
+                        </IconButton>
+                      )}
                       <Dialog
                         open={openDialog}
                         onClose={() => setOpenDialog(false)}
