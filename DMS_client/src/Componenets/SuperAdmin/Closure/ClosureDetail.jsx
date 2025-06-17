@@ -304,10 +304,10 @@ function ClosureDetail({ darkMode, fromDate, toDate, onChange, onDownload }) {
           <Typography
             variant="h6"
             sx={{
-              color: labelColor,
+              color: "rgb(95,200,236)",
               fontWeight: 600,
               fontFamily,
-              fontSize: 16,
+              fontSize: 18,
               minWidth: "120px",
               marginLeft: "2em",
             }}
@@ -430,11 +430,12 @@ function ClosureDetail({ darkMode, fromDate, toDate, onChange, onDownload }) {
             variant="contained"
             size="small"
             sx={{
-              backgroundColor: "#00f0c0",
-              "&:hover": { backgroundColor: "#00d8ac" },
+              backgroundColor: "rgb(18,166,95,0.8)",
+              color: "#fff",
+              "&:hover": { backgroundColor: "rgb(18,166,95,0.8)" },
               height: 35,
               minWidth: 100,
-              color: darkMode ? "black" : "#000",
+              color: darkMode ? "#fff" : "#fff",
             }}
             onClick={onSubmit}
           >
@@ -477,13 +478,13 @@ function ClosureDetail({ darkMode, fromDate, toDate, onChange, onDownload }) {
       )}
 
       <Grid item xs={12} md={7}>
-        <Paper elevation={3} sx={{ padding: 3, borderRadius: 3, backgroundColor: bgColor, mt: 1, mb: 5 }}>
+        <Paper elevation={3} sx={{ padding: 3, borderRadius: 3, backgroundColor:"#202328", mt: 1, mb: 5 }}>
           <TableContainer>
             <Table>
               <TableHead>
                 <TableRow>
                   <EnquiryCard sx={{
-                    backgroundColor: "#5FECC8",
+                    backgroundColor: "rgb(95,200,236)",
                     color: "#000",
                     display: "flex",
                     width: "100%",
@@ -616,7 +617,7 @@ function ClosureDetail({ darkMode, fromDate, toDate, onChange, onDownload }) {
               <TableBody>
                 {loading ? (
                   <Box p={4} display="flex" justifyContent="center">
-                    <CircularProgress sx={{ color: "#5FECC8" }} />
+                    <CircularProgress sx={{ color: "rgb(95,200,236)" }} />
                   </Box>
                 ) : !hasSubmitted ? (
                   <Box p={2}>
@@ -635,7 +636,7 @@ function ClosureDetail({ darkMode, fromDate, toDate, onChange, onDownload }) {
                     <EnquiryCardBody
                       key={index}
                       sx={{
-                        backgroundColor: inputBgColor,
+                       backgroundColor: darkMode ? "rgb(88,92,99)" : "#FFFFFF",
                         p: 2,
                         borderRadius: 2,
                         color: textColor,
@@ -706,7 +707,7 @@ function ClosureDetail({ darkMode, fromDate, toDate, onChange, onDownload }) {
                   borderColor: borderColor,
                   height: "30px",
                   minWidth: "70px",
-                  backgroundColor: bgColor,
+                  backgroundColor: "#202328",
                   "& .MuiOutlinedInput-notchedOutline": {
                     borderColor: borderColor,
                   },
@@ -734,6 +735,7 @@ function ClosureDetail({ darkMode, fromDate, toDate, onChange, onDownload }) {
                 gap: 2,
                 color: textColor,
                 fontSize: "13px",
+                backgroundColor:"#202328",
               }}
             >
               <Box

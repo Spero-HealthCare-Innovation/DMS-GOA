@@ -383,10 +383,10 @@ function SopRegister({ darkMode }) {
         <Typography
           variant="h6"
           sx={{
-            color: labelColor,
+            color: "rgb(95,200,236)",
             fontWeight: 600,
             fontFamily,
-            fontSize: 16,
+            fontSize: 18,
           }}
         >
           Register SOP
@@ -433,7 +433,7 @@ function SopRegister({ darkMode }) {
             sx={{
               padding: 2,
               borderRadius: 3,
-              backgroundColor: bgColor,
+              backgroundColor: "#202328",
               mt: 1,
               mb: 5,
               ml: 1,
@@ -445,7 +445,7 @@ function SopRegister({ darkMode }) {
                   <TableRow>
                     <EnquiryCard
                       sx={{
-                        backgroundColor: "#5FECC8",
+                        backgroundColor:"rgb(95,200,236)",
                         color: "#000",
                         display: "flex",
                         width: "100%",
@@ -507,7 +507,7 @@ function SopRegister({ darkMode }) {
                     <EnquiryCardBody
                       key={(page - 1) * rowsPerPage + index}
                       sx={{
-                        backgroundColor: inputBgColor,
+                         backgroundColor: darkMode ? "rgb(88,92,99)" : "#FFFFFF",
                         p: 2,
                         borderRadius: 2,
                         color: textColor,
@@ -586,7 +586,7 @@ function SopRegister({ darkMode }) {
                           onClick={(e) => handleOpen(e, item)}
                           sx={{
                             fontSize: "1.6em",
-                            color: "#00f0c0",
+                            color: "rgb(95,200,236)",
                             cursor: "pointer",
                           }}
                         />
@@ -696,7 +696,7 @@ function SopRegister({ darkMode }) {
                     borderColor: borderColor,
                     height: "30px",
                     minWidth: "70px",
-                    backgroundColor: bgColor,
+                    backgroundColor: "#202328",
                     "& .MuiOutlinedInput-notchedOutline": {
                       borderColor: borderColor,
                     },
@@ -723,6 +723,7 @@ function SopRegister({ darkMode }) {
                   gap: 2,
                   color: textColor,
                   fontSize: "13px",
+                  backCoundColor:"#202328 !important",
                 }}
               >
                 <Box
@@ -761,7 +762,7 @@ function SopRegister({ darkMode }) {
             sx={{
               padding: 2,
               borderRadius: 3,
-              backgroundColor: bgColor,
+              backgroundColor: "#202328",
               mt: 1,
               mb: 5,
             }}
@@ -782,8 +783,8 @@ function SopRegister({ darkMode }) {
                         sx={{
                           mb: 1,
                           width: "40%",
-                          backgroundColor: "#00f0c0",
-                          color: "black",
+                          backgroundColor: "rgb(223,76,76)",
+                          color: "#fff",
                           fontWeight: "bold",
                           borderRadius: "12px",
                           cursor: "pointer",
@@ -809,6 +810,7 @@ function SopRegister({ darkMode }) {
                     label="Disaster Type"
                     variant="outlined"
                     value={selectedDisaster || ""}
+                     sx={{    backgroundColor: darkMode ? "rgb(88,92,99)" : "#FFFFFF"}}
                     onChange={(e) => {
                       setSelectedDisaster(e.target.value);
                       setDisasterError(false); // reset on change
@@ -823,6 +825,7 @@ function SopRegister({ darkMode }) {
                           style: {
                             maxHeight: 250,
                             width: "250",
+                              
                           },
                         },
                       },
@@ -844,6 +847,7 @@ function SopRegister({ darkMode }) {
                     InputLabelProps={{ shrink: false }}
                     multiline
                     value={description}
+                    sx={{    backgroundColor: darkMode ? "rgb(88,92,99)" : "#FFFFFF"}}
                      onChange={(e) => {
     setDescription(e.target.value);
     setDescriptionError(false); // reset on change
@@ -871,8 +875,8 @@ function SopRegister({ darkMode }) {
                 sx={{
                   mt: 2,
                   width: "40%",
-                  backgroundColor: "#00f0c0",
-                  color: "black",
+                  backgroundColor:"rgb(18,166,95,0.8)",
+                  color: "#fff",
                   fontWeight: "bold",
                   borderRadius: "12px",
                   "&:hover": {

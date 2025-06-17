@@ -397,10 +397,10 @@ function Add_group({ darkMode }) {
 
         {/* Label */}
         <Typography variant="h6" sx={{
-          color: labelColor,
+          color: "rgb(95,200,236)",
           fontWeight: 600,
           fontFamily,
-          fontSize: 16,
+          fontSize: 18,
           marginLeft: "1.5em",
         }}>
           {isEditing ? 'Edit Group' : 'Add Group'}
@@ -445,24 +445,27 @@ function Add_group({ darkMode }) {
 
       <Grid container spacing={2}>
         <Grid item xs={12} md={7}>
-          <Paper elevation={3} sx={{ padding: 3, borderRadius: 3, backgroundColor: bgColor, mt: 1, mb: 5 }}>
+          <Paper elevation={3} sx={{ padding: 3, borderRadius: 3, backgroundColor: "#202328", mt: 1, mb: 5,ml:1 }}>
             <TableContainer>
               <Table>
                 <TableHead>
                   <TableRow>
                     <EnquiryCard sx={{
-                      backgroundColor: "#5FECC8",
+                      backgroundColor: "rgb(95,200,236)",
                       color: "#000",
                       display: "flex",
                       width: "100%",
                       borderRadius: 2,
                       p: 3,
+                      fontFamily: "Roboto",
+                      fontSize:"14px",
                     }}>
                       <StyledCardContent
                         sx={{
                           flex: 0.6,
                           borderRight: "1px solid black",
                           justifyContent: "center",
+                          
                         }}
                       >
                         <Typography variant="subtitle2" sx={fontsTableHeading}>
@@ -513,7 +516,7 @@ function Add_group({ darkMode }) {
                   {loading ? (
                     <TableRow>
                       <TableCell colSpan={6} align="center">
-                        <CircularProgress size={30} sx={{ color: "#5FECC8" }} />
+                        <CircularProgress size={30} sx={{ color: "rgb(95,200,236)" }} />
                       </TableCell>
                     </TableRow>
                   ) : paginatedData.length === 0 ? (
@@ -533,13 +536,14 @@ function Add_group({ darkMode }) {
                       <EnquiryCardBody
                         key={index}
                         sx={{
-                          backgroundColor: inputBgColor,
+                             backgroundColor: darkMode ? "rgb(88,92,99)" : "#FFFFFF",
                           p: 2,
                           borderRadius: 2,
                           color: textColor,
                           display: "flex",
                           width: "100%",
                           mb: 1,
+                          fontFamily: "Roboto",
                         }}
                       >
                         <StyledCardContent sx={{ flex: 0.6, justifyContent: "center" }}>
@@ -592,7 +596,7 @@ function Add_group({ darkMode }) {
                           <MoreHorizIcon
                             onClick={(e) => handleOpen(e, item)}
                             sx={{
-                              color: "#00f0c0",
+                              color: "rgb(95,200,236)",
                               cursor: "pointer",
                               fontSize: 28,
                               justifyContent: "center",
@@ -634,7 +638,7 @@ function Add_group({ darkMode }) {
                     borderColor: borderColor,
                     height: "30px",
                     minWidth: "70px",
-                    backgroundColor: bgColor,
+                    backgroundColor: "#202328",
                     "& .MuiOutlinedInput-notchedOutline": {
                       borderColor: borderColor,
                     },
@@ -652,6 +656,7 @@ function Add_group({ darkMode }) {
               {/* Page Navigation - Updated to use filteredGroups */}
               <Box
                 sx={{
+                  backgroundColor:"#202328",
                   border: "1px solid #ffffff",
                   borderRadius: "6px",
                   px: 2,
@@ -744,15 +749,16 @@ function Add_group({ darkMode }) {
         </Popover>
 
         <Grid item xs={12} md={4.9}>
-          <Paper elevation={3} sx={{ padding: 2, borderRadius: 3, backgroundColor: bgColor, mt: 1, mb: 5 }}>
+          <Paper elevation={3} sx={{ padding: 2, borderRadius: 3, backgroundColor:  "#202328", mt: 1, mb: 5 }}>
 
-            <Box
-              display="flex"
-              justifyContent="space-between"
-              alignItems="center"
-              mb={2}
-            >
-              <Typography
+           <Box
+                         display="flex"
+                         justifyContent={{ xs: "center", md: "flex-end" }}
+                         alignItems="center"
+                         mb={2}
+                         flexWrap="wrap"
+                       >
+              {/* <Typography
                 sx={{
                   color: labelColor,
                   fontWeight: 600,
@@ -762,7 +768,7 @@ function Add_group({ darkMode }) {
                 }}
               >
                 {isEditing ? 'Edit Group' : 'Add Group'}
-              </Typography>
+              </Typography> */}
 
               <Button
                 variant="contained"
@@ -770,13 +776,13 @@ function Add_group({ darkMode }) {
                 onClick={handleAddNewGroup}
                 disabled={!isEditing} // Show only when in edit mode
                 sx={{
-                  backgroundColor: "#5FECC8",
-                  color: "#000",
+                  backgroundColor: "rgb(223,76,76)",
+                  color: "#fff",
                   fontWeight: 600,
                   fontFamily: "Roboto",
                   textTransform: "none",
                   "&:hover": {
-                    backgroundColor: "#4ddbb6",
+                    backgroundColor:"rgb(223,76,76)",
                   },
                 }}
               >
@@ -797,6 +803,8 @@ function Add_group({ darkMode }) {
                   label={groupName ? "" : "Group Name"}
                   InputLabelProps={{ shrink: false }}
                   sx={{
+                        backgroundColor: darkMode ? "rgb(88,92,99)" : "#FFFFFF",
+                    fontFamily: "Roboto",
                     ...inputStyle,
                     ...(groupNameError && {
                       "& .MuiOutlinedInput-notchedOutline": {
@@ -827,6 +835,7 @@ function Add_group({ darkMode }) {
                       fontSize: "12px",
                       marginTop: "4px",
                       marginLeft: "14px",
+                      fontFamily: "Roboto",
                     }}
                   >
                     {groupNameError}
@@ -849,6 +858,8 @@ function Add_group({ darkMode }) {
                     "aria-label": "Select Department",
                   }}
                   sx={{
+                    fontFamily: "Roboto",
+                        backgroundColor: darkMode ? "rgb(88,92,99)" : "#FFFFFF",
                     ...selectStyles,
                     ...(departmentError && {
                       "& .MuiOutlinedInput-notchedOutline": {
@@ -874,6 +885,7 @@ function Add_group({ darkMode }) {
                       fontSize: "12px",
                       marginTop: "4px",
                       marginLeft: "14px",
+                      fontFamily: "Roboto",
                     }}
                   >
                     {departmentError}
@@ -890,13 +902,15 @@ function Add_group({ darkMode }) {
                 sx={{
                   mt: 2,
                   width: "40%",
-                  backgroundColor: "#00f0c0",
-                  color: "black",
+                  backgroundColor: "rgb(18,166,95,0.8) !important",
+                  color: "#ffff",
                   fontWeight: "bold",
                   borderRadius: "12px",
+                  fontFamily: "Roboto",
                   "&:hover": {
-                    backgroundColor: bgColor,
+                    backgroundColor: "rgb(18,166,95,0.8)",
                     color: "white !important",
+                    fontFamily: "Roboto",
                   },
                 }}
               >
@@ -910,13 +924,16 @@ function Add_group({ darkMode }) {
                   sx={{
                     mt: 2,
                     width: "40%",
-                    borderColor: "#00f0c0",
-                    color: "#00f0c0",
+                    borderColor: "rgb(223,76,76)",
+                    color:"#fff",
                     fontWeight: "bold",
                     borderRadius: "12px",
+                    fontFamily: "Roboto",
                     "&:hover": {
-                      borderColor: "#00d8ac",
-                      backgroundColor: "rgba(0, 240, 192, 0.1)",
+                      borderColor: "rgb(223,76,76)",
+                       backgroundColor: "rgb(223,76,76)",
+                       color:"#fff",
+                       fontFamily: "Roboto",
                     },
                   }}
                 >

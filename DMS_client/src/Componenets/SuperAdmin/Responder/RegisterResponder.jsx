@@ -353,10 +353,10 @@ const RegisterResponder = ({ darkMode, flag, setFlag, setSelectedIncident }) => 
                         <Typography
                             variant="h6"
                             sx={{
-                                color: labelColor,
+                                color: "rgb(95,200,236)",
                                 fontWeight: 600,
                                 fontFamily,
-                                fontSize: 16,
+                                fontSize: 18,
                             }}
                         >
                             Register Responder
@@ -401,7 +401,7 @@ const RegisterResponder = ({ darkMode, flag, setFlag, setSelectedIncident }) => 
                 <Grid item xs={12} md={7}>
                     <Paper
                         sx={{
-                            backgroundColor: bgColor,
+                            backgroundColor: "#202328",
                             p: 2,
                             borderRadius: 2,
                             color: textColor,
@@ -414,7 +414,7 @@ const RegisterResponder = ({ darkMode, flag, setFlag, setSelectedIncident }) => 
                                     <TableRow>
                                         <TableHeadingCard
                                             sx={{
-                                                backgroundColor: "#5FECC8",
+                                                backgroundColor: "rgb(95,200,236)",
                                                 color: "#000",
                                                 display: "flex",
                                                 width: "100%",
@@ -482,7 +482,7 @@ const RegisterResponder = ({ darkMode, flag, setFlag, setSelectedIncident }) => 
                                                     <TableDataCardBody
                                                         key={index}
                                                         sx={{
-                                                            // backgroundColor: inputBgColor,
+                                                             backgroundColor: darkMode ? "rgb(88,92,99)" : "#FFFFFF",
                                                             p: 2,
                                                             borderRadius: 2,
                                                             color: textColor,
@@ -563,7 +563,7 @@ const RegisterResponder = ({ darkMode, flag, setFlag, setSelectedIncident }) => 
                                                             <MoreHorizIcon
                                                                 onClick={(e) => handleClick(e, item)}
                                                                 sx={{
-                                                                    color: "#00f0c0",
+                                                                    color:"rgb(95,200,236)",
                                                                     cursor: "pointer",
                                                                     // fontSize: 35,
                                                                     justifyContent: "center",
@@ -733,7 +733,7 @@ const RegisterResponder = ({ darkMode, flag, setFlag, setSelectedIncident }) => 
                 </Grid>
 
                 <Grid item xs={12} md={4.9}>
-                    <Paper elevation={3} sx={{ padding: 2, borderRadius: 3, backgroundColor: bgColor, mt: 1, mb: 5 }}>
+                    <Paper elevation={3} sx={{ padding: 2, borderRadius: 3, backgroundColor: "#202328", mt: 1, mb: 5 }}>
                         <Box sx={{ display: 'flex', gap: 1, mb: 2 }}>
                             <Grid container spacing={2}>
                                 <Grid item xs={12} sm={12}>
@@ -750,8 +750,8 @@ const RegisterResponder = ({ darkMode, flag, setFlag, setSelectedIncident }) => 
                                                 sx={{
                                                     mb: 1,
                                                     width: "40%",
-                                                    backgroundColor: "#00f0c0",
-                                                    color: "black",
+                                                    backgroundColor:  "rgb(223,76,76)",
+                                                    color: "#fff",
                                                     fontWeight: "bold",
                                                     borderRadius: "12px",
                                                     cursor: "pointer",
@@ -776,6 +776,7 @@ const RegisterResponder = ({ darkMode, flag, setFlag, setSelectedIncident }) => 
                                         size="small"
                                         label="Disaster Type"
                                         variant="outlined"
+                                        sx={{  backgroundColor: darkMode ? "rgb(88,92,99)" : "#FFFFFF"}}
                                         value={selectedDisaster || ""}
                                         onChange={(e) => setSelectedDisaster(e.target.value)}
                                         error={disasterError}
@@ -806,6 +807,7 @@ const RegisterResponder = ({ darkMode, flag, setFlag, setSelectedIncident }) => 
                                             value={selectedResponders}
                                             onChange={handleChange}
                                             displayEmpty
+                                            sx={{  backgroundColor: darkMode ? "rgb(88,92,99)" : "#FFFFFF"}}
                                             renderValue={(selected) => {
                                                 if (selected.length === 0) {
                                                     return "Select Responder";
@@ -852,8 +854,8 @@ const RegisterResponder = ({ darkMode, flag, setFlag, setSelectedIncident }) => 
                                 sx={{
                                     mt: 2,
                                     width: "40%",
-                                    backgroundColor: "#00f0c0",
-                                    color: "black",
+                                    backgroundColor:  "rgb(18,166,95,0.8)",
+                                    color: "#fff",
                                     fontWeight: "bold",
                                     borderRadius: "12px",
                                     "&:hover": {
