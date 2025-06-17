@@ -551,7 +551,7 @@ function IncidentDetails({
                                       sx={{
                                         color: labelColor,
                                         "&.Mui-checked": {
-                                          color: "#00bfa5",
+                                          color: "#5FC8EC",
                                         },
                                         "&:hover": {
                                           backgroundColor: "rgba(0, 191, 165, 0.1)",
