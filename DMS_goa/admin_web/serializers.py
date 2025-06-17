@@ -94,11 +94,16 @@ class DMS_Employee_serializer(serializers.ModelSerializer):
     
 
 class DMS_Employee_GET_serializer(serializers.ModelSerializer):
-    state_name = serializers.SerializerMethodField()
-    dis_name = serializers.SerializerMethodField()
-    tah_name = serializers.SerializerMethodField()
-    cit_name = serializers.SerializerMethodField()
-    grp_name = serializers.SerializerMethodField()
+    # state_name = serializers.SerializerMethodField()
+    # tah_name = serializers.SerializerMethodField()
+    # cit_name = serializers.SerializerMethodField()
+    # grp_name = serializers.SerializerMethodField()
+    
+    dis_name = serializers.CharField(source='dist_id.dis_name', read_only=True)
+    tah_name = serializers.CharField(source='tahsil_id.tah_name', read_only=True)
+    cit_name = serializers.CharField(source='city_id.cit_name', read_only=True)
+    grp_name = serializers.CharField(source='grp_id.grp_name', read_only=True)
+    state_name = serializers.CharField(source='state_id.state_name', read_only=True)
     
 
     class Meta:
@@ -109,36 +114,6 @@ class DMS_Employee_GET_serializer(serializers.ModelSerializer):
             'state_id', 'state_name', 'dist_id','dis_name','tahsil_id','tah_name','city_id','cit_name','grp_name',
             'emp_is_deleted', 'emp_added_by', 'emp_modified_by', 'password'
         ]
-
-    def get_state_name(self, obj):
-        try:
-            return DMS_State.objects.get(state_id=obj.state_id).state_name
-        except DMS_State.DoesNotExist:
-            return None
-    
-    def get_dis_name(self, obj):
-        try:
-            return DMS_District.objects.get(dis_id=obj.dist_id).dis_name
-        except (DMS_District.DoesNotExist, ValueError, TypeError):
-            return None
-        
-    def get_tah_name(self, obj):
-        try:
-            return DMS_Tahsil.objects.get(tah_id=obj.tahsil_id).tah_name
-        except (DMS_Tahsil.DoesNotExist, ValueError, TypeError):
-            return None
-        
-    def get_cit_name(self, obj):
-        try:
-            return DMS_City.objects.get(cit_id=obj.city_id).cit_name
-        except (DMS_City.DoesNotExist, ValueError, TypeError):
-            return None
-        
-    def get_grp_name(self, obj):
-        try:
-            return DMS_Group.objects.get(grp_id=obj.grp_id).grp_name
-        except (DMS_Group.DoesNotExist, ValueError, TypeError):
-            return None
         
     
 class DMS_District_Serializer(serializers.ModelSerializer):
