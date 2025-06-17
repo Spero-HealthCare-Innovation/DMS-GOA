@@ -431,7 +431,18 @@ function IncidentDetails({
                     sx={{ color: labelColor, fontWeight: 500, fontFamily }}
                   >
                     Response Procedure
+                      {responderScope.sop_responses[0].sop_description && (
+                        <IconButton
+                          size="small"
+                          onClick={() => setOpenDialog(true)}
+                          sx={{ ml: 1 }}
+                          aria-label="Show full response procedure"
+                        >
+                          <VisibilityIcon fontSize="small"  color="orange"/>
+                        </IconButton>
+                      )}
                   </Typography>
+                  
 
                   {selectedIncident?.inc_id === undefined ? (
                     <Box display="flex" alignItems="center" gap={1} mt={0.5}>
@@ -459,16 +470,7 @@ function IncidentDetails({
                           responderScope.sop_responses[0].sop_description
                         )}
                       </Typography>
-                      {responderScope.sop_responses[0].sop_description && (
-                        <IconButton
-                          size="small"
-                          onClick={() => setOpenDialog(true)}
-                          sx={{ ml: 1 }}
-                          aria-label="Show full response procedure"
-                        >
-                          <VisibilityIcon fontSize="small" />
-                        </IconButton>
-                      )}
+                    
                       <Dialog
                         open={openDialog}
                         onClose={() => setOpenDialog(false)}
