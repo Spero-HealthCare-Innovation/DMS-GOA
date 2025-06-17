@@ -94,10 +94,6 @@ class DMS_Employee_serializer(serializers.ModelSerializer):
     
 
 class DMS_Employee_GET_serializer(serializers.ModelSerializer):
-    # state_name = serializers.SerializerMethodField()
-    # tah_name = serializers.SerializerMethodField()
-    # cit_name = serializers.SerializerMethodField()
-    # grp_name = serializers.SerializerMethodField()
     
     dis_name = serializers.CharField(source='dist_id.dis_name', read_only=True)
     tah_name = serializers.CharField(source='tahsil_id.tah_name', read_only=True)
