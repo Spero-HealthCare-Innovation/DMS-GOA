@@ -226,7 +226,7 @@ function Sop({ darkMode, setDarkMode, comments }) {
         py: { xs: 2, sm: 3 },
         mx: 0,
         px: 0,
-        backgroundColor: darkMode ? "#0a1929" : "#f5f5f5",
+        // backgroundColor: darkMode ? "#0a1929" : "#f5f5f5",
         minHeight: "100vh",
         transition: "background-color 0.5s ease-in-out, color 0.5s ease-in-out",
       }}

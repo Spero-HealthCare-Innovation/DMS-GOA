@@ -23,6 +23,8 @@ import DialogTitle from "@mui/material/DialogTitle";
 import DialogContent from "@mui/material/DialogContent";
 import IconButton from "@mui/material/IconButton";
 import CloseIcon from "@mui/icons-material/Close";
+import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
+import AccessTimeIcon from '@mui/icons-material/AccessTime';
 
 const inputStyle = {
     mb: 0.5,
@@ -285,29 +287,31 @@ const Incident = ({ darkMode }) => {
                             p: 2,
                             borderRadius: 3,
                             backgroundColor: bgColor,
-                            height: 'auto',
+                            // height: 'auto',
+                            height: '62vh'
                         }}
                     >
                         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
                             <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
                                 Create Incident
                             </Typography>
-                            {/* <Typography variant="h6" sx={{ fontSize: '16px', }} gutterBottom>
-                                Time : {formattedTime}
-                            </Typography> */}
                             <Typography
                                 variant="h6"
                                 sx={{
                                     fontSize: '15px',
                                     borderRadius: '2em',
-                                    p: 1,
-                                    ...(darkMode
-                                        ? { backgroundColor: 'white', color: "black" }
-                                        : { backgroundColor: 'lightgrey', color: 'black' }),
+                                    p: 1.5,
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: 2,
+                                    width: 'fit-content',
                                 }}
                                 gutterBottom
                             >
-                                Date: {formattedDate} | Time: {formattedTime}
+                                <CalendarTodayIcon sx={{ fontSize: 18 }} />
+                                {formattedDate}
+                                <AccessTimeIcon sx={{ fontSize: 18, ml: 2 }} />
+                                {formattedTime}
                             </Typography>
                         </Box>
 
@@ -501,22 +505,56 @@ const Incident = ({ darkMode }) => {
 
                 {selectedEmergencyValue === 1 && (
                     <Grid item xs={12}>
-                        <Paper elevation={3} sx={{ ...inputStyle, p: 3, borderRadius: 3, backgroundColor: bgColor }}>
+                        <Paper elevation={3} sx={{ ...inputStyle, p: 2, borderRadius: 3, backgroundColor: bgColor }}>
                             <Grid container spacing={2}>
                                 <Grid item xs={12} md={3} sx={{ borderRight: { md: `1px solid white` }, pr: 2 }}>
-                                    <Box sx={boxStyle}>
+                                    {/* <Box sx={boxStyle}>
                                         <Typography sx={{ color: labelColor, fontWeight: 500, fontFamily }}>
                                             Incident Type
                                         </Typography>
                                         <Typography variant="subtitle2" sx={{ fontFamily }}>
                                             {selectedEmergencyValue === 1 ? "Emergency" : "Non-Emergency"}
                                         </Typography>
+                                    </Box> */}
+                                    <Box>
+                                        <Typography variant="subtitle2" sx={{ color: labelColor, fontWeight: 500, fontFamily, fontSize: '16px' }}>
+                                            Incident Type
+                                        </Typography>
+                                        <Typography variant="subtitle2"
+                                            sx={{
+                                                fontFamily,
+                                                mb: 2,
+                                                ml: 1,
+                                                color: 'grey',
+                                                fontSize: '15px',
+                                                // color: selectedEmergencyValue === 1 ? 'red' : 'green'
+                                            }}
+                                        >
+                                            {selectedEmergencyValue === 1 ? "Emergency" : "Non-Emergency"}
+                                        </Typography>
                                     </Box>
                                     <Box>
-                                        <Typography variant="subtitle2" sx={{ color: labelColor, fontWeight: 500, fontFamily }}>
+                                        <Typography variant="subtitle2" sx={{ color: labelColor, fontWeight: 500, fontFamily, fontSize: '16px' }}>
                                             Alert Type
                                         </Typography>
-                                        <Typography variant="subtitle2" sx={{ fontFamily }}>
+                                        <Typography variant="subtitle2" sx={{
+                                            fontFamily, mb: 2,
+                                            ml: 1,
+                                            color: 'grey',
+                                            fontSize: '15px',
+                                        }}>
+                                            {alertType === 1 ? "High" : alertType === 2 ? "Medium" : "Low"}
+                                        </Typography>
+                                    </Box>
+                                    <Box>
+                                        <Typography variant="subtitle2" sx={{ color: labelColor, fontWeight: 500, fontFamily, fontSize: '16px' }}>
+                                            Alert Type
+                                        </Typography>
+                                        <Typography variant="subtitle2" sx={{
+                                            fontFamily, mb: 2, ml: 1,
+                                            color: 'grey',
+                                            fontSize: '15px',
+                                        }}>
                                             {alertType === 1 ? "High" : alertType === 2 ? "Medium" : "Low"}
                                         </Typography>
                                     </Box>
@@ -526,7 +564,7 @@ const Incident = ({ darkMode }) => {
                                 <Grid item xs={12} md={5} sx={{ px: 2, borderRight: { md: `1px solid white` } }}>
                                     <Box sx={boxStyle}>
                                         <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                                            <Typography variant="subtitle2" sx={{ color: labelColor, fontWeight: 500, fontFamily }}>
+                                            <Typography variant="subtitle2" sx={{ color: labelColor, fontWeight: 500, fontFamily, fontSize: '16px' }}>
                                                 Response Procedure
                                             </Typography>
                                             <IconButton
@@ -548,6 +586,8 @@ const Incident = ({ darkMode }) => {
                                                 overflow: "hidden",
                                                 textOverflow: "ellipsis",
                                                 maxWidth: 300,
+                                                color: 'grey',
+                                                marginLeft: '15px'
                                             }}
                                         >
                                             {(() => {
@@ -590,7 +630,7 @@ const Incident = ({ darkMode }) => {
                                     </Box>
 
                                     <Box>
-                                        <Typography variant="subtitle2" sx={{ color: labelColor, fontWeight: 500, fontFamily }}>
+                                        <Typography variant="subtitle2" sx={{ color: labelColor, fontWeight: 500, fontFamily, fontSize: '16px' }}>
                                             Responder Scope
                                         </Typography>
                                         <Stack spacing={1} mt={1}>
@@ -618,7 +658,7 @@ const Incident = ({ darkMode }) => {
                                 </Grid>
 
                                 <Grid item xs={12} md={4}>
-                                    <Typography variant="h6" sx={{ fontSize: '16px' }} gutterBottom>
+                                    <Typography variant="h6" sx={{ color: labelColor, fontWeight: 500, fontFamily, fontSize: '16px' }} gutterBottom>
                                         Comments
                                     </Typography>
                                     <TextField
@@ -626,7 +666,7 @@ const Incident = ({ darkMode }) => {
                                         size="small"
                                         multiline
                                         className='textarea'
-                                        rows={4}
+                                        rows={6}
                                         variant="outlined"
                                         sx={{ ...inputStyle }}
                                         value={comments}
@@ -638,7 +678,8 @@ const Incident = ({ darkMode }) => {
                             </Grid>
                         </Paper>
                     </Grid>
-                )}
+                )
+                }
 
                 <Grid item xs={12}>
                     <Box sx={{ display: 'flex', justifyContent: 'center' }}>
@@ -646,7 +687,7 @@ const Incident = ({ darkMode }) => {
                             variant="contained"
                             sx={{
                                 width: "10%",
-                                backgroundColor: "white",
+                                backgroundColor: "rgb(18,166,95)",
                                 color: "black",
                                 fontWeight: "bold",
                                 borderRadius: "12px",
@@ -659,7 +700,7 @@ const Incident = ({ darkMode }) => {
                     </Box>
                 </Grid>
             </Grid>
-        </Box >
+        </Box>
     );
 };
 

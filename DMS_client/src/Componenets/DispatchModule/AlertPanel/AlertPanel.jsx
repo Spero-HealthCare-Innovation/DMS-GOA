@@ -334,7 +334,7 @@ const AlertPanel = ({ darkMode }) => {
                                                                 1: { color: '#FF3B30', label: 'High' },
                                                                 2: { color: '#FF9500', label: 'Medium' },
                                                                 3: { color: '#FFD60A', label: 'Low' },
-                                                                4: { color: '#5AC8FA', label: 'Very Low' },
+                                                                4: { color: 'green', label: 'Very Low' },
                                                             };
                                                             const severity = config[item.alert_type];
                                                             return severity ? (

@@ -63,7 +63,9 @@ const EnquiryCardBody = styled("tr")(({ theme, alertType, isHighlighted }) => {
   };
 
   const glowColor = alertColors[alertType] || "transparent";
-  const highlightBorder = isHighlighted ? "0.8px solid #5FC8EC" : "1px solid transparent";
+  const highlightBorder = isHighlighted
+    ? "0.8px solid #5FC8EC"
+    : "1px solid transparent";
 
   return {
     display: "flex",
@@ -99,7 +101,7 @@ const Alerts = [
   "Longitude",
   "Temperature",
   "Rain",
-  "Alert Type",
+  "Severity Type",
   "Time",
   "Added By",
   "Actions",
@@ -109,7 +111,7 @@ const DispatchHeaders = [
   "Incident ID",
   "Date & Time",
   "Disaster Type",
-  "Alert Type",
+  "Severity Type",
   "Initiated By",
   "Actions",
 ];
@@ -126,8 +128,7 @@ function SopTask({
   incidentId,
   fetchDispatchList,
   highlightedId,
-  setHighlightedId
-
+  setHighlightedId,
 }) {
   const port = import.meta.env.VITE_APP_API_KEY;
   const socketUrl = import.meta.env.VITE_SOCKET_API_KEY;
@@ -142,7 +143,6 @@ function SopTask({
   const [rowsPerPage, setRowsPerPage] = useState(3);
   const [openCancelDialog, setOpenCancelDialog] = useState(false);
   const [selectedAlert, setSelectedAlert] = useState(null);
-
 
   const {
     snackbarOpen,
@@ -163,7 +163,8 @@ function SopTask({
   const endIndex = startIndex + rowsPerPage;
   // Get sliced data for current page
   const dispatchListdata = dataList.slice(startIndex, endIndex);
-  const { setSelectedIncidentFromSop, setDisasterIdFromSop, setCommentText } = useAuth();
+  const { setSelectedIncidentFromSop, setDisasterIdFromSop, setCommentText } =
+    useAuth();
 
   window.addEventListener("storage", (e) => {
     if (e.key === "logout") {
@@ -174,7 +175,8 @@ function SopTask({
     let socket;
     const timer = setTimeout(() => {
       socket = new WebSocket(
-        `${socketUrl}/ws/weather_alerts_trigger2?token=${AccessToken || newToken
+        `${socketUrl}/ws/weather_alerts_trigger2?token=${
+          AccessToken || newToken
         }`
       );
 
@@ -239,8 +241,9 @@ function SopTask({
   // };
 
   const textColor = darkMode ? "#ffffff" : "#000000";
-  const bgColor = darkMode ? "rgb(77, 77, 77)" : "#ffffff";
+  const bgColor = darkMode ? "202328" : "#ffffff";
   const borderColor = darkMode ? "#7F7F7F" : "#ccc";
+  const fontFamily = "Roboto, sans-serif";
 
   const handleClick = () => {
     navigate("/create-incident", { state: { startData: "start" } });
@@ -289,7 +292,6 @@ function SopTask({
   //     setFlag(0);
   //   }
   // }, [openCancelDialog]);
-
 
   // brouswer and tab close logout functionality
   //   let isPageReloaded = false;
@@ -362,12 +364,7 @@ function SopTask({
         {/* Title */}
         <Typography
           variant="h6"
-          sx={{
-            color: textColor,
-            fontSize: "20px",
-            fontWeight: 500,
-            lineHeight: "32px",
-          }}
+         sx={{ color: textColor, fontWeight: 500, fontFamily }}
         >
           {flag === 1 ? "Alert Task" : "Dispatch List"}
         </Typography>
@@ -390,7 +387,7 @@ function SopTask({
             width: "200px",
             "& .MuiOutlinedInput-root": {
               borderRadius: "25px",
-              backgroundColor: darkMode ? "#1e293b" : "#fff",
+              backgroundColor: darkMode ? "#202328" : "#fff",
               color: darkMode ? "#fff" : "#000",
               px: 1,
               py: 0.2,
@@ -454,7 +451,7 @@ function SopTask({
               sx={{
                 display: "flex",
                 flexDirection: "row",
-                backgroundColor: "#5FECC8",
+                // backgroundColor: "#5FECC8",
               }}
             >
               {Alerts.map((label, idx) => (
@@ -539,16 +536,16 @@ function SopTask({
                     >
                       {item.alert_datetime
                         ? new Date(item.alert_datetime).toLocaleString(
-                          "en-US",
-                          {
-                            day: "2-digit",
-                            month: "long",
-                            year: "numeric",
-                            hour: "numeric",
-                            minute: "2-digit",
-                            hour12: true,
-                          }
-                        )
+                            "en-US",
+                            {
+                              day: "2-digit",
+                              month: "long",
+                              year: "numeric",
+                              hour: "numeric",
+                              minute: "2-digit",
+                              hour12: true,
+                            }
+                          )
                         : "N/A"}
                     </Typography>
                   </StyledCardContent>
@@ -645,16 +642,16 @@ function SopTask({
                           >
                             {item.inc_added_date
                               ? new Date(item.inc_added_date).toLocaleString(
-                                "en-US",
-                                {
-                                  day: "2-digit",
-                                  month: "long",
-                                  year: "numeric",
-                                  hour: "numeric",
-                                  minute: "2-digit",
-                                  hour12: true,
-                                }
-                              )
+                                  "en-US",
+                                  {
+                                    day: "2-digit",
+                                    month: "long",
+                                    year: "numeric",
+                                    hour: "numeric",
+                                    minute: "2-digit",
+                                    hour12: true,
+                                  }
+                                )
                               : "N/A"}
                           </Typography>
                         </StyledCardContent>
@@ -831,4 +828,3 @@ function SopTask({
 }
 
 export default SopTask;
-

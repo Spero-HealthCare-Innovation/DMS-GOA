@@ -141,7 +141,7 @@ function IncidentDetails({
 
   return (
     <>
-      <Typography variant="h6" color={labelColor} sx={{ fontFamily }}>
+      <Typography variant="h6" color="#fff" sx={{ fontFamily ,ml: 2}}>
         Rules
       </Typography>
 
@@ -150,10 +150,10 @@ function IncidentDetails({
         sx={{
           p: 2,
           borderRadius: 2,
-          backgroundColor: darkMode ? "rgb(77, 77, 77)" : "#fff",
+          backgroundColor: darkMode ? "202328" : "#fff",
           color: textColor,
           transition: "all 0.3s ease",
-          mb: 3,
+          mb: 5,
         }}
       >
         <Grid container>
@@ -414,7 +414,7 @@ function IncidentDetails({
                     </Stack>
                   ) : (
                     <Box display="flex" alignItems="center" gap={1} mt={1}>
-                      <InfoOutlinedIcon color="disabled" />
+                      {/* <InfoOutlinedIcon color="disabled" /> */}
                       <Typography variant="subtitle2" sx={{ fontFamily }}>
                         Responder scope data not available.
                       </Typography>
@@ -435,7 +435,7 @@ function IncidentDetails({
 
                   {selectedIncident?.inc_id === undefined ? (
                     <Box display="flex" alignItems="center" gap={1} mt={0.5}>
-                      <InfoOutlinedIcon color="disabled" fontSize="small" />
+                      {/* <InfoOutlinedIcon color="disabled" fontSize="small" /> */}
                       <Typography variant="subtitle2" sx={{ fontFamily }}>
                         No response procedure available.
                       </Typography>
@@ -505,7 +505,7 @@ function IncidentDetails({
                     </Box>
                   ) : (
                     <Box display="flex" alignItems="center" gap={1} mt={0.5}>
-                      <InfoOutlinedIcon color="disabled" fontSize="small" />
+                      {/* <InfoOutlinedIcon color="disabled" fontSize="small" /> */}
                       <Typography variant="subtitle2" sx={{ fontFamily }}>
                         No response procedure available.
                       </Typography>
@@ -551,7 +551,7 @@ function IncidentDetails({
                                       sx={{
                                         color: labelColor,
                                         "&.Mui-checked": {
-                                          color: "#00bfa5",
+                                          color: "#5FC8EC",
                                         },
                                         "&:hover": {
                                           backgroundColor: "rgba(0, 191, 165, 0.1)",
@@ -574,7 +574,7 @@ function IncidentDetails({
                     </Stack>
                   ) : (
                     <Box display="flex" alignItems="center" gap={1} mt={1}>
-                      <InfoOutlinedIcon color="disabled" />
+                      {/* <InfoOutlinedIcon color="disabled" /> */}
                       <Typography variant="subtitle2" sx={{ fontFamily }}>
                         No responder scope assigned.
                       </Typography>
