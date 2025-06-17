@@ -370,7 +370,7 @@ const Navbar = ({ darkMode, toggleDarkMode }) => {
               <Avatar
                 alt="User Avatar"
                 // src="/static/images/avatar/1.jpg"
-                sx={{ bgcolor: '#5FC8EC', color: 'white' }}
+                sx={{ bgcolor: '#5FECC8', color: 'white' }}
               >{initials}</Avatar>
             </IconButton>
           </Tooltip>
