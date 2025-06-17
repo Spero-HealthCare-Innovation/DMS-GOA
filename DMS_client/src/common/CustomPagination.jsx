@@ -35,7 +35,7 @@ const CustomPagination = ({
             color: textColor,
             height: "30px",
             minWidth: "70px",
-            backgroundColor: darkMode ? "#1e293b" : "#fff",
+            backgroundColor: darkMode ? "#202328" : "#fff",
             "& .MuiOutlinedInput-notchedOutline": {
               borderColor: darkMode ? "#444" : "#ccc",
             },
