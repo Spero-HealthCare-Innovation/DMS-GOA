@@ -401,7 +401,7 @@ const RegisterResponder = ({ darkMode, flag, setFlag, setSelectedIncident }) => 
                 <Grid item xs={12} md={7}>
                     <Paper
                         sx={{
-                            backgroundColor: "#202328",
+                            backgroundColor:darkMode ? "#202328":"#FFFFFF",
                             p: 2,
                             borderRadius: 2,
                             color: textColor,
@@ -671,7 +671,7 @@ const RegisterResponder = ({ darkMode, flag, setFlag, setSelectedIncident }) => 
                                         borderColor: borderColor,
                                         height: "30px",
                                         minWidth: "70px",
-                                        backgroundColor: bgColor,
+                                        backgroundColor:darkMode ? "#202328":"#FFFFFF",
                                         "& .MuiOutlinedInput-notchedOutline": {
                                             borderColor: borderColor,
                                         },
@@ -698,6 +698,7 @@ const RegisterResponder = ({ darkMode, flag, setFlag, setSelectedIncident }) => 
                                     gap: 2,
                                     color: textColor,
                                     fontSize: "13px",
+                                     backgroundColor:darkMode ? "#202328":"#FFFFFF",
                                 }}
                             >
                                 <Box
@@ -733,7 +734,7 @@ const RegisterResponder = ({ darkMode, flag, setFlag, setSelectedIncident }) => 
                 </Grid>
 
                 <Grid item xs={12} md={4.9}>
-                    <Paper elevation={3} sx={{ padding: 2, borderRadius: 3, backgroundColor: "#202328", mt: 1, mb: 5 }}>
+                    <Paper elevation={3} sx={{ padding: 2, borderRadius: 3,  backgroundColor:darkMode ? "#202328":"#FFFFFF", mt: 1, mb: 5 }}>
                         <Box sx={{ display: 'flex', gap: 1, mb: 2 }}>
                             <Grid container spacing={2}>
                                 <Grid item xs={12} sm={12}>

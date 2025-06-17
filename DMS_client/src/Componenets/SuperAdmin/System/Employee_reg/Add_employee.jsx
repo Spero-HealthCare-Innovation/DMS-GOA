@@ -703,7 +703,7 @@ function Add_employee({ darkMode }) {
 
       <Grid container spacing={2}>
         <Grid item xs={12} md={7}>
-          <Paper elevation={3} sx={{ padding: 3, borderRadius: 3, backgroundColor: "#202328", mt: 1, mb: 1 }}>
+          <Paper elevation={3} sx={{ padding: 3, borderRadius: 3, backgroundColor:darkMode ? "#202328":"#FFFFFF", mt: 1, mb: 1 }}>
             <TableContainer>
               <Table>
                 <TableHead>
@@ -934,7 +934,7 @@ function Add_employee({ darkMode }) {
                     borderColor: borderColor,
                     height: "30px",
                     minWidth: "70px",
-                    backgroundColor: "#202328",
+                   backgroundColor:darkMode ? "#202328":"#FFFFFF",
                     "& .MuiOutlinedInput-notchedOutline": {
                       borderColor: borderColor,
                     },
@@ -962,7 +962,7 @@ function Add_employee({ darkMode }) {
                   gap: 2,
                   color: textColor,
                   fontSize: "13px",
-                  backgroundColor:"#202328",
+                 backgroundColor:darkMode ? "#202328":"#FFFFFF",
                 }}
               >
                 <Box
@@ -1094,7 +1094,7 @@ function Add_employee({ darkMode }) {
         </Popover>
 
         <Grid item xs={12} md={4.9}>
-          <Paper elevation={3} sx={{ padding: 2, borderRadius: 3,  backgroundColor: "#202328", mt: 1, mb: 5 }}>
+          <Paper elevation={3} sx={{ padding: 2, borderRadius: 3,  backgroundColor:darkMode ? "#202328":"#FFFFFF", mt: 1, mb: 5 }}>
             <Box
                                     display="flex"
                                     justifyContent={{ xs: "center", md: "flex-end" }}
@@ -1529,7 +1529,7 @@ function Add_employee({ darkMode }) {
                       mt: 2,
                       width: "40%",
                        borderColor: "rgb(223,76,76)",
-                      color: "white",
+                      color:darkMode ?"#fff":"rgb(223,76,76)",
                       fontWeight: "bold",
                       borderRadius: "12px",
                       "&:hover": {

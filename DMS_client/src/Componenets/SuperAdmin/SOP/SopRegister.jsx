@@ -433,7 +433,7 @@ function SopRegister({ darkMode }) {
             sx={{
               padding: 2,
               borderRadius: 3,
-              backgroundColor: "#202328",
+        backgroundColor:darkMode ? "#202328":"#FFFFFF",
               mt: 1,
               mb: 5,
               ml: 1,
@@ -696,7 +696,7 @@ function SopRegister({ darkMode }) {
                     borderColor: borderColor,
                     height: "30px",
                     minWidth: "70px",
-                    backgroundColor: "#202328",
+                backgroundColor:darkMode ? "#202328":"#FFFFFF",
                     "& .MuiOutlinedInput-notchedOutline": {
                       borderColor: borderColor,
                     },
@@ -762,7 +762,7 @@ function SopRegister({ darkMode }) {
             sx={{
               padding: 2,
               borderRadius: 3,
-              backgroundColor: "#202328",
+               backgroundColor:darkMode ? "#202328":"#FFFFFF",
               mt: 1,
               mb: 5,
             }}

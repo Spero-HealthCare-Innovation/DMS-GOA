@@ -478,7 +478,7 @@ function ClosureDetail({ darkMode, fromDate, toDate, onChange, onDownload }) {
       )}
 
       <Grid item xs={12} md={7}>
-        <Paper elevation={3} sx={{ padding: 3, borderRadius: 3, backgroundColor:"#202328", mt: 1, mb: 5 }}>
+        <Paper elevation={3} sx={{ padding: 3, borderRadius: 3, backgroundColor:darkMode ? "#202328":"#FFFFFF", mt: 1, mb: 5 }}>
           <TableContainer>
             <Table>
               <TableHead>
@@ -707,7 +707,7 @@ function ClosureDetail({ darkMode, fromDate, toDate, onChange, onDownload }) {
                   borderColor: borderColor,
                   height: "30px",
                   minWidth: "70px",
-                  backgroundColor: "#202328",
+                backgroundColor:darkMode ? "#202328":"#FFFFFF",
                   "& .MuiOutlinedInput-notchedOutline": {
                     borderColor: borderColor,
                   },
@@ -735,7 +735,7 @@ function ClosureDetail({ darkMode, fromDate, toDate, onChange, onDownload }) {
                 gap: 2,
                 color: textColor,
                 fontSize: "13px",
-                backgroundColor:"#202328",
+               backgroundColor:darkMode ? "#202328":"#FFFFFF",
               }}
             >
               <Box
