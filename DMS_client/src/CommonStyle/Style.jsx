@@ -25,13 +25,11 @@ export const getThemeBgColors = (darkMode) => {
   };
 };
 
-
 const darkMode = true; // Replace this later with actual dynamic value
 
 // STEP 3: Destructure theme values
 const { textColor, bgColor, borderColor, inputBgColor } =
   getThemeBgColors(darkMode);
-
 
 export const TableHeadingCard = styled("div")(() => ({
   display: "flex",
@@ -55,14 +53,15 @@ export const TableDataCardBody = styled("tr")(({ theme, status }) => ({
   padding: "10px 12px",
   transition: "all 0.3s ease",
   cursor: "pointer",
-  height: "45px",
+  height: "40px",
   "&:hover": {
-    boxShadow: `0 0 8px ${status === "Completed"
-      ? "#00e67699"
-      : status === "Pending"
+    boxShadow: `0 0 8px ${
+      status === "Completed"
+        ? "#00e67699"
+        : status === "Pending"
         ? "#f4433699"
         : "#88888855"
-      }`,
+    }`,
   },
 }));
 
@@ -137,8 +136,8 @@ export const inputStyle = {
 
 export const fontsTableBody = {
   fontFamily: "Roboto",
-  fontWeight: 400,
-  fontSize: 18,
+  fontWeight: 510,
+  fontSize: 14,
   letterSpacing: 0,
   textAlign: "center",
 };
@@ -146,7 +145,7 @@ export const fontsTableBody = {
 export const fontsTableHeading = {
   fontFamily: "Roboto",
   fontWeight: 500,
-  fontSize: 14,
+  fontSize: "13px",
   letterSpacing: 0,
   textAlign: "center",
   color: "black",
@@ -167,11 +166,11 @@ export const getCustomSelectStyles = (isDarkMode) => {
   const textfieldcolor = isDarkMode ? "#fff" : "grey";
   const placeholderColor = isDarkMode ? "#bbb" : "#666";
   const bgColor = isDarkMode
-    ? "rgba(255, 255, 255, 0.16)"
+    ? "rgb(88,92,99)"
     : "rgba(0, 0, 0, 0.04)";
 
   return {
-    height: "3rem",
+    height: "2.6rem",
     borderRadius: "12px",
     backgroundColor: bgColor,
     boxShadow: "0px 2px 10px rgba(0, 0, 0, 0.1)",
@@ -183,11 +182,10 @@ export const getCustomSelectStyles = (isDarkMode) => {
       fontSize: "13px",
       fontFamily: "Roboto",
     },
-    '& input': {
-      fontSize: '12px',
-      color: '#C0C0C0',
+    "& input": {
+      fontSize: "12px",
+      color: "#C0C0C0",
       fontFamily: "Roboto",
-
     },
     "& .MuiSelect-displayEmpty": {
       color: placeholderColor,
@@ -200,7 +198,7 @@ export const getCustomSelectStyles = (isDarkMode) => {
       padding: "0 12px",
       display: "flex",
       alignItems: "center",
-      color: "grey"
+      color: "grey",
     },
     "& fieldset": {
       border: "none",
@@ -220,12 +218,13 @@ export const EnquiryCardBody = styled("tr")(({ theme, status }) => ({
   transition: "all 0.3s ease",
   cursor: "pointer",
   "&:hover": {
-    boxShadow: `0 0 8px ${status === "Completed"
-      ? "#00e67699"
-      : status === "Pending"
+    boxShadow: `0 0 8px ${
+      status === "Completed"
+        ? "#00e67699"
+        : status === "Pending"
         ? "#f4433699"
         : "#88888855"
-      }`,
+    }`,
   },
   height: "45px",
 }));
@@ -240,5 +239,3 @@ export const EnquiryCard = styled("div")(() => ({
   color: "black",
   height: "40px",
 }));
-
-

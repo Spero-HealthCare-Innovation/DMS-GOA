@@ -122,7 +122,7 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
   const borderColor = darkMode ? "#7F7F7F" : "#ccc";
   const fontFamily = "Roboto, sans-serif";
   const textColor = darkMode ? "#ffffff" : "#000000";
-  const bgColor = darkMode ? "#0a1929" : "#ffffff";
+  const bgColor = darkMode ? "#202328" : "#ffffff";
   const [stateError, setStateError] = useState(false);
   const [districtError, setDistrictError] = useState(false);
   const [tehsilError, setTehsilError] = useState(false);
@@ -667,11 +667,11 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
             <Typography
               variant="h6"
               sx={{
-                color: labelColor,
+                color: "white",
                 fontWeight: 600,
                 fontFamily,
                 fontSize: 16,
-                marginLeft: "1em"
+                marginLeft: "1em",
               }}
             >
               Add Department
@@ -706,7 +706,7 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
                 ml: 5,
                 "& .MuiOutlinedInput-root": {
                   borderRadius: "25px",
-                  backgroundColor: darkMode ? "#1e293b" : "#fff",
+                  backgroundColor: darkMode ? "#202328" : "#fff",
                   color: darkMode ? "#fff" : "#000",
                   px: 1,
                   py: 0.2,
@@ -742,12 +742,12 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
                   <TableRow>
                     <TableHeadingCard
                       sx={{
-                        backgroundColor: "#5FECC8",
+                        backgroundColor: "#5FC8EC",
                         color: "#000",
                         display: "flex",
                         width: "100%",
                         borderRadius: 2,
-                        p: 3,
+                        // p: 1,
                       }}
                     >
                       <StyledCardContent
@@ -766,10 +766,9 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
                           flex: 2.5,
                           borderRight: "1px solid black",
                           justifyContent: "center",
-                          ...fontsTableHeading,
                         }}
                       >
-                        <Typography variant="subtitle2">
+                        <Typography variant="subtitle2" sx={fontsTableHeading}>
                           Department Name
                         </Typography>
                       </StyledCardContent>
@@ -788,20 +787,22 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
                           flex: 1,
                           borderRight: "1px solid black",
                           justifyContent: "center",
-                          ...fontsTableHeading,
                         }}
                       >
-                        <Typography variant="subtitle2">State</Typography>
+                        <Typography variant="subtitle2" sx={fontsTableHeading}>
+                          State
+                        </Typography>
                       </StyledCardContent>
                       <StyledCardContent
                         sx={{
                           flex: 0.6,
                           borderRight: "1px solid black",
                           justifyContent: "center",
-                          ...fontsTableHeading,
                         }}
                       >
-                        <Typography variant="subtitle2">District</Typography>
+                        <Typography variant="subtitle2" sx={fontsTableHeading}>
+                          District
+                        </Typography>
                       </StyledCardContent>
                       {/* <StyledCardContent
                         sx={{
@@ -830,7 +831,9 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
                           ...fontsTableHeading,
                         }}
                       >
-                        <Typography variant="subtitle2">Actions</Typography>
+                        <Typography variant="subtitle2" sx={fontsTableHeading}>
+                          Actions
+                        </Typography>
                       </StyledCardContent>
                     </TableHeadingCard>
                   </TableRow>
@@ -850,17 +853,20 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
                         <TableDataCardBody
                           key={index}
                           sx={{
-                            backgroundColor: inputBgColor,
-                            p: 2,
+                            backgroundColor: "rgb(88,92,99)",
+                            // p: 0.3,
                             borderRadius: 2,
                             color: textColor,
                             display: "flex",
                             width: "100%",
-                            mb: 1,
+                            // mb: 1,
                           }}
                         >
                           <StyledCardContent
-                            sx={{ flex: 0.3, justifyContent: "center" }}
+                            sx={{
+                              flex: 0.8,
+                              justifyContent: "center",
+                            }}
                           >
                             <Typography variant="subtitle2" sx={fontsTableBody}>
                               {(page - 1) * rowsPerPage + index + 1}
@@ -869,7 +875,7 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
 
                           <StyledCardContent
                             sx={{
-                              flex: 2.4,
+                              flex: 2.5,
                               justifyContent: "center",
                               alignItems: "center",
                               display: "flex",
@@ -888,6 +894,7 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
                                   textOverflow: "ellipsis",
                                   whiteSpace: "nowrap",
                                   maxWidth: 150,
+                                  ...fontsTableBody,
                                 }}
                               >
                                 {item.dep_name && item.dep_name.length > 35
@@ -912,10 +919,9 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
                             sx={{
                               flex: 0.8,
                               justifyContent: "center",
-                              ...fontsTableBody,
                             }}
                           >
-                            <Typography variant="subtitle2">
+                            <Typography variant="subtitle2" sx={fontsTableBody}>
                               {item.state_name}
                             </Typography>
                           </StyledCardContent>
@@ -923,10 +929,9 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
                             sx={{
                               flex: 0.8,
                               justifyContent: "center",
-                              ...fontsTableBody,
                             }}
                           >
-                            <Typography variant="subtitle2">
+                            <Typography variant="subtitle2" sx={fontsTableBody}>
                               {item.dst_name}
                             </Typography>
                           </StyledCardContent>
@@ -957,7 +962,6 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
                             sx={{
                               flex: 0.3,
                               justifyContent: "center",
-                              ...fontsTableBody,
                             }}
                           >
                             <MoreHorizIcon
@@ -1094,7 +1098,7 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
                     borderColor: borderColor,
                     height: "30px",
                     minWidth: "70px",
-                    backgroundColor: bgColor,
+                    backgroundColor: "#202328",
                     "& .MuiOutlinedInput-notchedOutline": {
                       borderColor: borderColor,
                     },
@@ -1122,6 +1126,7 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
                   gap: 2,
                   color: textColor,
                   fontSize: "13px",
+                  backgroundColor: "#202328",
                 }}
               >
                 <Box
@@ -1131,7 +1136,7 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
                     userSelect: "none",
                   }}
                 >
-                  &#8249;
+                   &#8249;
                 </Box>
 
                 <Box>
@@ -1141,7 +1146,7 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
                 <Box
                   onClick={() =>
                     page <
-                    Math.ceil(filteredDepartments.length / rowsPerPage) &&
+                      Math.ceil(filteredDepartments.length / rowsPerPage) &&
                     setPage(page + 1)
                   }
                   sx={{
@@ -1176,6 +1181,7 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
               alignItems="center"
               mb={2}
               flexWrap="wrap"
+              // sx={{backgroundColor: darkMode ? "rgb(88,92,99)" : "#FFFFFF"}}
             >
               <Button
                 variant="contained"
@@ -1183,16 +1189,16 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
                 disabled={!isEditMode}
                 onClick={handleAddNewDepartment}
                 sx={{
-                  backgroundColor: "#5FECC8",
-                  color: "#000",
+                  backgroundColor: "rgba(223,76,76, 0.8)",
+                  color: "#fff",
                   fontWeight: 600,
                   fontFamily: "Roboto",
                   textTransform: "none",
-                  px: 2,
+                  px: 1,
                   py: 1,
                   fontSize: { xs: "0.75rem", sm: "0.875rem" },
                   "&:hover": {
-                    backgroundColor: "#4ddbb6",
+                    backgroundColor: "rgba(223,76,76, 0.8)",
                   },
                 }}
               >
@@ -1220,7 +1226,6 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
                   helperText={departmentErrorMsg}
                   InputLabelProps={{ shrink: false }}
                   sx={selectStyles}
-
                 ></TextField>
                 {departmentError && (
                   <FormHelperText
@@ -1243,6 +1248,7 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
                     setSelectedStateId(e.target.value);
                     setStateError(false);
                   }}
+                  size="small"
                   fullWidth
                   error={stateError}
                   displayEmpty
@@ -1282,6 +1288,7 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
                     setDistrictError(false);
                   }}
                   fullWidth
+                  size="small"
                   error={districtError}
                   helperText={districtError ? "Please select a district" : ""}
                   displayEmpty
@@ -1445,14 +1452,16 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
                       Cancel
                     </Button> */}
                     <Button
-                      variant="outlined"
+                      // variant="outlined"
                       color="warning"
                       sx={{
-                        mt: 2,
+                        mt: 1,
                         width: "40%",
-                        backgroundColor: "#00f0c0",
-                        color: "black",
-                        fontWeight: "bold",
+                        backgroundColor: "rgba(18,166,95, 0.8)",
+                        color: "#fff",
+                        textTransform: "none",
+                        fontWeight: "600",
+                        fontFamily: "Roboto",
                         borderRadius: "12px",
                         mx: "auto", // centers the button horizontally
                         display: "block",
@@ -1464,14 +1473,16 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
                   </Box>
                 ) : (
                   <Button
-                    variant="outlined"
+                    // variant="outlined"
                     color="warning"
                     sx={{
                       mt: 2,
                       width: "40%",
-                      backgroundColor: "#00f0c0",
-                      color: "black",
-                      fontWeight: "bold",
+                      backgroundColor: "rgba(18,166,95, 0.8)",
+                      color: "#fff",
+                      fontWeight: "600",
+                      fontFamily: "Roboto",
+                      textTransform: "none",
                       borderRadius: "12px",
                       mx: "auto", // centers the button horizontally
                       display: "block",
