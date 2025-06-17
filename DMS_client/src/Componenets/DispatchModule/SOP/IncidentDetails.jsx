@@ -153,6 +153,7 @@ function IncidentDetails({
           backgroundColor: darkMode ? "#0a1929" : "#fff",
           color: textColor,
           transition: "all 0.3s ease",
+          mb: 3,
         }}
       >
         <Grid container>
