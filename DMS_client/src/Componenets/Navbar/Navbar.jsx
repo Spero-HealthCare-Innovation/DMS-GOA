@@ -122,7 +122,7 @@ const Navbar = ({ darkMode, toggleDarkMode }) => {
 
   const logout = async () => {
     const effectiveToken = newToken || localStorage.getItem("access_token");
-    console.log(localStorage.getItem("access_token"),"hii");
+    console.log(localStorage.getItem("access_token"), "hii");
 
     console.log(effectiveToken, 'effectiveTokeneffectiveToken');
 
@@ -170,83 +170,83 @@ const Navbar = ({ darkMode, toggleDarkMode }) => {
       localStorage.removeItem('refresh_token');
       localStorage.removeItem('token');
       // window.location.href = '/login';
-        // navigate("/login");
+      // navigate("/login");
     }
   };
 
   //auto logout for browser and tab close
 
-// useEffect(() => {
-//   // 1. Flag if it's a refresh
-//   let wasInteracted = false;
-//   let unloadTime = Date.now();
+  // useEffect(() => {
+  //   // 1. Flag if it's a refresh
+  //   let wasInteracted = false;
+  //   let unloadTime = Date.now();
 
-//   const markInteraction = () => {
-//     wasInteracted = true;
-//   };
+  //   const markInteraction = () => {
+  //     wasInteracted = true;
+  //   };
 
-//   const handleBeforeUnload = () => {
-//     unloadTime = Date.now();
-//     sessionStorage.setItem('lastUnloadTime', unloadTime.toString());
-//   };
+  //   const handleBeforeUnload = () => {
+  //     unloadTime = Date.now();
+  //     sessionStorage.setItem('lastUnloadTime', unloadTime.toString());
+  //   };
 
-//   const handleVisibilityChange = () => {
-//     if (document.visibilityState === 'hidden') {
-//       const now = Date.now();
-//       const diff = now - unloadTime;
+  //   const handleVisibilityChange = () => {
+  //     if (document.visibilityState === 'hidden') {
+  //       const now = Date.now();
+  //       const diff = now - unloadTime;
 
-//       // If no interaction recently, treat it as a close (not refresh)
-//       if (!wasInteracted && diff < 500) {
-//         localStorage.setItem('logout', Date.now().toString());
-//       }
-//     }
-//   };
+  //       // If no interaction recently, treat it as a close (not refresh)
+  //       if (!wasInteracted && diff < 500) {
+  //         localStorage.setItem('logout', Date.now().toString());
+  //       }
+  //     }
+  //   };
 
-//   // 2. Cross-tab logout listener
-//   const handleStorage = (e) => {
-//     if (e.key === 'logout') {
-//       // Cleanup and redirect to login
-//       Cookies.remove('token');
-//       localStorage.removeItem('userData');
-//       sessionStorage.clear();
+  //   // 2. Cross-tab logout listener
+  //   const handleStorage = (e) => {
+  //     if (e.key === 'logout') {
+  //       // Cleanup and redirect to login
+  //       Cookies.remove('token');
+  //       localStorage.removeItem('userData');
+  //       sessionStorage.clear();
 
-//       if ('caches' in window) {
-//         caches.keys().then(cacheNames =>
-//           cacheNames.forEach(name => caches.delete(name))
-//         );
-//       }
+  //       if ('caches' in window) {
+  //         caches.keys().then(cacheNames =>
+  //           cacheNames.forEach(name => caches.delete(name))
+  //         );
+  //       }
 
-//       // Avoid flickering during fast reloads
-//       setTimeout(() => {
-//         if (!window.location.pathname.includes('/login')) {
-//           window.location.href = '/login';
-//         }
-//       }, 100);
-//     }
+  //       // Avoid flickering during fast reloads
+  //       setTimeout(() => {
+  //         if (!window.location.pathname.includes('/login')) {
+  //           window.location.href = '/login';
+  //         }
+  //       }, 100);
+  //     }
 
-//     if (e.key === 'login') {
-//       // Auto-navigate to main page if someone logs in
-//       if (window.location.pathname === '/login') {
-//         window.location.href = '/alert'; // your main page
-//       }
-//     }
-//   };
+  //     if (e.key === 'login') {
+  //       // Auto-navigate to main page if someone logs in
+  //       if (window.location.pathname === '/login') {
+  //         window.location.href = '/alert'; // your main page
+  //       }
+  //     }
+  //   };
 
-//   // 3. Bind all handlers
-//   document.addEventListener('mousedown', markInteraction);
-//   document.addEventListener('keydown', markInteraction);
-//   window.addEventListener('beforeunload', handleBeforeUnload);
-//   document.addEventListener('visibilitychange', handleVisibilityChange);
-//   window.addEventListener('storage', handleStorage);
+  //   // 3. Bind all handlers
+  //   document.addEventListener('mousedown', markInteraction);
+  //   document.addEventListener('keydown', markInteraction);
+  //   window.addEventListener('beforeunload', handleBeforeUnload);
+  //   document.addEventListener('visibilitychange', handleVisibilityChange);
+  //   window.addEventListener('storage', handleStorage);
 
-//   return () => {
-//     document.removeEventListener('mousedown', markInteraction);
-//     document.removeEventListener('keydown', markInteraction);
-//     window.removeEventListener('beforeunload', handleBeforeUnload);
-//     document.removeEventListener('visibilitychange', handleVisibilityChange);
-//     window.removeEventListener('storage', handleStorage);
-//   };
-// }, []);
+  //   return () => {
+  //     document.removeEventListener('mousedown', markInteraction);
+  //     document.removeEventListener('keydown', markInteraction);
+  //     window.removeEventListener('beforeunload', handleBeforeUnload);
+  //     document.removeEventListener('visibilitychange', handleVisibilityChange);
+  //     window.removeEventListener('storage', handleStorage);
+  //   };
+  // }, []);
 
 
 
@@ -256,8 +256,11 @@ const Navbar = ({ darkMode, toggleDarkMode }) => {
       position="static"
       sx={{
         background: darkMode
-          ? "linear-gradient(90deg, #0f2027, #203a43, #2c5364)"
+          ? "#202328"
           : "linear-gradient(90deg, #ffffff, #f0f0f0)",
+        // background: darkMode
+        //   ? "linear-gradient(90deg, #0f2027, #203a43, #2c5364)"
+        //   : "linear-gradient(90deg, #ffffff, #f0f0f0)",
         color: darkMode ? "#E5F3F5" : "#000",
         boxShadow: "none",
         transition: "all 0.5s ease-in-out",

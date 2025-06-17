@@ -48,20 +48,23 @@ const Sidebar = ({ darkMode }) => {
                         boxShadow: "0px 4px 15px rgba(0, 0, 0, 0.2)",
                         // background: "linear-gradient(to bottom, #5FECC8, rgba(95, 236, 200, 0.05))",
                         background: darkMode
-                            ? "linear-gradient(to bottom, #5FECC8, rgba(95, 236, 200, 0.05))"
-                            : "radial-gradient(6035.71% 72.44% at 0% 50%, #00BFA6 0%, #292D45 100%)",
+                            ? "rgb(95, 200, 236)"
+                            : "rgb(95, 200, 236)",
+                        // background: darkMode
+                        //     ? "linear-gradient(to bottom, #5FECC8, rgba(95, 236, 200, 0.05))"
+                        //     : "radial-gradient(6035.71% 72.44% at 0% 50%, #00BFA6 0%, #292D45 100%)",
                         border: "1px solid rgba(255, 255, 255, 0.5)",
-                        color: "#000",
+                        color: "black",
                         borderRadius: "30px",
                         flexDirection: "column",
                         paddingTop: 2,
                         transition: "width 0.5s ease-in-out",
                         overflowX: "hidden",
                         paddingBottom: 3,
-                        marginTop: "7em",
+                        marginTop: "9em",
                         marginLeft: "0.8em",
                         "&:hover": {
-                            background: "radial-gradient(6035.71% 72.44% at 0% 50%, #00BFA6 0%, #292D45 100%)",
+                            background: "rgb(95, 200, 236)",
                         },
                     },
                 }}
@@ -71,8 +74,8 @@ const Sidebar = ({ darkMode }) => {
                         <ListItemButton
                             key={index}
                             sx={{
-                                color: "white",
-                                "&:hover": { background: "rgba(255, 255, 255, 0.2)" },
+                                color: "black",
+                                "&:hover": { background: "rgb(95, 200, 236)" },
                             }}
                             onClick={() => setShowWeatherPanel(item.id === "weather")}
                         >

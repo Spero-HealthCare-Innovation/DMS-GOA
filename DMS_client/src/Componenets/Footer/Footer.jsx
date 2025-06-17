@@ -9,8 +9,10 @@ export default function Footer({ darkMode }) {
                 hight: '30px',
                 width: '100%',
                 zIndex: 1000,
-                backgroundColor: darkMode ? "#1A1D33" : "#CCDBEF",
+                backgroundColor: darkMode ? "#202328" : "#CCDBEF",
                    transition: "background-color 0.5s ease-in-out, color 0.5s ease-in-out", // 👈 Add this
+                // backgroundColor: darkMode ? "#1A1D33" : "#CCDBEF",
+                //    transition: "background-color 0.5s ease-in-out, color 0.5s ease-in-out", // 👈 Add this
                 color: darkMode ? 'white' : 'black',
                 display: 'flex',
                 alignItems: 'center',

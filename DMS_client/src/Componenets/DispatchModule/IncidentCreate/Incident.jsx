@@ -25,7 +25,8 @@ import IconButton from "@mui/material/IconButton";
 import CloseIcon from "@mui/icons-material/Close";
 
 const inputStyle = {
-    mb: 1.2,
+    mb: 0.5,
+    color: "white",
 };
 const boxStyle = {
     mb: 2,
@@ -87,8 +88,8 @@ const Incident = ({ darkMode }) => {
     console.log(popupText, 'popupTextpopupText');
 
     const { handleSearchChange, handleSelectSuggestion, query } = useAuth();
-    const bgColor = darkMode ? "#0a1929" : "#ffffff";
-    const labelColor = darkMode ? "#5FECC8" : "#1976d2";
+    const bgColor = darkMode ? "#202328" : "#ffffff";
+    const labelColor = darkMode ? "white" : "#1976d2";
     const fontFamily = "Roboto, sans-serif";
     const [selectedEmergencyValue, setSelectedEmergencyValue] = useState('');
     console.log(responderScope, 'Fetching Scope Data');
@@ -263,7 +264,7 @@ const Incident = ({ darkMode }) => {
     }, [selectedEmergencyValue]);
 
     return (
-        <Box sx={{ minHeight: "100vh", backgroundColor: darkMode ? "#0a1929" : "#f5f5f5", px: 2, py: 3 }}>
+        <Box sx={{ minHeight: "100vh", backgroundColor: darkMode ? "black" : "#f5f5f5", px: 2, py: 3 }}>
             <Snackbar
                 open={snackbarOpen}
                 autoHideDuration={3000}
@@ -281,14 +282,14 @@ const Incident = ({ darkMode }) => {
                         elevation={3}
                         sx={{
                             ...inputStyle,
-                            p: 3,
+                            p: 2,
                             borderRadius: 3,
                             backgroundColor: bgColor,
                             height: 'auto',
                         }}
                     >
                         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-                            <Typography variant="h6" gutterBottom>
+                            <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
                                 Create Incident
                             </Typography>
                             {/* <Typography variant="h6" sx={{ fontSize: '16px', }} gutterBottom>
