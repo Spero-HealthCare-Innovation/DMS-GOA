@@ -294,7 +294,7 @@ const CaseClosureDetails = ({ darkMode, flag, selectedIncident, fetchDispatchLis
     >
       <Typography
         variant="body2"
-        sx={{ color: labelColor, fontWeight: 600, fontFamily }}
+        sx={{ color: labelColor, fontWeight: 500, fontFamily }}
       >
         {label}
       </Typography>
