@@ -364,7 +364,7 @@ function SopTask({
         {/* Title */}
         <Typography
           variant="h6"
-         sx={{ color: textColor, fontWeight: 500, fontFamily }}
+         sx={{ color: textColor, fontWeight: 500, fontFamily, }}
         >
           {flag === 1 ? "Alert Task" : "Dispatch List"}
         </Typography>
