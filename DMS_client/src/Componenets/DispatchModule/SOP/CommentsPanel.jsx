@@ -451,7 +451,7 @@ function CommentsPanel({
             color="primary"
             onClick={handlealertSaveClick}
             disabled={!commentText.trim()}
-            sx={{ alignSelf: "flex-end", px: 4 }}
+            sx={{ alignSelf: "flex-end", px: 4 ,textTransform: 'none'}}
           >
             Save
           </Button>
@@ -494,20 +494,27 @@ function CommentsPanel({
             sx={{ backgroundColor: "transparent" }}
           />
 
-          <Button
-            variant="contained"
-            color="secondary"
-            onClick={handleCommentSendClick}
-            disabled={!commentText.trim()}
-            sx={{
-              borderRadius: 2,
-              px: 3,
-              whiteSpace: "nowrap",
-              height: "100%",
-            }}
-          >
-            Send
-          </Button>
+ <Button
+  variant="contained"
+  onClick={handleCommentSendClick}
+  disabled={!commentText.trim()}
+  sx={{
+    backgroundColor: "#0F4D0F",
+    color: "#fff",
+    borderRadius: 2,
+    px: 3,
+    whiteSpace: "nowrap",
+    height: "100%",
+    textTransform: "none", 
+    '&:hover': {
+      backgroundColor: "#006400",
+    },
+  }}
+>
+  Send
+</Button>
+
+
         </Box>
       ) : (
         // No Incident Selected UI

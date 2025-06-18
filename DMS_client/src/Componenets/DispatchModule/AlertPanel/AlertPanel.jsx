@@ -88,7 +88,7 @@ const AlertPanel = ({ darkMode }) => {
     });
 
     useEffect(() => {
-        document.title = "DMS-AlertPanel";
+        document.title = "Dms|alertpanel";
     }, []);
 
     useEffect(() => {

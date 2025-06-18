@@ -64,7 +64,7 @@ const EnquiryCardBody = styled("tr")(({ theme, alertType, isHighlighted }) => {
 
   const glowColor = alertColors[alertType] || "transparent";
   const highlightBorder = isHighlighted
-    ? "0.8px solid #5FC8EC"
+    ? "2px solid #5FC8EC"
     : "1px solid transparent";
 
   return {
@@ -101,7 +101,7 @@ const Alerts = [
   "Longitude",
   "Temperature",
   "Rain",
-  "Severity Type",
+  "Severity ",
   "Time",
   "Added By",
   "Actions",
@@ -111,7 +111,7 @@ const DispatchHeaders = [
   "Incident ID",
   "Date & Time",
   "Disaster Type",
-  "Severity Type",
+  "Severity ",
   "Initiated By",
   "Actions",
 ];
