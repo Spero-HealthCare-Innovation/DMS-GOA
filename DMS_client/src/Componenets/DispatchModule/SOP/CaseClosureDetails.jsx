@@ -338,7 +338,7 @@ const CaseClosureDetails = ({ darkMode, flag, selectedIncident, fetchDispatchLis
           fontFamily,
           mb: 2,
           ml: 1,
-          fontWeight: 700,
+          fontWeight: 500,
           color: labelColor,
         }}
       >
@@ -372,7 +372,7 @@ const CaseClosureDetails = ({ darkMode, flag, selectedIncident, fetchDispatchLis
             <Typography
               variant="subtitle1"
               sx={{
-                fontWeight: 600,
+                fontWeight: 500,
                 color: labelColor,
                 fontFamily,
                 mb: 2,
@@ -441,7 +441,7 @@ const CaseClosureDetails = ({ darkMode, flag, selectedIncident, fetchDispatchLis
             <Typography
               variant="subtitle1"
               sx={{
-                fontWeight: 600,
+                fontWeight: 500,
                 color: labelColor,
                 fontFamily,
                 mb: 2,
@@ -735,7 +735,7 @@ const CaseClosureDetails = ({ darkMode, flag, selectedIncident, fetchDispatchLis
             <Typography
               variant="subtitle1"
               sx={{
-                fontWeight: 600,
+                fontWeight: 500,
                 color: labelColor,
                 fontFamily,
                 mb: 2,
