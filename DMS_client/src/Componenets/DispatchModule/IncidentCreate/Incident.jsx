@@ -570,9 +570,9 @@ const Incident = ({ darkMode }) => {
 
                 {selectedEmergencyValue === 1 && (
                     <Grid item xs={12}>
-                        <Paper elevation={3} sx={{ ...inputStyle, p: 2, borderRadius: 3, backgroundColor: bgColor }}>
+                        <Paper elevation={3} sx={{ ...inputStyle, p: 1, borderRadius: 3, backgroundColor: bgColor }}>
                             <Grid container spacing={2}>
-                                <Grid item xs={12} md={3} sx={{ borderRight: { md: `1px solid white` }, pr: 2 }}>
+                                <Grid item xs={12} md={3} sx={{ borderRight: { md: `1px solid white` }, pr: 2, mt: 1.5 }}>
                                     {/* <Box sx={boxStyle}>
                                         <Typography sx={{ color: labelColor, fontWeight: 500, fontFamily }}>
                                             Incident Type
@@ -626,9 +626,9 @@ const Incident = ({ darkMode }) => {
                                 </Grid>
 
                                 {/* SOP Section */}
-                                <Grid item xs={12} md={5} sx={{ px: 2, borderRight: { md: `1px solid white` } }}>
+                                <Grid item xs={12} md={5} sx={{ px: 2, borderRight: { md: `1px solid white` }, mt: 1.5 }}>
                                     <Box sx={boxStyle}>
-                                        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                                        <Box sx={{ display: "flex", alignItems: "center"}}>
                                             <Typography variant="subtitle2" sx={{ color: labelColor, fontWeight: 500, fontFamily, fontSize: '16px' }}>
                                                 Response Procedure
                                             </Typography>
