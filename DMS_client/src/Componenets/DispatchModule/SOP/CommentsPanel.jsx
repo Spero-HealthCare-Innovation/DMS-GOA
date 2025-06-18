@@ -453,7 +453,7 @@ function CommentsPanel({
             disabled={!commentText.trim()}
             sx={{ alignSelf: "flex-end", px: 4 }}
           >
-            Save Alert
+            Save
           </Button>
         </Box>
       ) : selectedIncident?.inc_id ? (

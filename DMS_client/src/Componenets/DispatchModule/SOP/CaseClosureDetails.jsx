@@ -505,9 +505,9 @@ const CaseClosureDetails = ({ darkMode, flag, selectedIncident, fetchDispatchLis
                     <MenuItem disabled value="">
                       <em>Select Department</em>
                     </MenuItem>
-                    <MenuItem value="HR">HR</MenuItem>
+                    {/* <MenuItem value="HR">HR</MenuItem>
                     <MenuItem value="Finance">Finance</MenuItem>
-                    <MenuItem value="IT">IT</MenuItem>
+                    <MenuItem value="IT">IT</MenuItem> */}
                   </Select>
                 </Grid>
 

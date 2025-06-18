@@ -12,6 +12,7 @@ import Sidebar from '../Sidebar/Sidebar';
 import { Search } from "@mui/icons-material";
 import { IconButton } from "@mui/material";
 import { Tooltip } from '@mui/material';
+import { red } from '@mui/material/colors';
 
 const EnquiryCard = styled('div')({
     display: 'flex',
@@ -522,7 +523,7 @@ const AlertPanel = ({ darkMode }) => {
                     </Box>
                 </Grid>
 
-                <Grid item xs={12} md={5}>
+                <Grid item xs={12} md={5} sx={{mt:5.9,mb:"2rem"}}>
                     <MapView data={triggeredData} />
                 </Grid>
             </Grid>
