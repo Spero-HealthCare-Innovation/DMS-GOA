@@ -401,7 +401,7 @@ const RegisterResponder = ({ darkMode, flag, setFlag, setSelectedIncident }) => 
                 <Grid item xs={12} md={7}>
                     <Paper
                         sx={{
-                            backgroundColor:darkMode ? "#202328":"#FFFFFF",
+                            backgroundColor: darkMode ? "#202328" : "#FFFFFF",
                             p: 2,
                             borderRadius: 2,
                             color: textColor,
@@ -468,161 +468,185 @@ const RegisterResponder = ({ darkMode, flag, setFlag, setSelectedIncident }) => 
                                     </TableRow>
                                 </TableHead>
 
-                                <TableBody>
-                                    {
-                                        loading ? (
-                                            <TableRow>
-                                                <TableCell colSpan={6} align="center">
-                                                    <CircularProgress size={30} sx={{ color: "#5FECC8" }} />
-                                                </TableCell>
-                                            </TableRow>
-                                        ) : (
-                                            paginatedData
-                                                .map((item, index) => (
-                                                    <TableDataCardBody
-                                                        key={index}
-                                                        sx={{
-                                                             backgroundColor: darkMode ? "rgb(88,92,99)" : "#FFFFFF",
-                                                            p: 2,
-                                                            borderRadius: 2,
-                                                            color: textColor,
-                                                            display: "flex",
-                                                            width: "100%",
-                                                            mb: 1,
-                                                        }}
-                                                    >
-                                                        <StyledCardContent
-                                                            sx={{ flex: 0.5, justifyContent: "center" }}
-                                                        >
-                                                            <Typography variant="subtitle2" sx={fontsTableBody}>
-                                                                {index + 1}
-                                                            </Typography>
-                                                        </StyledCardContent>
-                                                        <StyledCardContent
-                                                            sx={{
-                                                                flex: 1.5,
-                                                                justifyContent: "center",
-                                                                alignItems: "center",
-                                                                display: "flex",
-                                                                minWidth: 0,
-                                                            }}
-                                                        >
-                                                            <Typography
-                                                                variant="subtitle2"
+                                <Box sx={{
+                                    height: '250px',
+                                    overflowY: 'auto',
+                                    paddingRight: '10px',
+                                    '&::-webkit-scrollbar': {
+                                        width: '6px',
+                                    },
+                                    '&::-webkit-scrollbar-track': {
+                                        background: darkMode ? '#2e2e2e' : '#f1f1f1',
+                                        borderRadius: '3px',
+                                        marginTop: '1rem',
+                                    },
+                                    '&::-webkit-scrollbar-thumb': {
+                                        backgroundColor: darkMode ? "#5FC8EC" : "#555",
+                                        borderRadius: '3px',
+                                    },
+                                    '&::-webkit-scrollbar-thumb:hover': {
+                                        background: darkMode ? '#777' : '#555',
+                                    },
+                                }}>
+                                    <Table>
+                                        <TableBody>
+                                            {
+                                                loading ? (
+                                                    <TableRow>
+                                                        <TableCell colSpan={6} align="center">
+                                                            <CircularProgress size={30} sx={{ color: "#5FECC8" }} />
+                                                        </TableCell>
+                                                    </TableRow>
+                                                ) : (
+                                                    paginatedData
+                                                        .map((item, index) => (
+                                                            <TableDataCardBody
+                                                                key={index}
                                                                 sx={{
-                                                                    overflow: "hidden",
-                                                                    textOverflow: "ellipsis",
-                                                                    whiteSpace: "nowrap",
+                                                                    backgroundColor: darkMode ? "rgb(88,92,99)" : "#FFFFFF",
+                                                                    p: 2,
+                                                                    borderRadius: 2,
+                                                                    color: textColor,
+                                                                    display: "flex",
+                                                                    width: "100%",
+                                                                    mb: 1,
                                                                 }}
                                                             >
-                                                                {item.disaster_name}
-                                                            </Typography>
-                                                        </StyledCardContent>
-                                                        <StyledCardContent
-                                                            sx={{
-                                                                flex: 2.2,
-                                                                justifyContent: "left",
-                                                                ...fontsTableBody,
-                                                            }}
-                                                        >
-                                                            <Tooltip
-                                                                title={item.res_id.map((res) => res.responder_name).join(", ")}
-                                                                arrow
-                                                                placement="top"
-                                                            >
-                                                                <Typography
-                                                                    variant="subtitle2"
+                                                                <StyledCardContent
+                                                                    sx={{ flex: 0.5, justifyContent: "center" }}
+                                                                >
+                                                                    <Typography variant="subtitle2" sx={fontsTableBody}>
+                                                                        {index + 1}
+                                                                    </Typography>
+                                                                </StyledCardContent>
+                                                                <StyledCardContent
                                                                     sx={{
-                                                                        overflow: "hidden",
-                                                                        textOverflow: "ellipsis",
-                                                                        whiteSpace: "nowrap",
-                                                                        maxWidth: 500, // adjust as needed
-                                                                        display: "inline-block",
-                                                                        verticalAlign: "middle",
+                                                                        flex: 1.5,
+                                                                        justifyContent: "center",
+                                                                        alignItems: "center",
+                                                                        display: "flex",
+                                                                        minWidth: 0,
                                                                     }}
                                                                 >
-                                                                    {(() => {
-                                                                        const names = item.res_id.map((res) => res.responder_name);
-                                                                        const joined = names.join(", ");
-                                                                        // Show as much as fits, then add "..." if truncated
-                                                                        if (joined.length > 35) { // adjust 25 as needed for your width
-                                                                            return joined.slice(0, 35) + "...";
-                                                                        }
-                                                                        return joined;
-                                                                    })()}
-                                                                </Typography>
-                                                            </Tooltip>
-                                                        </StyledCardContent>
-                                                        <StyledCardContent
-                                                            sx={{
-                                                                flex: 0.3,
-                                                                justifyContent: "center",
-                                                                ...fontsTableBody,
-                                                            }}
-                                                        >
-                                                            <MoreHorizIcon
-                                                                onClick={(e) => handleClick(e, item)}
-                                                                sx={{
-                                                                    color:"rgb(95,200,236)",
-                                                                    cursor: "pointer",
-                                                                    // fontSize: 35,
-                                                                    justifyContent: "center",
-                                                                    ...fontsTableBody,
-                                                                }}
-                                                            />
-                                                        </StyledCardContent>
-                                                        <Popover
-                                                            open={open}
-                                                            anchorEl={anchorEl}
-                                                            onClose={handleClose}
-                                                            anchorOrigin={{
-                                                                vertical: "center",
-                                                                horizontal: "right",
-                                                            }}
-                                                            transformOrigin={{
-                                                                vertical: "center",
-                                                                horizontal: "left",
-                                                            }}
-                                                            PaperProps={{
-                                                                sx: {
-                                                                    p: 2,
-                                                                    display: "flex",
-                                                                    flexDirection: "column",
-                                                                    gap: 1.5,
-                                                                    borderRadius: 2,
-                                                                    minWidth: 120,
-                                                                },
-                                                            }}
-                                                        >
-                                                            <Button
-                                                                fullWidth
-                                                                variant="outlined"
-                                                                color="warning"
-                                                                startIcon={<EditOutlined />}
-                                                                onClick={() => {
-                                                                    handleEdit(selectedItem);
-                                                                    setIsEditMode(true);
-                                                                    setShowSubmitButton(false);
-                                                                }}
-                                                            >
-                                                                Edit
-                                                            </Button>
+                                                                    <Typography
+                                                                        variant="subtitle2"
+                                                                        sx={{
+                                                                            overflow: "hidden",
+                                                                            textOverflow: "ellipsis",
+                                                                            whiteSpace: "nowrap",
+                                                                        }}
+                                                                    >
+                                                                        {item.disaster_name}
+                                                                    </Typography>
+                                                                </StyledCardContent>
+                                                                <StyledCardContent
+                                                                    sx={{
+                                                                        flex: 2.2,
+                                                                        justifyContent: "left",
+                                                                        ...fontsTableBody,
+                                                                    }}
+                                                                >
+                                                                    <Tooltip
+                                                                        title={item.res_id.map((res) => res.responder_name).join(", ")}
+                                                                        arrow
+                                                                        placement="top"
+                                                                    >
+                                                                        <Typography
+                                                                            variant="subtitle2"
+                                                                            sx={{
+                                                                                overflow: "hidden",
+                                                                                textOverflow: "ellipsis",
+                                                                                whiteSpace: "nowrap",
+                                                                                maxWidth: 500, // adjust as needed
+                                                                                display: "inline-block",
+                                                                                verticalAlign: "middle",
+                                                                            }}
+                                                                        >
+                                                                            {(() => {
+                                                                                const names = item.res_id.map((res) => res.responder_name);
+                                                                                const joined = names.join(", ");
+                                                                                // Show as much as fits, then add "..." if truncated
+                                                                                if (joined.length > 35) { // adjust 25 as needed for your width
+                                                                                    return joined.slice(0, 35) + "...";
+                                                                                }
+                                                                                return joined;
+                                                                            })()}
+                                                                        </Typography>
+                                                                    </Tooltip>
+                                                                </StyledCardContent>
+                                                                <StyledCardContent
+                                                                    sx={{
+                                                                        flex: 0.3,
+                                                                        justifyContent: "center",
+                                                                        ...fontsTableBody,
+                                                                    }}
+                                                                >
+                                                                    <MoreHorizIcon
+                                                                        onClick={(e) => handleClick(e, item)}
+                                                                        sx={{
+                                                                            color: "rgb(95,200,236)",
+                                                                            cursor: "pointer",
+                                                                            // fontSize: 35,
+                                                                            justifyContent: "center",
+                                                                            ...fontsTableBody,
+                                                                        }}
+                                                                    />
+                                                                </StyledCardContent>
+                                                                <Popover
+                                                                    open={open}
+                                                                    anchorEl={anchorEl}
+                                                                    onClose={handleClose}
+                                                                    anchorOrigin={{
+                                                                        vertical: "center",
+                                                                        horizontal: "right",
+                                                                    }}
+                                                                    transformOrigin={{
+                                                                        vertical: "center",
+                                                                        horizontal: "left",
+                                                                    }}
+                                                                    PaperProps={{
+                                                                        sx: {
+                                                                            p: 2,
+                                                                            display: "flex",
+                                                                            flexDirection: "column",
+                                                                            gap: 1.5,
+                                                                            borderRadius: 2,
+                                                                            minWidth: 120,
+                                                                        },
+                                                                    }}
+                                                                >
+                                                                    <Button
+                                                                        fullWidth
+                                                                        variant="outlined"
+                                                                        color="warning"
+                                                                        startIcon={<EditOutlined />}
+                                                                        onClick={() => {
+                                                                            handleEdit(selectedItem);
+                                                                            setIsEditMode(true);
+                                                                            setShowSubmitButton(false);
+                                                                        }}
+                                                                    >
+                                                                        Edit
+                                                                    </Button>
 
-                                                            <Button
-                                                                fullWidth
-                                                                variant="outlined"
-                                                                color="error"
-                                                                startIcon={<DeleteOutline />}
-                                                                onClick={() => handleDelete(selectedItem)}
-                                                            >
-                                                                Delete
-                                                            </Button>
-                                                        </Popover>
-                                                    </TableDataCardBody>
-                                                ))
-                                        )}
-                                </TableBody>
+                                                                    <Button
+                                                                        fullWidth
+                                                                        variant="outlined"
+                                                                        color="error"
+                                                                        startIcon={<DeleteOutline />}
+                                                                        onClick={() => handleDelete(selectedItem)}
+                                                                    >
+                                                                        Delete
+                                                                    </Button>
+                                                                </Popover>
+                                                            </TableDataCardBody>
+                                                        ))
+                                                )}
+                                        </TableBody>
+                                    </Table>
+                                </Box>
                             </Table>
+
                             <Dialog
                                 // open={openDeleteDialog}
                                 // onClose={() => setOpenDeleteDialog(false)}
@@ -671,7 +695,7 @@ const RegisterResponder = ({ darkMode, flag, setFlag, setSelectedIncident }) => 
                                         borderColor: borderColor,
                                         height: "30px",
                                         minWidth: "70px",
-                                        backgroundColor:darkMode ? "#202328":"#FFFFFF",
+                                        backgroundColor: darkMode ? "#202328" : "#FFFFFF",
                                         "& .MuiOutlinedInput-notchedOutline": {
                                             borderColor: borderColor,
                                         },
@@ -698,7 +722,7 @@ const RegisterResponder = ({ darkMode, flag, setFlag, setSelectedIncident }) => 
                                     gap: 2,
                                     color: textColor,
                                     fontSize: "13px",
-                                     backgroundColor:darkMode ? "#202328":"#FFFFFF",
+                                    backgroundColor: darkMode ? "#202328" : "#FFFFFF",
                                 }}
                             >
                                 <Box
@@ -734,7 +758,7 @@ const RegisterResponder = ({ darkMode, flag, setFlag, setSelectedIncident }) => 
                 </Grid>
 
                 <Grid item xs={12} md={4.9}>
-                    <Paper elevation={3} sx={{ padding: 2, borderRadius: 3,  backgroundColor:darkMode ? "#202328":"#FFFFFF", mt: 1, mb: 5 }}>
+                    <Paper elevation={3} sx={{ padding: 2, borderRadius: 3, backgroundColor: darkMode ? "#202328" : "#FFFFFF", mb: 5 }}>
                         <Box sx={{ display: 'flex', gap: 1, mb: 2 }}>
                             <Grid container spacing={2}>
                                 <Grid item xs={12} sm={12}>
@@ -751,11 +775,12 @@ const RegisterResponder = ({ darkMode, flag, setFlag, setSelectedIncident }) => 
                                                 sx={{
                                                     mb: 1,
                                                     width: "40%",
-                                                    backgroundColor:  "rgb(223,76,76)",
+                                                    backgroundColor: "rgb(223,76,76)",
                                                     color: "#fff",
-                                                    fontWeight: "bold",
+                                                    // fontWeight: "bold",
                                                     borderRadius: "12px",
                                                     cursor: "pointer",
+                                                    textTransform: "none", // prevent uppercase by default
                                                 }}
                                                 onClick={() => {
                                                     setSelectedDisaster("");
@@ -764,7 +789,10 @@ const RegisterResponder = ({ darkMode, flag, setFlag, setSelectedIncident }) => 
                                                     setShowSubmitButton(true);
                                                 }}
                                             >
-                                                + Add Responder
+                                                {"+ add responder"
+                                                    .split(" ")
+                                                    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+                                                    .join(" ")}
                                             </Button>
                                         </Box>
                                     )}
@@ -777,7 +805,7 @@ const RegisterResponder = ({ darkMode, flag, setFlag, setSelectedIncident }) => 
                                         size="small"
                                         label="Disaster Type"
                                         variant="outlined"
-                                        sx={{  backgroundColor: darkMode ? "rgb(88,92,99)" : "#FFFFFF"}}
+                                        sx={{ backgroundColor: darkMode ? "rgb(88,92,99)" : "#FFFFFF" }}
                                         value={selectedDisaster || ""}
                                         onChange={(e) => setSelectedDisaster(e.target.value)}
                                         error={disasterError}
@@ -808,7 +836,7 @@ const RegisterResponder = ({ darkMode, flag, setFlag, setSelectedIncident }) => 
                                             value={selectedResponders}
                                             onChange={handleChange}
                                             displayEmpty
-                                            sx={{  backgroundColor: darkMode ? "rgb(88,92,99)" : "#FFFFFF"}}
+                                            sx={{ backgroundColor: darkMode ? "rgb(88,92,99)" : "#FFFFFF" }}
                                             renderValue={(selected) => {
                                                 if (selected.length === 0) {
                                                     return "Select Responder";
@@ -855,21 +883,24 @@ const RegisterResponder = ({ darkMode, flag, setFlag, setSelectedIncident }) => 
                                 sx={{
                                     mt: 2,
                                     width: "40%",
-                                    backgroundColor:  "rgb(18,166,95,0.8)",
+                                    backgroundColor: "rgb(18,166,95,0.8)",
                                     color: "#fff",
-                                    fontWeight: "bold",
                                     borderRadius: "12px",
                                     "&:hover": {
                                         backgroundColor: bgColor,
                                         color: "white !important",
                                     },
+                                    textTransform: "none",
                                 }}
                                 onClick={isEditMode ? handleUpdate : handleSubmit}
                             >
-                                {/* {isEditMode ? 'Update' : 'Submit'} */}
-                                {showSubmitButton ? 'Submit' : isEditMode ? 'Update' : 'Submit'}
+                                {(() => {
+                                    const label = showSubmitButton ? "submit" : isEditMode ? "update" : "submit";
+                                    return label.charAt(0).toUpperCase() + label.slice(1).toLowerCase();
+                                })()}
                             </Button>
                         </Box>
+
                     </Paper>
                 </Grid>
             </Grid>

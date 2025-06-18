@@ -154,15 +154,35 @@ function SopTask({
 
   const navigate = useNavigate();
 
-  // Decide current list based on flag
-  const dataList = flag === 1 ? alerts : dispatchList;
-  // Calculate total pages
-  const totalPages = Math.ceil(dataList.length / rowsPerPage) || 1;
-  // Calculate start and end indexes for slice
-  const startIndex = (page - 1) * rowsPerPage;
-  const endIndex = startIndex + rowsPerPage;
-  // Get sliced data for current page
-  const dispatchListdata = dataList.slice(startIndex, endIndex);
+
+
+const dataList = flag === 1 ? alerts : dispatchList;
+
+
+const filteredDispatchList = dataList.filter((item) => {
+  const searchLower = searchTerm.trim().toLowerCase();
+  return (
+    item.incident_id?.toString().toLowerCase().includes(searchLower) ||
+    item.disaster_name?.toLowerCase().includes(searchLower) ||
+    item.inc_added_by?.toLowerCase().includes(searchLower) ||
+    item.inc_type?.toString().toLowerCase().includes(searchLower)
+  );
+});
+useEffect(() => {
+  setPage(1);
+}, [searchTerm]);
+
+// 3. Pagination ke liye start/end indexes
+const startIndex = (page - 1) * rowsPerPage;
+const endIndex = startIndex + rowsPerPage;
+
+// 4. Slice filtered data
+const paginatedDispatchList = filteredDispatchList.slice(startIndex, endIndex);
+
+// 5. Total pages filter ke according
+const totalPages = Math.ceil(filteredDispatchList.length / rowsPerPage) || 1;
+
+
   const { setSelectedIncidentFromSop, setDisasterIdFromSop, setCommentText } =
     useAuth();
 
@@ -225,15 +245,7 @@ function SopTask({
     setViewmode("incident"); // Reset view mode to incident
   };
 
-  const filteredDispatchList = dispatchListdata.filter((item) => {
-    const searchLower = searchTerm.toLowerCase();
-    return (
-      item.incident_id?.toString().toLowerCase().includes(searchLower) ||
-      item.disaster_name?.toLowerCase().includes(searchLower) ||
-      item.inc_added_by?.toLowerCase().includes(searchLower) ||
-      item.inc_type?.toString().includes(searchLower)
-    );
-  });
+  
   // const handleForward = () => {
   //   setFlag(1);
   //   setSelectedIncident(); // Clear selected incident
@@ -364,7 +376,7 @@ function SopTask({
         {/* Title */}
         <Typography
           variant="h6"
-         sx={{ color: textColor, fontWeight: 500, fontFamily, }}
+          sx={{ color: textColor, fontWeight: 500, fontFamily }}
         >
           {flag === 1 ? "Alert Task" : "Dispatch List"}
         </Typography>
@@ -609,132 +621,152 @@ function SopTask({
                     ))}
                   </EnquiryCard>
 
-                  {/* Body Rows */}
-                  {filteredDispatchList.length === 0 ? (
-                    <Box p={2} width="100%">
-                      <Typography align="center" color="textSecondary">
-                        No tasks available.
-                      </Typography>
-                    </Box>
-                  ) : (
-                    filteredDispatchList.map((item) => (
-                      <EnquiryCardBody
-                        key={item.incident_id}
-                        alertType={item.inc_type}
-                        isHighlighted={item.incident_id === highlightedId}
-                      >
-                        {/* Incident ID */}
-                        <StyledCardContent
-                          sx={{ flex: 1, justifyContent: "center" }}
+                  {/* Scrollable Body */}
+                  <Box
+                    sx={{
+                      maxHeight: 170,
+                      overflowY: "auto",
+                      mt: 1,
+                      pr: 1,
+                      "&::-webkit-scrollbar": {
+                        width: "6px",
+                      },
+                      "&::-webkit-scrollbar-thumb": {
+                         backgroundColor: darkMode ? "#5FC8EC" : "#888",
+                        borderRadius: 3,
+                      },
+                      "&::-webkit-scrollbar-thumb:hover": {
+                        backgroundColor: darkMode ? "#888" : "#555",
+                      },
+                    }}
+                  >
+                    {/* Body Rows */}
+                    {paginatedDispatchList.length === 0 ? (
+                      <Box p={2} width="100%">
+                        <Typography align="center" color="textSecondary">
+                          No tasks available.
+                        </Typography>
+                      </Box>
+                    ) : (
+                      paginatedDispatchList.map((item) => (
+                        <EnquiryCardBody
+                          key={item.incident_id}
+                          alertType={item.inc_type}
+                          isHighlighted={item.incident_id === highlightedId}
                         >
-                          <Typography variant="subtitle2">
-                            {item.incident_id || "N/A"}
-                          </Typography>
-                        </StyledCardContent>
-
-                        {/* Date & Time */}
-                        <StyledCardContent
-                          sx={{ flex: 1, justifyContent: "center" }}
-                        >
-                          <Typography
-                            variant="subtitle2"
-                            sx={{ textAlign: "center", fontSize: "12px" }}
+                          {/* Incident ID */}
+                          <StyledCardContent
+                            sx={{ flex: 1, justifyContent: "center" }}
                           >
-                            {item.inc_added_date
-                              ? new Date(item.inc_added_date).toLocaleString(
-                                  "en-US",
-                                  {
-                                    day: "2-digit",
-                                    month: "long",
-                                    year: "numeric",
-                                    hour: "numeric",
-                                    minute: "2-digit",
-                                    hour12: true,
-                                  }
-                                )
-                              : "N/A"}
-                          </Typography>
-                        </StyledCardContent>
+                            <Typography variant="subtitle2">
+                              {item.incident_id || "N/A"}
+                            </Typography>
+                          </StyledCardContent>
 
-                        {/* Disaster Type */}
-                        <StyledCardContent
-                          sx={{ flex: 1, justifyContent: "center" }}
-                        >
-                          <Typography variant="subtitle2">
-                            {item.disaster_name || "N/A"}
-                          </Typography>
-                        </StyledCardContent>
-
-                        {/* Alert Type */}
-                        <StyledCardContent
-                          sx={{ flex: 1, justifyContent: "center" }}
-                        >
-                          <Typography variant="subtitle2">
-                            {{
-                              1: "High",
-                              2: "Medium",
-                              3: "Low",
-                              4: "Very Low",
-                            }[item.alert_type] || "Unknown"}
-                          </Typography>
-                        </StyledCardContent>
-
-                        {/* Initiated By */}
-                        <StyledCardContent
-                          sx={{ flex: 1, justifyContent: "center" }}
-                        >
-                          <Typography variant="subtitle2">
-                            {item.inc_added_by || "N/A"}
-                          </Typography>
-                        </StyledCardContent>
-
-                        {/* Actions */}
-                        <StyledCardContent
-                          sx={{
-                            flex: 1,
-                            justifyContent: "center",
-                            gap: 1,
-                            display: "flex",
-                          }}
-                        >
-                          <Tooltip title="View Details">
-                            <IconButton
-                              onClick={() => {
-                                setSelectedIncident(item);
-                                setIncidentId(item.inc_id);
-                                setSelectedIncidentFromSop(item);
-                                setDisasterIdFromSop(item.disaster_name);
-                                setHighlightedId(item.incident_id);
-                                console.log("Incident idd", setIncidentId);
-                                setFlag(0);
-                                setViewmode("incident");
-                              }}
+                          {/* Date & Time */}
+                          <StyledCardContent
+                            sx={{ flex: 1, justifyContent: "center" }}
+                          >
+                            <Typography
+                              variant="subtitle2"
+                              sx={{ textAlign: "center", fontSize: "12px" }}
                             >
-                              <Visibility
-                                sx={{ color: "	#FFA500", fontSize: 28 }}
-                              />
-                            </IconButton>
-                          </Tooltip>
+                              {item.inc_added_date
+                                ? new Date(item.inc_added_date).toLocaleString(
+                                    "en-US",
+                                    {
+                                      day: "2-digit",
+                                      month: "long",
+                                      year: "numeric",
+                                      hour: "numeric",
+                                      minute: "2-digit",
+                                      hour12: true,
+                                    }
+                                  )
+                                : "N/A"}
+                            </Typography>
+                          </StyledCardContent>
 
-                          <Tooltip title="Closure Details">
-                            <IconButton
-                              onClick={() => {
-                                setSelectedIncident(item);
-                                setFlag(0);
-                                setViewmode("closure");
-                                setHighlightedId(item.incident_id);
-                              }}
-                              size="large"
-                            >
-                              <TextSnippetIcon
-                                sx={{ color: "#ffccf2", fontSize: 20 }}
-                              />
-                            </IconButton>
-                          </Tooltip>
-                        </StyledCardContent>
-                      </EnquiryCardBody>
-                    ))
-                  )}
+                          {/* Disaster Type */}
+                          <StyledCardContent
+                            sx={{ flex: 1, justifyContent: "center" }}
+                          >
+                            <Typography variant="subtitle2">
+                              {item.disaster_name || "N/A"}
+                            </Typography>
+                          </StyledCardContent>
+
+                          {/* Alert Type */}
+                          <StyledCardContent
+                            sx={{ flex: 1, justifyContent: "center" }}
+                          >
+                            <Typography variant="subtitle2">
+                              {{
+                                1: "High",
+                                2: "Medium",
+                                3: "Low",
+                                4: "Very Low",
+                              }[item.alert_type] || "Unknown"}
+                            </Typography>
+                          </StyledCardContent>
+
+                          {/* Initiated By */}
+                          <StyledCardContent
+                            sx={{ flex: 1, justifyContent: "center" }}
+                          >
+                            <Typography variant="subtitle2">
+                              {item.inc_added_by || "N/A"}
+                            </Typography>
+                          </StyledCardContent>
+
+                          {/* Actions */}
+                          <StyledCardContent
+                            sx={{
+                              flex: 1,
+                              justifyContent: "center",
+                              gap: 1,
+                              display: "flex",
+                            }}
+                          >
+                            <Tooltip title="View Details">
+                              <IconButton
+                                onClick={() => {
+                                  setSelectedIncident(item);
+                                  setIncidentId(item.inc_id);
+                                  setSelectedIncidentFromSop(item);
+                                  setDisasterIdFromSop(item.disaster_name);
+                                  setHighlightedId(item.incident_id);
+                                  console.log("Incident idd", setIncidentId);
+                                  setFlag(0);
+                                  setViewmode("incident");
+                                }}
+                              >
+                                <Visibility
+                                  sx={{ color: "	#FFA500", fontSize: 28 }}
+                                />
+                              </IconButton>
+                            </Tooltip>
+
+                            <Tooltip title="Closure Details">
+                              <IconButton
+                                onClick={() => {
+                                  setSelectedIncident(item);
+                                  setFlag(0);
+                                  setViewmode("closure");
+                                  setHighlightedId(item.incident_id);
+                                }}
+                                size="large"
+                              >
+                                <TextSnippetIcon
+                                  sx={{ color: "#ffccf2", fontSize: 20 }}
+                                />
+                              </IconButton>
+                            </Tooltip>
+                          </StyledCardContent>
+                        </EnquiryCardBody>
+                      ))
+                    )}
+                  </Box>
                 </TableBody>
               </Table>
             </TableContainer>
