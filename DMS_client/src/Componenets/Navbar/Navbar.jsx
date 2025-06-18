@@ -23,13 +23,11 @@ import EmailIcon from "@mui/icons-material/Email";
 import EditIcon from "@mui/icons-material/Edit";
 import { styled, Switch } from '@mui/material';
 import { useAuth } from "./../../Context/ContextAPI";
-
+import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
+import AccessTimeIcon from '@mui/icons-material/AccessTime';
 
 const pages = [];
 const settings = ["Profile", "Logout"];
-
-
-
 const MaterialUISwitch = styled(Switch)(({ theme }) => ({
   width: 62,
   height: 34,
@@ -173,6 +171,19 @@ const Navbar = ({ darkMode, toggleDarkMode }) => {
       // navigate("/login");
     }
   };
+
+  const now = new Date();
+  const formattedDate = now.toLocaleDateString('en-IN', {
+    weekday: 'short',
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+  });
+
+  const formattedTime = now.toLocaleTimeString('en-IN', {
+    hour: '2-digit',
+    minute: '2-digit',
+  });
 
   //auto logout for browser and tab close
 
@@ -322,6 +333,29 @@ const Navbar = ({ darkMode, toggleDarkMode }) => {
         </Box>
 
         <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'flex-start',
+              justifyContent: 'flex-start',
+              borderRadius: '12px',
+              fontSize: '13px',
+              gap: '6px',
+              transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+              cursor: 'pointer',
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <CalendarTodayIcon style={{ fontSize: '16px', color: 'orange' }} />
+              <span style={{ color: 'orange' }}>{formattedDate}</span>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <AccessTimeIcon style={{ fontSize: '16px', color: '#87CEEB' }} />
+              <span style={{ color: '#87CEEB' }}>{formattedTime}</span>
+            </div>
+          </div>
+
           <Tooltip title={darkMode ? "Switch to Light Mode" : "Switch to Dark Mode"} arrow>
             <MaterialUISwitch
               checked={darkMode}
