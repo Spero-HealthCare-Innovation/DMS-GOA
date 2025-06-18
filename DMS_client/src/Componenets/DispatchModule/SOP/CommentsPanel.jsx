@@ -356,35 +356,31 @@ function CommentsPanel({
                     key={comm_id}
                     sx={{
                       display: "flex",
-                      justifyContent: isOwnComment ? "flex-end" : "flex-start",
+                      justifyContent: "flex-start",
                     }}
                   >
                     <Stack direction="row" spacing={1} alignItems="flex-end">
-                      {!isOwnComment && (
-                        <Tooltip title={comm_added_by} arrow>
-                          <Avatar sx={{ bgcolor: "#0288d1", fontSize: 14 }}>
-                            {comm_added_by
-                              ? comm_added_by.charAt(0).toUpperCase()
-                              : "U"}
-                          </Avatar>
-                        </Tooltip>
-                      )}
+                      {/* Avatar */}
+                      <Tooltip title={comm_added_by} arrow>
+                        <Avatar
+                          sx={{
+                            bgcolor: "#0288d1", // Same for all
+                            fontSize: 14,
+                          }}
+                        >
+                          {comm_added_by
+                            ? comm_added_by.charAt(0).toUpperCase()
+                            : "?"}
+                        </Avatar>
+                      </Tooltip>
+
+                      {/* Message Box */}
                       <Box
                         sx={{
-                          backgroundColor: isOwnComment
-                            ? darkMode
-                              ? "#0f766e"
-                              : "#d1fae5"
-                            : darkMode
+                          backgroundColor: darkMode
                             ? "rgb(77,77,77)"
                             : "#f3f4f6",
-                          color: isOwnComment
-                            ? darkMode
-                              ? "#e0f2f1"
-                              : "#065f46"
-                            : darkMode
-                            ? "#e2e8f0"
-                            : "#111827",
+                          color: darkMode ? "#e2e8f0" : "#111827",
                           px: 2,
                           py: 1,
                           borderRadius: 2,
@@ -406,15 +402,6 @@ function CommentsPanel({
                           ).toLocaleTimeString()}
                         </Typography>
                       </Box>
-                      {isOwnComment && (
-                        <Tooltip title={comm_added_by} arrow>
-                          <Avatar sx={{ bgcolor: "#6a1b9a", fontSize: 14 }}>
-                            {comm_added_by
-                              ? comm_added_by.charAt(0).toUpperCase()
-                              : "?"}
-                          </Avatar>
-                        </Tooltip>
-                      )}
                     </Stack>
                   </Box>
                 );
@@ -430,53 +417,108 @@ function CommentsPanel({
       )}
 
       {/* Input + Button */}
-      <Box
-        sx={{
-          display: "flex",
-          alignItems: "center",
-          gap: 1,
-          backgroundColor: darkMode ? "rgb(77,77,77)" : "#f9f9f9",
-          borderRadius: 2,
-          px: 1,
-          py: 0.5,
-          mt: 1,
-        }}
-      >
-        <TextField
-          placeholder={placeholderVisible ? "Type a comment..." : ""}
-          variant="standard"
-          fullWidth
-          multiline
-          maxRows={3}
-          value={commentText}
-          onChange={(e) => setCommentText(e.target.value)}
-          onFocus={() => setPlaceholderVisible(false)}
-          onBlur={(e) => {
-            if (e.target.value.trim() === "") setPlaceholderVisible(true);
+      {flag === 1 ? (
+        // ALERT UI
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            gap: 1,
+            // backgroundColor: darkMode ? "rgb(53, 51, 51)" : "#f1f5f9",
+            borderRadius: 2,
+            px: 2,
+            py: 1.5,
+            mt: 1,
           }}
-          InputProps={{
-            disableUnderline: true,
-            sx: {
-              fontSize: "0.9rem",
-              color: textColor,
-              px: 1,
-              py: 0.5,
-            },
-          }}
-          sx={{ backgroundColor: "transparent" }}
-        />
-
-        <Button
-          variant="contained"
-          color={flag === 1 ? "primary" : "secondary"}
-          onClick={flag === 1 ? handlealertSaveClick : handleCommentSendClick}
-          disabled={!commentText.trim()}
-          sx={{ borderRadius: 2, px: 3, whiteSpace: "nowrap", height: "100%" }}
         >
-          {flag === 1 ? "Save" : "Send"}
-        </Button>
-      </Box>
+          <TextField
+            placeholder="Type an Comment..."
+            variant="outlined"
+            fullWidth
+            multiline
+            minRows={4}
+            value={commentText}
+            onChange={(e) => setCommentText(e.target.value)}
+            InputProps={{
+              sx: {
+                fontSize: "0.95rem",
+                color: textColor,
+              },
+            }}
+          />
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={handlealertSaveClick}
+            disabled={!commentText.trim()}
+            sx={{ alignSelf: "flex-end", px: 4 }}
+          >
+            Save Alert
+          </Button>
+        </Box>
+      ) : selectedIncident?.inc_id ? (
+        // COMMENT UI
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            gap: 1,
+            backgroundColor: darkMode ? "rgb(53, 51, 51)" : "#f9f9f9",
+            borderRadius: 2,
+            px: 1,
+            py: 0.5,
+            mt: 1,
+          }}
+        >
+          <TextField
+            placeholder={placeholderVisible ? "Type a comment..." : ""}
+            variant="standard"
+            fullWidth
+            multiline
+            maxRows={3}
+            value={commentText}
+            onChange={(e) => setCommentText(e.target.value)}
+            onFocus={() => setPlaceholderVisible(false)}
+            onBlur={(e) => {
+              if (e.target.value.trim() === "") setPlaceholderVisible(true);
+            }}
+            InputProps={{
+              disableUnderline: true,
+              sx: {
+                fontSize: "0.9rem",
+                color: textColor,
+                px: 1,
+                py: 0.5,
+              },
+            }}
+            sx={{ backgroundColor: "transparent" }}
+          />
 
+          <Button
+            variant="contained"
+            color="secondary"
+            onClick={handleCommentSendClick}
+            disabled={!commentText.trim()}
+            sx={{
+              borderRadius: 2,
+              px: 3,
+              whiteSpace: "nowrap",
+              height: "100%",
+            }}
+          >
+            Send
+          </Button>
+        </Box>
+      ) : (
+        // No Incident Selected UI
+        <Typography
+          variant="body2"
+          color="text.secondary"
+          sx={{ mt: 1, textAlign: "center", fontSize: "0.9rem" }}
+        >
+          Please select an incident
+        </Typography>
+      )}
       <Snackbar
         open={snackbar.open}
         autoHideDuration={4000}
