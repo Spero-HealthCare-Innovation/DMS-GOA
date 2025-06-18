@@ -665,6 +665,9 @@ function IncidentDetails({
 
           {/* Right Column */}
           <Grid item xs={12} md={5} pl={{ md: 2 }}>
+              <Typography variant="subtitle2" mb={2} color="#5FC8EC">
+        Comments
+      </Typography>
             {selectedIncident ? (
               <CommentsPanel
                 darkMode={darkMode}
