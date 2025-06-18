@@ -877,7 +877,7 @@ function Add_group({ darkMode }) {
                   }}
                   sx={{
                     fontFamily: "Roboto",
-                        backgroundColor: darkMode ? "rgb(88,92,99)" : "#FFFFFF",
+                        // backgroundColor: darkMode ? "rgb(88,92,99)" : "#FFFFFF",
                     ...selectStyles,
                     ...(departmentError && {
                       "& .MuiOutlinedInput-notchedOutline": {
