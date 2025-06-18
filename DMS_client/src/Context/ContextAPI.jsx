@@ -47,10 +47,14 @@ export const AuthProvider = ({ children }) => {
 
   // 🔹 sop page
   const [responderScope, setResponderScope] = useState([]);
-  const [responderScopeForDispatch, setResponderScopeForDispatch] = useState([]);
+  const [responderScopeForDispatch, setResponderScopeForDispatch] = useState(
+    []
+  );
   console.log(responderScopeForDispatch, "disasterIncident");
   const [enhancedIncidentData, setEnhancedIncidentData] = useState(null);
   const [selectedIncidentFromSop, setSelectedIncidentFromSop] = useState(null);
+  const [isNewEntry, setIsNewEntry] = useState(false);
+
   // const [disasterIdFromSop, setDisasterIdFromSop] = useState(null);
   useEffect(() => {
     const disasterValue = disaterid || disasterIncident || disasterIdFromSop;
@@ -246,7 +250,7 @@ export const AuthProvider = ({ children }) => {
 
   // 🔹 useEffect for selectedStateId change
   useEffect(() => {
-    if (selectedStateId) {
+    if (selectedStateId && isNewEntry) {
       fetchDistrictsByState(selectedStateId);
       setSelectedDistrictId("");
       setSelectedTehsilId("");
@@ -261,11 +265,11 @@ export const AuthProvider = ({ children }) => {
       setSelectedTehsilId("");
       setSelectedCityId("");
     }
-  }, [selectedStateId]);
+  }, [selectedStateId, isNewEntry]);
 
   // 🔹 useEffect for selectedDistrictId change
   useEffect(() => {
-    if (selectedDistrictId) {
+    if (selectedDistrictId && isNewEntry) {
       fetchTehsilsByDistrict(selectedDistrictId);
       setSelectedTehsilId("");
       setSelectedCityId("");
@@ -276,18 +280,22 @@ export const AuthProvider = ({ children }) => {
       setSelectedTehsilId("");
       setSelectedCityId("");
     }
-  }, [selectedDistrictId]);
+  }, [selectedDistrictId, isNewEntry]);
 
   // ✅ useEffect for selectedTehsilId change (fetch cities)
-  useEffect(() => {
-    if (selectedTehsilId) {
-      fetchCitysByTehshil(selectedTehsilId);
-      setSelectedCityId("");
-    } else {
-      setCitys([]);
-      setSelectedCityId("");
-    }
-  }, [selectedTehsilId]);
+  useEffect(
+    () => {
+      if (selectedDistrictId && isNewEntry) {
+        fetchCitysByTehshil(selectedTehsilId);
+        setSelectedCityId("");
+      } else {
+        setCitys([]);
+        setSelectedCityId("");
+      }
+    },
+    [selectedTehsilId],
+    isNewEntry
+  );
 
   // DISASTER GET API
   const [disaster, setDisaster] = useState([]);
@@ -348,9 +356,12 @@ export const AuthProvider = ({ children }) => {
         setResponderScopeForDispatch,
         enhancedIncidentData,
         setEnhancedIncidentData,
-        lattitude, setLattitude,
-        longitude, setLongitude,
-        commentText, setCommentText
+        lattitude,
+        setLattitude,
+        longitude,
+        setLongitude,
+        commentText,
+        setCommentText,
       }}
     >
       {children}
