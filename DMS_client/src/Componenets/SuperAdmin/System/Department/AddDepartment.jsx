@@ -217,6 +217,7 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
       );
       setIsEditMode(true); // This enables buttons that depend on isEditMode
       setAllEditData(res.data);
+      console.log("dddddd", res.data);
 
       setDepartmentName(res.data[0].dep_name || "");
       setSelectedStateId(res.data[0].state_id || "");
@@ -230,9 +231,8 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
   const handleUpdate = async () => {
     const payload = {
       dep_name: departmentName,
-      dis_id: selectedDisasterId,
       state_id: selectedStateId,
-      dis_district_id: selectedDistrictId,
+      dis_id: selectedDistrictId,
       tah_id: selectedTehsilId,
       cit_id: selectedCityID,
       disaster_id: selectedDisasterId,
@@ -279,7 +279,7 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
       } else {
         const errorData = await response.json();
         console.error("Update failed:", errorData);
-        alert("Failed to update department.");
+        snackbarMessage("Failed to update department.");
       }
     } catch (err) {
       console.error("Update error:", err);
@@ -290,38 +290,35 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
     setSnackbar({ ...snackbar, open: false });
   };
   // Set District after districts are loaded
-useEffect(() => {
-  if (isEditMode && selectedStateId && allEditData.length > 0) {
-    const disId = allEditData[0]?.dis_id;
-    if (districts.find((d) => d.dis_id === disId)) {
-      setSelectedDistrictId(disId);
+  useEffect(() => {
+    if (isEditMode && selectedStateId && allEditData.length > 0) {
+      const disId = allEditData[0]?.dis_id;
+      if (districts.find((d) => d.dis_id === disId)) {
+        setSelectedDistrictId(disId);
+      }
     }
-  }
-}, [districts, selectedStateId]);
-
-
-useEffect(() => {
-  if (isEditMode && selectedDistrictId && allEditData.length > 0) {
-    const tahId = allEditData[0]?.tah_id;
-    if (Tehsils.find((t) => t.tah_id === tahId)) {
-      setSelectedTehsilId(tahId);
-    }
-  }
-}, [Tehsils, selectedDistrictId]);
-
-
-useEffect(() => {
-  if (isEditMode && selectedTehsilId && allEditData.length > 0) {
-    const citId = allEditData[0]?.cit_id;
-    if (Citys.find((c) => c.cit_id === citId)) {
-      setSelectedCityId(citId);
-    }
-  }
-}, [Citys, selectedTehsilId]);
-
+  }, [districts, selectedStateId]);
 
   useEffect(() => {
-    if (allEditData.length > 0 && disasterList.length > 0) {
+    if (isEditMode && selectedDistrictId && allEditData.length > 0) {
+      const tahId = allEditData[0]?.tah_id;
+      if (Tehsils.find((t) => t.tah_id === tahId)) {
+        setSelectedTehsilId(tahId);
+      }
+    }
+  }, [Tehsils, selectedDistrictId]);
+
+  useEffect(() => {
+    if (isEditMode && selectedTehsilId && allEditData.length > 0) {
+      const citId = allEditData[0]?.cit_id;
+      if (Citys.find((c) => c.cit_id === citId)) {
+        setSelectedCityId(citId);
+      }
+    }
+  }, [Citys, selectedTehsilId]);
+
+  useEffect(() => {
+    if (isEditMode && allEditData.length > 0) {
       const disasterId = allEditData[0]?.disaster_id;
       const foundDisaster = disasterList.find(
         (d) => d.disaster_id === disasterId
@@ -330,7 +327,7 @@ useEffect(() => {
         setSelectedDisasterId(disasterId);
       }
     }
-  }, [allEditData, disasterList]);
+  }, [isEditMode, allEditData, disasterList]);
 
   useEffect(() => {
     setPage(1);
@@ -439,9 +436,8 @@ useEffect(() => {
 
     const payload = {
       dep_name: departmentName,
-      dis_id: selectedDisasterId,
       state_id: selectedStateId,
-      dis_district_id: selectedDistrictId,
+      dis_id: selectedDistrictId,
       tah_id: selectedTehsilId,
       cit_id: selectedCityID,
       disaster_id: selectedDisasterId,
@@ -528,6 +524,7 @@ useEffect(() => {
 
     fetchDisasters();
   }, []);
+
   const handleDelete = async () => {
     try {
       const res = await axios.delete(
