@@ -46,8 +46,8 @@ export const TableDataCardBody = styled("tr")(({ theme, status }) => ({
   display: "flex",
   alignItems: "center",
   justifyContent: "space-between",
-  background: theme.palette.mode === "dark" ? "#1E243E" : "#FFFFFF",
-  color: theme.palette.mode === "dark" ? "red" : "#FFFFFF",
+  background: theme.palette.mode === "dark" ? "rgb(122, 126, 134)" : "#fff",
+  color: theme.palette.mode === "dark" ? "#fff" : "#000",
   marginTop: "0.5em",
   borderRadius: "8px",
   padding: "10px 12px",
@@ -164,10 +164,8 @@ export const textfieldInputFonts = {
 export const getCustomSelectStyles = (isDarkMode) => {
   const textColor = isDarkMode ? "#fff" : "grey";
   const textfieldcolor = isDarkMode ? "#fff" : "grey";
-  const placeholderColor = isDarkMode ? "#bbb" : "#666";
-  const bgColor = isDarkMode
-    ? "rgb(88,92,99)"
-    : "rgba(0, 0, 0, 0.04)";
+  const placeholderColor = isDarkMode ? "rgb(88,92,99)" : "#666";
+  const bgColor = isDarkMode ? "rgb(88,92,99)" : "rgba(0, 0, 0, 0.04)";
 
   return {
     height: "2.6rem",

@@ -64,6 +64,7 @@ import {
 import { useAuth } from "../../../../Context/ContextAPI";
 import axios from "axios";
 import { select } from "framer-motion/client";
+import { motion } from "framer-motion";
 
 const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
   const [anchorEl, setAnchorEl] = useState(null);
@@ -734,6 +735,7 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
               borderRadius: 2,
               color: textColor,
               transition: "all 0.3s ease-in-out",
+              boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
             }}
           >
             <TableContainer>
@@ -747,6 +749,7 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
                         display: "flex",
                         width: "100%",
                         borderRadius: 2,
+                        position: "sticky",
                         // p: 1,
                       }}
                     >
@@ -839,7 +842,26 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
                   </TableRow>
                 </TableHead>
 
-                <TableBody>
+                <TableBody
+                  sx={{
+                    display: "block",
+                    maxHeight: "50vh",
+                    overflowY: "auto",
+                    scrollBehavior: "smooth",
+                    width: "100%",
+                    "&::-webkit-scrollbar": {
+                      width: "6px",
+                    },
+                    "&::-webkit-scrollbar-thumb": {
+                      backgroundColor: darkMode ? "#5FC8EC" : "#888",
+                      borderRadius: 3,
+                    },
+                    "&::-webkit-scrollbar-thumb:hover": {
+                      backgroundColor: darkMode ? "#5FC8EC" : "#555",
+                    },
+                  }}
+                >
+                  {" "}
                   {loading ? (
                     <TableRow>
                       <TableCell colSpan={6} align="center">
@@ -853,13 +875,10 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
                         <TableDataCardBody
                           key={index}
                           sx={{
-                            backgroundColor: "rgb(88,92,99)",
-                            // p: 0.3,
                             borderRadius: 2,
                             color: textColor,
                             display: "flex",
                             width: "100%",
-                            // mb: 1,
                           }}
                         >
                           <StyledCardContent
@@ -967,10 +986,11 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
                             <MoreHorizIcon
                               onClick={(e) => handleOpen(e, item)}
                               sx={{
-                                color: "#00f0c0",
+                                color: "white",
                                 cursor: "pointer",
                                 // fontSize: 35,
                                 justifyContent: "center",
+                                fontSize: 14,
                                 ...fontsTableBody,
                               }}
                             />
@@ -1002,8 +1022,19 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
                               fullWidth
                               variant="outlined"
                               color="warning"
-                              startIcon={<EditOutlined />}
+                              startIcon={
+                                <EditOutlined
+                                  sx={{
+                                    fontSize: "14px",
+                                    alignItems: "center",
+                                  }}
+                                />
+                              }
                               onClick={() => handleEdit(selectedItem)}
+                              sx={{
+                                textTransform: "none",
+                                fontSize: "14px",
+                              }}
                             >
                               Edit
                             </Button>
@@ -1012,11 +1043,22 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
                               fullWidth
                               variant="outlined"
                               color="error"
-                              startIcon={<DeleteOutline />}
+                              startIcon={
+                                <DeleteOutline
+                                  sx={{
+                                    fontSize: "14px",
+                                    alignItems: "center",
+                                  }}
+                                />
+                              }
                               // onClick={() => handleDelete(selectedItem.dep_id)}
                               onClick={() => {
                                 setDeleteDepId(selectedItem.dep_id);
                                 setOpenDeleteDialog(true);
+                              }}
+                              sx={{
+                                textTransform: "none",
+                                fontSize: "14px",
                               }}
                             >
                               Delete
@@ -1098,7 +1140,7 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
                     borderColor: borderColor,
                     height: "30px",
                     minWidth: "70px",
-                    backgroundColor: "#202328",
+                    backgroundColor: darkMode ? "#202328" : "#fff",
                     "& .MuiOutlinedInput-notchedOutline": {
                       borderColor: borderColor,
                     },
@@ -1126,7 +1168,7 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
                   gap: 2,
                   color: textColor,
                   fontSize: "13px",
-                  backgroundColor: "#202328",
+                  backgroundColor: darkMode ? "#202328" : "#fff",
                 }}
               >
                 <Box
@@ -1136,7 +1178,7 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
                     userSelect: "none",
                   }}
                 >
-                   &#8249;
+                  &#8249;
                 </Box>
 
                 <Box>
