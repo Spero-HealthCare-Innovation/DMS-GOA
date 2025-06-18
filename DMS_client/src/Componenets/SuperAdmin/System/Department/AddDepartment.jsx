@@ -290,32 +290,35 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
     setSnackbar({ ...snackbar, open: false });
   };
   // Set District after districts are loaded
-  useEffect(() => {
-    if (selectedStateId && allEditData.length > 0) {
-      const disId = allEditData[0]?.dis_id;
-      if (districts.find((d) => d.dis_id === disId)) {
-        setSelectedDistrictId(disId);
-      }
+useEffect(() => {
+  if (isEditMode && selectedStateId && allEditData.length > 0) {
+    const disId = allEditData[0]?.dis_id;
+    if (districts.find((d) => d.dis_id === disId)) {
+      setSelectedDistrictId(disId);
     }
-  }, [districts, selectedStateId]);
+  }
+}, [districts, selectedStateId]);
 
-  useEffect(() => {
-    if (selectedDistrictId && allEditData.length > 0) {
-      const tahId = allEditData[0]?.tah_id;
-      if (Tehsils.find((t) => t.tah_id === tahId)) {
-        setSelectedTehsilId(tahId);
-      }
-    }
-  }, [Tehsils, selectedDistrictId]);
 
-  useEffect(() => {
-    if (selectedTehsilId && allEditData.length > 0) {
-      const citId = allEditData[0]?.cit_id;
-      if (Citys.find((c) => c.cit_id === citId)) {
-        setSelectedCityId(citId);
-      }
+useEffect(() => {
+  if (isEditMode && selectedDistrictId && allEditData.length > 0) {
+    const tahId = allEditData[0]?.tah_id;
+    if (Tehsils.find((t) => t.tah_id === tahId)) {
+      setSelectedTehsilId(tahId);
     }
-  }, [Citys, selectedTehsilId]);
+  }
+}, [Tehsils, selectedDistrictId]);
+
+
+useEffect(() => {
+  if (isEditMode && selectedTehsilId && allEditData.length > 0) {
+    const citId = allEditData[0]?.cit_id;
+    if (Citys.find((c) => c.cit_id === citId)) {
+      setSelectedCityId(citId);
+    }
+  }
+}, [Citys, selectedTehsilId]);
+
 
   useEffect(() => {
     if (allEditData.length > 0 && disasterList.length > 0) {
