@@ -25,6 +25,7 @@ import IconButton from "@mui/material/IconButton";
 import CloseIcon from "@mui/icons-material/Close";
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
+import TimerIcon from '@mui/icons-material/Timer';
 
 const inputStyle = {
     mb: 0.5,
@@ -42,7 +43,7 @@ const Incident = ({ darkMode }) => {
     const [secondsElapsed, setSecondsElapsed] = useState(0);
     const [timerActive, setTimerActive] = useState(false);
     const now = new Date();
-    const formattedDate = now.toLocaleDateString('en-GB').slice(0, 8).replace(/\//g, '/').slice(0, -2) + now.getFullYear().toString().slice(2);
+    const formattedDate = now.toLocaleDateString('en-GB').slice(0, 8).replace(/\//g, '-').slice(0, -2) + now.getFullYear().toString().slice(2);
 
 
     window.addEventListener("storage", (e) => {
@@ -91,7 +92,8 @@ const Incident = ({ darkMode }) => {
 
     const { handleSearchChange, handleSelectSuggestion, query } = useAuth();
     const bgColor = darkMode ? "#202328" : "#ffffff";
-    const labelColor = darkMode ? "white" : "#1976d2";
+    const labelColor = darkMode ? "#5FC8EC" : "#1976d2";
+    const labelColor1 = darkMode ? "white" : "#1976d2";
     const fontFamily = "Roboto, sans-serif";
     const [selectedEmergencyValue, setSelectedEmergencyValue] = useState('');
     console.log(responderScope, 'Fetching Scope Data');
@@ -291,11 +293,71 @@ const Incident = ({ darkMode }) => {
                             height: '62vh'
                         }}
                     >
-                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-                            <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+                            <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold', color: "#5FC8EC" }}>
                                 Create Incident
                             </Typography>
                             <Typography
+                                variant="h6"
+                                sx={{
+                                    fontSize: '15px',
+                                    p: 1.5,
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: 1,
+                                    width: 'fit-content',
+                                    borderRadius: '1em',
+                                }}
+                                gutterBottom
+                            >
+                                <Box
+                                    sx={{
+                                        backgroundColor: '#E0F2F1',
+                                        px: 1.5,
+                                        py: 0.5,
+                                        borderRadius: '1em',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: 0.5,
+                                    }}
+                                >
+                                    <CalendarTodayIcon sx={{ fontSize: 18, color: '#009688' }} />
+                                    <span style={{ color: 'black', fontSize: '14px' }}>{formattedDate}</span>
+                                </Box>
+
+                                <Box
+                                    sx={{
+                                        backgroundColor: '#FFF3E0',
+                                        px: 1.5,
+                                        py: 0.5,
+                                        borderRadius: '0.8em',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: 0.5,
+                                    }}
+                                >
+                                    <AccessTimeIcon sx={{ fontSize: 18, color: '#FB8C00' }} />
+                                    <span style={{ color: 'black', fontSize: '14px' }}>
+                                        {new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                    </span>
+                                </Box>
+
+                                <Box
+                                    sx={{
+                                        backgroundColor: '#E8EAF6',
+                                        px: 1.5,
+                                        py: 0.5,
+                                        borderRadius: '1.5em',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: 0.5,
+                                    }}
+                                >
+                                    <TimerIcon sx={{ fontSize: 18, color: '#3F51B5' }} />
+                                    <span style={{ color: 'black', fontSize: '14px' }}>{formattedTime}</span>
+                                </Box>
+                            </Typography>
+                            {/* <Typography
                                 variant="h6"
                                 sx={{
                                     fontSize: '15px',
@@ -303,16 +365,18 @@ const Incident = ({ darkMode }) => {
                                     p: 1.5,
                                     display: 'flex',
                                     alignItems: 'center',
-                                    gap: 2,
+                                    gap: 0.3,
                                     width: 'fit-content',
                                 }}
                                 gutterBottom
                             >
-                                <CalendarTodayIcon sx={{ fontSize: 18 }} />
+                                <CalendarTodayIcon sx={{ fontSize: 18, color: '#009688' }} />
                                 {formattedDate}
-                                <AccessTimeIcon sx={{ fontSize: 18, ml: 2 }} />
+                                <AccessTimeIcon sx={{ fontSize: 18, ml: 1.3, color: '#009688' }} />
                                 {formattedTime}
-                            </Typography>
+                                <TimerIcon  sx={{ fontSize: 18, ml: 1.3, color: '#009688' }} />
+                                {formattedTime}
+                            </Typography> */}
                         </Box>
 
                         <Grid container spacing={1.6}>
@@ -525,7 +589,7 @@ const Incident = ({ darkMode }) => {
                                                 fontFamily,
                                                 mb: 2,
                                                 ml: 1,
-                                                color: 'grey',
+                                                color: labelColor1,
                                                 fontSize: '15px',
                                                 // color: selectedEmergencyValue === 1 ? 'red' : 'green'
                                             }}
@@ -540,7 +604,7 @@ const Incident = ({ darkMode }) => {
                                         <Typography variant="subtitle2" sx={{
                                             fontFamily, mb: 2,
                                             ml: 1,
-                                            color: 'grey',
+                                            color: labelColor1,
                                             fontSize: '15px',
                                         }}>
                                             {alertType === 1 ? "High" : alertType === 2 ? "Medium" : "Low"}
@@ -552,7 +616,7 @@ const Incident = ({ darkMode }) => {
                                         </Typography>
                                         <Typography variant="subtitle2" sx={{
                                             fontFamily, mb: 2, ml: 1,
-                                            color: 'grey',
+                                            color: labelColor1,
                                             fontSize: '15px',
                                         }}>
                                             {alertType === 1 ? "High" : alertType === 2 ? "Medium" : "Low"}
@@ -570,7 +634,7 @@ const Incident = ({ darkMode }) => {
                                             <IconButton
                                                 size="small"
                                                 onClick={() => setOpenSopModal(true)}
-                                                sx={{ color: labelColor, ml: 1 }}
+                                                sx={{ color: 'orange', ml: 1 }}
                                             >
                                                 <VisibilityIcon />
                                             </IconButton>
@@ -586,7 +650,7 @@ const Incident = ({ darkMode }) => {
                                                 overflow: "hidden",
                                                 textOverflow: "ellipsis",
                                                 maxWidth: 300,
-                                                color: 'grey',
+                                                color: labelColor1,
                                                 marginLeft: '15px'
                                             }}
                                         >

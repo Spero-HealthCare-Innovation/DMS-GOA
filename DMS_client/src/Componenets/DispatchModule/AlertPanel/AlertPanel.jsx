@@ -312,7 +312,7 @@ const AlertPanel = ({ darkMode }) => {
                                                 key={startIndex + index}
                                                 sx={{
                                                     backgroundColor: darkMode ? "rgb(88,92,99)" : "#FFFFFF",
-                                                    color: "black",
+                                                    color: "white",
                                                     cursor: "pointer",
                                                 }}
                                             >
