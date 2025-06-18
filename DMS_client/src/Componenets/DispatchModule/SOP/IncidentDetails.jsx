@@ -384,7 +384,7 @@ function IncidentDetails({
                         sx={{
                           fontFamily,
                           display: "-webkit-box",
-                          WebkitLineClamp: 4,
+                          WebkitLineClamp: 2,
                           WebkitBoxOrient: "vertical",
                           overflow: "hidden",
                           whiteSpace: "pre-line",
@@ -393,11 +393,11 @@ function IncidentDetails({
                       >
                         {getFirstTwoLines(responseProcedure)}
                       </Typography>
-                      {responseProcedure.split("\n").length > 4 && (
+                      {responseProcedure.split("\n").length > 2 && (
                         <IconButton
                           size="small"
                           onClick={() => setOpenDialog(true)}
-                          sx={{ ml: 1, color: 'orange' }}
+                          sx={{ ml: 1 }}
                         >
                           <VisibilityIcon fontSize="small" />
                         </IconButton>
@@ -505,25 +505,12 @@ function IncidentDetails({
               <>
                 {/* Different UI    for dispatch if flag !== 1 (optional) or repeat same */}
                 <Box sx={boxStyle}>
-                  {/* Heading with Eye Icon aligned in one line */}
-                  <Box display="flex" justifyContent="space-between" alignItems="center" mb={1}>
-                    <Typography
-                      variant="subtitle2"
-                      sx={{ color: labelColor, fontWeight: 500, fontFamily }}
-                    >
-                      Response Procedure
-                    </Typography>
-
-                    {responderScope?.sop_responses?.[0]?.sop_description && (
-                      <IconButton
-                        size="small"
-                        onClick={() => setOpenDialog(true)}
-                        sx={{ ml: 1 }}
-                      >
-                        <VisibilityIcon fontSize="small" />
-                      </IconButton>
-                    )}
-                  </Box>
+                  <Typography
+                    variant="subtitle2"
+                    sx={{ color: labelColor, fontWeight: 500, fontFamily, mb: 1 }}
+                  >
+                    Response Procedure
+                  </Typography>
 
                   {selectedIncident?.inc_id === undefined ? (
                     <Box display="flex" alignItems="center" gap={1} mt={0.5}>
@@ -531,8 +518,9 @@ function IncidentDetails({
                         No response procedure available.
                       </Typography>
                     </Box>
-                  ) : responderScope?.sop_responses?.[0]?.sop_description ? (
-                    <Box>
+                  ) : responderScope?.sop_responses?.length > 0 &&
+                    responderScope.sop_responses[0]?.sop_description ? (
+                    <Box display="flex" alignItems="center">
                       <Typography
                         variant="subtitle2"
                         sx={{
@@ -542,12 +530,23 @@ function IncidentDetails({
                           WebkitBoxOrient: "vertical",
                           overflow: "hidden",
                           whiteSpace: "pre-line",
+                          flex: 1,
+                          ml: 1.2
                         }}
                       >
-                        {getFirstTwoLines(responderScope.sop_responses[0].sop_description)}
+                        {getFirstTwoLines(
+                          responderScope.sop_responses[0].sop_description
+                        )}
                       </Typography>
-
-                      {/* Dialog for full content */}
+                      {responderScope.sop_responses[0].sop_description && (
+                        <IconButton
+                          size="small"
+                          onClick={() => setOpenDialog(true)}
+                          sx={{ ml: 1 }}
+                        >
+                          <VisibilityIcon fontSize="small" />
+                        </IconButton>
+                      )}
                       <Dialog
                         open={openDialog}
                         onClose={() => setOpenDialog(false)}
@@ -584,6 +583,7 @@ function IncidentDetails({
                     </Box>
                   ) : (
                     <Box display="flex" alignItems="center" gap={1} mt={0.5}>
+                      {/* <InfoOutlinedIcon color="disabled" fontSize="small" /> */}
                       <Typography variant="subtitle2" sx={{ fontFamily }}>
                         No response procedure available.
                       </Typography>
