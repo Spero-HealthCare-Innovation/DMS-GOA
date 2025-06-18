@@ -755,7 +755,7 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
                     >
                       <StyledCardContent
                         sx={{
-                          flex: 0.9,
+                          flex: 0.4,
                           borderRight: "1px solid black",
                           justifyContent: "center",
                         }}
@@ -766,7 +766,7 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
                       </StyledCardContent>
                       <StyledCardContent
                         sx={{
-                          flex: 2.5,
+                          flex: 1.8,
                           borderRight: "1px solid black",
                           justifyContent: "center",
                         }}
@@ -883,7 +883,7 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
                         >
                           <StyledCardContent
                             sx={{
-                              flex: 0.8,
+                              flex: 0.4,
                               justifyContent: "center",
                             }}
                           >
@@ -894,7 +894,7 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
 
                           <StyledCardContent
                             sx={{
-                              flex: 2.5,
+                              flex: 1.8,
                               justifyContent: "center",
                               alignItems: "center",
                               display: "flex",
@@ -990,7 +990,7 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
                                 cursor: "pointer",
                                 // fontSize: 35,
                                 justifyContent: "center",
-                                fontSize: 14,
+                                fontSize: 25,
                                 ...fontsTableBody,
                               }}
                             />
@@ -1233,12 +1233,12 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
                 sx={{
                   backgroundColor: "rgba(223,76,76, 0.8)",
                   color: "#fff",
-                  fontWeight: 600,
+                  fontWeight: 500,
                   fontFamily: "Roboto",
                   textTransform: "none",
                   px: 1,
                   py: 1,
-                  fontSize: { xs: "0.75rem", sm: "0.875rem" },
+                  fontSize: { xs: "14px", sm: "14px" },
                   "&:hover": {
                     backgroundColor: "rgba(223,76,76, 0.8)",
                   },
@@ -1502,9 +1502,9 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
                         backgroundColor: "rgba(18,166,95, 0.8)",
                         color: "#fff",
                         textTransform: "none",
-                        fontWeight: "600",
+                        fontWeight: "500",
                         fontFamily: "Roboto",
-                        borderRadius: "12px",
+                        borderRadius: "13px",
                         mx: "auto", // centers the button horizontally
                         display: "block",
                       }}
@@ -1522,10 +1522,10 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
                       width: "40%",
                       backgroundColor: "rgba(18,166,95, 0.8)",
                       color: "#fff",
-                      fontWeight: "600",
+                      fontWeight: "500",
                       fontFamily: "Roboto",
                       textTransform: "none",
-                      borderRadius: "12px",
+                      borderRadius: "13px",
                       mx: "auto", // centers the button horizontally
                       display: "block",
                     }}
