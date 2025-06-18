@@ -356,13 +356,15 @@ const CaseClosureDetails = ({ darkMode, flag, selectedIncident, fetchDispatchLis
           transition: "all 0.3s ease",
         }}
       >
-        <Grid container spacing={3} sx={{ height: '300px' }}>
+        <Grid container spacing={3} sx={{ height: '310px' }}>
           {/* Left Column - Incident Info (Reduced width) */}
           <Grid
             item
             xs={12}
             md={3.3}
             sx={{
+              mt:1,
+              mb:0.5,
               borderRight: { md: `1px solid ${borderColor}` },
               pr: { md: 3 },
             }}
@@ -430,6 +432,8 @@ const CaseClosureDetails = ({ darkMode, flag, selectedIncident, fetchDispatchLis
             xs={12}
             md={4.7}
             sx={{
+                 mt:1,
+              mb:0.5,
               borderRight: { md: `1px solid ${borderColor}` },
               px: { md: 3 },
             }}
