@@ -276,23 +276,24 @@ class CaptchaAPIView(APIView):
 
 def get_tokens_for_user(user):
     refresh = RefreshToken.for_user(user)
-    group = str(user.grp_id)
-    print("group---", group)
-    permissions_data = []
+    group = str(user.grp_id.grp_id)
+    print("user---123", user)
+    print("group---123", user.grp_id.grp_id)
+    # permissions_data = []
     # if group:
-    #         incs= DMS_Group.objects.get(grp_id=group)
-    #         pers = DMS_Permission.objects.filter(grp_id=group)
-    #         group = incs.grp_name
-    #         for permission in pers:
-    #             permission_info = {
-    #                 'modules_submodule': permission.mod_submod_per,
-    #                 'permission_status': permission.per_is_deleted,
-    #                 # 'source_id': permission.source.source_pk_id,
-    #                 # 'source_name': permission.source.source,  
-    #                 'group_id': permission.grp_id.grp_id,
-    #                 'group_name': permission.grp_id.grp_name,  
-    # }   
-    #             permissions_data.append(permission_info)
+    #     incs= DMS_Group.objects.get(grp_id=group)
+    #     pers = DMS_Permission.objects.filter(grp_id=group)
+    #     group_id = incs.grp_id
+    #     for permission in pers:
+    #         permission_info = {
+    #             'modules_submodule': permission.mod_submod_per,
+    #             'permission_status': permission.per_is_deleted,
+    #             # 'source_id': permission.source.source_pk_id,
+    #             # 'source_name': permission.source.source,  
+    #             'group_id': permission.grp_id.grp_id,
+    #             'group_name': permission.grp_id.grp_name,  
+    #         }   
+    #         permissions_data.append(permission_info)
     # else:
     #     group = None
             
@@ -651,12 +652,14 @@ class DMS_Incident_Post_api(APIView):
                 "caller_no": "",
                 "location": "",
                 "summary": "",
-                "disaster_name": incc.disaster_type.disaster_name,
-                "inc_type": "NON_MCI",
+                "disaster_name": incc.disaster_type.disaster_name if incc.disaster_type else None,
+                "inc_type": incc.disaster_type.disaster_id if incc.disaster_type else None,
                 "incident_id": str(incc.incident_id),
                 "latitude": str(incc.latitude),
                 "longitude": str(incc.longitude),
-                "alert_priority_type": ("High" if incc.alert_type == 1 else"Medium" if incc.alert_type == 2 else"Low" if incc.alert_type == 3 else"Very Low" if incc.alert_type == 4 else"")
+                "dms_lat": str(incc.latitude),
+                "dms_lng": str(incc.longitude),
+                "alert_type": ("High" if incc.alert_type == 1 else"Medium" if incc.alert_type == 2 else"Low" if incc.alert_type == 3 else"Very Low" if incc.alert_type == 4 else"")
             } 
             print(external_api_payload)
             external_response = requests.post(
@@ -905,13 +908,17 @@ class Manual_Call_Incident_api(APIView):
         "disaster_name": str(incident_instance.disaster_type.disaster_name) if incident_instance.disaster_type else "",
         "location": incident_instance.location,
         "summary": str(incident_instance.summary.summary),
-        "inc_type": "NON_MCI" if incident_instance.inc_type == 1 else "NON_EME_CALL" if incident_instance.inc_type == 2 else "",
+        # "inc_type": "NON_MCI" if incident_instance.inc_type == 1 else "NON_EME_CALL" if incident_instance.inc_type == 2 else "",
+        "inc_type": incident_instance.disaster_type.disaster_id if incident_instance.disaster_type else None,
         "incident_id": str(incident_instance.incident_id),
         "latitude": str(incident_instance.latitude),
         "longitude": str(incident_instance.longitude),
-        "alert_priority_type": ("High" if incident_instance.alert_type == 1 else"Medium" if incident_instance.alert_type == 2 else"Low" if incident_instance.alert_type == 3 else"Very Low" if incident_instance.alert_type == 4 else""
+        "dms_lat": str(incident_instance.latitude),
+        "dms_lng": str(incident_instance.longitude),
+        "alert_type": ("High" if incident_instance.alert_type == 1 else"Medium" if incident_instance.alert_type == 2 else"Low" if incident_instance.alert_type == 3 else"Very Low" if incident_instance.alert_type == 4 else""
 )
     }
+        print("ssssssssssssssssssssssssss",external_api_payload)
         print("Sending to external API:", external_api_payload)
 
         try:
