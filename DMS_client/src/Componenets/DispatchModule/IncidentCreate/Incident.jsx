@@ -628,7 +628,7 @@ const Incident = ({ darkMode }) => {
                                 {/* SOP Section */}
                                 <Grid item xs={12} md={5} sx={{ px: 2, borderRight: { md: `1px solid white` }, mt: 1.5 }}>
                                     <Box sx={boxStyle}>
-                                        <Box sx={{ display: "flex", alignItems: "center"}}>
+                                        <Box sx={{ display: "flex", alignItems: "center" }}>
                                             <Typography variant="subtitle2" sx={{ color: labelColor, fontWeight: 500, fontFamily, fontSize: '16px' }}>
                                                 Response Procedure
                                             </Typography>
@@ -753,7 +753,7 @@ const Incident = ({ darkMode }) => {
                             sx={{
                                 width: "10%",
                                 backgroundColor: "rgb(18,166,95)",
-                                color: "black",
+                                color: "white",
                                 fontWeight: "bold",
                                 borderRadius: "12px",
                                 mb: 5,

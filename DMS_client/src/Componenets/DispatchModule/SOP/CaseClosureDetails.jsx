@@ -363,8 +363,8 @@ const CaseClosureDetails = ({ darkMode, flag, selectedIncident, fetchDispatchLis
             xs={12}
             md={3.3}
             sx={{
-              mt:1,
-              mb:0.5,
+              mt: 1,
+              mb: 0.5,
               borderRight: { md: `1px solid ${borderColor}` },
               pr: { md: 3 },
             }}
@@ -432,8 +432,8 @@ const CaseClosureDetails = ({ darkMode, flag, selectedIncident, fetchDispatchLis
             xs={12}
             md={4.7}
             sx={{
-                 mt:1,
-              mb:0.5,
+              mt: 1,
+              mb: 0.5,
               borderRight: { md: `1px solid ${borderColor}` },
               px: { md: 3 },
             }}
@@ -803,8 +803,9 @@ const CaseClosureDetails = ({ darkMode, flag, selectedIncident, fetchDispatchLis
                       px: 3,
                       py: 1,
                       fontSize: '0.875rem',
-                      fontWeight: 600,
-                      minWidth: 100
+                      fontWeight: 500,
+                      minWidth: 100,
+                      textTransform: "none",
                     }}
                   >
                     {loading ? <CircularProgress size={20} color="inherit" /> : "Submit"}
