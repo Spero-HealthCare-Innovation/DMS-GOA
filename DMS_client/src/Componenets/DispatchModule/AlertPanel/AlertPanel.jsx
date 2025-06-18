@@ -227,6 +227,9 @@ const AlertPanel = ({ darkMode }) => {
     const paginatedData = filteredData.slice(startIndex, endIndex);
     const totalPages = Math.ceil(filteredData.length / rowsPerPage);
 
+    useEffect(() => {
+        setPage(1);
+    }, [searchText])
 
     return (
         <Box sx={{ flexGrow: 1, mt: 1, ml: '5em', mr: 1, mb: 2 }}>
