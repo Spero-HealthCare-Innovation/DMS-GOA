@@ -47,10 +47,14 @@ export const AuthProvider = ({ children }) => {
 
   // 🔹 sop page
   const [responderScope, setResponderScope] = useState([]);
-  const [responderScopeForDispatch, setResponderScopeForDispatch] = useState([]);
+  const [responderScopeForDispatch, setResponderScopeForDispatch] = useState(
+    []
+  );
   console.log(responderScopeForDispatch, "disasterIncident");
   const [enhancedIncidentData, setEnhancedIncidentData] = useState(null);
   const [selectedIncidentFromSop, setSelectedIncidentFromSop] = useState(null);
+  const [isNewEntry, setIsNewEntry] = useState(false);
+
   // const [disasterIdFromSop, setDisasterIdFromSop] = useState(null);
   useEffect(() => {
     const disasterValue = disaterid || disasterIncident || disasterIdFromSop;
@@ -246,7 +250,7 @@ export const AuthProvider = ({ children }) => {
 
   // 🔹 useEffect for selectedStateId change
   useEffect(() => {
-    if (selectedStateId) {
+    if (selectedStateId ) {
       fetchDistrictsByState(selectedStateId);
       setSelectedDistrictId("");
       setSelectedTehsilId("");
@@ -348,9 +352,12 @@ export const AuthProvider = ({ children }) => {
         setResponderScopeForDispatch,
         enhancedIncidentData,
         setEnhancedIncidentData,
-        lattitude, setLattitude,
-        longitude, setLongitude,
-        commentText, setCommentText
+        lattitude,
+        setLattitude,
+        longitude,
+        setLongitude,
+        commentText,
+        setCommentText,
       }}
     >
       {children}

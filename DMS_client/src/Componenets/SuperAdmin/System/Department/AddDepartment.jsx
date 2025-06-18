@@ -135,6 +135,7 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
   const [snackbarupdate, setSnackbarMessageUpdated] = useState("");
   const [filteredResults, setFilteredResults] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [isNewEntry, setIsNewEntry] = useState(false);
 
   const TableDataColor = darkMode
     ? "rgba(0, 0, 0, 0.04)"
@@ -289,32 +290,35 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
     setSnackbar({ ...snackbar, open: false });
   };
   // Set District after districts are loaded
-  useEffect(() => {
-    if (selectedStateId && allEditData.length > 0) {
-      const disId = allEditData[0]?.dis_id;
-      if (districts.find((d) => d.dis_id === disId)) {
-        setSelectedDistrictId(disId);
-      }
+useEffect(() => {
+  if (isEditMode && selectedStateId && allEditData.length > 0) {
+    const disId = allEditData[0]?.dis_id;
+    if (districts.find((d) => d.dis_id === disId)) {
+      setSelectedDistrictId(disId);
     }
-  }, [districts, selectedStateId]);
+  }
+}, [districts, selectedStateId]);
 
-  useEffect(() => {
-    if (selectedDistrictId && allEditData.length > 0) {
-      const tahId = allEditData[0]?.tah_id;
-      if (Tehsils.find((t) => t.tah_id === tahId)) {
-        setSelectedTehsilId(tahId);
-      }
-    }
-  }, [Tehsils, selectedDistrictId]);
 
-  useEffect(() => {
-    if (selectedTehsilId && allEditData.length > 0) {
-      const citId = allEditData[0]?.cit_id;
-      if (Citys.find((c) => c.cit_id === citId)) {
-        setSelectedCityId(citId);
-      }
+useEffect(() => {
+  if (isEditMode && selectedDistrictId && allEditData.length > 0) {
+    const tahId = allEditData[0]?.tah_id;
+    if (Tehsils.find((t) => t.tah_id === tahId)) {
+      setSelectedTehsilId(tahId);
     }
-  }, [Citys, selectedTehsilId]);
+  }
+}, [Tehsils, selectedDistrictId]);
+
+
+useEffect(() => {
+  if (isEditMode && selectedTehsilId && allEditData.length > 0) {
+    const citId = allEditData[0]?.cit_id;
+    if (Citys.find((c) => c.cit_id === citId)) {
+      setSelectedCityId(citId);
+    }
+  }
+}, [Citys, selectedTehsilId]);
+
 
   useEffect(() => {
     if (allEditData.length > 0 && disasterList.length > 0) {
@@ -345,19 +349,6 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
         item.city_name?.toLowerCase().includes(query)
     );
   }, [departments, searchQuery]);
-
-  // const paginatedData = useMemo(() => {
-  //   if (!filteredDepartments?.length) return [];
-
-  //   const start = (page - 1) * rowsPerPage;
-  //   const end = start + rowsPerPage;
-  //   const paginated = filteredDepartments.slice(start, end);
-
-  //   // Optional fallback to first page if none match (rare if no filtering)
-  //   return paginated.length > 0
-  //     ? paginated
-  //     : filteredDepartments.slice(0, rowsPerPage);
-  // }, [page, rowsPerPage, filteredDepartments]);
 
   const paginatedData = useMemo(() => {
     if (!filteredDepartments?.length) return [];
@@ -572,6 +563,7 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
     setDepartmentName("");
     setSelectedDisasterId("");
     setSelectedStateId("");
+
     setSelectedDistrictId("");
     setSelectedTehsilId("");
     setSelectedCityId("");
@@ -589,6 +581,7 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
     setIsEditMode(false);
     setEditId(null);
     setDeptId(null); // if used
+    setIsNewEntry(true);
   };
 
   const validateForm = () => {
@@ -627,6 +620,12 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
 
     return isValid;
   };
+
+  useEffect(() => {
+    if (selectedStateId && isNewEntry) {
+      // fetchDistricts(selectedStateId);
+    }
+  }, [selectedStateId, isNewEntry]);
 
   return (
     // ..
@@ -668,7 +667,7 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
             <Typography
               variant="h6"
               sx={{
-                color: "white",
+                color: "#5FC8EC",
                 fontWeight: 600,
                 fontFamily,
                 fontSize: 16,
@@ -865,7 +864,7 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
                   {loading ? (
                     <TableRow>
                       <TableCell colSpan={6} align="center">
-                        <CircularProgress size={30} sx={{ color: "#5FECC8" }} />
+                        <CircularProgress size={30} sx={{ color: "#5FC8EC" }} />
                       </TableCell>
                     </TableRow>
                   ) : (
@@ -1289,6 +1288,7 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
                   onChange={(e) => {
                     setSelectedStateId(e.target.value);
                     setStateError(false);
+                    setIsNewEntry(false);
                   }}
                   size="small"
                   fullWidth
