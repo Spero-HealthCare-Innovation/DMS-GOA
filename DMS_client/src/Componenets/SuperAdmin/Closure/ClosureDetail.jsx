@@ -489,6 +489,7 @@ function ClosureDetail({ darkMode, fromDate, toDate, onChange, onDownload }) {
                     display: "flex",
                     width: "100%",
                     borderRadius: 2,
+                      position: "sticky",
                     p: 3,
                   }}>
                     <StyledCardContent
@@ -614,7 +615,25 @@ function ClosureDetail({ darkMode, fromDate, toDate, onChange, onDownload }) {
                 </TableRow>
               </TableHead>
 
-              <TableBody>
+              <TableBody
+                sx={{
+                    display: "block",
+                    maxHeight: "50vh",
+                    overflowY: "auto",
+                    scrollBehavior: "smooth",
+                    width: "100%",
+                    "&::-webkit-scrollbar": {
+                      width: "6px",
+                    },
+                    "&::-webkit-scrollbar-thumb": {
+                      backgroundColor: darkMode ? "#5FC8EC" : "#888",
+                      borderRadius: 3,
+                    },
+                    "&::-webkit-scrollbar-thumb:hover": {
+                      backgroundColor: darkMode ? "#5FC8EC" : "#555",
+                    },
+                  }}
+              >
                 {loading ? (
                   <Box p={4} display="flex" justifyContent="center">
                     <CircularProgress sx={{ color: "rgb(95,200,236)" }} />

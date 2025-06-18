@@ -638,7 +638,7 @@ function Add_employee({ darkMode }) {
       </Snackbar>
 
 
-      <Box sx={{ display: "flex", alignItems: "center", gap: 2, pb: 2, mt: 3 }}>
+      <Box sx={{ display: "flex", alignItems: "center", gap: 2, pb: 1, mt: 2 }}>
 
         {/* Back Arrow */}
         {/* <IconButton size="small" sx={{
@@ -657,7 +657,7 @@ function Add_employee({ darkMode }) {
 
         <Typography
           sx={{
-            color: "rgb(95,200,236)",
+           color: "white",
             fontWeight: 600,
             fontSize: 18,
             fontFamily,
@@ -703,9 +703,9 @@ function Add_employee({ darkMode }) {
 
       <Grid container spacing={2}>
         <Grid item xs={12} md={7}>
-          <Paper elevation={3} sx={{ padding: 3, borderRadius: 3, backgroundColor:darkMode ? "#202328":"#FFFFFF", mt: 1, mb: 1 }}>
-            <TableContainer>
-              <Table>
+          <Paper elevation={3} sx={{ padding: 3, borderRadius: 3, backgroundColor:darkMode ? "#202328":"#FFFFFF", mt: 1, mb: 1 , height: "89%"}}>
+            <TableContainer >
+              <Table >
                 <TableHead>
                   <TableRow>
                     <EnquiryCard sx={{
@@ -714,6 +714,7 @@ function Add_employee({ darkMode }) {
                       display: "flex",
                       width: "100%",
                       borderRadius: 2,
+                       position: "sticky",
                       p: 3,
                     }}>
                       <StyledCardContent
@@ -784,7 +785,25 @@ function Add_employee({ darkMode }) {
                 </TableHead>
 
 
-                <TableBody>
+                <TableBody
+                sx={{
+                    display: "block",
+                    // height:"90%",
+                    maxHeight: "50vh",
+                    overflowY: "auto",
+                    scrollBehavior: "smooth",
+                    width: "100%",
+                    "&::-webkit-scrollbar": {
+                      width: "6px",
+                    },
+                    "&::-webkit-scrollbar-thumb": {
+                      backgroundColor: darkMode ? "#5FC8EC" : "#888",
+                      borderRadius: 3,
+                    },
+                    "&::-webkit-scrollbar-thumb:hover": {
+                      backgroundColor: darkMode ? "#5FC8EC" : "#555",
+                    },
+                  }}>
                   {loading1 ? (
                     <TableRow>
                       <TableCell colSpan={6} align="center">
@@ -1094,7 +1113,7 @@ function Add_employee({ darkMode }) {
         </Popover>
 
         <Grid item xs={12} md={4.9}>
-          <Paper elevation={3} sx={{ padding: 2, borderRadius: 3,  backgroundColor:darkMode ? "#202328":"#FFFFFF", mt: 1, mb: 5 }}>
+          <Paper elevation={3} sx={{ padding: 2, borderRadius: 3,  backgroundColor:darkMode ? "#202328":"#FFFFFF", mt: 1, mb: 5.9 }}>
             <Box
                                     display="flex"
                                     justifyContent={{ xs: "center", md: "flex-end" }}
@@ -1521,7 +1540,7 @@ function Add_employee({ darkMode }) {
                   >
                     Update
                   </Button>
-                  <Button
+                  {/* <Button
                     variant="outlined"
                     onClick={handleCancel}
                     disabled={loading}
@@ -1540,7 +1559,7 @@ function Add_employee({ darkMode }) {
                     }}
                   >
                     Cancel
-                  </Button>
+                  </Button> */}
                 </>
               ) : (
                 <Button
@@ -1548,7 +1567,7 @@ function Add_employee({ darkMode }) {
                   onClick={handleSubmit}
                   disabled={loading}
                   sx={{
-                    mt: 2,
+                    mt: 1,
                     width: "40%",
                     backgroundColor:  "rgb(18,166,95,0.8)",
                     color: "#fff",

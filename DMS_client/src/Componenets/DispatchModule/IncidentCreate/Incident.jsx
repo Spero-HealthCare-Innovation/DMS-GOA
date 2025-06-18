@@ -26,6 +26,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import TimerIcon from '@mui/icons-material/Timer';
+import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 
 const inputStyle = {
     mb: 0.5,
@@ -321,7 +322,7 @@ const Incident = ({ darkMode }) => {
                                         gap: 0.5,
                                     }}
                                 >
-                                    <CalendarTodayIcon sx={{ fontSize: 18, color: '#009688' }} />
+                                    <CalendarMonthIcon sx={{ fontSize: 18, color: '#009688' }} />
                                     <span style={{ color: 'black', fontSize: '14px' }}>{formattedDate}</span>
                                 </Box>
 
@@ -338,7 +339,7 @@ const Incident = ({ darkMode }) => {
                                 >
                                     <AccessTimeIcon sx={{ fontSize: 18, color: '#FB8C00' }} />
                                     <span style={{ color: 'black', fontSize: '14px' }}>
-                                        {new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                        {new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
                                     </span>
                                 </Box>
 
@@ -569,9 +570,9 @@ const Incident = ({ darkMode }) => {
 
                 {selectedEmergencyValue === 1 && (
                     <Grid item xs={12}>
-                        <Paper elevation={3} sx={{ ...inputStyle, p: 2, borderRadius: 3, backgroundColor: bgColor }}>
+                        <Paper elevation={3} sx={{ ...inputStyle, p: 1, borderRadius: 3, backgroundColor: bgColor }}>
                             <Grid container spacing={2}>
-                                <Grid item xs={12} md={3} sx={{ borderRight: { md: `1px solid white` }, pr: 2 }}>
+                                <Grid item xs={12} md={3} sx={{ borderRight: { md: `1px solid white` }, pr: 2, mt: 1.5 }}>
                                     {/* <Box sx={boxStyle}>
                                         <Typography sx={{ color: labelColor, fontWeight: 500, fontFamily }}>
                                             Incident Type
@@ -625,9 +626,9 @@ const Incident = ({ darkMode }) => {
                                 </Grid>
 
                                 {/* SOP Section */}
-                                <Grid item xs={12} md={5} sx={{ px: 2, borderRight: { md: `1px solid white` } }}>
+                                <Grid item xs={12} md={5} sx={{ px: 2, borderRight: { md: `1px solid white` }, mt: 1.5 }}>
                                     <Box sx={boxStyle}>
-                                        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                                        <Box sx={{ display: "flex", alignItems: "center"}}>
                                             <Typography variant="subtitle2" sx={{ color: labelColor, fontWeight: 500, fontFamily, fontSize: '16px' }}>
                                                 Response Procedure
                                             </Typography>
@@ -756,6 +757,7 @@ const Incident = ({ darkMode }) => {
                                 fontWeight: "bold",
                                 borderRadius: "12px",
                                 mb: 5,
+                                textTransform: "none",
                             }}
                             onClick={handleSubmit}
                         >

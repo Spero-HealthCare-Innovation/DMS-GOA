@@ -742,7 +742,7 @@ const totalPages = Math.ceil(filteredDispatchList.length / rowsPerPage) || 1;
                                 }}
                               >
                                 <Visibility
-                                  sx={{ color: "	#FFA500", fontSize: 28 }}
+                                  sx={{ color: "orange", fontSize: 28 }}
                                 />
                               </IconButton>
                             </Tooltip>
@@ -758,7 +758,8 @@ const totalPages = Math.ceil(filteredDispatchList.length / rowsPerPage) || 1;
                                 size="large"
                               >
                                 <TextSnippetIcon
-                                  sx={{ color: "#ffccf2", fontSize: 20 }}
+                                  // sx={{ color: "#ffccf2", fontSize: 20 }}
+                                  sx={{ color: "rgb(122 255 242)", fontSize: 20 }}
                                 />
                               </IconButton>
                             </Tooltip>
