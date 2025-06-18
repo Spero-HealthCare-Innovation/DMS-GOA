@@ -370,8 +370,16 @@ const Navbar = ({ darkMode, toggleDarkMode }) => {
               <Avatar
                 alt="User Avatar"
                 // src="/static/images/avatar/1.jpg"
-                sx={{ bgcolor: '#5FECC8', color: 'white' }}
-              >{initials}</Avatar>
+                sx={{
+                  // bgcolor: '#5FECC8',
+                  color: 'white',
+                  background: darkMode
+                    ? "linear-gradient(90deg, #0f3443 0%, #34e89e 100%)"
+                    : "linear-gradient(90deg, #1C3B52 0%, #2EB9A3 100%)",
+                }}
+              >
+                {initials}
+              </Avatar>
             </IconButton>
           </Tooltip>
           <Menu

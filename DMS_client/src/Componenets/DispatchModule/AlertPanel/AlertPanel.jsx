@@ -311,7 +311,8 @@ const AlertPanel = ({ darkMode }) => {
                                             <EnquiryCardBody
                                                 key={startIndex + index}
                                                 sx={{
-                                                    backgroundColor: darkMode ? "rgb(88,92,99)" : "#FFFFFF",
+                                                    backgroundColor: darkMode ? "rgb(90 90 91)" : "#FFFFFF",
+                                                    // backgroundColor: darkMode ? "rgb(88,92,99)" : "#FFFFFF",
                                                     color: "white",
                                                     cursor: "pointer",
                                                 }}
