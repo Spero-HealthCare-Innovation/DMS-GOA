@@ -183,6 +183,7 @@ const Navbar = ({ darkMode, toggleDarkMode }) => {
   const formattedTime = now.toLocaleTimeString('en-IN', {
     hour: '2-digit',
     minute: '2-digit',
+    second: '2-digit',
   });
 
   //auto logout for browser and tab close
