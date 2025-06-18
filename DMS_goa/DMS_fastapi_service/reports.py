@@ -13,6 +13,53 @@ india_tz = pytz.timezone('Asia/Kolkata')
 
 router = APIRouter()
 
+@router.get('/incident_report_incident_daywise')
+def incident_report_incident_daywise(
+    from_date : Optional[str] = Query(..., description="Start date in YYYY-MM-DD format"),
+    to_date : Optional[str] = Query(..., description="End date in YYYY-MM-DD format")):
+    try:
+        to_date_obj = datetime.strptime(to_date, "%Y-%m-%d") + timedelta(days=1)
+        to_date_plus_one = to_date_obj.strftime("%Y-%m-%d")
+
+        incident_data = DMS_Incident.objects.filter(inc_added_date__range = (from_date,to_date_plus_one))
+        data=[{"incident_id": str(i.incident_id),"disaster_type": i.disaster_type.disaster_name if i.disaster_type else None,"incident_datetime": i.inc_datetime,"clouser_status": i.clouser_status,"incident_remark": i.comment_id.comments if i.comment_id else None} for i in incident_data]
+        return data
+    except Exception as e:
+        return {"Error":"Error","msg":str(e)}
+
+
+
+@router.get('/download_incident_report_incident_daywise')
+def download_incident_report_incident_daywise(
+    from_date:Optional[str]=Query(...,description="Start date in YYYY-MM-DD format"),
+    to_date:Optional[str]=Query(...,description="End date in YYYY-MM-DD format")):
+    try:
+        to_date_obj = datetime.strptime(to_date, "%Y-%m-%d") + timedelta(days=1)
+        to_date_plus_one = to_date_obj.strftime("%Y-%m-%d")
+
+        incident_data = DMS_Incident.objects.filter(inc_added_date__range = (from_date,to_date_plus_one))
+        data=[{"incident_id": str(i.incident_id),"disaster_type": i.disaster_type.disaster_name if i.disaster_type else None,"incident_datetime": i.inc_datetime,"clouser_status": i.clouser_status,"incident_remark": i.comment_id.comments if i.comment_id else None} for i in incident_data]
+        df = pd.DataFrame(data)
+        output = BytesIO()
+        with pd.ExcelWriter(output, engine='openpyxl') as writer:
+            df.to_excel(writer, index=False, sheet_name='Incident Report')
+        output.seek(0)
+        filename = f"incident_report_{from_date}_to_{to_date}.xlsx"
+        headers = {
+            'Content-Disposition': f'attachment; filename="{filename}"'
+        }
+        return StreamingResponse(output, media_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', headers=headers)
+    except Exception as e:
+        return {"Error":'Error',"msg":str(e)}
+
+
+
+
+
+
+
+
+
 @router.get("/incident_closure_report_daywise/")
 def incident_report_daywise(
     from_date: Optional[str] = Query(..., description="Start date in YYYY-MM-DD format"),
@@ -38,8 +85,6 @@ def incident_report_daywise(
         return dt
     except Exception as e:
         return {"status": "error","message": str(e)}
-
-
 
 
 
@@ -96,15 +141,6 @@ def incident_report_daywise(
 
     except Exception as e:
         return {"status": "error", "message": str(e)}
-
-
-
-
-
-
-
-
-
 
 
 
@@ -184,3 +220,21 @@ def incident_report_daywise(
 
 #     except Exception as e:
 #         return {"status": "error", "message": str(e)}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

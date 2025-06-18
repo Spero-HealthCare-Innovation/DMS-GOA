@@ -435,9 +435,10 @@ class incident_get_serializer(serializers.ModelSerializer):
     caller_no=serializers.CharField(source='caller_id.caller_no', read_only=True)
     summary_name = serializers.CharField(source='summary.summary', read_only=True)
     disaster_name=serializers.CharField(source='disaster_type.disaster_name', read_only=True)
+    comment_added_by = serializers.CharField(source='comment_id.comm_added_by',read_only=True)
     class Meta:
         model = DMS_Incident
-        fields=['incident_id','disaster_type','inc_type','responder_scope','caller_id','caller_name','caller_no','location','summary','summary_name','disaster_name','alert_type','mode','latitude','longitude','inc_datetime','location']
+        fields=['incident_id','disaster_type','inc_type','responder_scope','caller_id','caller_name','caller_no','location','summary','summary_name','disaster_name','alert_type','mode','latitude','longitude','inc_datetime','location','comment_added_by']
 
 
 class Responder_Scope_post_Serializer(serializers.ModelSerializer):
