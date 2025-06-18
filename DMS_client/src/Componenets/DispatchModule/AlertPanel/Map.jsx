@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { MapContainer, TileLayer, Marker, Popup, GeoJSON, useMap } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, GeoJSON,LayersControl,useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 import customIconUrl from '../../../assets/Rectangle.png';
@@ -28,6 +28,7 @@ const MapView = ({ data }) => {
   const [stateData, setStateData] = useState();
   const [triggeredData, setTriggeredData] = useState(null);
   const [mapZoom, setMapZoom] = useState(11);
+  const { BaseLayer,Overlay } = LayersControl;
 
   useEffect(() => {
     setTriggeredData(data);
@@ -73,22 +74,73 @@ const MapView = ({ data }) => {
   ) : "No data";
 
   return (
-    <MapContainer
-      center={markerPosition}
-      zoom={mapZoom}
-      style={{ height: "80vh", width: "100%" }}
-      scrollWheelZoom={true}
-    >
+     <MapContainer
+  center={markerPosition}
+  zoom={mapZoom}
+  style={{ height: "96vh", width: "100%", marginBottom: "0.6rem" }}
+  scrollWheelZoom={true}
+>
+  <LayersControl position="topright">
+    {/* Base Layer 1: Thunderforest */}
+    <BaseLayer checked name="Thunderforest Outdoors">
       <TileLayer
         url="https://tile.thunderforest.com/outdoors/{z}/{x}/{y}.png?apikey=e2c62012ab834665b043fe5b2a6c67a4"
         attribution='&copy; <a href="https://www.thunderforest.com/">Thunderforest</a>'
       />
-      {stateData && <GeoJSON data={stateData} style={geoJsonStyle} />}
-      <FlyToLocation position={markerPosition} zoom={mapZoom} />
-      <Marker position={markerPosition} icon={customIcon}>
-        <Popup>{popupContent}</Popup>
-      </Marker>
-    </MapContainer>
+    </BaseLayer>
+
+    {/* Base Layer 2: ESRI Satellite */}
+    <BaseLayer name="ESRI Satellite">
+      <TileLayer
+        url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
+  attribution='&copy; <a href="https://www.esri.com/">Esri</a>, Earthstar Geographics'
+      />
+      
+    </BaseLayer>
+     <BaseLayer name="Google Satellite">
+      <TileLayer
+  url="http://mt0.google.com/vt/lyrs=y&hl=en&x={x}&y={y}&z={z}&s=Ga"
+  attribution='&copy; <a href="https://www.google.com/">google</a>'
+      />
+    </BaseLayer>
+     
+    <BaseLayer name="Maptiler Satellite">
+      <TileLayer
+  url="https://api.maptiler.com/maps/hybrid/256/{z}/{x}/{y}.jpg?key=HBBM5qrIqQ5Y0hnH7gln"
+  attribution='&copy; <a href="https://www.maptiler.com/">MapTiler</a>'
+      />
+    </BaseLayer>
+    {/* Base Layer 3: heremaps Hybrid tile layer
+    <BaseLayer name="Maptiler Satellite">
+      <TileLayer
+  https://2.aerial.maps.ls.hereapi.com/maptile/2.1/maptile/newest/hybrid.day/5/8/13/256/png8
+?apiKey={YOUR_API_KEY}
+      />
+    </BaseLayer>
+    */}
+ {/* ✅ Overlay: ESRI Labels */}
+  <Overlay name="ESRI Labels">
+    <TileLayer
+      url="https://services.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}"
+      attribution="&copy; Esri"
+      zIndex={1000}
+    />
+  </Overlay>
+  
+
+  </LayersControl>
+
+  {/* GeoJSON layer (Always visible) */}
+  {stateData && <GeoJSON data={stateData} style={geoJsonStyle} />}
+
+  {/* Marker (Always visible) */}
+  <Marker position={markerPosition} icon={customIcon}>
+    <Popup>{popupContent}</Popup>
+  </Marker>
+
+  {/* Optional fly-to animation */}
+  <FlyToLocation position={markerPosition} zoom={mapZoom} />
+</MapContainer>
   );
 };
 
