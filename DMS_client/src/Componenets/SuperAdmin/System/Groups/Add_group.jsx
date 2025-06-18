@@ -381,7 +381,7 @@ function Add_group({ darkMode }) {
         </Alert>
       </Snackbar>
 
-      <Box sx={{ display: "flex", alignItems: "center", gap: 2, pb: 2, mt: 3 }}>
+      <Box sx={{ display: "flex", alignItems: "center", gap: 2, pb: 1, mt: 2 }}>
         {/* Back Arrow */}
         {/* <IconButton size="small" sx={{
           backgroundColor: "#00f0c0",
@@ -397,7 +397,7 @@ function Add_group({ darkMode }) {
 
         {/* Label */}
         <Typography variant="h6" sx={{
-          color: "rgb(95,200,236)",
+        color: "white",
           fontWeight: 600,
           fontFamily,
           fontSize: 18,
@@ -456,6 +456,7 @@ function Add_group({ darkMode }) {
                       display: "flex",
                       width: "100%",
                       borderRadius: 2,
+                       position: "sticky",
                       p: 3,
                       fontFamily: "Roboto",
                       fontSize:"14px",
@@ -512,7 +513,24 @@ function Add_group({ darkMode }) {
                   </TableRow>
                 </TableHead>
 
-                <TableBody>
+                <TableBody
+                sx={{
+                    display: "block",
+                    maxHeight: "50vh",
+                    overflowY: "auto",
+                    scrollBehavior: "smooth",
+                    width: "100%",
+                    "&::-webkit-scrollbar": {
+                      width: "6px",
+                    },
+                    "&::-webkit-scrollbar-thumb": {
+                      backgroundColor: darkMode ? "#5FC8EC" : "#888",
+                      borderRadius: 3,
+                    },
+                    "&::-webkit-scrollbar-thumb:hover": {
+                      backgroundColor: darkMode ? "#5FC8EC" : "#555",
+                    },
+                  }}>
                   {loading ? (
                     <TableRow>
                       <TableCell colSpan={6} align="center">
@@ -917,7 +935,7 @@ function Add_group({ darkMode }) {
                 {loading ? 'Loading...' : (isEditing ? 'Update' : 'Submit')}
               </Button>
 
-              {isEditing && (
+              {/* {isEditing && (
                 <Button
                   variant="outlined"
                   onClick={resetForm}
@@ -939,7 +957,7 @@ function Add_group({ darkMode }) {
                 >
                   Cancel
                 </Button>
-              )}
+              )} */}
             </Box>
           </Paper>
         </Grid>
