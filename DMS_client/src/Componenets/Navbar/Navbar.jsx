@@ -421,7 +421,13 @@ const Navbar = ({ darkMode, toggleDarkMode }) => {
           >
             <DialogTitle>
               <Box display="flex" alignItems="center" gap={2}>
-                <Avatar sx={{ bgcolor: "#5FECC8", width: 56, height: 56 }}>
+                <Avatar sx={{
+                  background: darkMode
+                    ? "linear-gradient(90deg, #0f3443 0%, #34e89e 100%)"
+                    : "linear-gradient(90deg, #1C3B52 0%, #2EB9A3 100%)",
+                  width: 56,
+                  height: 56
+                }}>
                   {initials}
                 </Avatar>
 

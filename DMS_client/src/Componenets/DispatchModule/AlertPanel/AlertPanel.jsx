@@ -295,7 +295,21 @@ const AlertPanel = ({ darkMode }) => {
                             </TableHead>
                         </Table>
 
-                        <Box sx={{ maxHeight: 500, overflowY: 'auto' }}>
+                        <Box sx={{
+                            maxHeight: 500,
+                            overflowY: 'auto',
+                            scrollBehavior: "smooth",
+                            "&::-webkit-scrollbar": {
+                                width: "6px",
+                            },
+                            "&::-webkit-scrollbar-thumb": {
+                                backgroundColor: darkMode ? "#0288d1" : "#888",
+                                borderRadius: 3,
+                            },
+                            "&::-webkit-scrollbar-thumb:hover": {
+                                backgroundColor: darkMode ? "#5FC8EC" : "#555",
+                            },
+                        }}>
                             <Table>
                                 <TableBody>
                                     {paginatedData.length === 0 ? (
