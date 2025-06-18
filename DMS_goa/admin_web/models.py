@@ -470,6 +470,8 @@ class DMS_Disaster_Responder(models.Model):
 class DMS_incident_closure(models.Model):
     closure_id=models.AutoField(primary_key=True)
     incident_id=models.ForeignKey(DMS_Incident,on_delete=models.CASCADE,null=True,blank=True)
+    department = models.ForeignKey(DMS_Department, on_delete=models.CASCADE, null=True, blank=True)
+    vehicle_no = models.CharField(max_length=100, null= True, blank=True)
     closure_acknowledge=models.DateTimeField(null=True, blank=True)
     closure_start_base_location=models.DateTimeField(null=True, blank=True)
     closure_at_scene=models.DateTimeField(null=True, blank=True)
@@ -478,6 +480,7 @@ class DMS_incident_closure(models.Model):
     closure_is_deleted = models.BooleanField(default=False)
     image = models.FileField(upload_to='media_files/', null=True, blank=True)
     closure_inc_id = models.CharField(max_length=255, null=True, blank=True)
+    incident_close_by = models.CharField(max_length=100, null=True, blank=True)
     closure_added_by = models.CharField(max_length=255, null=True, blank=True)
     closure_added_date = models.DateTimeField(auto_now=True,null=True, blank=True)
     closure_modified_by = models.CharField(max_length=255, null=True, blank=True)
