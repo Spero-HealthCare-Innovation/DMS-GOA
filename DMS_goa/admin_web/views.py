@@ -276,23 +276,24 @@ class CaptchaAPIView(APIView):
 
 def get_tokens_for_user(user):
     refresh = RefreshToken.for_user(user)
-    group = str(user.grp_id)
-    print("group---", group)
-    permissions_data = []
+    group = str(user.grp_id.grp_id)
+    print("user---123", user)
+    print("group---123", user.grp_id.grp_id)
+    # permissions_data = []
     # if group:
-    #         incs= DMS_Group.objects.get(grp_id=group)
-    #         pers = DMS_Permission.objects.filter(grp_id=group)
-    #         group = incs.grp_name
-    #         for permission in pers:
-    #             permission_info = {
-    #                 'modules_submodule': permission.mod_submod_per,
-    #                 'permission_status': permission.per_is_deleted,
-    #                 # 'source_id': permission.source.source_pk_id,
-    #                 # 'source_name': permission.source.source,  
-    #                 'group_id': permission.grp_id.grp_id,
-    #                 'group_name': permission.grp_id.grp_name,  
-    # }   
-    #             permissions_data.append(permission_info)
+    #     incs= DMS_Group.objects.get(grp_id=group)
+    #     pers = DMS_Permission.objects.filter(grp_id=group)
+    #     group_id = incs.grp_id
+    #     for permission in pers:
+    #         permission_info = {
+    #             'modules_submodule': permission.mod_submod_per,
+    #             'permission_status': permission.per_is_deleted,
+    #             # 'source_id': permission.source.source_pk_id,
+    #             # 'source_name': permission.source.source,  
+    #             'group_id': permission.grp_id.grp_id,
+    #             'group_name': permission.grp_id.grp_name,  
+    #         }   
+    #         permissions_data.append(permission_info)
     # else:
     #     group = None
             
