@@ -384,7 +384,7 @@ class DisasterResponderPostSerializer(serializers.ModelSerializer):
          model = DMS_Disaster_Responder
          fields = ['dis_id','res_id']
 
-class ClosureSerializer(serializers.ModelSerializer):
+class ClosureSerializer2(serializers.ModelSerializer):
     closure_inc_id = serializers.CharField()  
 
     class Meta:
@@ -401,6 +401,12 @@ class ClosureSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError({'closure_inc_id': 'Invalid incident ID'})
 
         return super().create(validated_data)
+    
+
+class ClosureSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DMS_incident_closure
+        fields = '__all__'
 
 
 

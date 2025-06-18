@@ -1197,7 +1197,7 @@ class closure_Post_api2(APIView):
         except DMS_Incident.DoesNotExist:
             return Response({"error": "Incident not found"}, status=status.HTTP_400_BAD_REQUEST)
 
-        serializer = ClosureSerializer(data=request.data)
+        serializer = ClosureSerializer2(data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
