@@ -8,6 +8,8 @@ import {
   Button,
   CircularProgress,
   Alert,
+  Select,
+  MenuItem,
 
 } from "@mui/material";
 import axios from "axios";
@@ -56,7 +58,7 @@ const CaseClosureDetails = ({ darkMode, flag, selectedIncident, fetchDispatchLis
   const [loading, setLoading] = useState(false);
   const [submitStatus, setSubmitStatus] = useState(null);
 
-  const labelColor = darkMode ? "#5FECC8" : "#1976d2";
+  const labelColor = darkMode ? "rgb(95,200,236)" : "rgb(95,200,236)";
   const textColor = darkMode ? "#ffffff" : "#000000";
   const fontFamily = "Roboto, sans-serif";
   const borderColor = darkMode ? "#7F7F7F" : "#e0e0e0";
@@ -98,7 +100,7 @@ const CaseClosureDetails = ({ darkMode, flag, selectedIncident, fetchDispatchLis
   const textFieldStyle = {
     "& .MuiInputLabel-root": { color: labelColor },
     "& .MuiOutlinedInput-root": {
-      backgroundColor: darkMode ? "#1e293b" : "#fff",
+      backgroundColor: darkMode ? "#202328" : "#FFFFFF",
       borderRadius: 2,
     },
   };
@@ -281,8 +283,15 @@ const CaseClosureDetails = ({ darkMode, flag, selectedIncident, fetchDispatchLis
     };
     return alertTypeMap[alertType] || "Unknown";
   };
-  const renderText = (label, value) => (
-    <Box sx={{ pb: 1.5, mb: 1.5, borderBottom: `1px solid ${borderColor}` }}>
+  const renderText = (label, value, index, total) => (
+    <Box
+      sx={{
+        pb: 1.5,
+        mb: 1.5,
+        mr: 2,
+        borderBottom: index === total - 1 ? "none" : `1px solid ${borderColor}`,
+      }}
+    >
       <Typography
         variant="body2"
         sx={{ color: labelColor, fontWeight: 600, fontFamily }}
@@ -299,6 +308,14 @@ const CaseClosureDetails = ({ darkMode, flag, selectedIncident, fetchDispatchLis
     </Box>
   );
 
+
+
+  const [selectedDepartments, setSelectedDepartments] = useState([]);
+
+  const handleChange1 = (event) => {
+    setSelectedDepartments(event.target.value);
+  };
+
   return (
     <>
       {submitStatus && (
@@ -306,19 +323,21 @@ const CaseClosureDetails = ({ darkMode, flag, selectedIncident, fetchDispatchLis
           width: "100%",
           display: "flex",
           alignItems: "center",
-          justifyContent: "center", // horizontal center
-          height: "auto",           // let height adjust to content
-          margin: 0,                // no margin around Box
-          padding: 0,               // no padding around Box
+          justifyContent: "center",
+          height: "auto",
+          margin: 0,
+          padding: 0,
         }}>
           <Alert severity={submitStatus.type} >{submitStatus.message}</Alert>
         </Box>
       )}
+
       <Typography
         variant="h6"
         sx={{
           fontFamily,
           mb: 2,
+          ml: 1,
           fontWeight: 700,
           color: labelColor,
         }}
@@ -330,18 +349,19 @@ const CaseClosureDetails = ({ darkMode, flag, selectedIncident, fetchDispatchLis
         elevation={3}
         sx={{
           p: 3,
+          mb: 5,
           borderRadius: 2,
-          backgroundColor: darkMode ? "#0a1929" : "#ffffff",
+          backgroundColor: darkMode ? "#121212" : "#FFFFFF",
           color: textColor,
           transition: "all 0.3s ease",
         }}
       >
-        <Grid container spacing={3}>
-          {/* Left Column */}
+        <Grid container spacing={3} sx={{ height: '300px' }}>
+          {/* Left Column - Incident Info (Reduced width) */}
           <Grid
             item
             xs={12}
-            md={3}
+            md={3.3}
             sx={{
               borderRight: { md: `1px solid ${borderColor}` },
               pr: { md: 3 },
@@ -349,54 +369,66 @@ const CaseClosureDetails = ({ darkMode, flag, selectedIncident, fetchDispatchLis
           >
             <Typography
               variant="subtitle1"
-              sx={{ fontWeight: 600, color: labelColor, fontFamily, mb: 2 }}
+              sx={{
+                fontWeight: 600,
+                color: labelColor,
+                fontFamily,
+                mb: 2,
+                textAlign: 'center',
+                borderBottom: `2px solid ${labelColor}`,
+                pb: 1
+              }}
             >
               Incident Info
             </Typography>
-            {flag === 0 ? (
-              <Box>
-                {flag === 0 ? (
-                  <Box>
-                    {renderText(
-                      "Incident ID",
-                      isDataCleared ? "" : (
-                        selectedIncidentFromSop?.incident_id ||
-                        selectedIncident?.incident_id
-                      )
-                    )}
-                    {renderText(
-                      "Disaster Type",
-                      isDataCleared ? "" : (
-                        selectedIncidentFromSop?.disaster_name ||
-                        selectedIncident?.disaster_name
-                      )
-                    )}
-                    {renderText(
-                      "Alert Type",
-                      isDataCleared ? "" : getAlertTypeName(
-                        selectedIncidentFromSop?.alert_type || selectedIncident?.alert_type
-                      )
-                    )}
-                  </Box>
-                ) : (
-                  <Typography variant="body2" sx={{ color: textColor }}>
-                    No incident data to display.
-                  </Typography>
-                )}
-                {/* {renderText("Alert Type", selectedIncident?.disasterType)} */}
-              </Box>
-            ) : (
-              <Typography variant="body2" sx={{ color: textColor }}>
-                No incident data to display.
-              </Typography>
-            )}
+
+            <Box sx={{
+              height: '240px',
+              overflowY: 'auto',
+              '&::-webkit-scrollbar': {
+                width: '6px',
+              },
+              '&::-webkit-scrollbar-track': {
+                background: darkMode ? '#2e2e2e' : '#f1f1f1',
+                borderRadius: '3px',
+                marginTop: '1rem',
+              },
+              '&::-webkit-scrollbar-thumb': {
+                background: darkMode ? '#555' : '#888',
+                borderRadius: '3px',
+              },
+              '&::-webkit-scrollbar-thumb:hover': {
+                background: darkMode ? '#777' : '#555',
+              },
+            }}>
+              {flag === 0 ? (
+                <Box>
+                  <Grid container spacing={2} sx={{ mb: 2, mt: 0.6 }}>
+                    <Grid item xs={6}>
+                      {renderText("Caller Name", "9876543487")}
+                    </Grid>
+                    <Grid item xs={6}>
+                      {renderText("Caller Number", "Person")}
+                    </Grid>
+                  </Grid>
+                  {renderText(
+                    "Location", "Ahilyanagar, Maharashtra")}
+                  {renderText(
+                    "Summary", "In case of emergency, call the ambulance immediately.Provide your location and details clearly to ensure quick response.")}
+                </Box>
+              ) : (
+                <Typography variant="body2" sx={{ color: textColor, textAlign: 'center', mt: 4 }}>
+                  No incident data to display.
+                </Typography>
+              )}
+            </Box>
           </Grid>
 
-          {/* Middle Column */}
+          {/* Middle Column - Case Timeline (Increased width) */}
           <Grid
             item
             xs={12}
-            md={5}
+            md={4.7}
             sx={{
               borderRight: { md: `1px solid ${borderColor}` },
               px: { md: 3 },
@@ -404,56 +436,88 @@ const CaseClosureDetails = ({ darkMode, flag, selectedIncident, fetchDispatchLis
           >
             <Typography
               variant="subtitle1"
-              sx={{ fontWeight: 600, color: labelColor, fontFamily, mb: 2 }}
+              sx={{
+                fontWeight: 600,
+                color: labelColor,
+                fontFamily,
+                mb: 2,
+                textAlign: 'center',
+                borderBottom: `2px solid ${labelColor}`,
+                pb: 1
+              }}
             >
               Case Timeline
             </Typography>
 
-            <Grid container spacing={2}>
-              {/* <LocalizationProvider dateAdapter={AdapterDateFns}>
-                <Grid container spacing={2} sx={{ mt: 0.5 }}>
-                  {[
-                    ["Acknowledge", "acknowledge"],
-                    ["Start Base Location", "startBaseLocation"],
-                    ["At Scene", "atScene"],
-                    ["From Scene", "fromScene"],
-                    ["Back to Base", "backToBase"],
-                  ].map(([label, field], i) => (
-                    <Grid item xs={12} sm={6} key={i}>
-                      <DateTimePicker
-                        label={label}
-                        value={formData[field] || null}
-                        onChange={(newValue) => handleChange(field, newValue)}
-                        inputFormat="yyyy-MM-dd | HH:mm"
-                        renderInput={(params) => (
-                          <TextField
-                            {...params}
-                            fullWidth
-                            placeholder="yyyy-MM-dd | hh:mm"
-                            variant="outlined"
-                            InputLabelProps={{ shrink: true }}
-                            InputProps={{
-                              ...params.InputProps,
-                              sx: {
-                                color: textColor,
-                                height:"10%",
-                                "& .MuiSvgIcon-root": {
-                                  color: "white", // calendar icon color
-                                },
-                              },
-                            }}
-                            sx={textFieldStyle}
-                          />
-                        )}
-                      />
-                    </Grid>
-                  ))}
-                </Grid>
-              </LocalizationProvider> */}
+            <Box sx={{
 
-              <LocalizationProvider dateAdapter={AdapterDateFns}>
-                <Grid container spacing={2} sx={{ mt: 0.5 }}>
-                  <Grid item xs={12} sm={6}>
+              height: '220px',
+              overflowY: 'auto',
+              '&::-webkit-scrollbar': {
+                width: '6px',
+              },
+              '&::-webkit-scrollbar-track': {
+                background: darkMode ? '#2e2e2e' : '#f1f1f1',
+                borderRadius: '3px',
+                marginTop: '1rem',
+              },
+              '&::-webkit-scrollbar-thumb': {
+                background: darkMode ? '#555' : '#888',
+                borderRadius: '3px',
+              },
+              '&::-webkit-scrollbar-thumb:hover': {
+                background: darkMode ? '#777' : '#555',
+              },
+            }}>
+              <Grid container spacing={2} sx={{ mt: 0.6 }}>
+                <Grid item xs={5.7}>
+                  <Select
+                    multiple
+                    displayEmpty
+                    value={selectedDepartments}
+                    onChange={handleChange1}
+                    renderValue={(selected) => {
+                      if (selected.length === 0) {
+                        return (
+                          <span style={{ color: '#888', fontStyle: 'normal' }}>
+                            Select Department
+                          </span>
+                        );
+                      }
+                      return selected.join(", ");
+                    }}
+                    size="small"
+                    fullWidth
+                    inputProps={{ "aria-label": "Select Department" }}
+                    MenuProps={{
+                      PaperProps: {
+                        style: {
+                          maxHeight: 250,
+                          width: 200,
+                        },
+                      },
+                    }}
+                  >
+                    <MenuItem disabled value="">
+                      <em>Select Department</em>
+                    </MenuItem>
+                    <MenuItem value="HR">HR</MenuItem>
+                    <MenuItem value="Finance">Finance</MenuItem>
+                    <MenuItem value="IT">IT</MenuItem>
+                  </Select>
+                </Grid>
+
+                <Grid item xs={6.2}>
+                  <TextField
+                    fullWidth
+                    size="small"
+                    placeholder="Vehicle Number"
+                    InputLabelProps={{ shrink: false }}
+                  />
+                </Grid>
+
+                <LocalizationProvider dateAdapter={AdapterDateFns}>
+                  <Grid item xs={5.5}>
                     <DateTimePicker
                       label="Acknowledge *"
                       value={formData.acknowledge || null}
@@ -463,8 +527,8 @@ const CaseClosureDetails = ({ darkMode, flag, selectedIncident, fetchDispatchLis
                           setValidationErrors(prev => ({ ...prev, acknowledge: null }));
                         }
                       }}
-                        ampm={false} // 24-hour format
-                     inputFormat="yyyy-MM-dd | HH:mm" 
+                      ampm={false}
+                      inputFormat="yyyy-MM-dd | HH:mm"
                       views={['year', 'month', 'day', 'hours', 'minutes']}
                       renderInput={(params) => (
                         <TextField
@@ -481,6 +545,7 @@ const CaseClosureDetails = ({ darkMode, flag, selectedIncident, fetchDispatchLis
                             ...params.InputProps,
                             sx: {
                               color: textColor,
+                              height: '35px',
                               "& .MuiSvgIcon-root": {
                                 color: "white",
                               },
@@ -492,7 +557,7 @@ const CaseClosureDetails = ({ darkMode, flag, selectedIncident, fetchDispatchLis
                     />
                   </Grid>
 
-                  <Grid item xs={12} sm={6}>
+                  <Grid item xs={6.4}>
                     <DateTimePicker
                       label="Start Base Location *"
                       value={formData.startBaseLocation || null}
@@ -502,8 +567,7 @@ const CaseClosureDetails = ({ darkMode, flag, selectedIncident, fetchDispatchLis
                           setValidationErrors(prev => ({ ...prev, startBaseLocation: null }));
                         }
                       }}
-                        ampm={false} // 24-hour format
-
+                      ampm={false}
                       minDateTime={formData.acknowledge || new Date()}
                       inputFormat="yyyy-MM-dd | HH:mm"
                       renderInput={(params) => (
@@ -512,6 +576,7 @@ const CaseClosureDetails = ({ darkMode, flag, selectedIncident, fetchDispatchLis
                           fullWidth
                           placeholder="yyyy-MM-dd | hh:mm"
                           variant="outlined"
+                          size="small"
                           required
                           error={!!validationErrors.startBaseLocation}
                           helperText={validationErrors.startBaseLocation}
@@ -520,8 +585,8 @@ const CaseClosureDetails = ({ darkMode, flag, selectedIncident, fetchDispatchLis
                             ...params.InputProps,
                             sx: {
                               color: textColor,
-                              fontSize: "0.85rem",
-                              height: "10%",
+                              height: '35px',
+                              fontSize: "0.45rem",
                               "& .MuiSvgIcon-root": {
                                 color: "white",
                               },
@@ -533,7 +598,7 @@ const CaseClosureDetails = ({ darkMode, flag, selectedIncident, fetchDispatchLis
                     />
                   </Grid>
 
-                  <Grid item xs={12} sm={6}>
+                  <Grid item xs={5.5}>
                     <DateTimePicker
                       label="At Scene *"
                       value={formData.atScene || null}
@@ -543,8 +608,7 @@ const CaseClosureDetails = ({ darkMode, flag, selectedIncident, fetchDispatchLis
                           setValidationErrors(prev => ({ ...prev, atScene: null }));
                         }
                       }}
-                        ampm={false} // 24-hour format
-
+                      ampm={false}
                       minDateTime={formData.acknowledge || new Date()}
                       inputFormat="yyyy-MM-dd | HH:mm"
                       renderInput={(params) => (
@@ -553,6 +617,7 @@ const CaseClosureDetails = ({ darkMode, flag, selectedIncident, fetchDispatchLis
                           fullWidth
                           placeholder="yyyy-MM-dd | hh:mm"
                           variant="outlined"
+                          size="small"
                           required
                           error={!!validationErrors.atScene}
                           helperText={validationErrors.atScene}
@@ -561,8 +626,8 @@ const CaseClosureDetails = ({ darkMode, flag, selectedIncident, fetchDispatchLis
                             ...params.InputProps,
                             sx: {
                               color: textColor,
+                              height: '35px',
                               fontSize: "0.85rem",
-                              height: "10%",
                               "& .MuiSvgIcon-root": {
                                 color: "white",
                               },
@@ -574,7 +639,7 @@ const CaseClosureDetails = ({ darkMode, flag, selectedIncident, fetchDispatchLis
                     />
                   </Grid>
 
-                  <Grid item xs={12} sm={6}>
+                  <Grid item xs={6.4}>
                     <DateTimePicker
                       label="From Scene *"
                       value={formData.fromScene || null}
@@ -584,8 +649,7 @@ const CaseClosureDetails = ({ darkMode, flag, selectedIncident, fetchDispatchLis
                           setValidationErrors(prev => ({ ...prev, fromScene: null }));
                         }
                       }}
-                        ampm={false} // 24-hour format
-
+                      ampm={false}
                       minDateTime={formData.acknowledge || new Date()}
                       inputFormat="yyyy-MM-dd | HH:mm"
                       renderInput={(params) => (
@@ -594,6 +658,7 @@ const CaseClosureDetails = ({ darkMode, flag, selectedIncident, fetchDispatchLis
                           fullWidth
                           placeholder="yyyy-MM-dd | hh:mm"
                           variant="outlined"
+                          size="small"
                           required
                           error={!!validationErrors.fromScene}
                           helperText={validationErrors.fromScene}
@@ -602,6 +667,7 @@ const CaseClosureDetails = ({ darkMode, flag, selectedIncident, fetchDispatchLis
                             ...params.InputProps,
                             sx: {
                               color: textColor,
+                              height: '35px',
                               fontSize: "0.85rem",
                               "& .MuiSvgIcon-root": {
                                 color: "white",
@@ -614,7 +680,7 @@ const CaseClosureDetails = ({ darkMode, flag, selectedIncident, fetchDispatchLis
                     />
                   </Grid>
 
-                  <Grid item xs={12} sm={6}>
+                  <Grid item xs={12}>
                     <DateTimePicker
                       label="Back to Base *"
                       value={formData.backToBase || null}
@@ -624,8 +690,7 @@ const CaseClosureDetails = ({ darkMode, flag, selectedIncident, fetchDispatchLis
                           setValidationErrors(prev => ({ ...prev, backToBase: null }));
                         }
                       }}
-                        ampm={false} // 24-hour format
-
+                      ampm={false}
                       minDateTime={formData.acknowledge || new Date()}
                       inputFormat="yyyy-MM-dd | HH:mm"
                       renderInput={(params) => (
@@ -634,6 +699,7 @@ const CaseClosureDetails = ({ darkMode, flag, selectedIncident, fetchDispatchLis
                           fullWidth
                           placeholder="yyyy-MM-dd | hh:mm"
                           variant="outlined"
+                          size="small"
                           required
                           error={!!validationErrors.backToBase}
                           helperText={validationErrors.backToBase}
@@ -642,16 +708,11 @@ const CaseClosureDetails = ({ darkMode, flag, selectedIncident, fetchDispatchLis
                             ...params.InputProps,
                             sx: {
                               color: textColor,
+                              height: '35px',
                               fontSize: "0.85rem",
                               "& .MuiSvgIcon-root": {
                                 color: "white",
                                 fontSize: "0.8rem",
-                              },
-                              '& .MuiFilledInput-input': {
-                                fontSize: 14,
-                                height: 20,
-                                lineHeight: 1,
-                                p: 0
                               },
                             },
                           }}
@@ -660,55 +721,95 @@ const CaseClosureDetails = ({ darkMode, flag, selectedIncident, fetchDispatchLis
                       )}
                     />
                   </Grid>
-                </Grid>
-              </LocalizationProvider>
-
-            </Grid>
+                </LocalizationProvider>
+              </Grid>
+            </Box>
           </Grid>
 
-          {/* Right Column */}
+          {/* Right Column - Closure Remark */}
           <Grid item xs={12} md={4}>
             <Typography
               variant="subtitle1"
-              sx={{ fontWeight: 600, color: labelColor, fontFamily, mb: 2 }}
+              sx={{
+                fontWeight: 600,
+                color: labelColor,
+                fontFamily,
+                mb: 2,
+                textAlign: 'center',
+                borderBottom: `2px solid ${labelColor}`,
+                pb: 1
+              }}
             >
               Closure Remark
             </Typography>
 
-            <TextField
-              label="Remark *"
-              variant="outlined"
-              fullWidth
-              multiline
-              rows={6}
-              required
-              value={formData.closureRemark}
-              onChange={(e) => {
-                handleChange("closureRemark", e.target.value);
-                if (validationErrors.closureRemark) {
-                  setValidationErrors(prev => ({ ...prev, closureRemark: null }));
-                }
-              }}
-              error={!!validationErrors.closureRemark}
-              helperText={validationErrors.closureRemark}
-              InputLabelProps={{ shrink: true }}
-              InputProps={{ sx: { color: textColor } }}
-              sx={textFieldStyle}
-            />
+            <Box sx={{
+
+              height: '220px',
+              overflowY: 'auto',
+              '&::-webkit-scrollbar': {
+                width: '6px',
+              },
+              '&::-webkit-scrollbar-track': {
+                background: darkMode ? '#2e2e2e' : '#f1f1f1',
+                borderRadius: '3px',
+                marginTop: '1.5rem',
+              },
+              '&::-webkit-scrollbar-thumb': {
+                background: darkMode ? '#555' : '#888',
+                borderRadius: '3px',
+              },
+              '&::-webkit-scrollbar-thumb:hover': {
+                background: darkMode ? '#777' : '#555',
+              },
+            }}>
 
 
-            <Box mt={3} sx={{ textAlign: "right" }}>
-              <Button
-                variant="contained"
-                onClick={handleSubmit}
-                disabled={loading}
-              >
-                {loading ? <CircularProgress size={24} color="inherit" /> : "Submit"}
-              </Button>
+              <Box sx={{ height: '200px', display: 'flex', flexDirection: 'column', mt: 3 }}>
+
+                <TextField
+                  label="Remark *"
+                  variant="outlined"
+                  fullWidth
+                  multiline
+                  rows={6}
+                  required
+                  value={formData.closureRemark}
+                  onChange={(e) => {
+                    handleChange("closureRemark", e.target.value);
+                    if (validationErrors.closureRemark) {
+                      setValidationErrors(prev => ({ ...prev, closureRemark: null }));
+                    }
+                  }}
+                  error={!!validationErrors.closureRemark}
+                  helperText={validationErrors.closureRemark}
+                  InputLabelProps={{ shrink: true }}
+                  InputProps={{ sx: { color: textColor } }}
+                  sx={{ ...textFieldStyle, mb: 2, flex: 1 }}
+                />
+
+                <Box sx={{ textAlign: "center", mt: 'auto' }}>
+                  <Button
+                    variant="contained"
+                    onClick={handleSubmit}
+                    disabled={loading}
+                    sx={{
+                      backgroundColor: "rgb(18,166,95,0.8)",
+                      color: "#fff",
+                      px: 3,
+                      py: 1,
+                      fontSize: '0.875rem',
+                      fontWeight: 600,
+                      minWidth: 100
+                    }}
+                  >
+                    {loading ? <CircularProgress size={20} color="inherit" /> : "Submit"}
+                  </Button>
+                </Box>
+              </Box>
             </Box>
-
-
           </Grid>
+
         </Grid>
       </Paper>
     </>
