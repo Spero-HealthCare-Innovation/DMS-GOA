@@ -77,7 +77,7 @@ const MapView = ({ data }) => {
     <MapContainer
       center={markerPosition}
       zoom={mapZoom}
-      style={{ height: "100%", width: "100%", marginBottom: "0.6rem" }}
+      style={{ height: "96vh", width: "100%", marginBottom: "0.6rem" }}
       scrollWheelZoom={true}
     >
       <LayersControl position="topright">
