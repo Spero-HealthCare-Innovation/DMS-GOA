@@ -82,8 +82,8 @@ const Departmentsidebar = ({ darkMode }) => {
                   ? "linear-gradient(to bottom, #5FC8EC,rgb(19, 26, 28))" // top to bottom gradient when open
                   : "linear-gradient(to bottom, #5FC8EC,rgb(19, 26, 28))" // solid background when closed
                 : open
-                ? "linear-gradient(to bottom, #5FC8EC,rgb(18, 24, 26))" // light gradient when open in light mode
-                : "radial-gradient(6035.71% 72.44% at 0% 50%, #5FC8EC 0%, #5FC8EC 100%)",
+                  ? "linear-gradient(to bottom, #5FC8EC,rgb(18, 24, 26))" // light gradient when open in light mode
+                  : "radial-gradient(6035.71% 72.44% at 0% 50%, #5FC8EC 0%, #5FC8EC 100%)",
 
               borderRadius: "30px",
               // transition: "width 0.5s ease-in-out",
@@ -93,6 +93,11 @@ const Departmentsidebar = ({ darkMode }) => {
               overflow: "hidden",
               height: "auto",
               // maxHeight: "90vh",
+              svg: {
+                fill: "#000000",
+              },
+              pt: 2,
+              pb: 2,
               marginLeft: "0.5em",
               fontSize: "18px",
               color: "black",

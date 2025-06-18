@@ -180,11 +180,32 @@ const Navbar = ({ darkMode, toggleDarkMode }) => {
     day: 'numeric',
   });
 
-  const formattedTime = now.toLocaleTimeString('en-IN', {
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit',
-  });
+  const [currentTime, setCurrentTime] = useState(
+    new Date().toLocaleTimeString([], {
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+    })
+  );
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentTime(
+        new Date().toLocaleTimeString([], {
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit',
+        })
+      );
+    }, 1000); // updates every second
+
+    return () => clearInterval(interval); // cleanup on unmount
+  }, []);
+  // const formattedTime = now.toLocaleTimeString('en-IN', {
+  //   hour: '2-digit',
+  //   minute: '2-digit',
+  //   second: '2-digit',
+  // });
 
   //auto logout for browser and tab close
 
@@ -353,7 +374,9 @@ const Navbar = ({ darkMode, toggleDarkMode }) => {
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
               <AccessTimeIcon style={{ fontSize: '16px', color: '#87CEEB' }} />
-              <span style={{ color: '#87CEEB' }}>{formattedTime}</span>
+              <span style={{ color: '#87CEEB' }}>
+                {currentTime}
+              </span>
             </div>
           </div>
 
