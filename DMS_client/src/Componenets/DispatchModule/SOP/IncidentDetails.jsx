@@ -178,7 +178,7 @@ function IncidentDetails({
                 <>
                   {incident?.mode === 2 ? (
                     <>
-                      {renderText("Incident ID", incident?.incident_id)}
+                      {renderText("Incident Id", incident?.incident_id)}
                       {renderText(
                         "Incident Type",
                         incident?.inc_type === 1
@@ -203,7 +203,7 @@ function IncidentDetails({
                     </>
                   ) : (
                     <Box sx={{
-                      maxHeight: '250px', overflowY: 'auto',
+                      // maxHeight: '250px', overflowY: 'auto',
                       scrollBehavior: "smooth",
                       "&::-webkit-scrollbar": {
                         width: "6px",
@@ -319,12 +319,24 @@ function IncidentDetails({
                             >
                               Location
                             </Typography>
-                            <Typography
-                              variant="subtitle2"
-                              sx={{ fontFamily, color: textColor, wordBreak: "break-word" }}
-                            >
-                              {incident?.location || "N/A"}
-                            </Typography>
+
+                            {incident?.location && incident.location.length > 20 ? (
+                              <Tooltip title={incident.location} arrow>
+                                <Typography
+                                  variant="subtitle2"
+                                  sx={{ fontFamily, color: textColor, wordBreak: "break-word", cursor: "pointer" }}
+                                >
+                                  {incident.location.slice(0, 20)}...
+                                </Typography>
+                              </Tooltip>
+                            ) : (
+                              <Typography
+                                variant="subtitle2"
+                                sx={{ fontFamily, color: textColor, wordBreak: "break-word" }}
+                              >
+                                {incident?.location || "N/A"}
+                              </Typography>
+                            )}
                           </Box>
                         </Grid>
 
@@ -336,12 +348,29 @@ function IncidentDetails({
                             >
                               Summary
                             </Typography>
-                            <Typography
-                              variant="subtitle2"
-                              sx={{ fontFamily, color: textColor, wordBreak: "break-word" }}
-                            >
-                              {incident?.summary_name || "N/A"}
-                            </Typography>
+
+                            {incident?.summary_name && incident.summary_name.length > 40 ? (
+                              <Tooltip title={incident.summary_name} arrow>
+                                <Typography
+                                  variant="subtitle2"
+                                  sx={{
+                                    fontFamily,
+                                    color: textColor,
+                                    wordBreak: "break-word",
+                                    cursor: "pointer"
+                                  }}
+                                >
+                                  {incident.summary_name.slice(0, 40)}...
+                                </Typography>
+                              </Tooltip>
+                            ) : (
+                              <Typography
+                                variant="subtitle2"
+                                sx={{ fontFamily, color: textColor, wordBreak: "break-word" }}
+                              >
+                                {incident?.summary_name || "N/A"}
+                              </Typography>
+                            )}
                           </Box>
                         </Grid>
                       </Grid>
@@ -622,40 +651,32 @@ function IncidentDetails({
                                 .includes(String(responder_id));
 
                             return (
-                              <Tooltip
+                              <FormControlLabel
                                 key={responder_id}
-                                title={
-                                  isChecked
-                                    ? "Pre-assigned responder"
-                                    : "Responder not assigned"
+                                control={
+                                  <Checkbox
+                                    checked={isChecked}
+                                    disabled
+                                    sx={{
+                                      color: labelColor,
+                                      "&.Mui-checked": {
+                                        color: "#5FC8EC",
+                                      },
+                                      "&:hover": {
+                                        backgroundColor: "rgba(0, 191, 165, 0.1)",
+                                        borderRadius: "6px",
+                                      },
+                                    }}
+                                  />
                                 }
-                                placement="top"
-                              >
-                                <FormControlLabel
-                                  control={
-                                    <Checkbox
-                                      checked={isChecked}
-                                      disabled
-                                      sx={{
-                                        color: labelColor,
-                                        "&.Mui-checked": {
-                                          color: "#5FC8EC",
-                                        },
-                                        "&:hover": {
-                                          backgroundColor: "rgba(0, 191, 165, 0.1)",
-                                          borderRadius: "6px",
-                                        },
-                                      }}
-                                    />
-                                  }
-                                  label={
-                                    <Typography variant="subtitle2" sx={{ fontFamily }}>
-                                      {responder_name}
-                                    </Typography>
-                                  }
-                                />
-                              </Tooltip>
+                                label={
+                                  <Typography variant="subtitle2" sx={{ fontFamily }}>
+                                    {responder_name}
+                                  </Typography>
+                                }
+                              />
                             );
+
                           }
                         )}
                       </Box>
@@ -664,7 +685,7 @@ function IncidentDetails({
                     <Box display="flex" alignItems="center" gap={1} mt={1}>
                       {/* <InfoOutlinedIcon color="disabled" /> */}
                       <Typography variant="subtitle2" sx={{ fontFamily }}>
-                        No responder scope assigned.
+                        No Responder Scope Assigned.
                       </Typography>
                     </Box>
                   )}

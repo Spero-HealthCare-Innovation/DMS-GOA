@@ -411,7 +411,7 @@ const Navbar = ({ darkMode, toggleDarkMode }) => {
             PaperProps={{
               sx: {
                 position: "absolute",
-                top: 70,
+                top: 60,
                 right: 20,
                 m: 0,
                 width: 300,
@@ -425,8 +425,8 @@ const Navbar = ({ darkMode, toggleDarkMode }) => {
                   background: darkMode
                     ? "linear-gradient(90deg, #0f3443 0%, #34e89e 100%)"
                     : "linear-gradient(90deg, #1C3B52 0%, #2EB9A3 100%)",
-                  width: 56,
-                  height: 56
+                  width: 50,
+                  height: 50
                 }}>
                   {initials}
                 </Avatar>
@@ -439,18 +439,57 @@ const Navbar = ({ darkMode, toggleDarkMode }) => {
 
               </Box>
             </DialogTitle>
-
-            <DialogContent dividers>
-              <Box display="flex" alignItems="center" gap={1} mb={2}>
-                <CallIcon color="primary" />
-                <Typography>{phoneNo}</Typography>
+            <DialogContent dividers sx={{ px: 3, py: 2 }}>
+              <Box display="flex" alignItems="center" gap={1.5} mb={2}>
+                <Box
+                  sx={{
+                    backgroundColor: "#FDECEA",
+                    borderRadius: "50%",
+                    padding: "6px",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <CallIcon sx={{ color: "rgb(223, 76, 76)", fontSize: 20 }} />
+                </Box>
+                <Typography
+                  sx={{
+                    color: "rgb(255, 150, 150)",
+                    fontSize: "14px",
+                    cursor: "pointer",
+                    "&:hover": { textDecoration: "underline" },
+                  }}
+                >
+                  {phoneNo}
+                </Typography>
               </Box>
-              <Box display="flex" alignItems="center" gap={1}>
-                <EmailIcon color="primary" />
-                <Typography>{email}</Typography>
+
+              <Box display="flex" alignItems="center" gap={1.5}>
+                <Box
+                  sx={{
+                    backgroundColor: "#E3F2FD",
+                    borderRadius: "50%",
+                    padding: "6px",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <EmailIcon sx={{ color: "#1E88E5", fontSize: 20 }} />
+                </Box>
+                <Typography
+                  sx={{
+                    color: "#90CAF9",
+                    fontSize: "14px",
+                    cursor: "pointer",
+                    "&:hover": { textDecoration: "underline" },
+                  }}
+                >
+                  {email}
+                </Typography>
               </Box>
             </DialogContent>
-
 
             <DialogActions>
               <Button onClick={() => setOpenProfileDialog(false)} variant="outlined">Close</Button>
