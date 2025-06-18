@@ -86,7 +86,7 @@ function IncidentDetails({
   // Function to render text with label and value
   const renderText = (label, value) => (
     <Box sx={boxStyle}>
-      <Typography sx={{ color: labelColor, fontWeight: 500, fontFamily }}>
+      <Typography sx={{ color: labelColor, fontWeight: 500, fontFamily, fontSize: '14px', mt: 1 }}>
         {label}
       </Typography>
       {selectedIncident ? (
@@ -99,22 +99,6 @@ function IncidentDetails({
     </Box>
   );
 
-  const renderHorizontalFields = (label, value) => (
-    <Box>
-      <Typography
-        variant="body2"
-        sx={{ color: labelColor, fontWeight: 500, fontFamily }}
-      >
-        {label}
-      </Typography>
-      <Typography
-        variant="subtitle2"
-        sx={{ fontFamily, color: textColor, wordBreak: "break-word" }}
-      >
-        {value || "N/A"}
-      </Typography>
-    </Box>
-  );
   useEffect(() => {
     if (Array.isArray(responderScope?.responder_scope)) {
       const defaultSelected = responderScope.responder_scope.map(
@@ -141,7 +125,7 @@ function IncidentDetails({
 
   return (
     <>
-      <Typography variant="h6" color="#fff" sx={{ fontFamily ,ml: 2}}>
+      <Typography variant="h6" color="#fff" sx={{ fontFamily, ml: 2 }}>
         Rules
       </Typography>
 
@@ -187,7 +171,6 @@ function IncidentDetails({
                     )
                     : "N/A"
                 )}
-                {/* {renderText("Disaster Id", selectedIncident?.disaster_id_id)} */}
                 {renderText("Disaster Type", selectedIncident?.disaster_name)}
               </>
             ) : (
@@ -195,7 +178,7 @@ function IncidentDetails({
                 <>
                   {incident?.mode === 2 ? (
                     <>
-                      {renderText("Incident ID", incident?.incident_id)}
+                      {renderText("Incident Id", incident?.incident_id)}
                       {renderText(
                         "Incident Type",
                         incident?.inc_type === 1
@@ -216,59 +199,182 @@ function IncidentDetails({
                                 ? "very Low"
                                 : "N/A"
                       )}
+                      {renderText("Disaster Type", incident?.disaster_name)}
                     </>
                   ) : (
-                    <Grid container spacing={2}>
-                      {[
-                        { label: "Incident ID", value: incident?.incident_id },
-                        {
-                          label: "Incident Type",
-                          value:
-                            incident?.inc_type === 1
-                              ? "Emergency"
-                              : incident?.inc_type === 2
-                                ? "Non-Emergency"
-                                : "N/A",
-                        },
-                        {
-                          label: "Alert Type",
-                          value:
-                            { 1: "High", 2: "Medium", 3: "Low", 4: "Very Low" }[
-                            incident?.alert_type
-                            ] || "N/A",
-                        },
-                        { label: "Caller Name", value: incident?.caller_name },
-                        { label: "Caller Number", value: incident?.caller_no },
-                        { label: "Location", value: incident?.location },
-                      ].map((item, idx) => (
-                        <Grid item xs={12} sm={6} key={idx}>
-                          <Box
-                            sx={{
-                              whiteSpace: "pre-wrap",
-                              wordBreak: "break-word",
-                            }}
+                    <Box sx={{
+                      // maxHeight: '250px', overflowY: 'auto',
+                      scrollBehavior: "smooth",
+                      "&::-webkit-scrollbar": {
+                        width: "6px",
+                      },
+                      "&::-webkit-scrollbar-thumb": {
+                        backgroundColor: darkMode ? "#0288d1" : "#888",
+                        borderRadius: 3,
+                      },
+                      "&::-webkit-scrollbar-thumb:hover": {
+                        backgroundColor: darkMode ? "#5FC8EC" : "#555",
+                      },
+                    }}>
+                      <Grid container spacing={2}>
+                        {/* <Grid item xs={12} md={12}>
+                          <Typography
+                            variant="body2"
+                            sx={{ color: labelColor, fontWeight: 500, fontFamily, fontSize: '18px', borderBottom: '1px solid #ccc' }}
                           >
-                            {renderHorizontalFields(item.label, item.value)}
+                            Incident Details
+                          </Typography>
+                        </Grid> */}
+
+                        <Grid item xs={12} md={6}>
+                          <Box>
+                            <Typography
+                              variant="body2"
+                              sx={{ color: labelColor, fontWeight: 500, fontFamily }}
+                            >
+                              Caller Name
+                            </Typography>
+                            <Typography
+                              variant="subtitle2"
+                              sx={{ fontFamily, color: textColor, wordBreak: "break-word" }}
+                            >
+                              {incident?.caller_name || "N/A"}
+                            </Typography>
                           </Box>
                         </Grid>
-                      ))}
 
-                      {incident?.summary_name && (
-                        <Grid item xs={12}>
-                          <Box
-                            sx={{
-                              whiteSpace: "pre-wrap",
-                              wordBreak: "break-word",
-                            }}
-                          >
-                            {renderHorizontalFields(
-                              "Summary",
-                              incident?.summary_name
+                        <Grid item xs={12} md={6}>
+                          <Box>
+                            <Typography
+                              variant="body2"
+                              sx={{ color: labelColor, fontWeight: 500, fontFamily }}
+                            >
+                              Caller Number
+                            </Typography>
+                            <Typography
+                              variant="subtitle2"
+                              sx={{ fontFamily, color: textColor, wordBreak: "break-word" }}
+                            >
+                              {incident?.caller_no || "N/A"}
+                            </Typography>
+                          </Box>
+                        </Grid>
+
+                        <Grid item xs={12} md={6}>
+                          <Box>
+                            <Typography
+                              variant="body2"
+                              sx={{ color: labelColor, fontWeight: 500, fontFamily }}
+                            >
+                              Ward
+                            </Typography>
+                            <Typography
+                              variant="subtitle2"
+                              sx={{ fontFamily, color: textColor, wordBreak: "break-word" }}
+                            >
+                              {incident?.ward || "N/A"}
+                            </Typography>
+                          </Box>
+                        </Grid>
+
+                        <Grid item xs={12} md={6}>
+                          <Box>
+                            <Typography
+                              variant="body2"
+                              sx={{ color: labelColor, fontWeight: 500, fontFamily }}
+                            >
+                              Tehsil
+                            </Typography>
+                            <Typography
+                              variant="subtitle2"
+                              sx={{ fontFamily, color: textColor, wordBreak: "break-word" }}
+                            >
+                              {incident?.tehsil || "N/A"}
+                            </Typography>
+                          </Box>
+                        </Grid>
+
+                        <Grid item xs={12} md={6}>
+                          <Box>
+                            <Typography
+                              variant="body2"
+                              sx={{ color: labelColor, fontWeight: 500, fontFamily }}
+                            >
+                              District
+                            </Typography>
+                            <Typography
+                              variant="subtitle2"
+                              sx={{ fontFamily, color: textColor, wordBreak: "break-word" }}
+                            >
+                              {incident?.district || "N/A"}
+                            </Typography>
+                          </Box>
+                        </Grid>
+
+                        <Grid item xs={12} md={6}>
+                          <Box>
+                            <Typography
+                              variant="body2"
+                              sx={{ color: labelColor, fontWeight: 500, fontFamily }}
+                            >
+                              Location
+                            </Typography>
+
+                            {incident?.location && incident.location.length > 20 ? (
+                              <Tooltip title={incident.location} arrow>
+                                <Typography
+                                  variant="subtitle2"
+                                  sx={{ fontFamily, color: textColor, wordBreak: "break-word", cursor: "pointer" }}
+                                >
+                                  {incident.location.slice(0, 20)}...
+                                </Typography>
+                              </Tooltip>
+                            ) : (
+                              <Typography
+                                variant="subtitle2"
+                                sx={{ fontFamily, color: textColor, wordBreak: "break-word" }}
+                              >
+                                {incident?.location || "N/A"}
+                              </Typography>
                             )}
                           </Box>
                         </Grid>
-                      )}
-                    </Grid>
+
+                        <Grid item xs={12} md={12}>
+                          <Box>
+                            <Typography
+                              variant="body2"
+                              sx={{ color: labelColor, fontWeight: 500, fontFamily }}
+                            >
+                              Summary
+                            </Typography>
+
+                            {incident?.summary_name && incident.summary_name.length > 40 ? (
+                              <Tooltip title={incident.summary_name} arrow>
+                                <Typography
+                                  variant="subtitle2"
+                                  sx={{
+                                    fontFamily,
+                                    color: textColor,
+                                    wordBreak: "break-word",
+                                    cursor: "pointer"
+                                  }}
+                                >
+                                  {incident.summary_name.slice(0, 40)}...
+                                </Typography>
+                              </Tooltip>
+                            ) : (
+                              <Typography
+                                variant="subtitle2"
+                                sx={{ fontFamily, color: textColor, wordBreak: "break-word" }}
+                              >
+                                {incident?.summary_name || "N/A"}
+                              </Typography>
+                            )}
+                          </Box>
+                        </Grid>
+                      </Grid>
+                    </Box>
                   )}
                 </>
               </>
@@ -289,40 +395,53 @@ function IncidentDetails({
           >
             {flag === 1 ? (
               <>
-                {/* Different UI    for alerts if flag !== 1 (optional) or repeat same */}
+                {/* Alert-panel */}
                 <Box sx={boxStyle}>
-                  <Typography
-                    variant="subtitle2"
-                    sx={{ color: labelColor, fontWeight: 500, fontFamily }}
-                  >
-                    Response Procedure
-                  </Typography>
-                  {responseProcedure ? (
-                    <Box display="flex" alignItems="center">
+                  {/* Heading + Eye icon in one row */}
+                  <Box display="flex" justifyContent="space-between" alignItems="center" mb={1}>
+                    <Typography
+                      variant="subtitle2"
+                      sx={{ color: labelColor, fontWeight: 500, fontFamily }}
+                    >
+                      Response Procedure
+                    </Typography>
+
+                    {responderScope?.sop_responses?.[0]?.sop_description && (
+                      <IconButton
+                        size="small"
+                        onClick={() => setOpenDialog(true)}
+                        sx={{ color: 'orange' }} // eye icon in orange
+                      >
+                        <VisibilityIcon fontSize="small" />
+                      </IconButton>
+                    )}
+                  </Box>
+
+                  {/* Conditionally show response text or fallback */}
+                  {selectedIncident?.inc_id === undefined ? (
+                    <Box display="flex" alignItems="center" gap={1}>
+                      <Typography variant="subtitle2" sx={{ fontFamily }}>
+                        No response procedure available.
+                      </Typography>
+                    </Box>
+                  ) : responderScope?.sop_responses?.[0]?.sop_description ? (
+                    <Box>
                       <Typography
                         variant="subtitle2"
                         sx={{
                           fontFamily,
-                          display: "-webkit-box",
-                          WebkitLineClamp: 2,
-                          WebkitBoxOrient: "vertical",
-                          overflow: "hidden",
-                          whiteSpace: "pre-line",
-                          flex: 1,
+                          display: '-webkit-box',
+                          WebkitLineClamp: 4,
+                          WebkitBoxOrient: 'vertical',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          whiteSpace: 'normal', // required for clamping to work
                         }}
                       >
-                        {getFirstTwoLines(responseProcedure)}
+                        {responderScope.sop_responses[0].sop_description}
                       </Typography>
-                      {responseProcedure.split("\n").length > 2 && (
-                        <IconButton
-                          size="small"
-                          onClick={() => setOpenDialog(true)}
-                          sx={{ ml: 1 }}
-                          aria-label="Show full response procedure"
-                        >
-                          <VisibilityIcon fontSize="small" />
-                        </IconButton>
-                      )}
+
+                      {/* Dialog showing full content */}
                       <Dialog
                         open={openDialog}
                         onClose={() => setOpenDialog(false)}
@@ -331,9 +450,9 @@ function IncidentDetails({
                       >
                         <DialogTitle
                           sx={{
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "space-between",
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
                             pr: 1,
                           }}
                         >
@@ -342,7 +461,6 @@ function IncidentDetails({
                             aria-label="close"
                             onClick={() => setOpenDialog(false)}
                             size="small"
-                            sx={{ ml: 2 }}
                           >
                             <CloseIcon />
                           </IconButton>
@@ -350,18 +468,17 @@ function IncidentDetails({
                         <DialogContent>
                           <Typography
                             variant="body1"
-                            sx={{ whiteSpace: "pre-line", fontFamily }}
+                            sx={{ whiteSpace: 'pre-line', fontFamily }}
                           >
-                            {responseProcedure}
+                            {responderScope.sop_responses[0].sop_description}
                           </Typography>
                         </DialogContent>
                       </Dialog>
                     </Box>
                   ) : (
-                    <Box display="flex" alignItems="center" gap={1} mt={1}>
-                      <InfoOutlinedIcon color="disabled" />
+                    <Box display="flex" alignItems="center" gap={1}>
                       <Typography variant="subtitle2" sx={{ fontFamily }}>
-                        Response procedure data not available.
+                        No response procedure available.
                       </Typography>
                     </Box>
                   )}
@@ -424,51 +541,53 @@ function IncidentDetails({
               </>
             ) : (
               <>
-                {/* Different UI    for dispatch if flag !== 1 (optional) or repeat same */}
+                {/* Dispatch */}
                 <Box sx={boxStyle}>
-                  <Typography
-                    variant="subtitle2"
-                    sx={{ color: labelColor, fontWeight: 500, fontFamily }}
-                  >
-                    Response Procedure
-                  </Typography>
+                  {/* Heading + Eye icon in one row */}
+                  <Box display="flex" justifyContent="space-between" alignItems="center" mb={1}>
+                    <Typography
+                      variant="subtitle2"
+                      sx={{ color: labelColor, fontWeight: 500, fontFamily }}
+                    >
+                      Response Procedure
+                    </Typography>
 
+                    {responderScope?.sop_responses?.[0]?.sop_description && (
+                      <IconButton
+                        size="small"
+                        onClick={() => setOpenDialog(true)}
+                        sx={{ color: 'orange' }} // eye icon in orange
+                      >
+                        <VisibilityIcon fontSize="small" />
+                      </IconButton>
+                    )}
+                  </Box>
+
+                  {/* Conditionally show response text or fallback */}
                   {selectedIncident?.inc_id === undefined ? (
-                    <Box display="flex" alignItems="center" gap={1} mt={0.5}>
-                      {/* <InfoOutlinedIcon color="disabled" fontSize="small" /> */}
+                    <Box display="flex" alignItems="center" gap={1}>
                       <Typography variant="subtitle2" sx={{ fontFamily }}>
                         No response procedure available.
                       </Typography>
                     </Box>
-                  ) : responderScope?.sop_responses?.length > 0 &&
-                    responderScope.sop_responses[0]?.sop_description ? (
-                    <Box display="flex" alignItems="center">
+                  ) : responderScope?.sop_responses?.[0]?.sop_description ? (
+                    <Box>
                       <Typography
                         variant="subtitle2"
                         sx={{
                           fontFamily,
-                          display: "-webkit-box",
-                          WebkitLineClamp: 2,
-                          WebkitBoxOrient: "vertical",
-                          overflow: "hidden",
-                          whiteSpace: "pre-line",
-                          flex: 1,
+                          display: '-webkit-box',
+                          WebkitLineClamp: 4,
+                          WebkitBoxOrient: 'vertical',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          whiteSpace: 'normal', // required for clamping to work
                         }}
                       >
-                        {getFirstTwoLines(
-                          responderScope.sop_responses[0].sop_description
-                        )}
+                        {responderScope.sop_responses[0].sop_description}
                       </Typography>
-                      {responderScope.sop_responses[0].sop_description && (
-                        <IconButton
-                          size="small"
-                          onClick={() => setOpenDialog(true)}
-                          sx={{ ml: 1 }}
-                          aria-label="Show full response procedure"
-                        >
-                          <VisibilityIcon fontSize="small" />
-                        </IconButton>
-                      )}
+
+                      {/* Dialog showing full content */}
                       <Dialog
                         open={openDialog}
                         onClose={() => setOpenDialog(false)}
@@ -477,9 +596,9 @@ function IncidentDetails({
                       >
                         <DialogTitle
                           sx={{
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "space-between",
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
                             pr: 1,
                           }}
                         >
@@ -488,7 +607,6 @@ function IncidentDetails({
                             aria-label="close"
                             onClick={() => setOpenDialog(false)}
                             size="small"
-                            sx={{ ml: 2 }}
                           >
                             <CloseIcon />
                           </IconButton>
@@ -496,7 +614,7 @@ function IncidentDetails({
                         <DialogContent>
                           <Typography
                             variant="body1"
-                            sx={{ whiteSpace: "pre-line", fontFamily }}
+                            sx={{ whiteSpace: 'pre-line', fontFamily }}
                           >
                             {responderScope.sop_responses[0].sop_description}
                           </Typography>
@@ -504,8 +622,7 @@ function IncidentDetails({
                       </Dialog>
                     </Box>
                   ) : (
-                    <Box display="flex" alignItems="center" gap={1} mt={0.5}>
-                      {/* <InfoOutlinedIcon color="disabled" fontSize="small" /> */}
+                    <Box display="flex" alignItems="center" gap={1}>
                       <Typography variant="subtitle2" sx={{ fontFamily }}>
                         No response procedure available.
                       </Typography>
@@ -534,40 +651,32 @@ function IncidentDetails({
                                 .includes(String(responder_id));
 
                             return (
-                              <Tooltip
+                              <FormControlLabel
                                 key={responder_id}
-                                title={
-                                  isChecked
-                                    ? "Pre-assigned responder"
-                                    : "Responder not assigned"
+                                control={
+                                  <Checkbox
+                                    checked={isChecked}
+                                    disabled
+                                    sx={{
+                                      color: labelColor,
+                                      "&.Mui-checked": {
+                                        color: "#5FC8EC",
+                                      },
+                                      "&:hover": {
+                                        backgroundColor: "rgba(0, 191, 165, 0.1)",
+                                        borderRadius: "6px",
+                                      },
+                                    }}
+                                  />
                                 }
-                                placement="top"
-                              >
-                                <FormControlLabel
-                                  control={
-                                    <Checkbox
-                                      checked={isChecked}
-                                      disabled
-                                      sx={{
-                                        color: labelColor,
-                                        "&.Mui-checked": {
-                                          color: "#5FC8EC",
-                                        },
-                                        "&:hover": {
-                                          backgroundColor: "rgba(0, 191, 165, 0.1)",
-                                          borderRadius: "6px",
-                                        },
-                                      }}
-                                    />
-                                  }
-                                  label={
-                                    <Typography variant="subtitle2" sx={{ fontFamily }}>
-                                      {responder_name}
-                                    </Typography>
-                                  }
-                                />
-                              </Tooltip>
+                                label={
+                                  <Typography variant="subtitle2" sx={{ fontFamily }}>
+                                    {responder_name}
+                                  </Typography>
+                                }
+                              />
                             );
+
                           }
                         )}
                       </Box>
@@ -576,7 +685,7 @@ function IncidentDetails({
                     <Box display="flex" alignItems="center" gap={1} mt={1}>
                       {/* <InfoOutlinedIcon color="disabled" /> */}
                       <Typography variant="subtitle2" sx={{ fontFamily }}>
-                        No responder scope assigned.
+                        No Responder Scope Assigned.
                       </Typography>
                     </Box>
                   )}
@@ -587,6 +696,9 @@ function IncidentDetails({
 
           {/* Right Column */}
           <Grid item xs={12} md={5} pl={{ md: 2 }}>
+            <Typography variant="subtitle2" mb={2} color="#5FC8EC">
+              Comments
+            </Typography>
             {selectedIncident ? (
               <CommentsPanel
                 darkMode={darkMode}
@@ -615,7 +727,7 @@ function IncidentDetails({
           </Grid>
 
         </Grid>
-      </Paper>
+      </Paper >
     </>
   );
 }

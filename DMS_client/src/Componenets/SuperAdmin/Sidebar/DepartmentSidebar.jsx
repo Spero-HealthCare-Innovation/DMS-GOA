@@ -73,26 +73,35 @@ const Departmentsidebar = ({ darkMode }) => {
           sx={{
             width: open ? 200 : 60,
             "& .MuiDrawer-paper": {
-              width: open ? 200 : 50,
+              width: open ? 200 : 45,
               position: "absolute",
               top: "50%",
               transform: "translateY(-50%)",
               background: darkMode
-                ? "linear-gradient(to bottom, #5FECC8, rgba(32, 43, 40, 0.05))"
-                : "radial-gradient(6035.71% 72.44% at 0% 50%, #00BFA6 0%, #292D45 100%)",
+                ? open
+                  ? "linear-gradient(to bottom, #5FC8EC,rgb(19, 26, 28))" // top to bottom gradient when open
+                  : "linear-gradient(to bottom, #5FC8EC,rgb(19, 26, 28))" // solid background when closed
+                : open
+                ? "linear-gradient(to bottom, #5FC8EC,rgb(18, 24, 26))" // light gradient when open in light mode
+                : "radial-gradient(6035.71% 72.44% at 0% 50%, #5FC8EC 0%, #5FC8EC 100%)",
+
               borderRadius: "30px",
-              transition: "width 0.5s ease-in-out",
+              // transition: "width 0.5s ease-in-out",
               display: "flex",
               alignItems: open ? "flex-start" : "center",
               justifyContent: "center",
               overflow: "hidden",
-              height: "50vh",
-              maxHeight: "90vh",
+              height: "auto",
+              // maxHeight: "90vh",
               marginLeft: "0.5em",
-              fontSize:'18px',
+              fontSize: "18px",
+              color: "black",
+              boxShadow: "0 0 10px rgba(0, 0, 0, 0.1)",
               alignContent: "left",
               "&:hover": {
-                background: "radial-gradient(6035.71% 72.44% at 0% 50%, #00BFA6 0%, #292D45 100%)",
+                background: open
+                  ? "linear-gradient(to bottom, #5FC8EC, #2F4D54)"
+                  : "radial-gradient(6035.71% 72.44% at 0% 50%, #5FC8EC 0%, #5FC8EC 100%)",
               },
             },
           }}

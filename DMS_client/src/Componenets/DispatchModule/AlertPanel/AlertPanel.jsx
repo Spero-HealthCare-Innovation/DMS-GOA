@@ -227,6 +227,9 @@ const AlertPanel = ({ darkMode }) => {
     const paginatedData = filteredData.slice(startIndex, endIndex);
     const totalPages = Math.ceil(filteredData.length / rowsPerPage);
 
+    useEffect(() => {
+        setPage(1);
+    }, [searchText])
 
     return (
         <Box sx={{ flexGrow: 1, mt: 1, ml: '5em', mr: 1, mb: 2 }}>
@@ -295,7 +298,21 @@ const AlertPanel = ({ darkMode }) => {
                             </TableHead>
                         </Table>
 
-                        <Box sx={{ maxHeight: 500, overflowY: 'auto' }}>
+                        <Box sx={{
+                            maxHeight: 500,
+                            overflowY: 'auto',
+                            scrollBehavior: "smooth",
+                            "&::-webkit-scrollbar": {
+                                width: "6px",
+                            },
+                            "&::-webkit-scrollbar-thumb": {
+                                backgroundColor: darkMode ? "#0288d1" : "#888",
+                                borderRadius: 3,
+                            },
+                            "&::-webkit-scrollbar-thumb:hover": {
+                                backgroundColor: darkMode ? "#5FC8EC" : "#555",
+                            },
+                        }}>
                             <Table>
                                 <TableBody>
                                     {paginatedData.length === 0 ? (
@@ -311,7 +328,8 @@ const AlertPanel = ({ darkMode }) => {
                                             <EnquiryCardBody
                                                 key={startIndex + index}
                                                 sx={{
-                                                    backgroundColor: darkMode ? "rgb(88,92,99)" : "#FFFFFF",
+                                                    backgroundColor: darkMode ? "rgb(90 90 91)" : "#FFFFFF",
+                                                    // backgroundColor: darkMode ? "rgb(88,92,99)" : "#FFFFFF",
                                                     color: "white",
                                                     cursor: "pointer",
                                                 }}
@@ -367,7 +385,7 @@ const AlertPanel = ({ darkMode }) => {
                                                         })()}
                                                     </Typography>
                                                 </StyledCardContent>
-                                                <StyledCardContent style={{ flex: 1 }}>
+                                                {/* <StyledCardContent style={{ flex: 1 }}>
                                                     <Button
                                                         onClick={(e) => {
                                                             e.stopPropagation();
@@ -383,7 +401,31 @@ const AlertPanel = ({ darkMode }) => {
                                                             fontSize: '11px',
                                                         }}
                                                     >
-                                                        {item.triger_status === 1 ? "Trigger" : "Triggered"}
+                                                        {(item.triger_status === 1 ? "trigger" : "triggered")
+                                                            .charAt(0).toUpperCase() + (item.triger_status === 1 ? "trigger" : "triggered").slice(1).toLowerCase()}
+                                                    </Button>
+                                                </StyledCardContent> */}
+                                                <StyledCardContent style={{ flex: 1 }}>
+                                                    <Button
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            handleTriggerClick(item.pk_id, item.triger_status);
+                                                        }}
+                                                        style={{
+                                                            width: '70%',
+                                                            backgroundColor: item.triger_status === 1 ? 'rgb(223,76,76)' : "rgb(18,166,95)",
+                                                            color: 'white',
+                                                            borderRadius: '10px',
+                                                            height: '30px',
+                                                            marginTop: '15px',
+                                                            fontSize: '13px',
+                                                            textTransform: 'none'
+                                                        }}
+                                                    >
+                                                        {(() => {
+                                                            const label = item.triger_status === 1 ? "trigger" : "triggered";
+                                                            return label.charAt(0).toUpperCase() + label.slice(1).toLowerCase();
+                                                        })()}
                                                     </Button>
                                                 </StyledCardContent>
                                             </EnquiryCardBody>
