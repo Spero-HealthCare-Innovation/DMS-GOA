@@ -385,7 +385,7 @@ const AlertPanel = ({ darkMode }) => {
                                                         })()}
                                                     </Typography>
                                                 </StyledCardContent>
-                                                <StyledCardContent style={{ flex: 1 }}>
+                                                {/* <StyledCardContent style={{ flex: 1 }}>
                                                     <Button
                                                         onClick={(e) => {
                                                             e.stopPropagation();
@@ -401,7 +401,31 @@ const AlertPanel = ({ darkMode }) => {
                                                             fontSize: '11px',
                                                         }}
                                                     >
-                                                        {item.triger_status === 1 ? "Trigger" : "Triggered"}
+                                                        {(item.triger_status === 1 ? "trigger" : "triggered")
+                                                            .charAt(0).toUpperCase() + (item.triger_status === 1 ? "trigger" : "triggered").slice(1).toLowerCase()}
+                                                    </Button>
+                                                </StyledCardContent> */}
+                                                <StyledCardContent style={{ flex: 1 }}>
+                                                    <Button
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            handleTriggerClick(item.pk_id, item.triger_status);
+                                                        }}
+                                                        style={{
+                                                            width: '70%',
+                                                            backgroundColor: item.triger_status === 1 ? 'rgb(223,76,76)' : "rgb(18,166,95)",
+                                                            color: 'white',
+                                                            borderRadius: '10px',
+                                                            height: '30px',
+                                                            marginTop: '15px',
+                                                            fontSize: '13px',
+                                                            textTransform: 'none'
+                                                        }}
+                                                    >
+                                                        {(() => {
+                                                            const label = item.triger_status === 1 ? "trigger" : "triggered";
+                                                            return label.charAt(0).toUpperCase() + label.slice(1).toLowerCase();
+                                                        })()}
                                                     </Button>
                                                 </StyledCardContent>
                                             </EnquiryCardBody>
