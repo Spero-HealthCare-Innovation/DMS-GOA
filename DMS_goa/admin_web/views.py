@@ -1163,11 +1163,8 @@ class closure_Post_api(APIView):
         if serializer.is_valid():
             serializer.save()
 
-            # incident = closure_instance.incident_id 
-
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
 
 
 # class closure_Post_api2(APIView):
