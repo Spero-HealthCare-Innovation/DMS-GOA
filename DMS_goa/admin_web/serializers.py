@@ -463,4 +463,10 @@ class Ward_get_Serializer(serializers.ModelSerializer):
         model = DMS_Ward
         # fields = '__all__'
         fields = ['pk_id','ward_name']
-        
+
+
+class Ward_officer_get_Serializer(serializers.ModelSerializer):
+    class Meta:
+        model = DMS_Employee
+        # fields = '__all__'
+        fields = ['emp_id','emp_name']
