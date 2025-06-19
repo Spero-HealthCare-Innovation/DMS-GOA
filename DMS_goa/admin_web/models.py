@@ -146,7 +146,7 @@ class DMS_Disaster_Type(models.Model):
 # Custom User Manager
 class DMS_Employee_Manager(BaseUserManager):
 
-    def create_user(self, emp_username, grp_id, emp_name, emp_email, emp_contact_no, emp_dob, emp_doj, emp_is_login, state_id, dist_id, tahsil_id, city_id, emp_is_deleted, emp_added_by, emp_modified_by,password=None, password2=None):
+    def create_user(self, emp_username, grp_id, emp_name, emp_email, emp_contact_no, emp_dob, emp_doj, emp_is_login, state_id, dist_id, tahsil_id, city_id, emp_is_deleted, emp_added_by, emp_modified_by,ward_id,password=None, password2=None):
 
         """
         Creates and saves a User with the given email, name, tc and password.
@@ -170,13 +170,14 @@ class DMS_Employee_Manager(BaseUserManager):
             emp_is_deleted = emp_is_deleted,
             emp_added_by = emp_added_by,
             emp_modified_by = emp_modified_by,
+            ward_id=ward_id,
         )
 
         user.set_password(password)
         user.save(using=self._db)
         return user
 
-    def create_superuser(self, emp_username, grp_id, emp_name, emp_email, emp_contact_no, emp_dob, emp_doj, emp_is_login, state_id, dist_id, tahsil_id, city_id, emp_is_deleted, emp_added_by, emp_modified_by, password=None,):
+    def create_superuser(self, emp_username, grp_id, emp_name, emp_email, emp_contact_no, emp_dob, emp_doj, emp_is_login, state_id, dist_id, tahsil_id, city_id,ward_id, emp_is_deleted, emp_added_by, emp_modified_by, password=None,):
 
         """Creates and saves a superuser with the given email, name, tc and password."""
         user = self.create_user(
@@ -196,6 +197,7 @@ class DMS_Employee_Manager(BaseUserManager):
             emp_is_deleted = emp_is_deleted,
             emp_added_by = emp_added_by,
             emp_modified_by = emp_modified_by,
+            ward_id=ward_id,
         )
 
         user.is_admin = True
@@ -244,7 +246,7 @@ class DMS_Employee(AbstractBaseUser):
     USERNAME_FIELD = 'emp_username'
 
 
-    REQUIRED_FIELDS = ['grp_id', 'emp_name', 'emp_email', 'emp_contact_no', 'emp_dob', 'emp_doj', 'emp_is_login', 'state_id', 'dist_id', 'tahsil_id', 'city_id', 'emp_is_deleted', 'emp_added_by', 'emp_modified_by']
+    REQUIRED_FIELDS = ['grp_id', 'emp_name', 'emp_email', 'emp_contact_no', 'emp_dob', 'emp_doj', 'emp_is_login', 'state_id', 'dist_id', 'tahsil_id', 'city_id','ward_id', 'emp_is_deleted', 'emp_added_by', 'emp_modified_by']
 
     def __str__(self):
         return str(self.emp_username)
