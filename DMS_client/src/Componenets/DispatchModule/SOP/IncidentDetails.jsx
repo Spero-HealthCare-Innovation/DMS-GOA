@@ -145,7 +145,7 @@ function IncidentDetails({
           <Grid
             item
             xs={12}
-            md={3}
+            md={4}
             sx={{
               borderRight: { md: `1px solid ${borderColor}` },
               pr: { md: 2 },
@@ -695,7 +695,7 @@ function IncidentDetails({
           </Grid>
 
           {/* Right Column */}
-          <Grid item xs={12} md={5} pl={{ md: 2 }}>
+          <Grid item xs={12} md={4} pl={{ md: 2 }}>
             <Typography variant="subtitle2" mb={2} color="#5FC8EC">
               Comments
             </Typography>
