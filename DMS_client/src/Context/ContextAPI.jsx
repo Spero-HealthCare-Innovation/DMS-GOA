@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import axios from "axios";
-
+import * as turf from '@turf/turf';
 const AuthContext = createContext();
 export const useAuth = () => useContext(AuthContext);
 
@@ -16,7 +16,7 @@ export const AuthProvider = ({ children }) => {
   console.log(districts, "districts");
   // const HERE_API_KEY = 'FscCo6SQsrummInzClxlkdETkvx5T1r8VVI25XMGnyY'
   const HERE_API_KEY = import.meta.env.VITE_APP_GOOGLE_MAPS_API_KEY;
-
+// const HERE_API_KEY = 'FscCo6SQsrummInzClxlkdETkvx5T1r8VVI25XMGnyY'
   const [Tehsils, setTehsils] = useState([]);
   const [Citys, setCitys] = useState([]);
   const [Wards, setWards] = useState([]);
@@ -58,6 +58,11 @@ export const AuthProvider = ({ children }) => {
   const [enhancedIncidentData, setEnhancedIncidentData] = useState(null);
   const [selectedIncidentFromSop, setSelectedIncidentFromSop] = useState(null);
   const [isNewEntry, setIsNewEntry] = useState(false);
+// To fetch the ward,tehsil, district from the map
+  const [wardName, setWardName] = useState("");
+  const [tehsilName, setTehsilName] = useState("");
+  const [districtName, setDistrictName] = useState("");
+
 
   // const [disasterIdFromSop, setDisasterIdFromSop] = useState(null);
   useEffect(() => {
@@ -255,7 +260,7 @@ export const AuthProvider = ({ children }) => {
         },
       }
     );
-
+console.log("🔍 HERE API full response:", response.data);
     setSuggestions(response.data.items.filter((item) => item.position));
   };
 
@@ -267,6 +272,31 @@ export const AuthProvider = ({ children }) => {
     setPopupText(address.label);
     setQuery(address.label);
     setSuggestions([]);
+
+
+    try {
+    const geojsonRes = await fetch('/Boundaries/PUNEWARD_TD.geojson'); // ✅ make sure this path is correct
+    const geojson = await geojsonRes.json();
+
+    const point = turf.point([position.lng, position.lat]);
+
+    const matchedFeature = geojson.features.find(feature =>
+      turf.booleanPointInPolygon(point, feature)
+    );
+
+    if (matchedFeature) {
+      const { Name1, Teshil, District } = matchedFeature.properties;
+setWardName(Name1 || "");
+setTehsilName(Teshil || "");
+setDistrictName(District || "");
+    } else {
+      setWardName("");
+      setTehsilName("");
+      setDistrictName("");
+    }
+  } catch (err) {
+    console.error("❌ Error checking polygon match:", err);
+  }
   };
 
   // 🔹 Effects
@@ -394,6 +424,13 @@ export const AuthProvider = ({ children }) => {
         setLongitude,
         commentText,
         setCommentText,
+        wardName,
+        setWardName,
+        tehsilName, 
+        setTehsilName,
+        districtName,
+        setDistrictName,
+        
       }}
     >
       {children}
