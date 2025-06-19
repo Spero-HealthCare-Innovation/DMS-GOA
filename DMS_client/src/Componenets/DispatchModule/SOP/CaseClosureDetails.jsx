@@ -10,41 +10,52 @@ import {
   Alert,
   Select,
   MenuItem,
-
 } from "@mui/material";
 import axios from "axios";
 import { useEffect, useState } from "react";
-import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
-import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
-import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
+import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
+import { DateTimePicker } from "@mui/x-date-pickers/DateTimePicker";
 import { useAuth } from "../../../Context/ContextAPI";
 
-
-const CaseClosureDetails = ({ darkMode, flag, selectedIncident, fetchDispatchList }) => {
+const CaseClosureDetails = ({
+  darkMode,
+  flag,
+  selectedIncident,
+  fetchDispatchList,
+}) => {
   const port = import.meta.env.VITE_APP_API_KEY;
   const token = localStorage.getItem("accessToken");
   const userName = localStorage.getItem("userId");
-  const { selectedIncidentFromSop, disasterIdFromSop, setSelectedIncidentFromSop } = useAuth();
-  console.log("disater name and inc_id from sop", selectedIncidentFromSop, disasterIdFromSop);
+  const {
+    selectedIncidentFromSop,
+    disasterIdFromSop,
+    setSelectedIncidentFromSop,
+  } = useAuth();
+  console.log(
+    "disater name and inc_id from sop",
+    selectedIncidentFromSop,
+    disasterIdFromSop
+  );
 
   const [isDataCleared, setIsDataCleared] = useState(false);
   const [validationErrors, setValidationErrors] = useState({});
-
 
   const validateForm = () => {
     const errors = {};
 
     if (!formData.acknowledge) errors.acknowledge = "Acknowledge is required";
-    if (!formData.startBaseLocation) errors.startBaseLocation = "Start Base Location is required";
+    if (!formData.startBaseLocation)
+      errors.startBaseLocation = "Start Base Location is required";
     if (!formData.atScene) errors.atScene = "At Scene is required";
     if (!formData.fromScene) errors.fromScene = "From Scene is required";
     if (!formData.backToBase) errors.backToBase = "Back to Base is required";
-    if (!formData.closureRemark.trim()) errors.closureRemark = "Remark is required";
+    if (!formData.closureRemark.trim())
+      errors.closureRemark = "Remark is required";
 
     setValidationErrors(errors);
     return Object.keys(errors).length === 0;
   };
-
 
   const [formData, setFormData] = useState({
     acknowledge: "",
@@ -77,7 +88,6 @@ const CaseClosureDetails = ({ darkMode, flag, selectedIncident, fetchDispatchLis
     backToBase: "",
   });
   // Load initial values from props
-
 
   // useEffect(() => {
   //   if (selectedIncident) {
@@ -123,7 +133,6 @@ const CaseClosureDetails = ({ darkMode, flag, selectedIncident, fetchDispatchLis
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
-
   const formatDate = (date) => {
     if (!date) return "";
     const d = new Date(date);
@@ -143,8 +152,6 @@ const CaseClosureDetails = ({ darkMode, flag, selectedIncident, fetchDispatchLis
     );
   };
 
-
-
   //   const handleSubmit = async () => {
   //     if (!selectedIncident?.IncidentId) return;
 
@@ -163,7 +170,6 @@ const CaseClosureDetails = ({ darkMode, flag, selectedIncident, fetchDispatchLis
   //   closure_remark: formData.closureRemark,
   // };
 
-
   //     try {
   //       setLoading(true);
   //       const res = await axios.post(
@@ -179,16 +185,19 @@ const CaseClosureDetails = ({ darkMode, flag, selectedIncident, fetchDispatchLis
   //     }
   //   };
 
-
   const handleSubmit = async () => {
-
     if (!validateForm()) {
-      setSubmitStatus({ type: "error", message: "Please fill all required fields" });
+      setSubmitStatus({
+        type: "error",
+        message: "Please fill all required fields",
+      });
       return;
     }
     // Check if we have incident data
-    const incidentId = selectedIncidentFromSop?.incident_id || selectedIncident?.incident_id;
-    const numericIncId = selectedIncidentFromSop?.inc_id || selectedIncident?.inc_id;
+    const incidentId =
+      selectedIncidentFromSop?.incident_id || selectedIncident?.incident_id;
+    const numericIncId =
+      selectedIncidentFromSop?.inc_id || selectedIncident?.inc_id;
 
     if (!incidentId || !numericIncId) {
       setSubmitStatus({ type: "error", message: "No incident ID found!" });
@@ -196,16 +205,27 @@ const CaseClosureDetails = ({ darkMode, flag, selectedIncident, fetchDispatchLis
     }
 
     const payload = {
-
       incident_id: numericIncId, // Pass numeric inc_id (292) instead of string incident_id
-      Disaster_Type: selectedIncidentFromSop?.disaster_name || selectedIncident?.disaster_name,
-      Alert_Type: getAlertTypeName(selectedIncidentFromSop?.alert_type || selectedIncident?.alert_type),
+      Disaster_Type:
+        selectedIncidentFromSop?.disaster_name ||
+        selectedIncident?.disaster_name,
+      Alert_Type: getAlertTypeName(
+        selectedIncidentFromSop?.alert_type || selectedIncident?.alert_type
+      ),
       inc_id: numericIncId, // Same numeric ID
-      closure_acknowledge: formData.acknowledge ? formatDate(formData.acknowledge) : "",
-      closure_start_base_location: formData.startBaseLocation ? formatDate(formData.startBaseLocation) : "",
+      closure_acknowledge: formData.acknowledge
+        ? formatDate(formData.acknowledge)
+        : "",
+      closure_start_base_location: formData.startBaseLocation
+        ? formatDate(formData.startBaseLocation)
+        : "",
       closure_at_scene: formData.atScene ? formatDate(formData.atScene) : "",
-      closure_from_scene: formData.fromScene ? formatDate(formData.fromScene) : "",
-      closure_back_to_base: formData.backToBase ? formatDate(formData.backToBase) : "",
+      closure_from_scene: formData.fromScene
+        ? formatDate(formData.fromScene)
+        : "",
+      closure_back_to_base: formData.backToBase
+        ? formatDate(formData.backToBase)
+        : "",
       closure_added_by: userName,
       closure_modified_by: userName,
       closure_remark: formData.closureRemark,
@@ -225,14 +245,17 @@ const CaseClosureDetails = ({ darkMode, flag, selectedIncident, fetchDispatchLis
         payload,
         {
           headers: {
-            'Authorization': `Bearer ${authToken}`,
-            'Content-Type': 'application/json'
-          }
+            Authorization: `Bearer ${authToken}`,
+            "Content-Type": "application/json",
+          },
         }
       );
 
       console.log("API Response:", res.data); // Debug log
-      setSubmitStatus({ type: "success", message: "Closure details saved successfully!" });
+      setSubmitStatus({
+        type: "success",
+        message: "Closure details saved successfully!",
+      });
 
       // Clear form fields after successful submit
       setFormData({
@@ -245,13 +268,13 @@ const CaseClosureDetails = ({ darkMode, flag, selectedIncident, fetchDispatchLis
       });
       setSelectedIncidentFromSop(null);
       setIsDataCleared(true);
-      fetchDispatchList()
-
+      fetchDispatchList();
     } catch (error) {
       console.error("API Error:", error); // Debug log
       console.error("Error response:", error.response?.data); // Debug log
 
-      const errorMessage = error.response?.data?.message ||
+      const errorMessage =
+        error.response?.data?.message ||
         error.response?.data?.error ||
         "Failed to save closure details.";
 
@@ -279,7 +302,7 @@ const CaseClosureDetails = ({ darkMode, flag, selectedIncident, fetchDispatchLis
       1: "High",
       2: "Medium",
       3: "Low",
-      4: "Very Low"
+      4: "Very Low",
     };
     return alertTypeMap[alertType] || "Unknown";
   };
@@ -308,8 +331,6 @@ const CaseClosureDetails = ({ darkMode, flag, selectedIncident, fetchDispatchLis
     </Box>
   );
 
-
-
   const [selectedDepartments, setSelectedDepartments] = useState([]);
 
   const handleChange1 = (event) => {
@@ -319,16 +340,18 @@ const CaseClosureDetails = ({ darkMode, flag, selectedIncident, fetchDispatchLis
   return (
     <>
       {submitStatus && (
-        <Box sx={{
-          width: "100%",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          height: "auto",
-          margin: 0,
-          padding: 0,
-        }}>
-          <Alert severity={submitStatus.type} >{submitStatus.message}</Alert>
+        <Box
+          sx={{
+            width: "100%",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            height: "auto",
+            margin: 0,
+            padding: 0,
+          }}
+        >
+          <Alert severity={submitStatus.type}>{submitStatus.message}</Alert>
         </Box>
       )}
 
@@ -356,14 +379,14 @@ const CaseClosureDetails = ({ darkMode, flag, selectedIncident, fetchDispatchLis
           transition: "all 0.3s ease",
         }}
       >
-        <Grid container spacing={3} sx={{ height: '310px' }}>
+        <Grid container spacing={3} sx={{ height: "350px" }}>
           {/* Left Column - Incident Info (Reduced width) */}
           <Grid
             item
             xs={12}
             md={3.3}
             sx={{
-              mt: 1,
+              // mt: 1,
               mb: 0.5,
               borderRight: { md: `1px solid ${borderColor}` },
               pr: { md: 3 },
@@ -375,34 +398,36 @@ const CaseClosureDetails = ({ darkMode, flag, selectedIncident, fetchDispatchLis
                 fontWeight: 500,
                 color: labelColor,
                 fontFamily,
-                mb: 2,
-                textAlign: 'center',
-                borderBottom: `2px solid ${labelColor}`,
-                pb: 1
+                // mb: 2,
+                textAlign: "left",
+                // borderBottom: `2px solid ${labelColor}`,
+                // pb: 1
               }}
             >
               Incident Info
             </Typography>
 
-            <Box sx={{
-              height: '240px',
-              overflowY: 'auto',
-              '&::-webkit-scrollbar': {
-                width: '6px',
-              },
-              '&::-webkit-scrollbar-track': {
-                background: darkMode ? '#2e2e2e' : '#f1f1f1',
-                borderRadius: '3px',
-                marginTop: '1rem',
-              },
-              '&::-webkit-scrollbar-thumb': {
-                background: darkMode ? '#555' : '#888',
-                borderRadius: '3px',
-              },
-              '&::-webkit-scrollbar-thumb:hover': {
-                background: darkMode ? '#777' : '#555',
-              },
-            }}>
+            <Box
+              sx={{
+                height: "250px",
+                // overflowY: "auto",
+                "&::-webkit-scrollbar": {
+                  width: "6px",
+                },
+                "&::-webkit-scrollbar-track": {
+                  background: darkMode ? "#2e2e2e" : "#f1f1f1",
+                  borderRadius: "3px",
+                  marginTop: "1rem",
+                },
+                "&::-webkit-scrollbar-thumb": {
+                  background: darkMode ? "#555" : "#888",
+                  borderRadius: "3px",
+                },
+                "&::-webkit-scrollbar-thumb:hover": {
+                  background: darkMode ? "#777" : "#555",
+                },
+              }}
+            >
               {flag === 0 ? (
                 <Box>
                   <Grid container spacing={2} sx={{ mb: 2, mt: 0.6 }}>
@@ -413,13 +438,17 @@ const CaseClosureDetails = ({ darkMode, flag, selectedIncident, fetchDispatchLis
                       {renderText("Caller Number", "Person")}
                     </Grid>
                   </Grid>
+                  {renderText("Location", "Ahilyanagar, Maharashtra")}
                   {renderText(
-                    "Location", "Ahilyanagar, Maharashtra")}
-                  {renderText(
-                    "Summary", "In case of emergency, call the ambulance immediately.Provide your location and details clearly to ensure quick response.")}
+                    "Summary",
+                    "In case of emergency, call the ambulance immediately.Provide your location and details clearly to ensure quick response."
+                  )}
                 </Box>
               ) : (
-                <Typography variant="body2" sx={{ color: textColor, textAlign: 'center', mt: 4 }}>
+                <Typography
+                  variant="body2"
+                  sx={{ color: textColor, textAlign: "center", mt: 4 }}
+                >
                   No incident data to display.
                 </Typography>
               )}
@@ -432,7 +461,7 @@ const CaseClosureDetails = ({ darkMode, flag, selectedIncident, fetchDispatchLis
             xs={12}
             md={4.7}
             sx={{
-              mt: 1,
+              // mt: 1,
               mb: 0.5,
               borderRight: { md: `1px solid ${borderColor}` },
               px: { md: 3 },
@@ -444,35 +473,36 @@ const CaseClosureDetails = ({ darkMode, flag, selectedIncident, fetchDispatchLis
                 fontWeight: 500,
                 color: labelColor,
                 fontFamily,
-                mb: 2,
-                textAlign: 'center',
-                borderBottom: `2px solid ${labelColor}`,
-                pb: 1
+                // mb: 2,
+                textAlign: "left",
+                // borderBottom: `2px solid ${labelColor}`,
+                // pb: 1
               }}
             >
               Case Timeline
             </Typography>
 
-            <Box sx={{
-
-              height: '220px',
-              overflowY: 'auto',
-              '&::-webkit-scrollbar': {
-                width: '6px',
-              },
-              '&::-webkit-scrollbar-track': {
-                background: darkMode ? '#2e2e2e' : '#f1f1f1',
-                borderRadius: '3px',
-                marginTop: '1rem',
-              },
-              '&::-webkit-scrollbar-thumb': {
-                background: darkMode ? '#555' : '#888',
-                borderRadius: '3px',
-              },
-              '&::-webkit-scrollbar-thumb:hover': {
-                background: darkMode ? '#777' : '#555',
-              },
-            }}>
+            <Box
+              sx={{
+                height: "250px",
+                // overflowY: "auto",
+                "&::-webkit-scrollbar": {
+                  width: "6px",
+                },
+                "&::-webkit-scrollbar-track": {
+                  background: darkMode ? "#2e2e2e" : "#f1f1f1",
+                  borderRadius: "3px",
+                  marginTop: "1rem",
+                },
+                "&::-webkit-scrollbar-thumb": {
+                  background: darkMode ? "#555" : "#888",
+                  borderRadius: "3px",
+                },
+                "&::-webkit-scrollbar-thumb:hover": {
+                  background: darkMode ? "#777" : "#555",
+                },
+              }}
+            >
               <Grid container spacing={2} sx={{ mt: 0.6 }}>
                 <Grid item xs={5.7}>
                   <Select
@@ -483,7 +513,7 @@ const CaseClosureDetails = ({ darkMode, flag, selectedIncident, fetchDispatchLis
                     renderValue={(selected) => {
                       if (selected.length === 0) {
                         return (
-                          <span style={{ color: '#888', fontStyle: 'normal' }}>
+                          <span style={{ color: "#888", fontStyle: "normal" }}>
                             Select Department
                           </span>
                         );
@@ -528,12 +558,15 @@ const CaseClosureDetails = ({ darkMode, flag, selectedIncident, fetchDispatchLis
                       onChange={(newValue) => {
                         handleChange("acknowledge", newValue);
                         if (validationErrors.acknowledge) {
-                          setValidationErrors(prev => ({ ...prev, acknowledge: null }));
+                          setValidationErrors((prev) => ({
+                            ...prev,
+                            acknowledge: null,
+                          }));
                         }
                       }}
                       ampm={false}
                       inputFormat="yyyy-MM-dd | HH:mm"
-                      views={['year', 'month', 'day', 'hours', 'minutes']}
+                      views={["year", "month", "day", "hours", "minutes"]}
                       renderInput={(params) => (
                         <TextField
                           {...params}
@@ -549,7 +582,7 @@ const CaseClosureDetails = ({ darkMode, flag, selectedIncident, fetchDispatchLis
                             ...params.InputProps,
                             sx: {
                               color: textColor,
-                              height: '35px',
+                              height: "35px",
                               "& .MuiSvgIcon-root": {
                                 color: "white",
                               },
@@ -568,7 +601,10 @@ const CaseClosureDetails = ({ darkMode, flag, selectedIncident, fetchDispatchLis
                       onChange={(newValue) => {
                         handleChange("startBaseLocation", newValue);
                         if (validationErrors.startBaseLocation) {
-                          setValidationErrors(prev => ({ ...prev, startBaseLocation: null }));
+                          setValidationErrors((prev) => ({
+                            ...prev,
+                            startBaseLocation: null,
+                          }));
                         }
                       }}
                       ampm={false}
@@ -589,7 +625,7 @@ const CaseClosureDetails = ({ darkMode, flag, selectedIncident, fetchDispatchLis
                             ...params.InputProps,
                             sx: {
                               color: textColor,
-                              height: '35px',
+                              height: "35px",
                               fontSize: "0.45rem",
                               "& .MuiSvgIcon-root": {
                                 color: "white",
@@ -609,7 +645,10 @@ const CaseClosureDetails = ({ darkMode, flag, selectedIncident, fetchDispatchLis
                       onChange={(newValue) => {
                         handleChange("atScene", newValue);
                         if (validationErrors.atScene) {
-                          setValidationErrors(prev => ({ ...prev, atScene: null }));
+                          setValidationErrors((prev) => ({
+                            ...prev,
+                            atScene: null,
+                          }));
                         }
                       }}
                       ampm={false}
@@ -630,7 +669,7 @@ const CaseClosureDetails = ({ darkMode, flag, selectedIncident, fetchDispatchLis
                             ...params.InputProps,
                             sx: {
                               color: textColor,
-                              height: '35px',
+                              height: "35px",
                               fontSize: "0.85rem",
                               "& .MuiSvgIcon-root": {
                                 color: "white",
@@ -650,7 +689,10 @@ const CaseClosureDetails = ({ darkMode, flag, selectedIncident, fetchDispatchLis
                       onChange={(newValue) => {
                         handleChange("fromScene", newValue);
                         if (validationErrors.fromScene) {
-                          setValidationErrors(prev => ({ ...prev, fromScene: null }));
+                          setValidationErrors((prev) => ({
+                            ...prev,
+                            fromScene: null,
+                          }));
                         }
                       }}
                       ampm={false}
@@ -671,7 +713,7 @@ const CaseClosureDetails = ({ darkMode, flag, selectedIncident, fetchDispatchLis
                             ...params.InputProps,
                             sx: {
                               color: textColor,
-                              height: '35px',
+                              height: "35px",
                               fontSize: "0.85rem",
                               "& .MuiSvgIcon-root": {
                                 color: "white",
@@ -691,7 +733,10 @@ const CaseClosureDetails = ({ darkMode, flag, selectedIncident, fetchDispatchLis
                       onChange={(newValue) => {
                         handleChange("backToBase", newValue);
                         if (validationErrors.backToBase) {
-                          setValidationErrors(prev => ({ ...prev, backToBase: null }));
+                          setValidationErrors((prev) => ({
+                            ...prev,
+                            backToBase: null,
+                          }));
                         }
                       }}
                       ampm={false}
@@ -712,7 +757,7 @@ const CaseClosureDetails = ({ darkMode, flag, selectedIncident, fetchDispatchLis
                             ...params.InputProps,
                             sx: {
                               color: textColor,
-                              height: '35px',
+                              height: "35px",
                               fontSize: "0.85rem",
                               "& .MuiSvgIcon-root": {
                                 color: "white",
@@ -738,39 +783,44 @@ const CaseClosureDetails = ({ darkMode, flag, selectedIncident, fetchDispatchLis
                 fontWeight: 500,
                 color: labelColor,
                 fontFamily,
-                mb: 2,
-                textAlign: 'center',
-                borderBottom: `2px solid ${labelColor}`,
-                pb: 1
+                // mb: 2,
+                textAlign: "left",
+                // borderBottom: `2px solid ${labelColor}`,
+                // pb: 1
               }}
             >
               Closure Remark
             </Typography>
 
-            <Box sx={{
-
-              height: '220px',
-              overflowY: 'auto',
-              '&::-webkit-scrollbar': {
-                width: '6px',
-              },
-              '&::-webkit-scrollbar-track': {
-                background: darkMode ? '#2e2e2e' : '#f1f1f1',
-                borderRadius: '3px',
-                marginTop: '1.5rem',
-              },
-              '&::-webkit-scrollbar-thumb': {
-                background: darkMode ? '#555' : '#888',
-                borderRadius: '3px',
-              },
-              '&::-webkit-scrollbar-thumb:hover': {
-                background: darkMode ? '#777' : '#555',
-              },
-            }}>
-
-
-              <Box sx={{ height: '200px', display: 'flex', flexDirection: 'column', mt: 3 }}>
-
+            <Box
+              sx={{
+                height: "250px",
+                // overflowY: "auto",
+                "&::-webkit-scrollbar": {
+                  width: "6px",
+                },
+                "&::-webkit-scrollbar-track": {
+                  background: darkMode ? "#2e2e2e" : "#f1f1f1",
+                  borderRadius: "3px",
+                  marginTop: "1.5rem",
+                },
+                "&::-webkit-scrollbar-thumb": {
+                  background: darkMode ? "#555" : "#888",
+                  borderRadius: "3px",
+                },
+                "&::-webkit-scrollbar-thumb:hover": {
+                  background: darkMode ? "#777" : "#555",
+                },
+              }}
+            >
+              <Box
+                sx={{
+                  height: "100px",
+                  display: "flex",
+                  flexDirection: "column",
+                  mt: 3,
+                }}
+              >
                 <TextField
                   label="Remark *"
                   variant="outlined"
@@ -782,7 +832,10 @@ const CaseClosureDetails = ({ darkMode, flag, selectedIncident, fetchDispatchLis
                   onChange={(e) => {
                     handleChange("closureRemark", e.target.value);
                     if (validationErrors.closureRemark) {
-                      setValidationErrors(prev => ({ ...prev, closureRemark: null }));
+                      setValidationErrors((prev) => ({
+                        ...prev,
+                        closureRemark: null,
+                      }));
                     }
                   }}
                   error={!!validationErrors.closureRemark}
@@ -792,7 +845,7 @@ const CaseClosureDetails = ({ darkMode, flag, selectedIncident, fetchDispatchLis
                   sx={{ ...textFieldStyle, mb: 2, flex: 1 }}
                 />
 
-                <Box sx={{ textAlign: "center", mt: 'auto' }}>
+                <Box sx={{ textAlign: "center", mt: "auto" }}>
                   <Button
                     variant="contained"
                     onClick={handleSubmit}
@@ -802,19 +855,22 @@ const CaseClosureDetails = ({ darkMode, flag, selectedIncident, fetchDispatchLis
                       color: "#fff",
                       px: 3,
                       py: 1,
-                      fontSize: '0.875rem',
+                      fontSize: "0.875rem",
                       fontWeight: 500,
                       minWidth: 100,
                       textTransform: "none",
                     }}
                   >
-                    {loading ? <CircularProgress size={20} color="inherit" /> : "Submit"}
+                    {loading ? (
+                      <CircularProgress size={20} color="inherit" />
+                    ) : (
+                      "Submit"
+                    )}
                   </Button>
                 </Box>
               </Box>
             </Box>
           </Grid>
-
         </Grid>
       </Paper>
     </>

@@ -7,7 +7,7 @@ export default function Footer({ darkMode }) {
             sx={{
                 position: 'fixed',
                 bottom: 0,
-                height: '40px',
+                height: '50px',
                 width: '100%',
                 zIndex: 1000,
                 backgroundColor: darkMode ? "#202328" : "#CCDBEF",
@@ -35,8 +35,8 @@ export default function Footer({ darkMode }) {
                 src={logo}
                 alt="Logo"
                 sx={{
-                    height: 35,
-                    width: 40,
+                    height: 45,
+                    width: 45,
                     position: 'absolute',
                     right: 16,
                 }}

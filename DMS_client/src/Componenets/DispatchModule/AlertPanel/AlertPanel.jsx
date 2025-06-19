@@ -19,7 +19,7 @@ const EnquiryCard = styled('div')({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    background: "rgb(95, 200, 236)",
+    background: "linear-gradient(to bottom, #53bce1, rgb(173, 207, 216))",
     // background: "rgb(95, 200, 236)",
     color: 'black',
     borderRadius: '8px 10px 0 0',
@@ -329,7 +329,7 @@ const AlertPanel = ({ darkMode }) => {
                                             <EnquiryCardBody
                                                 key={startIndex + index}
                                                 sx={{
-                                                    backgroundColor: darkMode ? "rgb(90 90 91)" : "#FFFFFF",
+                                                    backgroundColor: darkMode ? "rgb(53 53 53)" : "#FFFFFF",
                                                     // backgroundColor: darkMode ? "rgb(88,92,99)" : "#FFFFFF",
                                                     color: "white",
                                                     cursor: "pointer",

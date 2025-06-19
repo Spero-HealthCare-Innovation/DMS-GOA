@@ -1,12 +1,12 @@
 import { useState } from "react";
 import {
-    Drawer,
-    List,
-    ListItemButton,
-    ListItemIcon,
-    ListItemText,
-    Typography,
-    Box,
+  Drawer,
+  List,
+  ListItemButton,
+  ListItemIcon,
+  ListItemText,
+  Typography,
+  Box,
 } from "@mui/material";
 import { FaCloudSun } from "react-icons/fa";
 import weatherImg from "../../../assets/Cloud angled rain zap.png";
@@ -18,85 +18,106 @@ import floodImg from "../../../assets/Cloud angled rain zap.png";
 import waterStressImg from "../../../assets/Big rain drops.png";
 
 const menuItems = [
-    { text: "Weather Forecast", img: weatherImg, id: "weather" },
-    { text: "Heat Watch", img: heatWatchImg, id: "heat-watch" },
-    { text: "Cyclone", img: cycloneImg, id: "cyclone" },
-    { text: "Drought", img: droughtImg, id: "drought" },
-    { text: "Nowcast Weather", img: nowcastImg, id: "Nowcast Weather" },
-    { text: "Flood Forecast", img: floodImg, id: "flood-control" },
-    { text: "Drinking Water Stress", img: waterStressImg, id: "service-wise" },
+  { text: "Weather Forecast", img: weatherImg, id: "weather" },
+  { text: "Heat Watch", img: heatWatchImg, id: "heat-watch" },
+  { text: "Cyclone", img: cycloneImg, id: "cyclone" },
+  { text: "Drought", img: droughtImg, id: "drought" },
+  { text: "Nowcast Weather", img: nowcastImg, id: "Nowcast Weather" },
+  { text: "Flood Forecast", img: floodImg, id: "flood-control" },
+  { text: "Drinking Water Stress", img: waterStressImg, id: "service-wise" },
 ];
 
 const Sidebar = ({ darkMode }) => {
-    const [open, setOpen] = useState(false);
-    const [showWeatherPanel, setShowWeatherPanel] = useState(false);
+  const [open, setOpen] = useState(false);
+  const [showWeatherPanel, setShowWeatherPanel] = useState(false);
 
-    return (
-        <Box sx={{ display: "flex" }}>
-            <Drawer
-                variant="permanent"
-                onMouseEnter={() => setOpen(true)}
-                onMouseLeave={() => setOpen(false)}
-                sx={{
-                    width: open ? 200 : 50,
-                    flexShrink: 0,
-                    transition: "width 0.5s ease-in-out",
-                    "& .MuiDrawer-paper": {
-                        width: open ? 200 : 50,
-                        height: "auto",
-                        maxHeight: "100vh",
-                        boxShadow: "0px 4px 15px rgba(0, 0, 0, 0.2)",
-                        // background: "linear-gradient(to bottom, #5FECC8, rgba(95, 236, 200, 0.05))",
-                        background: darkMode
-                            ? "rgb(95, 200, 236)"
-                            : "rgb(95, 200, 236)",
-                        // background: darkMode
-                        //     ? "linear-gradient(to bottom, #5FECC8, rgba(95, 236, 200, 0.05))"
-                        //     : "radial-gradient(6035.71% 72.44% at 0% 50%, #00BFA6 0%, #292D45 100%)",
-                        border: "1px solid rgba(255, 255, 255, 0.5)",
-                        color: "black",
-                        borderRadius: "30px",
-                        flexDirection: "column",
-                        paddingTop: 2,
-                        transition: "width 0.5s ease-in-out",
-                        overflowX: "hidden",
-                        paddingBottom: 3,
-                        marginTop: "9em",
-                        marginLeft: "0.8em",
-                        "&:hover": {
-                            background: "rgb(95, 200, 236)",
-                        },
-                    },
-                }}
+  return (
+    <Box sx={{ display: "flex" }}>
+      <Drawer
+        variant="permanent"
+        onMouseEnter={() => setOpen(true)}
+        onMouseLeave={() => setOpen(false)}
+        sx={{
+          width: open ? 200 : 50,
+          flexShrink: 0,
+          transition: "width 0.5s ease-in-out",
+          "& .MuiDrawer-paper": {
+            width: open ? 200 : 50,
+            height: "auto",
+            maxHeight: "100vh",
+            boxShadow: "0px 4px 15px rgba(0, 0, 0, 0.2)",
+            // background: "linear-gradient(to bottom, #5FECC8, rgba(95, 236, 200, 0.05))",
+            // background: darkMode
+            //     ? "rgb(95, 200, 236)"
+            //     : "rgb(95, 200, 236)",
+            background: darkMode
+              ? open
+                ? "linear-gradient(to bottom, #5FC8EC,rgb(19, 26, 28))" // top to bottom gradient when open
+                : "linear-gradient(to bottom, #5FC8EC,rgb(19, 26, 28))" // solid background when closed
+              : open
+              ? "linear-gradient(to bottom, #5FC8EC,rgb(18, 24, 26))" // light gradient when open in light mode
+              : "radial-gradient(6035.71% 72.44% at 0% 50%, #5FC8EC 0%, #5FC8EC 100%)",
+            // background: darkMode
+            //     ? "linear-gradient(to bottom, #5FECC8, rgba(95, 236, 200, 0.05))"
+            //     : "radial-gradient(6035.71% 72.44% at 0% 50%, #00BFA6 0%, #292D45 100%)",
+            border: "1px solid rgba(255, 255, 255, 0.5)",
+            color: "#fff",
+            borderRadius: "30px",
+            flexDirection: "column",
+            paddingTop: 2,
+            transition: "width 0.5s ease-in-out",
+            overflowX: "hidden",
+            paddingBottom: 3,
+            marginTop: "9em",
+            marginLeft: "0.8em",
+            "&:hover": {
+              //   background: "rgb(95, 200, 236)",
+              background: darkMode
+                ? open
+                  ? "linear-gradient(to bottom, #53bce1, rgb(19, 26, 28))" // top to bottom gradient when open
+                  : "linear-gradient(to bottom, #53bce1, rgb(19, 26, 28))" // solid background when closed
+                : open
+                ? "linear-gradient(to bottom, #5FC8EC,rgb(18, 24, 26))" // light gradient when open in light mode
+                : "radial-gradient(6035.71% 72.44% at 0% 50%, #5FC8EC 0%, #5FC8EC 100%)",
+            },
+          },
+        }}
+      >
+        <List sx={{ width: "100%", padding: 0 }}>
+          {menuItems.map((item, index) => (
+            <ListItemButton
+              key={index}
+              sx={{
+                color: "black",
+                "&:hover": { background: "rgb(95, 200, 236)" },
+              }}
+              onClick={() => setShowWeatherPanel(item.id === "weather")}
             >
-                <List sx={{ width: "100%", padding: 0 }}>
-                    {menuItems.map((item, index) => (
-                        <ListItemButton
-                            key={index}
-                            sx={{
-                                color: "black",
-                                "&:hover": { background: "rgb(95, 200, 236)" },
-                            }}
-                            onClick={() => setShowWeatherPanel(item.id === "weather")}
-                        >
-                            <ListItemIcon sx={{ minWidth: 40 }}>
-                                <img src={item.img} alt={item.text} style={{ width: 24, height: 24 }} />
-                            </ListItemIcon>
-                            <ListItemText
-                                primary={item.text}
-                                primaryTypographyProps={{
-                                    fontSize: "14px",
-                                    lineHeight: 1.3,
-                                }}
-                                sx={{ opacity: open ? 1 : 0, whiteSpace: "nowrap" }}
-                            />
-                        </ListItemButton>
-                    ))}
+              <ListItemIcon sx={{ minWidth: 40 }}>
+                <img
+                  src={item.img}
+                  alt={item.text}
+                  style={{ width: 24, height: 24 }}
+                />
+              </ListItemIcon>
+              <ListItemText
+                primary={item.text}
+                primaryTypographyProps={{
+                  fontSize: "14px",
+                  lineHeight: 1.3,
+                }}
+                sx={{
+                  opacity: open ? 1 : 0,
+                  whiteSpace: "nowrap",
+                  color: "white",
+                }}
+              />
+            </ListItemButton>
+          ))}
+        </List>
+      </Drawer>
 
-                </List>
-            </Drawer>
-
-            {/* {showWeatherPanel && (
+      {/* {showWeatherPanel && (
                 <Box
                     sx={{
                         position: "absolute",
@@ -127,8 +148,8 @@ const Sidebar = ({ darkMode }) => {
                     </Box>
                 </Box>
             )} */}
-        </Box>
-    );
+    </Box>
+  );
 };
 
 export default Sidebar;
