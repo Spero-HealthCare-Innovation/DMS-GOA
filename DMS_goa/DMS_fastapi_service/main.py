@@ -305,7 +305,7 @@ async def call_open_meteo_api():
     #     "https://api.open-meteo.com/v1/forecast?latitude=18.1505,18.635764&longitude=73.8424,73.801452&current=temperature_2m,rain,precipitation,weather_code"
     # )
     url = (
-        "https://api.open-meteo.com/v1/forecast?latitude=18.52380565246535&longitude=73.85260317930653&current=temperature_2m,rain,precipitation,weather_code"
+        "https://api.open-meteo.com/v1/forecast?latitude=18.52380565246535&longitude=73.85260317930653&current=temperature_2m,rain,precipitation,weather_code&timezone=Asia%2FKolkata"
     )
     # url = (
     #     "https://api.open-meteo.com/v1/forecast?latitude=15.5367,15.1261&longitude=73.9458,74.1848&hourly=temperature_2m,rain,precipitation,weather_code&models=ecmwf_ifs025"
@@ -374,7 +374,10 @@ logger = logging.getLogger(__name__)
 def get_old_weather_alerts():
     try:
         # alerts = Weather_alerts.objects.order_by("-time")
-        alerts = Weather_alerts.objects.order_by("-alert_datetime")
+        # alerts = Weather_alerts.objects.order_by("-alert_datetime")
+        alerts = Weather_alerts.objects.order_by("-alert_datetime", "-pk_id")
+        for alert in alerts:
+            print(alert.pk_id, alert.alert_datetime)
         return [
             {
                 "pk_id": alert.pk_id,
@@ -388,8 +391,8 @@ def get_old_weather_alerts():
                 "precipitation": alert.precipitation,
                 "weather_code": alert.weather_code,
                 "triger_status": alert.triger_status,
-                "disaster_id": alert.disaster_id.disaster_id,
-                "disaster_name": alert.disaster_id.disaster_name,
+                "disaster_id": alert.disaster_id.disaster_id if alert.disaster_id else None,
+                "disaster_name": alert.disaster_id.disaster_name if alert.disaster_id else None,
                 "alert_type":alert.alert_type
             }
             for alert in alerts
@@ -536,7 +539,9 @@ async def websocket_endpoint(websocket: WebSocket):
     try:
         # Send old messages on connect
         old_messages = await get_old_weather_alerts()
+        # print("old msg-", old_messages)
         for msg in old_messages:
+            print("MSSSSSSSSSSSSSSGGGGG----", msg)
             await websocket.send_text(json.dumps(msg))  # ✅ flat format
             await asyncio.sleep(0.05)
 
@@ -648,4 +653,47 @@ async def websocket_trigger2(websocket: WebSocket):
         print(f"Trigger2 WebSocket removed: {websocket.client}")
 
 
+# # --------------------------------------####NIKITA###-------------------------------------
+
+# Based on disaster id webcoket to fetch weather alerts
+
+# connected_disaster_clients = {}  # { websocket: disaster_id }
+
+# @app.websocket("/ws/disaster_alerts")
+# async def websocket_disaster_alerts(websocket: WebSocket):
+#     await websocket.accept()
+
+#     try:
+#         # Wait for client to send disaster_id
+#         data = await websocket.receive_text()
+#         message = json.loads(data)
+#         disaster_id = message.get("disaster_id")
+
+#         if not disaster_id:
+#             await websocket.send_text("Error: 'disaster_id' is required.")
+#             await websocket.close(code=1008)
+#             return
+
+#         connected_disaster_clients[websocket] = disaster_id
+#         print(f"WebSocket connected for disaster_id: {disaster_id}")
+#         print("Total connected disaster alert clients:", len(connected_disaster_clients))
+
+#         # Listen loop
+#         while True:
+#             await asyncio.sleep(5)  # Optional heartbeat
+#             # You can push data here based on disaster_id
+#             # Example dummy data push:
+#             alert_data = {
+#                 "disaster_id": disaster_id,
+#                 "alert": f"Sample alert for disaster {disaster_id}"
+#             }
+#             await websocket.send_text(json.dumps(alert_data))
+
+#     except WebSocketDisconnect:
+#         print("Disaster alert WebSocket disconnected.")
+#     except Exception as e:
+#         print(f"Disaster alert WebSocket error: {e}")
+#     finally:
+#         connected_disaster_clients.pop(websocket, None)
+#         print(f"Disaster alert WebSocket removed: {websocket.client}")
 # # --------------------------------------####NIKITA###-------------------------------------

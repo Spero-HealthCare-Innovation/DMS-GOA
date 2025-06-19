@@ -218,6 +218,7 @@ class DMS_Employee(AbstractBaseUser):
     dist_id = models.ForeignKey(DMS_District, on_delete=models.CASCADE,null=True, blank=True)
     tahsil_id = models.ForeignKey(DMS_Tahsil, on_delete=models.CASCADE,null=True, blank=True)
     city_id = models.ForeignKey(DMS_City, on_delete=models.CASCADE,null=True, blank=True)
+    ward_id = models.ForeignKey('DMS_Ward', on_delete=models.CASCADE,null=True, blank=True)
     # grp_id = models.CharField(max_length=255, null=True, blank=True)
     # state_id = models.CharField(max_length=255, null=True, blank=True)
     # dist_id = models.CharField(max_length=255, null=True, blank=True)
@@ -480,7 +481,7 @@ class DMS_incident_closure(models.Model):
     image = models.FileField(upload_to='media_files/', null=True, blank=True)
     closure_inc_id = models.CharField(max_length=255, null=True, blank=True)
     closure_amb_no = models.CharField(max_length=255, null=True, blank=True)
-    incident_close_by = models.CharField(max_length=100, null=True, blank=True)
+    incident_responder_by = models.CharField(max_length=100, null=True, blank=True)
     closure_added_by = models.CharField(max_length=255, null=True, blank=True)
     closure_added_date = models.DateTimeField(auto_now=True,null=True, blank=True)
     closure_modified_by = models.CharField(max_length=255, null=True, blank=True)
@@ -511,5 +512,17 @@ class DMS_Disaster_Severity(models.Model):
     added_by = models.CharField(max_length=255, null=True, blank=True)
     modified_by = models.CharField(max_length=255, null=True, blank=True)
     modified_date = models.DateTimeField(null=True, blank=True)
+    
+
+class DMS_Ward(models.Model):
+    pk_id = models.AutoField(primary_key=True)
+    ward_name = models.CharField(max_length=255,null=True,blank=True)
+    tah_id = models.ForeignKey(DMS_Tahsil, on_delete=models.CASCADE)
+    city_id = models.ForeignKey(DMS_City,on_delete=models.CASCADE) 
+    ward_is_deleted = models.BooleanField(default=False)
+    ward_added_by = models.CharField(max_length=255, null=True, blank=True)
+    ward_added_date = models.DateTimeField(auto_now=True)
+    ward_modified_by = models.CharField(max_length=255, null=True, blank=True)
+    ward_modified_date = models.DateTimeField(auto_now=True,null=True, blank=True)
     
     
