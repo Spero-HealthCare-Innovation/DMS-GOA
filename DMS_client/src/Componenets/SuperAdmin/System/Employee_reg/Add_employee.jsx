@@ -42,14 +42,17 @@ function Add_employee({ darkMode }) {
     districts,
     Tehsils,
     Citys,
+    Wards,
     selectedStateId,
     selectedDistrictId,
     selectedTehsilId,
     selectedCityID,
+     selectedWardId,
     setSelectedStateId,
     setSelectedDistrictId,
     setSelectedTehsilId,
     setSelectedCityId,
+    setSelectedWardId ,
     loading,
     error,
   } = useAuth();
@@ -57,7 +60,7 @@ function Add_employee({ darkMode }) {
 
   const textColor = darkMode ? "#ffffff" : "#000000";
   const bgColor = "linear-gradient(to bottom, #53bce1, rgb(173, 207, 216))";
-  const paper = darkMode ? "202328":"#FFFFFF";
+  const paper = darkMode ? "202328" : "#FFFFFF";
   const tableRow = "rgb(53 53 53)";
   const labelColor = darkMode ? "#5FECC8" : "#1976d2";
   const fontFamily = "Roboto, sans-serif";
@@ -91,7 +94,7 @@ function Add_employee({ darkMode }) {
   const [loading1, setLoading1] = useState(false);
   const [groupList, setGroupList] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
-
+  const [editSelectedRowId, setEditSelectedRowId] = useState(null);
   const [anchorEl, setAnchorEl] = useState(null);
   const [selectedEmployee, setSelectedEmployee] = useState(null);
   const [showAlert, setShowAlert] = useState(false);
@@ -133,6 +136,14 @@ function Add_employee({ darkMode }) {
   const handleCityChange = (e) => {
     setSelectedCityId(e.target.value);
   };
+
+  const handleWardChange = (e) => {
+    setSelectedWardId(e.target.value);
+    if (formErrors.selectedWardId) {
+      setFormErrors(prev => ({ ...prev, selectedWardId: '' }));
+    }
+  };
+
 
 
   const open = Boolean(anchorEl);
@@ -209,6 +220,7 @@ function Add_employee({ darkMode }) {
       dist_id: selectedDistrictId,
       tahsil_id: selectedTehsilId,
       city_id: selectedCityID,
+      ward_id:selectedWardId,
       emp_is_deleted: "0",
       emp_added_by: userName,
       emp_modified_by: userName,
@@ -241,6 +253,7 @@ function Add_employee({ darkMode }) {
       setSelectedDistrictId('');
       setSelectedTehsilId('');
       setSelectedCityId('');
+      setSelectedWardId('');
 
     } catch (err) {
       console.error("Error creating employee:", err.response?.data || err.message);
@@ -590,7 +603,7 @@ function Add_employee({ darkMode }) {
 
 
   const filteredEmployees = employees.filter(employee =>
-   employee.empName.toLowerCase().includes(searchTerm.toLowerCase())
+    employee.empName.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const paginatedData = filteredEmployees;
@@ -659,7 +672,7 @@ function Add_employee({ darkMode }) {
 
         <Typography
           sx={{
-           color: "#5FC8EC",
+            color: "#5FC8EC",
             fontWeight: 600,
             fontSize: 18,
             fontFamily,
@@ -705,7 +718,7 @@ function Add_employee({ darkMode }) {
 
       <Grid container spacing={2}>
         <Grid item xs={12} md={7}>
-          <Paper elevation={3} sx={{ padding: 3, borderRadius: 3, backgroundColor:paper, mt: 1, mb: 1 , height: "89%"}}>
+          <Paper elevation={3} sx={{ padding: 3, borderRadius: 3, backgroundColor: paper, mt: 1, mb: 1, height: "89%" }}>
             <TableContainer >
               <Table >
                 <TableHead>
@@ -716,7 +729,7 @@ function Add_employee({ darkMode }) {
                       display: "flex",
                       width: "100%",
                       borderRadius: 2,
-                       position: "sticky",
+                      position: "sticky",
                       p: 3,
                     }}>
                       <StyledCardContent
@@ -788,7 +801,7 @@ function Add_employee({ darkMode }) {
 
 
                 <TableBody
-                sx={{
+                  sx={{
                     display: "block",
                     // height:"90%",
                     maxHeight: "50vh",
@@ -834,6 +847,11 @@ function Add_employee({ darkMode }) {
                               display: "flex",
                               width: "100%",
                               mb: 1,
+                              border:
+                                item.emp_id === editSelectedRowId
+                                  ? "2px solid #5FC8EC"
+                                  : "1px solid transparent",
+
                             }}
                           >
                             <StyledCardContent
@@ -955,7 +973,7 @@ function Add_employee({ darkMode }) {
                     borderColor: borderColor,
                     height: "30px",
                     minWidth: "70px",
-                   backgroundColor:darkMode ? "#202328":"#FFFFFF",
+                    backgroundColor: darkMode ? "#202328" : "#FFFFFF",
                     "& .MuiOutlinedInput-notchedOutline": {
                       borderColor: borderColor,
                     },
@@ -983,7 +1001,7 @@ function Add_employee({ darkMode }) {
                   gap: 2,
                   color: textColor,
                   fontSize: "13px",
-                 backgroundColor:darkMode ? "#202328":"#FFFFFF",
+                  backgroundColor: darkMode ? "#202328" : "#FFFFFF",
                 }}
               >
                 <Box
@@ -1090,9 +1108,10 @@ function Add_employee({ darkMode }) {
                 // Set editing mode first
                 setIsEditing(true);
                 setEditingEmployeeId(empData.emp_id);
-
+                setEditSelectedRowId(emp_id);
                 // Then set location IDs in sequence to trigger dependent loading
                 setSelectedStateId(empData.state_id);
+
 
                 // Use setTimeout to ensure state is set before setting district
                 setTimeout(() => {
@@ -1115,14 +1134,14 @@ function Add_employee({ darkMode }) {
         </Popover>
 
         <Grid item xs={12} md={4.9}>
-          <Paper elevation={3} sx={{ padding: 2, borderRadius: 3,  backgroundColor:paper, mt: 1, mb: 5.9 }}>
+          <Paper elevation={3} sx={{ padding: 2, borderRadius: 3, backgroundColor: paper, mt: 1, mb: 5.9 }}>
             <Box
-                                    display="flex"
-                                    justifyContent={{ xs: "center", md: "flex-end" }}
-                                    alignItems="center"
-                                    mb={2}
-                                    flexWrap="wrap"
-                                  >
+              display="flex"
+              justifyContent={{ xs: "center", md: "flex-end" }}
+              alignItems="center"
+              mb={2}
+              flexWrap="wrap"
+            >
 
               {/* <Typography
                 sx={{
@@ -1146,7 +1165,7 @@ function Add_employee({ darkMode }) {
                   fontFamily: "Roboto",
                   textTransform: "none",
                   "&:hover": {
-                    backgroundColor:  "rgb(223,76,76)",
+                    backgroundColor: "rgb(223,76,76)",
                   },
                 }}
               >
@@ -1475,6 +1494,48 @@ function Add_employee({ darkMode }) {
                 )}
               </Grid>
 
+              {/* Ward Select  */}
+
+              <Grid item xs={12} sm={6}>
+                <Select
+                  fullWidth
+                  displayEmpty
+                  value={selectedWardId}
+                  onChange={handleWardChange}
+                  placeholder="Select Ward"
+                  defaultValue=""
+                  error={!!formErrors.selectedWardId}
+                  inputProps={{
+                    "aria-label": "Select Ward",
+                  }}
+                  sx={{
+                    ...selectStyles,
+                    ...(formErrors.selectedWardId && {
+                      '& .MuiOutlinedInput-notchedOutline': {
+                        borderColor: '#d32f2f',
+                      }
+                    })
+                  }}
+                  IconComponent={KeyboardArrowDownIcon}
+                >
+                  <MenuItem value="" disabled>
+                    Select Ward
+                  </MenuItem>
+                  {Wards.map((ward) => (
+                    <MenuItem key={ward.pk_id} value={ward.pk_id}>
+                      {ward.ward_name}
+                    </MenuItem>
+                  ))}
+                </Select>
+
+                {formErrors.selectedWardId && (
+                  <Typography variant="caption" color="error" sx={{ ml: 1, fontSize: '0.75rem' }}>
+                    {formErrors.selectedWardId}
+                  </Typography>
+                )}
+              </Grid>
+
+
               {/* DOB TextField */}
               <Grid item xs={12} sm={6}>
                 <TextField
@@ -1571,15 +1632,15 @@ function Add_employee({ darkMode }) {
                   sx={{
                     mt: 1,
                     width: "40%",
-                    backgroundColor:  "rgb(18,166,95,0.8)",
+                    backgroundColor: "rgb(18,166,95,0.8)",
                     color: "#fff",
                     fontWeight: "bold",
                     borderRadius: "12px",
-                       textTransform: 'none',
+                    textTransform: 'none',
                     "&:hover": {
-                      backgroundColor:"rgb(18,166,95,0.8)",
+                      backgroundColor: "rgb(18,166,95,0.8)",
                       color: "white !important",
-                         textTransform: 'none',
+                      textTransform: 'none',
                     },
                   }}
                 >

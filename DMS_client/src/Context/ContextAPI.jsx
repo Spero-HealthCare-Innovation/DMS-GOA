@@ -19,10 +19,14 @@ export const AuthProvider = ({ children }) => {
 
   const [Tehsils, setTehsils] = useState([]);
   const [Citys, setCitys] = useState([]);
+  const [Wards, setWards] = useState([]);
+
   const [selectedStateId, setSelectedStateId] = useState("");
   const [selectedDistrictId, setSelectedDistrictId] = useState("");
   const [selectedTehsilId, setSelectedTehsilId] = useState("");
   const [selectedCityID, setSelectedCityId] = useState("");
+  const [selectedWardId, setSelectedWardId] = useState("");
+
   console.log(Citys, "selectedCityID");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -178,8 +182,30 @@ export const AuthProvider = ({ children }) => {
           },
         }
       );
-      console.log(`Tehsils by district ${tehshilId}:`, res.data);
+      console.log(`City by tehshil ${tehshilId}:`, res.data);
       setCitys(res.data || []);
+    } catch (err) {
+      console.error("Error fetching tehsils:", err);
+      setError(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+   const fetchWardsByTehshil = async (tehshilId) => {
+    if (!tehshilId) return;
+    try {
+      setLoading(true);
+      const res = await axios.get(
+        `${port}/admin_web/ward_get/${tehshilId}/`,
+        {
+          headers: {
+            Authorization: `Bearer ${newToken || token}`,
+          },
+        }
+      );
+      console.log(`Ward by tehshil ${tehshilId}:`, res.data);
+      setWards(res.data || []);
     } catch (err) {
       console.error("Error fetching tehsils:", err);
       setError(err);
@@ -255,12 +281,15 @@ export const AuthProvider = ({ children }) => {
       setSelectedDistrictId("");
       setSelectedTehsilId("");
       setSelectedCityId("");
+      setSelectedWardId("");
       setTehsils([]);
       setCitys([]);
+      setWards([]); 
     } else {
       setDistricts([]);
       setTehsils([]);
       setCitys([]);
+      setWards([]); 
       setSelectedDistrictId("");
       setSelectedTehsilId("");
       setSelectedCityId("");
@@ -273,10 +302,13 @@ export const AuthProvider = ({ children }) => {
       fetchTehsilsByDistrict(selectedDistrictId);
       setSelectedTehsilId("");
       setSelectedCityId("");
+      setSelectedWardId("");
       setCitys([]);
+      setWards([]); 
     } else {
       setTehsils([]);
       setCitys([]);
+      setWards([]); 
       setSelectedTehsilId("");
       setSelectedCityId("");
     }
@@ -286,6 +318,7 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     if (selectedTehsilId) {
       fetchCitysByTehshil(selectedTehsilId);
+      fetchWardsByTehshil(selectedTehsilId);
       setSelectedCityId("");
     } else {
       setCitys([]);
@@ -315,15 +348,18 @@ export const AuthProvider = ({ children }) => {
         districts,
         Tehsils,
         Citys,
+        Wards,
         departments,
         selectedStateId,
         selectedDistrictId,
         selectedTehsilId,
         selectedCityID,
+        selectedWardId,
         setSelectedStateId,
         setSelectedDistrictId,
         setSelectedTehsilId,
         setSelectedCityId,
+        setSelectedWardId,
         loading,
         error,
         newToken,
