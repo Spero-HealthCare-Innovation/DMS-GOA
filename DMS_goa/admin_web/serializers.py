@@ -330,7 +330,7 @@ class Alert_Type_Serializer(serializers.ModelSerializer):
 class Manual_call_incident_dispatch_Serializer(serializers.ModelSerializer):
     class Meta:
         model = DMS_Incident
-        fields = ['inc_type','disaster_type','alert_type','location','summary','responder_scope','latitude','longitude','caller_id','inc_added_by','inc_modified_by','time','mode']   
+        fields = ['inc_type','disaster_type','alert_type','location','summary','responder_scope','latitude','longitude','caller_id','inc_added_by','inc_modified_by','time','mode','ward','district','ward_officer','tahsil']   
 
 class Manual_call_data_Serializer(serializers.ModelSerializer):
     class Meta:
@@ -443,9 +443,13 @@ class incident_get_serializer(serializers.ModelSerializer):
     summary_name = serializers.CharField(source='summary.summary', read_only=True)
     disaster_name=serializers.CharField(source='disaster_type.disaster_name', read_only=True)
     comment_added_by = serializers.CharField(source='comment_id.comm_added_by',read_only=True)
+    ward_name = serializers.CharField(source='ward.ward_name',read_only=True)
+    district_name = serializers.CharField(source='district.dis_name',read_only=True)
+    tahsil_name = serializers.CharField(source='tahsil.tah_name',read_only=True)
+    ward_officer_name = serializers.CharField(source='ward_officer.emp_name',read_only=True)
     class Meta:
         model = DMS_Incident
-        fields=['incident_id','disaster_type','inc_type','responder_scope','caller_id','caller_name','caller_no','location','summary','summary_name','disaster_name','alert_type','mode','latitude','longitude','inc_datetime','location','comment_added_by']
+        fields=['incident_id','disaster_type','inc_type','responder_scope','caller_id','caller_name','caller_no','location','summary','summary_name','disaster_name','alert_type','mode','latitude','longitude','inc_datetime','location','comment_added_by','ward','district','ward_officer','tahsil','ward_name','district_name','tahsil_name','ward_officer_name']
 
 
 class Responder_Scope_post_Serializer(serializers.ModelSerializer):
