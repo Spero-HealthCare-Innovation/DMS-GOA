@@ -32,7 +32,9 @@ import { useAuth } from "./../../../Context/ContextAPI";
 
 function ClosureDetail({ darkMode, fromDate, toDate, onChange, onDownload }) {
   const textColor = darkMode ? "#ffffff" : "#000000";
-  const bgColor = darkMode ? "#0a1929" : "#ffffff";
+  const bgColor = "linear-gradient(to bottom, #53bce1, rgb(173, 207, 216))";
+  const paper = darkMode ? "202328":"#FFFFFF";
+  const tableRow = "rgb(53 53 53)";
   const labelColor = darkMode ? "#5FECC8" : "#1976d2";
   const fontFamily = "Roboto, sans-serif";
   const borderColor = darkMode ? "#7F7F7F" : "#ccc";
@@ -375,7 +377,7 @@ function ClosureDetail({ darkMode, fromDate, toDate, onChange, onDownload }) {
                 width: '150px',
                 height: '35px',
                 padding: '10px',
-                backgroundColor: bgColor,
+                backgroundColor: "202328 !important",
                 color: 'grey',
                 border: '1px solid gray',
                 borderRadius: '4px',
@@ -436,6 +438,7 @@ function ClosureDetail({ darkMode, fromDate, toDate, onChange, onDownload }) {
               height: 35,
               minWidth: 100,
               color: darkMode ? "#fff" : "#fff",
+                 textTransform: 'none'
             }}
             onClick={onSubmit}
           >
@@ -478,13 +481,13 @@ function ClosureDetail({ darkMode, fromDate, toDate, onChange, onDownload }) {
       )}
 
       <Grid item xs={12} md={7}>
-        <Paper elevation={3} sx={{ padding: 3, borderRadius: 3, backgroundColor:darkMode ? "#202328":"#FFFFFF", mt: 1, mb: 5 }}>
+        <Paper elevation={3} sx={{ padding: 3, borderRadius: 3, backgroundColor:paper, mt: 1, mb: 5 }}>
           <TableContainer>
             <Table>
               <TableHead>
                 <TableRow>
                   <EnquiryCard sx={{
-                    backgroundColor: "rgb(95,200,236)",
+                    backgroundColor: bgColor,
                     color: "#000",
                     display: "flex",
                     width: "100%",
@@ -655,7 +658,7 @@ function ClosureDetail({ darkMode, fromDate, toDate, onChange, onDownload }) {
                     <EnquiryCardBody
                       key={index}
                       sx={{
-                       backgroundColor: darkMode ? "rgb(88,92,99)" : "#FFFFFF",
+                       backgroundColor: tableRow,
                         p: 2,
                         borderRadius: 2,
                         color: textColor,

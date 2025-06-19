@@ -56,7 +56,9 @@ function Add_employee({ darkMode }) {
 
 
   const textColor = darkMode ? "#ffffff" : "#000000";
-  const bgColor = darkMode ? "#0a1929" : "#ffffff";
+  const bgColor = "linear-gradient(to bottom, #53bce1, rgb(173, 207, 216))";
+  const paper = darkMode ? "202328":"#FFFFFF";
+  const tableRow = "rgb(53 53 53)";
   const labelColor = darkMode ? "#5FECC8" : "#1976d2";
   const fontFamily = "Roboto, sans-serif";
   const borderColor = darkMode ? "#7F7F7F" : "#ccc";
@@ -657,7 +659,7 @@ function Add_employee({ darkMode }) {
 
         <Typography
           sx={{
-           color: "white",
+           color: "#5FC8EC",
             fontWeight: 600,
             fontSize: 18,
             fontFamily,
@@ -703,13 +705,13 @@ function Add_employee({ darkMode }) {
 
       <Grid container spacing={2}>
         <Grid item xs={12} md={7}>
-          <Paper elevation={3} sx={{ padding: 3, borderRadius: 3, backgroundColor:darkMode ? "#202328":"#FFFFFF", mt: 1, mb: 1 , height: "89%"}}>
+          <Paper elevation={3} sx={{ padding: 3, borderRadius: 3, backgroundColor:paper, mt: 1, mb: 1 , height: "89%"}}>
             <TableContainer >
               <Table >
                 <TableHead>
                   <TableRow>
                     <EnquiryCard sx={{
-                      backgroundColor: "rgb(95,200,236)",
+                      backgroundColor: bgColor,
                       color: "#000",
                       display: "flex",
                       width: "100%",
@@ -825,7 +827,7 @@ function Add_employee({ darkMode }) {
                           <EnquiryCardBody
                             key={index}
                             sx={{
-                              backgroundColor: darkMode ? "rgb(88,92,99)" : "#FFFFFF",
+                              backgroundColor: tableRow,
                               p: 2,
                               borderRadius: 2,
                               color: textColor,
@@ -1113,7 +1115,7 @@ function Add_employee({ darkMode }) {
         </Popover>
 
         <Grid item xs={12} md={4.9}>
-          <Paper elevation={3} sx={{ padding: 2, borderRadius: 3,  backgroundColor:darkMode ? "#202328":"#FFFFFF", mt: 1, mb: 5.9 }}>
+          <Paper elevation={3} sx={{ padding: 2, borderRadius: 3,  backgroundColor:paper, mt: 1, mb: 5.9 }}>
             <Box
                                     display="flex"
                                     justifyContent={{ xs: "center", md: "flex-end" }}
@@ -1573,9 +1575,11 @@ function Add_employee({ darkMode }) {
                     color: "#fff",
                     fontWeight: "bold",
                     borderRadius: "12px",
+                       textTransform: 'none',
                     "&:hover": {
                       backgroundColor:"rgb(18,166,95,0.8)",
                       color: "white !important",
+                         textTransform: 'none',
                     },
                   }}
                 >

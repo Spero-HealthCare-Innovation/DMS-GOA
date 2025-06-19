@@ -100,7 +100,9 @@ function SopRegister({ darkMode }) {
   const { newToken, disaster } = useAuth();
   const token = localStorage.getItem("access_token");
   const textColor = darkMode ? "#ffffff" : "#000000";
-  const bgColor = darkMode ? "#0a1929" : "#0a1929";
+  const bgColor = "linear-gradient(to bottom, #53bce1, rgb(173, 207, 216))";
+  const paper = darkMode ? "202328":"#FFFFFF";
+  const tableRow = "rgb(53 53 53)";
   const labelColor = darkMode ? "#5FECC8" : "#1976d2";
   const fontFamily = "Roboto, sans-serif";
   const borderColor = darkMode ? "#7F7F7F" : "#ccc";
@@ -432,7 +434,7 @@ function SopRegister({ darkMode }) {
             sx={{
               padding: 2,
               borderRadius: 3,
-              backgroundColor: darkMode ? "#202328" : "#FFFFFF",
+              backgroundColor: paper,
               mt: 1,
               mb: 5,
               ml: 1,
@@ -444,7 +446,7 @@ function SopRegister({ darkMode }) {
                   <TableRow>
                     <EnquiryCard
                       sx={{
-                        backgroundColor: "rgb(95,200,236)",
+                        backgroundColor: bgColor,
                         color: "#000",
                         display: "flex",
                         width: "100%",
@@ -527,7 +529,7 @@ function SopRegister({ darkMode }) {
                         <EnquiryCardBody
                           key={(page - 1) * rowsPerPage + index}
                           sx={{
-                            backgroundColor: darkMode ? "rgb(88,92,99)" : "#FFFFFF",
+                            backgroundColor: tableRow,
                             p: 2,
                             borderRadius: 2,
                             color: textColor,
@@ -784,7 +786,7 @@ function SopRegister({ darkMode }) {
             sx={{
               padding: 2,
               borderRadius: 3,
-              backgroundColor: darkMode ? "#202328" : "#FFFFFF",
+              backgroundColor: paper,
               mt: 1,
               mb: 5,
             }}
@@ -835,7 +837,7 @@ function SopRegister({ darkMode }) {
                     label="Disaster Type"
                     variant="outlined"
                     value={selectedDisaster || ""}
-                    sx={{ backgroundColor: darkMode ? "rgb(88,92,99)" : "#FFFFFF" }}
+                    sx={{ backgroundColor: tableRow }}
                     onChange={(e) => {
                       setSelectedDisaster(e.target.value);
                       setDisasterError(false); // reset on change
@@ -872,7 +874,7 @@ function SopRegister({ darkMode }) {
                     InputLabelProps={{ shrink: false }}
                     multiline
                     value={description}
-                    sx={{ backgroundColor: darkMode ? "rgb(88,92,99)" : "#FFFFFF" }}
+                    sx={{ backgroundColor: tableRow}}
                     onChange={(e) => {
                       setDescription(e.target.value);
                       setDescriptionError(false); // reset on change
