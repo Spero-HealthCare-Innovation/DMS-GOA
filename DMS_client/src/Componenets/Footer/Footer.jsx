@@ -1,5 +1,5 @@
 import { Box, Typography } from '@mui/material';
-import logo from '../../assets/SperoLogo.png'
+import logo from '../../assets/SPERO-Final-logo png 2 1.png'
 
 export default function Footer({ darkMode }) {
     return (
@@ -7,7 +7,7 @@ export default function Footer({ darkMode }) {
             sx={{
                 position: 'fixed',
                 bottom: 0,
-                height: '50px',
+                height: '30px',
                 width: '100%',
                 zIndex: 1000,
                 backgroundColor: darkMode ? "#202328" : "#CCDBEF",
@@ -35,7 +35,7 @@ export default function Footer({ darkMode }) {
                 src={logo}
                 alt="Logo"
                 sx={{
-                    height: 45,
+                    height: 24,
                     width: 45,
                     position: 'absolute',
                     right: 16,

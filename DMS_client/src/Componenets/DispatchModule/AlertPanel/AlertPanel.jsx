@@ -118,13 +118,29 @@ const AlertPanel = ({ darkMode }) => {
 
     const [initialData, setInitialData] = useState([]);
     const [liveData, setLiveData] = useState([]);
+    const [lastTriggeredId, setLastTriggeredId] = useState(null);
+
+    // useEffect(() => {
+    //     fetch(`${socketUrl}/api/weather_alerts`)
+    //         .then(res => res.json())
+    //         .then(data => setInitialData(data.slice(0, 10)))
+    //         .catch(err => console.error("Initial fetch failed:", err));
+    // }, []);
 
     useEffect(() => {
         fetch(`${socketUrl}/api/weather_alerts`)
             .then(res => res.json())
-            .then(data => setInitialData(data.slice(0, 10)))
+            .then(data => {
+                const sorted = data
+                    .sort((a, b) => b.pk_id - a.pk_id)
+                    .slice(0, 10);
+                setInitialData(sorted);
+                console.log(sorted, 'sorted Data in descending order');
+
+            })
             .catch(err => console.error("Initial fetch failed:", err));
     }, []);
+
 
     useEffect(() => {
         const socket = new WebSocket(`${socketUrl}/ws/weather_alerts`);
@@ -189,19 +205,19 @@ const AlertPanel = ({ darkMode }) => {
                     'Content-Type': 'application/json',
                 },
             });
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
-            const data = await response.json();
-            setTriggeredData(data);
-            // window.location.reload();
-            // if (group === "2") {
-            //     navigate('/Sop', {
-            //         state: {
-            //             triggerStatus: triggerStatus
-            //         }
-            //     });
-            // }
+
+            if (!response.ok) throw new Error('Network response was not ok');
+
+            const updatedItem = await response.json();
+
+            // Update initialData: remove old item and insert updated one at the top
+            setInitialData(prev => {
+                const filtered = prev.filter(item => item.pk_id !== updatedItem.pk_id);
+                return [updatedItem, ...filtered];
+            });
+            setTriggeredData(updatedItem);
+            setLastTriggeredId(updatedItem.pk_id); // 🔹 Set the triggered alert's ID
+
         } catch (error) {
             console.error('Error fetching alert details:', error);
         }
@@ -262,7 +278,28 @@ const AlertPanel = ({ darkMode }) => {
     //     item.pk_id.toString().toLowerCase().includes(searchText.toLowerCase())
     // );
 
-    const combinedData = [...initialData, ...liveData];
+    // const combinedData = [...initialData, ...liveData];
+
+    // const filteredData = combinedData.filter(item =>
+    //     item.pk_id.toString().toLowerCase().includes(searchText.toLowerCase())
+    // );
+
+    const combinedRaw = [...initialData, ...liveData];
+
+    const uniqueCombined = combinedRaw.filter(
+        (item, index, self) =>
+            index === self.findIndex(i => i.pk_id === item.pk_id)
+    );
+
+    const sortedCombined = uniqueCombined.sort((a, b) => b.pk_id - a.pk_id);
+
+    // 🔹 Place the last triggered alert at the top
+    const combinedData = lastTriggeredId
+        ? [
+            ...uniqueCombined.filter(i => i.pk_id === lastTriggeredId),
+            ...sortedCombined.filter(i => i.pk_id !== lastTriggeredId)
+        ]
+        : sortedCombined;
 
     const filteredData = combinedData.filter(item =>
         item.pk_id.toString().toLowerCase().includes(searchText.toLowerCase())
@@ -331,7 +368,7 @@ const AlertPanel = ({ darkMode }) => {
                                             <Typography variant="subtitle2">Alert Id</Typography>
                                         </StyledCardContent>
                                         <StyledCardContent style={{ flex: 1.5, borderRight: "1px solid black" }}>
-                                            <Typography variant="subtitle2">Time</Typography>
+                                            <Typography variant="subtitle2">Date & Time</Typography>
                                         </StyledCardContent>
                                         <StyledCardContent style={{ flex: 1, borderRight: "1px solid black" }}>
                                             <Typography variant="subtitle2">Disaster Name</Typography>
@@ -391,7 +428,15 @@ const AlertPanel = ({ darkMode }) => {
                                                 </StyledCardContent>
                                                 <StyledCardContent style={{ flex: 1.5 }}>
                                                     <Typography variant="subtitle2">
-                                                        {new Date(item.alert_datetime).toLocaleString()}
+                                                        {new Date(item.alert_datetime).toLocaleString('en-GB', {
+                                                            hour12: false,
+                                                            year: 'numeric',
+                                                            month: '2-digit',
+                                                            day: '2-digit',
+                                                            hour: '2-digit',
+                                                            minute: '2-digit',
+                                                            second: '2-digit'
+                                                        })}
                                                     </Typography>
                                                 </StyledCardContent>
                                                 <StyledCardContent style={{ flex: 1 }}>

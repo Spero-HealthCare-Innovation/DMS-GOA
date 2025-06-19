@@ -176,6 +176,7 @@ const Navbar = ({ darkMode, toggleDarkMode }) => {
       hour: "2-digit",
       minute: "2-digit",
       second: "2-digit",
+      hour12: false,
     })
   );
 
@@ -186,9 +187,10 @@ const Navbar = ({ darkMode, toggleDarkMode }) => {
           hour: "2-digit",
           minute: "2-digit",
           second: "2-digit",
+          hour12: false,
         })
       );
-    }, 1000); // updates every second
+    }, 1000);
 
     return () => clearInterval(interval); // cleanup on unmount
   }, []);

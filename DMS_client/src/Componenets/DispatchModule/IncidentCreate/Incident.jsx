@@ -11,6 +11,7 @@ import {
     FormControlLabel,
     Stack
 } from "@mui/material";
+import { FormControl, InputLabel, Select } from "@mui/material";
 import { useAuth } from "../../../Context/ContextAPI";
 import IncidentCreateMap from "./IncidentCreateMap";
 import { Snackbar, Alert } from '@mui/material';
@@ -46,6 +47,71 @@ const Incident = ({ darkMode }) => {
     const now = new Date();
     const formattedDate = now.toLocaleDateString('en-GB').slice(0, 8).replace(/\//g, '-').slice(0, -2) + now.getFullYear().toString().slice(2);
 
+    const {
+        districts,
+        fetchDistrictsByState,
+        Tehsils,
+        selectedDistrictId,
+        selectedTehsilId,
+        selectedCityID,
+        setSelectedStateId,
+        setSelectedDistrictId,
+        setSelectedTehsilId,
+        setSelectedCityId,
+        fetchTehsilsByDistrict
+    } = useAuth();
+
+    useEffect(() => {
+        fetchDistrictsByState();
+    }, []);
+
+    useEffect(() => {
+        if (districts.length > 0) {
+            console.log("All districts:", districts);
+        }
+    }, [districts]);
+
+    useEffect(() => {
+        if (selectedDistrictId) {
+            fetchTehsilsByDistrict(selectedDistrictId);
+        }
+    }, [selectedDistrictId]);
+
+    // Ward API
+    const [ward, setWard] = useState([]);
+    const [wardOfficer, setWardOfficer] = useState([]);
+    const [selectedWard, setSelectedWard] = useState("");
+    const [selectedWardOfficer, setSelectedWardOfficer] = useState("");
+
+    useEffect(() => {
+        if (selectedTehsilId) {
+            const fetchWardList = async () => {
+                const res = await fetch(`${port}/admin_web/ward_get/${selectedTehsilId}/`, {
+                    headers: {
+                        Authorization: `Bearer ${token || newToken}`,
+                    }
+                });
+                const data = await res.json();
+                setWard(data);
+            };
+            fetchWardList();
+        }
+    }, [selectedTehsilId]);
+
+    useEffect(() => {
+        if (selectedWard) {
+            const fetchWardOfficerList = async () => {
+                const res = await fetch(`${port}/admin_web/ward_get/${selectedWard}/`, {
+                    headers: {
+                        Authorization: `Bearer ${token || newToken}`,
+                    }
+                });
+                const data = await res.json();
+                setWard(data);
+            };
+            fetchWardOfficerList();
+        }
+    }, [selectedWard]);
 
     window.addEventListener("storage", (e) => {
         if (e.key === "logout") {
@@ -56,8 +122,6 @@ const Incident = ({ darkMode }) => {
     useEffect(() => {
         document.title = "DMS|Incident Create";
     }, []);
-
-
 
     useEffect(() => {
         if (location.state?.startData) {
@@ -202,7 +266,11 @@ const Incident = ({ darkMode }) => {
             caller_modified_by: "admin",
             comm_added_by: "admin",
             comm_modified_by: "admin",
-            mode: 1
+            mode: 1,
+            district: selectedDistrictId,
+            tahsil: selectedTehsilId,
+            ward: selectedWard,
+            ward_officer: selectedWardOfficer,
         };
 
         try {
@@ -339,7 +407,12 @@ const Incident = ({ darkMode }) => {
                                 >
                                     <AccessTimeIcon sx={{ fontSize: 18, color: '#FB8C00' }} />
                                     <span style={{ color: 'black', fontSize: '14px' }}>
-                                        {new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+                                        {new Date().toLocaleTimeString([], {
+                                            hour: '2-digit',
+                                            minute: '2-digit',
+                                            second: '2-digit',
+                                            hour12: false,
+                                        })}
                                     </span>
                                 </Box>
 
@@ -507,34 +580,80 @@ const Incident = ({ darkMode }) => {
                                 />
                             </Grid>
 
-                            <Grid item xs={12} sm={4}>
-                                <TextField
-                                    fullWidth
-                                    size="small"
-                                    label="Ward"
-                                    variant="outlined"
-                                    sx={inputStyle}
-                                />
+                            <Grid item xs={12} sm={6}>
+                                <FormControl fullWidth size="small" sx={inputStyle}>
+                                    <InputLabel id="district-label">District</InputLabel>
+                                    <Select
+                                        labelId="district-label"
+                                        id="district-select"
+                                        value={selectedDistrictId}
+                                        label="District"
+                                        onChange={(e) => setSelectedDistrictId(e.target.value)}
+                                    >
+                                        {districts.map((district) => (
+                                            <MenuItem key={district.dis_id} value={district.dis_id}>
+                                                {district.dis_name}
+                                            </MenuItem>
+                                        ))}
+                                    </Select>
+                                </FormControl>
                             </Grid>
 
-                            <Grid item xs={12} sm={4}>
+                            <Grid item xs={12} sm={6}>
                                 <TextField
                                     fullWidth
                                     size="small"
+                                    select
                                     label="Tehsil"
                                     variant="outlined"
+                                    value={selectedTehsilId}
+                                    onChange={(e) => setSelectedTehsilId(e.target.value)}
                                     sx={inputStyle}
-                                />
+                                >
+                                    {Tehsils.map((tehsil) => (
+                                        <MenuItem key={tehsil.tah_id} value={tehsil.tah_id}>
+                                            {tehsil.tah_name}
+                                        </MenuItem>
+                                    ))}
+                                </TextField>
                             </Grid>
 
-                            <Grid item xs={12} sm={4}>
+                            <Grid item xs={12} sm={6}>
                                 <TextField
                                     fullWidth
                                     size="small"
-                                    label="District"
+                                    select
+                                    label="Ward"
                                     variant="outlined"
+                                    value={selectedWard}
+                                    onChange={(e) => setSelectedWard(e.target.value)}
                                     sx={inputStyle}
-                                />
+                                >
+                                    {ward.map((ward) => (
+                                        <MenuItem key={ward.tah_id} value={ward.tah_id}>
+                                            {ward.tah_name}
+                                        </MenuItem>
+                                    ))}
+                                </TextField>
+                            </Grid>
+
+                            <Grid item xs={12} sm={6}>
+                                <TextField
+                                    fullWidth
+                                    size="small"
+                                    select
+                                    label="Ward Officer"
+                                    variant="outlined"
+                                    value={selectedWardOfficer}
+                                    onChange={(e) => setSelectedWardOfficer(e.target.value)}
+                                    sx={inputStyle}
+                                >
+                                    {wardOfficer.map((wardOff) => (
+                                        <MenuItem key={wardOff.tah_id} value={wardOff.tah_id}>
+                                            {wardOff.tah_name}
+                                        </MenuItem>
+                                    ))}
+                                </TextField>
                             </Grid>
 
                             <Grid item xs={12}>
@@ -568,12 +687,13 @@ const Incident = ({ darkMode }) => {
                     <IncidentCreateMap />
                 </Grid>
 
-                {selectedEmergencyValue === 1 && (
-                    <Grid item xs={12}>
-                        <Paper elevation={3} sx={{ ...inputStyle, p: 1, borderRadius: 3, backgroundColor: bgColor }}>
-                            <Grid container spacing={2}>
-                                <Grid item xs={12} md={3} sx={{ borderRight: { md: `1px solid white` }, pr: 2, mt: 1.5 }}>
-                                    {/* <Box sx={boxStyle}>
+                {
+                    selectedEmergencyValue === 1 && (
+                        <Grid item xs={12}>
+                            <Paper elevation={3} sx={{ ...inputStyle, p: 1, borderRadius: 3, backgroundColor: bgColor }}>
+                                <Grid container spacing={2}>
+                                    <Grid item xs={12} md={3} sx={{ borderRight: { md: `1px solid white` }, pr: 2 }}>
+                                        {/* <Box sx={boxStyle}>
                                         <Typography sx={{ color: labelColor, fontWeight: 500, fontFamily }}>
                                             Incident Type
                                         </Typography>
@@ -581,169 +701,169 @@ const Incident = ({ darkMode }) => {
                                             {selectedEmergencyValue === 1 ? "Emergency" : "Non-Emergency"}
                                         </Typography>
                                     </Box> */}
-                                    <Box>
-                                        <Typography variant="subtitle2" sx={{ color: labelColor, fontWeight: 500, fontFamily, fontSize: '16px' }}>
-                                            Incident Type
-                                        </Typography>
-                                        <Typography variant="subtitle2"
-                                            sx={{
-                                                fontFamily,
-                                                mb: 2,
+                                        <Box>
+                                            <Typography variant="subtitle2" sx={{ color: labelColor, fontWeight: 500, fontFamily, fontSize: '16px' }}>
+                                                Incident Type
+                                            </Typography>
+                                            <Typography variant="subtitle2"
+                                                sx={{
+                                                    fontFamily,
+                                                    mb: 2,
+                                                    ml: 1,
+                                                    color: labelColor1,
+                                                    fontSize: '15px',
+                                                    // color: selectedEmergencyValue === 1 ? 'red' : 'green'
+                                                }}
+                                            >
+                                                {selectedEmergencyValue === 1 ? "Emergency" : "Non-Emergency"}
+                                            </Typography>
+                                        </Box>
+                                        <Box>
+                                            <Typography variant="subtitle2" sx={{ color: labelColor, fontWeight: 500, fontFamily, fontSize: '16px' }}>
+                                                Alert Type
+                                            </Typography>
+                                            <Typography variant="subtitle2" sx={{
+                                                fontFamily, mb: 2,
                                                 ml: 1,
                                                 color: labelColor1,
                                                 fontSize: '15px',
-                                                // color: selectedEmergencyValue === 1 ? 'red' : 'green'
-                                            }}
-                                        >
-                                            {selectedEmergencyValue === 1 ? "Emergency" : "Non-Emergency"}
-                                        </Typography>
-                                    </Box>
-                                    <Box>
-                                        <Typography variant="subtitle2" sx={{ color: labelColor, fontWeight: 500, fontFamily, fontSize: '16px' }}>
-                                            Alert Type
-                                        </Typography>
-                                        <Typography variant="subtitle2" sx={{
-                                            fontFamily, mb: 2,
-                                            ml: 1,
-                                            color: labelColor1,
-                                            fontSize: '15px',
-                                        }}>
-                                            {alertType === 1 ? "High" : alertType === 2 ? "Medium" : "Low"}
-                                        </Typography>
-                                    </Box>
-                                    <Box>
-                                        <Typography variant="subtitle2" sx={{ color: labelColor, fontWeight: 500, fontFamily, fontSize: '16px' }}>
-                                            Alert Type
-                                        </Typography>
-                                        <Typography variant="subtitle2" sx={{
-                                            fontFamily, mb: 2, ml: 1,
-                                            color: labelColor1,
-                                            fontSize: '15px',
-                                        }}>
-                                            {alertType === 1 ? "High" : alertType === 2 ? "Medium" : "Low"}
-                                        </Typography>
-                                    </Box>
-                                </Grid>
-
-                                {/* SOP Section */}
-                                <Grid item xs={12} md={5} sx={{ px: 2, borderRight: { md: `1px solid white` }, mt: 1.5 }}>
-                                    <Box sx={boxStyle}>
-                                        <Box sx={{ display: "flex", alignItems: "center" }}>
-                                            <Typography variant="subtitle2" sx={{ color: labelColor, fontWeight: 500, fontFamily, fontSize: '16px' }}>
-                                                Response Procedure
+                                            }}>
+                                                {alertType === 1 ? "High" : alertType === 2 ? "Medium" : "Low"}
                                             </Typography>
-                                            <IconButton
-                                                size="small"
-                                                onClick={() => setOpenSopModal(true)}
-                                                sx={{ color: 'orange', ml: 1 }}
-                                            >
-                                                <VisibilityIcon />
-                                            </IconButton>
                                         </Box>
-                                        <Typography
-                                            variant="subtitle2"
-                                            sx={{
-                                                fontFamily,
-                                                cursor: "pointer",
-                                                display: "-webkit-box",
-                                                WebkitLineClamp: 2,
-                                                WebkitBoxOrient: "vertical",
-                                                overflow: "hidden",
-                                                textOverflow: "ellipsis",
-                                                maxWidth: 300,
+                                        <Box>
+                                            <Typography variant="subtitle2" sx={{ color: labelColor, fontWeight: 500, fontFamily, fontSize: '16px' }}>
+                                                Alert Type
+                                            </Typography>
+                                            <Typography variant="subtitle2" sx={{
+                                                fontFamily, mb: 2, ml: 1,
                                                 color: labelColor1,
-                                                marginLeft: '15px'
-                                            }}
-                                        >
-                                            {(() => {
-                                                const sops = responderScope?.sop_responses || [];
-                                                if (sops.length === 0) return "No SOP description";
-                                                const shown = sops.slice(0, 2).map(sop => sop.sop_description || "No SOP description");
-                                                let text = shown.join(", ");
-                                                if (sops.length > 2) text += " ...";
-                                                return text;
-                                            })()}
-                                        </Typography>
-                                        {/* </Tooltip> */}
+                                                fontSize: '15px',
+                                            }}>
+                                                {alertType === 1 ? "High" : alertType === 2 ? "Medium" : "Low"}
+                                            </Typography>
+                                        </Box>
+                                    </Grid>
 
-                                        <Dialog open={openSopModal} onClose={() => setOpenSopModal(false)} maxWidth="sm" fullWidth>
-                                            <DialogTitle sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                                                All Response Procedures
+                                    {/* SOP Section */}
+                                    <Grid item xs={12} md={5} sx={{ px: 2, borderRight: { md: `1px solid white` } }}>
+                                        <Box sx={boxStyle}>
+                                            <Box sx={{ display: "flex", alignItems: "center" }}>
+                                                <Typography variant="subtitle2" sx={{ color: labelColor, fontWeight: 500, fontFamily, fontSize: '16px' }}>
+                                                    Response Procedure
+                                                </Typography>
                                                 <IconButton
-                                                    aria-label="close"
-                                                    onClick={() => setOpenSopModal(false)}
-                                                    sx={{
-                                                        color: (theme) => theme.palette.grey[500],
-                                                        ml: 2,
-                                                    }}
                                                     size="small"
+                                                    onClick={() => setOpenSopModal(true)}
+                                                    sx={{ color: 'orange', ml: 1 }}
                                                 >
-                                                    <CloseIcon />
+                                                    <VisibilityIcon />
                                                 </IconButton>
-                                            </DialogTitle>
-                                            <DialogContent dividers>
-                                                {(responderScope?.sop_responses?.length > 0)
-                                                    ? responderScope.sop_responses.map((sop, idx) => (
-                                                        <Typography key={sop.sop_id || idx} sx={{ mb: 1 }}>
-                                                            {sop?.sop_description || "No SOP description"}
-                                                        </Typography>
-                                                    ))
-                                                    : <Typography>No SOP description</Typography>
-                                                }
-                                            </DialogContent>
-                                        </Dialog>
-                                    </Box>
-
-                                    <Box>
-                                        <Typography variant="subtitle2" sx={{ color: labelColor, fontWeight: 500, fontFamily, fontSize: '16px' }}>
-                                            Responder Scope
-                                        </Typography>
-                                        <Stack spacing={1} mt={1}>
-                                            <Box display="flex" flexWrap="wrap" gap={1}>
-                                                {responderScope?.responder_scope?.map((responder) => (
-                                                    <FormControlLabel
-                                                        key={responder.res_id}
-                                                        control={
-                                                            <Checkbox
-                                                                checked={sopId.includes(responder.res_id)}
-                                                                onChange={() => handleCheckboxChange(responder.res_id)}
-                                                                sx={{ color: labelColor }}
-                                                            />
-                                                        }
-                                                        label={
-                                                            <Typography variant="subtitle2" sx={{ fontFamily }}>
-                                                                {responder.responder_name}
-                                                            </Typography>
-                                                        }
-                                                    />
-                                                ))}
                                             </Box>
-                                        </Stack>
-                                    </Box>
-                                </Grid>
+                                            <Typography
+                                                variant="subtitle2"
+                                                sx={{
+                                                    fontFamily,
+                                                    cursor: "pointer",
+                                                    display: "-webkit-box",
+                                                    WebkitLineClamp: 2,
+                                                    WebkitBoxOrient: "vertical",
+                                                    overflow: "hidden",
+                                                    textOverflow: "ellipsis",
+                                                    maxWidth: 300,
+                                                    color: labelColor1,
+                                                    marginLeft: '15px'
+                                                }}
+                                            >
+                                                {(() => {
+                                                    const sops = responderScope?.sop_responses || [];
+                                                    if (sops.length === 0) return "No SOP description";
+                                                    const shown = sops.slice(0, 2).map(sop => sop.sop_description || "No SOP description");
+                                                    let text = shown.join(", ");
+                                                    if (sops.length > 2) text += " ...";
+                                                    return text;
+                                                })()}
+                                            </Typography>
+                                            {/* </Tooltip> */}
 
-                                <Grid item xs={12} md={4}>
-                                    <Typography variant="h6" sx={{ color: labelColor, fontWeight: 500, fontFamily, fontSize: '16px' }} gutterBottom>
-                                        Comments
-                                    </Typography>
-                                    <TextField
-                                        fullWidth
-                                        size="small"
-                                        multiline
-                                        className='textarea'
-                                        rows={6}
-                                        variant="outlined"
-                                        sx={{ ...inputStyle }}
-                                        value={comments}
-                                        onChange={(e) => setComments(e.target.value)}
-                                        error={!!errors.comments}
-                                        helperText={errors.comments}
-                                    />
+                                            <Dialog open={openSopModal} onClose={() => setOpenSopModal(false)} maxWidth="sm" fullWidth>
+                                                <DialogTitle sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                                                    All Response Procedures
+                                                    <IconButton
+                                                        aria-label="close"
+                                                        onClick={() => setOpenSopModal(false)}
+                                                        sx={{
+                                                            color: (theme) => theme.palette.grey[500],
+                                                            ml: 2,
+                                                        }}
+                                                        size="small"
+                                                    >
+                                                        <CloseIcon />
+                                                    </IconButton>
+                                                </DialogTitle>
+                                                <DialogContent dividers>
+                                                    {(responderScope?.sop_responses?.length > 0)
+                                                        ? responderScope.sop_responses.map((sop, idx) => (
+                                                            <Typography key={sop.sop_id || idx} sx={{ mb: 1 }}>
+                                                                {sop?.sop_description || "No SOP description"}
+                                                            </Typography>
+                                                        ))
+                                                        : <Typography>No SOP description</Typography>
+                                                    }
+                                                </DialogContent>
+                                            </Dialog>
+                                        </Box>
+
+                                        <Box>
+                                            <Typography variant="subtitle2" sx={{ color: labelColor, fontWeight: 500, fontFamily, fontSize: '16px' }}>
+                                                Responder Scope
+                                            </Typography>
+                                            <Stack spacing={1} mt={1}>
+                                                <Box display="flex" flexWrap="wrap" gap={1}>
+                                                    {responderScope?.responder_scope?.map((responder) => (
+                                                        <FormControlLabel
+                                                            key={responder.res_id}
+                                                            control={
+                                                                <Checkbox
+                                                                    checked={sopId.includes(responder.res_id)}
+                                                                    onChange={() => handleCheckboxChange(responder.res_id)}
+                                                                    sx={{ color: labelColor }}
+                                                                />
+                                                            }
+                                                            label={
+                                                                <Typography variant="subtitle2" sx={{ fontFamily }}>
+                                                                    {responder.responder_name}
+                                                                </Typography>
+                                                            }
+                                                        />
+                                                    ))}
+                                                </Box>
+                                            </Stack>
+                                        </Box>
+                                    </Grid>
+
+                                    <Grid item xs={12} md={4}>
+                                        <Typography variant="h6" sx={{ color: labelColor, fontWeight: 500, fontFamily, fontSize: '16px' }} gutterBottom>
+                                            Comments
+                                        </Typography>
+                                        <TextField
+                                            fullWidth
+                                            size="small"
+                                            multiline
+                                            className='textarea'
+                                            rows={6}
+                                            variant="outlined"
+                                            sx={{ ...inputStyle }}
+                                            value={comments}
+                                            onChange={(e) => setComments(e.target.value)}
+                                            error={!!errors.comments}
+                                            helperText={errors.comments}
+                                        />
+                                    </Grid>
                                 </Grid>
-                            </Grid>
-                        </Paper>
-                    </Grid>
-                )
+                            </Paper>
+                        </Grid>
+                    )
                 }
 
                 <Grid item xs={12}>
@@ -765,8 +885,8 @@ const Incident = ({ darkMode }) => {
                         </Button>
                     </Box>
                 </Grid>
-            </Grid>
-        </Box>
+            </Grid >
+        </Box >
     );
 };
 

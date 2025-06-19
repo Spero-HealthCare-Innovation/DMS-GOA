@@ -122,18 +122,18 @@ export const AuthProvider = ({ children }) => {
 
   // 🔹 2. Fetch districts based on selected state
   const fetchDistrictsByState = async (stateId) => {
-    if (!stateId) return;
+    const validStateId = stateId || 1;
     try {
       setLoading(true);
       const res = await axios.get(
-        `${port}/admin_web/district_get_idwise/${stateId}/`,
+        `${port}/admin_web/district_get_idwise/${validStateId}/`,
         {
           headers: {
             Authorization: `Bearer ${token || newToken}`,
           },
         }
       );
-      console.log(`Districts by state ${stateId}:`, res.data);
+      console.log(`Districts by state ${validStateId}:`, res.data);
       setDistricts(res.data || []);
     } catch (err) {
       console.error("Error fetching districts:", err);
@@ -142,6 +142,7 @@ export const AuthProvider = ({ children }) => {
       setLoading(false);
     }
   };
+
 
   // 🔹 3. Fetch tehsils based on selected district
   const fetchTehsilsByDistrict = async (districtId) => {
@@ -250,8 +251,15 @@ export const AuthProvider = ({ children }) => {
 
   // 🔹 useEffect for selectedStateId change
   useEffect(() => {
-    if (selectedStateId ) {
-      fetchDistrictsByState(selectedStateId);
+    if (selectedStateId) {
+      // fetchDistrictsByState(selectedStateId);
+      const defaultId = selectedStateId || 1; 
+      fetchDistrictsByState(defaultId);
+
+      if (!selectedStateId) {
+        setSelectedStateId(1); 
+      }
+
       setSelectedDistrictId("");
       setSelectedTehsilId("");
       setSelectedCityId("");
@@ -358,6 +366,8 @@ export const AuthProvider = ({ children }) => {
         setLongitude,
         commentText,
         setCommentText,
+        fetchDistrictsByState,
+        fetchTehsilsByDistrict
       }}
     >
       {children}
