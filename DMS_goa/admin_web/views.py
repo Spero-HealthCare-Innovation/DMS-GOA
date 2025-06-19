@@ -1471,3 +1471,19 @@ class incident_wise_responder_list(APIView):
                  }
             kk.append(dt)
         return Response(kk)
+
+
+
+
+class Ward_get_API(APIView):
+    def get(self,request,tah_id):
+        ward = DMS_Ward.objects.filter(tah_id=tah_id)
+        serializer = Ward_get_Serializer(ward,many=True)
+        return Response(serializer.data,status=status.HTTP_200_OK)
+
+
+class Ward_Officer_get_API(APIView):
+    def get(self,request,ward_id):
+        ward = DMS_Employee.objects.filter(ward_id=ward_id,grp_id_id__grp_name='Ward Officer')
+        serializer = Ward_officer_get_Serializer(ward,many=True)
+        return Response(serializer.data,status=status.HTTP_200_OK)
