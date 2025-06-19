@@ -100,7 +100,7 @@ const Departmentsidebar = ({ darkMode }) => {
               pb: 2,
               marginLeft: "0.5em",
               fontSize: "18px",
-              color: "black",
+              color: "white",
               boxShadow: "0 0 10px rgba(0, 0, 0, 0.1)",
               alignContent: "left",
               "&:hover": {
@@ -130,9 +130,10 @@ const Departmentsidebar = ({ darkMode }) => {
                           justifyContent: "left",
                           py: 1,
                           gap: 1,
+                          color: 'white'
                         }}
                       >
-                        <ListItemIcon sx={{ minWidth: 0 }}>{icon}</ListItemIcon>
+                        <ListItemIcon sx={{ minWidth: 0, color: 'white' }}>{icon}</ListItemIcon>
 
                         {open && (
                           <Box

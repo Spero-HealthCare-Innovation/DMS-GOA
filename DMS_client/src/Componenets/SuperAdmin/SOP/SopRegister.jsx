@@ -41,7 +41,7 @@ function SopRegister({ darkMode }) {
     display: "flex",
     alignItems: "center",
     justifyContent: "space-between",
-    background: "#5FECC8",
+    background: "linear-gradient(to bottom, #53bce1, rgb(173, 207, 216))",
     borderRadius: "8px 10px 0 0",
     padding: "6px 12px",
     color: "black",
@@ -67,7 +67,7 @@ function SopRegister({ darkMode }) {
           : "#88888855"
         }`,
     },
-    height: "45px",
+    height: "40px",
   }));
 
   const StyledCardContent = styled("td")({

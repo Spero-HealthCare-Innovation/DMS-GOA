@@ -67,9 +67,9 @@ const RegisterResponder = ({ darkMode, flag, setFlag, setSelectedIncident }) => 
     const token = localStorage.getItem("access_token");
     const [showSuccessAlert, setShowSuccessAlert] = useState(false);
     const textColor = darkMode ? "#ffffff" : "#000000";
-      const bgColor = "linear-gradient(to bottom, #53bce1, rgb(173, 207, 216))";
-  const paper = darkMode ? "202328":"#FFFFFF";
-  const tableRow = "rgb(53 53 53)";
+    const bgColor = "linear-gradient(to bottom, #53bce1, rgb(173, 207, 216))";
+    const paper = darkMode ? "202328" : "#FFFFFF";
+    const tableRow = "rgb(53 53 53)";
     const labelColor = darkMode ? "#5FECC8" : "#1976d2";
     const fontFamily = "Roboto, sans-serif";
     const borderColor = darkMode ? "#7F7F7F" : "#ccc";
@@ -421,7 +421,7 @@ const RegisterResponder = ({ darkMode, flag, setFlag, setSelectedIncident }) => 
                                                 display: "flex",
                                                 width: "100%",
                                                 borderRadius: 2,
-                                                p: 3,
+                                                // p: 3,
                                             }}
                                         >
                                             <StyledCardContent
@@ -838,7 +838,7 @@ const RegisterResponder = ({ darkMode, flag, setFlag, setSelectedIncident }) => 
                                             value={selectedResponders}
                                             onChange={handleChange}
                                             displayEmpty
-                                            sx={{ backgroundColor:tableRow }}
+                                            sx={{ backgroundColor: tableRow }}
                                             renderValue={(selected) => {
                                                 if (selected.length === 0) {
                                                     return "Select Responder";
