@@ -119,11 +119,7 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
   const [showSuccessAlert, setShowSuccessAlert] = useState(false);
   const [disasterList, setDisasterList] = useState([]);
   const [rowsPerPage, setRowsPerPage] = useState(5);
-  const labelColor = darkMode ? "#5FECC8" : "#1976d2";
-  const borderColor = darkMode ? "#7F7F7F" : "#ccc";
-  const fontFamily = "Roboto, sans-serif";
-  const textColor = darkMode ? "#ffffff" : "#000000";
-  const bgColor = darkMode ? "#202328" : "#ffffff";
+
   const [stateError, setStateError] = useState(false);
   const [districtError, setDistrictError] = useState(false);
   const [tehsilError, setTehsilError] = useState(false);
@@ -136,6 +132,14 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
   const [filteredResults, setFilteredResults] = useState([]);
   const [loading, setLoading] = useState(false);
   const [isNewEntry, setIsNewEntry] = useState(false);
+  const [activeTab, setActiveTab] = useState("");
+  const [editRowId, setEditRowId] = useState(null);
+
+  const labelColor = darkMode ? "#5FECC8" : "#1976d2";
+  const borderColor = darkMode ? "#7F7F7F" : "#ccc";
+  const fontFamily = "Roboto, sans-serif";
+  const textColor = darkMode ? "#ffffff" : "#000000";
+  const bgColor = darkMode ? "202328" : "#ffffff";
 
   const TableDataColor = darkMode
     ? "rgba(0, 0, 0, 0.04)"
@@ -196,6 +200,8 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
     const depId = selectedItem.dep_id;
     console.log("Editing Department ID:", depId);
     setDeptFetchId(depId);
+    setEditRowId(depId); // Set selected row for border
+    // setSelectedItem(selectedItem); // if used for Popover
 
     try {
       const res = await axios.get(
@@ -740,12 +746,13 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
                   <TableRow>
                     <TableHeadingCard
                       sx={{
-                        backgroundColor: "#5FC8EC",
                         color: "#000",
                         display: "flex",
                         width: "100%",
                         borderRadius: 2,
                         position: "sticky",
+                        bgcolor:
+                          "linear-gradient(to bottom, #5FC8EC,rgb(214, 223, 225))",
                         // p: 1,
                       }}
                     >
@@ -871,10 +878,17 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
                         <TableDataCardBody
                           key={index}
                           sx={{
+                            bgcolor: "rgb(53 53 53)",
                             borderRadius: 2,
                             color: textColor,
                             display: "flex",
                             width: "100%",
+                            border:
+                              item.dep_id === editRowId
+                                ? "2px solid #5FC8EC"
+                                : "1px solid transparent",
+
+                            transition: "all 0.3s ease",
                           }}
                         >
                           <StyledCardContent
@@ -1014,6 +1028,15 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
                               },
                             }}
                           >
+                            {/* <IconButton
+                              onClick={handleClose}
+                              sx={{
+                                alignSelf: "flex-end",
+                                color: textColor,
+                              }}
+                            >
+                              <CloseIcon  sx={{ fontSize: "14px" , alignItems: "center"}}/>
+                            </IconButton> */}
                             <Button
                               fullWidth
                               variant="outlined"
