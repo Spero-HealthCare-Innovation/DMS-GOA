@@ -1163,11 +1163,8 @@ class closure_Post_api(APIView):
         if serializer.is_valid():
             serializer.save()
 
-            # incident = closure_instance.incident_id 
-
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
 
 
 # class closure_Post_api2(APIView):
@@ -1197,7 +1194,7 @@ class closure_Post_api2(APIView):
         except DMS_Incident.DoesNotExist:
             return Response({"error": "Incident not found"}, status=status.HTTP_400_BAD_REQUEST)
 
-        serializer = ClosureSerializer(data=request.data)
+        serializer = ClosureSerializer2(data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -1374,7 +1371,13 @@ class UpdateTriggerStatusAPIView(APIView):
                 'status': False,
                 'message': f'Record with ID {pk_id} already has triger_status = {record.triger_status}.'
             }, status=status.HTTP_200_OK)
-            
+
+
+class Ward_get_API(APIView):
+    def get(self,request,tah_id):
+        ward = DMS_Ward.objects.filter(tah_id=tah_id)
+        serializer = Ward_get_Serializer(ward,many=True)
+        return Response(serializer.data,status=status.HTTP_200_OK)
 
 
         
