@@ -96,7 +96,7 @@ const Navbar = ({ darkMode, toggleDarkMode }) => {
   const initials =
     nameParts.length >= 2
       ? nameParts[0][0].toUpperCase() +
-        nameParts[nameParts.length - 1][0].toUpperCase()
+      nameParts[nameParts.length - 1][0].toUpperCase()
       : empName[0]?.toUpperCase() || "";
 
   const email = user?.email || "";
@@ -329,36 +329,24 @@ const Navbar = ({ darkMode, toggleDarkMode }) => {
 
         <Box
           sx={{
-            display: "inline-flex",
+            display: "flex",
             alignItems: "center",
+            justifyContent: "center",
+            width: "100%",
             px: 2,
             py: 0.5,
-            //   borderRadius: "40px",
-            //   background: darkMode
-            //     ? "linear-gradient(to bottom, #53bce1, rgb(19, 26, 28))"
-            //     : "linear-gradient(to bottom, #53bce1, rgb(228, 236, 238))",
-            //   border: "2px solid grey",
-            //   borderColor: darkMode ? "#5BB9B4" : "#1C3B52",
-            //   gap: 1,
-            //   cursor: "pointer",
           }}
         >
           <Typography
             sx={{
               color: darkMode ? "white" : "#fff",
               fontSize: "28px",
-              alignItems: "center",
               textAlign: "center",
-              justifyContent: "center",
-              ml: "8em",
-              // fontWeight: 'demi-bold',
-              fontWeight: '500',
-              // fontFamily: "Roboto, sans-serif",
-              // fontFamily:'Monteserrat',
-              fontFamily:'poppins',
+              fontWeight: 500,
+              fontFamily: "Poppins",
             }}
           >
-           PMC EMERGENCY OPERATIONS CENTER
+            PMC EMERGENCY OPERATIONS CENTER
           </Typography>
         </Box>
 
@@ -386,24 +374,25 @@ const Navbar = ({ darkMode, toggleDarkMode }) => {
               justifyContent: "flex-start",
               borderRadius: "12px",
               fontSize: "13px",
-              gap: "6px",
+              width: "130px",
               transition: "transform 0.2s ease, box-shadow 0.2s ease",
               cursor: "pointer",
             }}
           >
+            {/* Date */}
             <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-              <CalendarTodayIcon
-                style={{ fontSize: "16px", color: "orange" }}
-              />
+              <CalendarTodayIcon style={{ fontSize: "16px", color: "orange" }} />
               <span style={{ color: "orange" }}>{formattedDate}</span>
             </div>
+
+            {/* Time */}
             <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
               <AccessTimeIcon style={{ fontSize: "16px", color: "#87CEEB" }} />
               <span style={{ color: "#87CEEB" }}>{currentTime}</span>
             </div>
           </div>
 
-          <Tooltip
+          {/* <Tooltip
             title={darkMode ? "Switch to Light Mode" : "Switch to Dark Mode"}
             arrow
           >
@@ -416,7 +405,7 @@ const Navbar = ({ darkMode, toggleDarkMode }) => {
                 color: darkMode ? "#FFD700" : "#333",
               }}
             />
-          </Tooltip>
+          </Tooltip> */}
 
           {/* Mobile Menu */}
           <Box sx={{ display: { xs: "flex", md: "none" } }}>
@@ -493,18 +482,17 @@ const Navbar = ({ darkMode, toggleDarkMode }) => {
                 position: "absolute",
                 top: 60,
                 right: 20,
-                m: 0,
                 width: 300,
                 borderRadius: 2,
               },
             }}
           >
             <DialogTitle>
-              <Box display="flex" alignItems="center" gap={2}>
+              <Box display="flex" alignItems="center" gap={1}>
                 <Avatar
                   sx={{
                     background: darkMode
-                      ? "linear-gradient(90deg, #0f3443 0%, #34e89e 100%)"
+                      ? "linear-gradient(to bottom, #53bce1, rgb(19, 26, 28))"
                       : "linear-gradient(90deg, #1C3B52 0%, #2EB9A3 100%)",
                     width: 50,
                     height: 50,
@@ -514,7 +502,7 @@ const Navbar = ({ darkMode, toggleDarkMode }) => {
                 </Avatar>
 
                 <Box>
-                  <Typography variant="h6" display="inline">
+                  <Typography variant="h6" display="inline" sx={{ color: 'white' }}>
                     {empName}
                   </Typography>
                 </Box>

@@ -116,6 +116,15 @@ const AlertPanel = ({ darkMode }) => {
         };
     }, []);
 
+    const [initialData, setInitialData] = useState([]);
+    const [liveData, setLiveData] = useState([]);
+
+    useEffect(() => {
+        fetch(`${socketUrl}/api/weather_alerts`)
+            .then(res => res.json())
+            .then(data => setInitialData(data.slice(0, 10)))
+            .catch(err => console.error("Initial fetch failed:", err));
+    }, []);
 
     useEffect(() => {
         const socket = new WebSocket(`${socketUrl}/ws/weather_alerts`);
@@ -123,23 +132,53 @@ const AlertPanel = ({ darkMode }) => {
         socket.onmessage = (event) => {
             try {
                 const newData = JSON.parse(event.data);
-                console.log('Received:', newData);
-                setAlertData(prevData => {
-                    const incoming = Array.isArray(newData) ? newData[0] : newData;
-                    const filteredData = prevData.filter(item => item.pk_id !== incoming.pk_id);
-                    return [incoming, ...filteredData];
+                const incoming = Array.isArray(newData) ? newData[0] : newData;
+
+                setLiveData(prev => {
+                    const isDuplicate = prev.some(item => item.pk_id === incoming.pk_id) ||
+                        initialData.some(item => item.pk_id === incoming.pk_id);
+                    if (isDuplicate) return prev;
+
+                    return [...prev, incoming];
                 });
             } catch (error) {
                 console.error('Invalid JSON:', event.data);
             }
         };
+
         socket.onerror = (error) => {
             console.error('WebSocket error:', error);
         };
+
         socket.onclose = () => {
             console.log('WebSocket closed');
         };
-    }, []);
+    }, [initialData]);
+
+    // useEffect(() => {
+    //     const socket = new WebSocket(`${socketUrl}/ws/weather_alerts`);
+
+    //     socket.onmessage = (event) => {
+    //         try {
+    //             const newData = JSON.parse(event.data);
+    //             console.log('Received:', newData);
+    //             setAlertData(prevData => {
+    //                 const incoming = Array.isArray(newData) ? newData[0] : newData;
+    //                 const filteredData = prevData.filter(item => item.pk_id !== incoming.pk_id);
+    //                 return [...filteredData, incoming]
+    //                 // return [incoming, ...filteredData];
+    //             });
+    //         } catch (error) {
+    //             console.error('Invalid JSON:', event.data);
+    //         }
+    //     };
+    //     socket.onerror = (error) => {
+    //         console.error('WebSocket error:', error);
+    //     };
+    //     socket.onclose = () => {
+    //         console.log('WebSocket closed');
+    //     };
+    // }, []);
 
     const handleTriggerClick = async (id, triggerStatus) => {
         try {
@@ -219,7 +258,13 @@ const AlertPanel = ({ darkMode }) => {
 
     const [searchText, setSearchText] = useState("");
 
-    const filteredData = alertData.filter(item =>
+    // const filteredData = alertData.filter(item =>
+    //     item.pk_id.toString().toLowerCase().includes(searchText.toLowerCase())
+    // );
+
+    const combinedData = [...initialData, ...liveData];
+
+    const filteredData = combinedData.filter(item =>
         item.pk_id.toString().toLowerCase().includes(searchText.toLowerCase())
     );
 
@@ -289,6 +334,9 @@ const AlertPanel = ({ darkMode }) => {
                                             <Typography variant="subtitle2">Time</Typography>
                                         </StyledCardContent>
                                         <StyledCardContent style={{ flex: 1, borderRight: "1px solid black" }}>
+                                            <Typography variant="subtitle2">Disaster Name</Typography>
+                                        </StyledCardContent>
+                                        <StyledCardContent style={{ flex: 0.5, borderRight: "1px solid black" }}>
                                             <Typography variant="subtitle2">Severity</Typography>
                                         </StyledCardContent>
                                         <StyledCardContent style={{ flex: 1, marginTop: '15px' }}>
@@ -347,6 +395,11 @@ const AlertPanel = ({ darkMode }) => {
                                                     </Typography>
                                                 </StyledCardContent>
                                                 <StyledCardContent style={{ flex: 1 }}>
+                                                    <Typography variant="subtitle2">
+                                                        {item.disaster_name || 'N/A'}
+                                                    </Typography>
+                                                </StyledCardContent>
+                                                <StyledCardContent style={{ flex: 0.5 }}>
                                                     <Typography variant="subtitle2">
                                                         {(() => {
                                                             const config = {
