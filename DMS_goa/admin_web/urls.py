@@ -130,4 +130,8 @@ urlpatterns = [
     path('logout/', LogoutView.as_view(), name='logout'),
     path('alert/', DMS_Alert_idwise_get_api.as_view(), name='DMS_Alert_idwise'),
     #=============================== Nikita =========================================================
+
+    #=================================  Vinayak =====================================================
+    path('get_responder_list/<int:inc_id>/',incident_wise_responder_list.as_view()),
+    #=================================  Vinayak =====================================================
 ]
