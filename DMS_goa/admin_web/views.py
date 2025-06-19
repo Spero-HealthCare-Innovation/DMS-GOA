@@ -1371,7 +1371,13 @@ class UpdateTriggerStatusAPIView(APIView):
                 'status': False,
                 'message': f'Record with ID {pk_id} already has triger_status = {record.triger_status}.'
             }, status=status.HTTP_200_OK)
-            
+
+
+class Ward_get_API(APIView):
+    def get(self,request,tah_id):
+        ward = DMS_Ward.objects.filter(tah_id=tah_id)
+        serializer = Ward_get_Serializer(ward,many=True)
+        return Response(serializer.data,status=status.HTTP_200_OK)
 
 
         
