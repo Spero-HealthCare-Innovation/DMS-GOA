@@ -66,7 +66,7 @@ class DMS_Employee_serializer(serializers.ModelSerializer):
     
     class Meta:
         model  = DMS_Employee
-        fields = ['emp_id', 'emp_username', 'grp_id', 'emp_name', 'emp_email', 'emp_contact_no', 'emp_dob', 'emp_doj', 'emp_is_login', 'state_id', 'dist_id', 'tahsil_id', 'city_id', 'emp_is_deleted', 'emp_added_by', 'emp_modified_by', 'password','password2' ]
+        fields = ['emp_id', 'emp_username', 'grp_id', 'emp_name', 'emp_email', 'emp_contact_no', 'emp_dob', 'emp_doj', 'emp_is_login', 'state_id', 'dist_id', 'tahsil_id', 'city_id', 'emp_is_deleted', 'emp_added_by', 'emp_modified_by', 'password','password2','ward_id' ]
 
         extra_kwargs = {
             'password':{'write_only':True}
@@ -100,6 +100,7 @@ class DMS_Employee_GET_serializer(serializers.ModelSerializer):
     cit_name = serializers.CharField(source='city_id.cit_name', read_only=True)
     grp_name = serializers.CharField(source='grp_id.grp_name', read_only=True)
     state_name = serializers.CharField(source='state_id.state_name', read_only=True)
+    ward_name = serializers.CharField(source='ward_id.ward_name', read_only=True)
     
 
     class Meta:
@@ -108,7 +109,7 @@ class DMS_Employee_GET_serializer(serializers.ModelSerializer):
             'emp_id', 'emp_username', 'grp_id', 'emp_name', 'emp_email',
             'emp_contact_no', 'emp_dob', 'emp_doj', 'emp_is_login',
             'state_id', 'state_name', 'dist_id','dis_name','tahsil_id','tah_name','city_id','cit_name','grp_name',
-            'emp_is_deleted', 'emp_added_by', 'emp_modified_by', 'password'
+            'emp_is_deleted', 'emp_added_by', 'emp_modified_by', 'password','ward_id','ward_name'
         ]
         
     
@@ -323,7 +324,7 @@ class Alert_Type_Serializer(serializers.ModelSerializer):
 class Manual_call_incident_dispatch_Serializer(serializers.ModelSerializer):
     class Meta:
         model = DMS_Incident
-        fields = ['inc_type','disaster_type','alert_type','location','summary','responder_scope','latitude','longitude','caller_id','inc_added_by','inc_modified_by','time','mode']   
+        fields = ['inc_type','disaster_type','alert_type','location','summary','responder_scope','latitude','longitude','caller_id','inc_added_by','inc_modified_by','time','mode','ward','district','ward_officer','tahsil']   
 
 class Manual_call_data_Serializer(serializers.ModelSerializer):
     class Meta:
@@ -436,12 +437,30 @@ class incident_get_serializer(serializers.ModelSerializer):
     summary_name = serializers.CharField(source='summary.summary', read_only=True)
     disaster_name=serializers.CharField(source='disaster_type.disaster_name', read_only=True)
     comment_added_by = serializers.CharField(source='comment_id.comm_added_by',read_only=True)
+    ward_name = serializers.CharField(source='ward.ward_name',read_only=True)
+    district_name = serializers.CharField(source='district.dis_name',read_only=True)
+    tahsil_name = serializers.CharField(source='tahsil.tah_name',read_only=True)
+    ward_officer_name = serializers.CharField(source='ward_officer.emp_name',read_only=True)
     class Meta:
         model = DMS_Incident
-        fields=['incident_id','disaster_type','inc_type','responder_scope','caller_id','caller_name','caller_no','location','summary','summary_name','disaster_name','alert_type','mode','latitude','longitude','inc_datetime','location','comment_added_by']
+        fields=['incident_id','disaster_type','inc_type','responder_scope','caller_id','caller_name','caller_no','location','summary','summary_name','disaster_name','alert_type','mode','latitude','longitude','inc_datetime','location','comment_added_by','ward','district','ward_officer','tahsil','ward_name','district_name','tahsil_name','ward_officer_name']
 
 
 class Responder_Scope_post_Serializer(serializers.ModelSerializer):
     class Meta:
         model = DMS_Disaster_Responder
         fields = ['res_id','dis_id','dr_added_by','dr_modified_by']
+        
+
+class Ward_get_Serializer(serializers.ModelSerializer):
+    class Meta:
+        model = DMS_Ward
+        # fields = '__all__'
+        fields = ['pk_id','ward_name']
+
+
+class Ward_officer_get_Serializer(serializers.ModelSerializer):
+    class Meta:
+        model = DMS_Employee
+        # fields = '__all__'
+        fields = ['emp_id','emp_name']

@@ -826,6 +826,7 @@ class Manual_Call_Incident_api(APIView):
             'inc_type', 'disaster_type', 'alert_type', 'location', 'summary',
             'responder_scope', 'latitude', 'longitude', 'caller_id',
             'inc_added_by', 'inc_modified_by', 'incident_id', 'inc_id', 'time', 'mode',
+            'ward','district','ward_officer','tahsil'
         ]
         caller_fields = ['caller_no', 'caller_name', 'caller_added_by', 'caller_modified_by']
         comments_fields = ['comments', 'comm_added_by', 'comm_modified_by']
@@ -1371,7 +1372,23 @@ class UpdateTriggerStatusAPIView(APIView):
                 'status': False,
                 'message': f'Record with ID {pk_id} already has triger_status = {record.triger_status}.'
             }, status=status.HTTP_200_OK)
-            
+
+
+class Ward_get_API(APIView):
+    def get(self,request,tah_id):
+        ward = DMS_Ward.objects.filter(tah_id=tah_id)
+        serializer = Ward_get_Serializer(ward,many=True)
+        return Response(serializer.data,status=status.HTTP_200_OK)
+
+
+class Ward_Officer_get_API(APIView):
+    def get(self,request,ward_id):
+        ward = DMS_Employee.objects.filter(ward_id=ward_id,grp_id_id__grp_name='Ward Officer')
+        serializer = Ward_officer_get_Serializer(ward,many=True)
+        return Response(serializer.data,status=status.HTTP_200_OK)
+    
+
+
 
 
         
