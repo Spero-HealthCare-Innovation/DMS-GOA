@@ -469,7 +469,7 @@ class DMS_Disaster_Responder(models.Model):
 class DMS_incident_closure(models.Model):
     closure_id=models.AutoField(primary_key=True)
     incident_id=models.ForeignKey(DMS_Incident,on_delete=models.CASCADE,null=True,blank=True)
-    department = models.ForeignKey(DMS_Department, on_delete=models.CASCADE, null=True, blank=True)
+    responder = models.ForeignKey(DMS_Responder, on_delete=models.CASCADE, null=True, blank=True)
     vehicle_no = models.CharField(max_length=100, null= True, blank=True)
     closure_acknowledge=models.DateTimeField(null=True, blank=True)
     closure_start_base_location=models.DateTimeField(null=True, blank=True)
