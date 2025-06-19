@@ -109,7 +109,7 @@ class DMS_Employee_GET_serializer(serializers.ModelSerializer):
             'emp_id', 'emp_username', 'grp_id', 'emp_name', 'emp_email',
             'emp_contact_no', 'emp_dob', 'emp_doj', 'emp_is_login',
             'state_id', 'state_name', 'dist_id','dis_name','tahsil_id','tah_name','city_id','cit_name','grp_name',
-            'emp_is_deleted', 'emp_added_by', 'emp_modified_by', 'password','ward_id'
+            'emp_is_deleted', 'emp_added_by', 'emp_modified_by', 'password','ward_id','ward_name'
         ]
         
     
