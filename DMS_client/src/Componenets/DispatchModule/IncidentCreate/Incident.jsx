@@ -754,7 +754,7 @@ const Incident = ({ darkMode }) => {
                                 width: "10%",
                                 backgroundColor: "rgb(18,166,95)",
                                 color: "white",
-                                fontWeight: "bold",
+                                // fontWeight: "bold",
                                 borderRadius: "12px",
                                 mb: 5,
                                 textTransform: "none",
