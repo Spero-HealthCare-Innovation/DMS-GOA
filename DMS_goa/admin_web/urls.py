@@ -105,6 +105,9 @@ urlpatterns = [
     
     path('comments_post/<int:incident_id>/', CommentPostView.as_view(), name='comments_post'),
     
+    path('ward_get/<int:tah_id>/', Ward_get_API.as_view(), name='ward_get'),
+    
+    
     #===================================Mohin==================================================
     
 

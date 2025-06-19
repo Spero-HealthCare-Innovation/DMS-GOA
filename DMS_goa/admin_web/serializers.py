@@ -66,7 +66,7 @@ class DMS_Employee_serializer(serializers.ModelSerializer):
     
     class Meta:
         model  = DMS_Employee
-        fields = ['emp_id', 'emp_username', 'grp_id', 'emp_name', 'emp_email', 'emp_contact_no', 'emp_dob', 'emp_doj', 'emp_is_login', 'state_id', 'dist_id', 'tahsil_id', 'city_id', 'emp_is_deleted', 'emp_added_by', 'emp_modified_by', 'password','password2' ]
+        fields = ['emp_id', 'emp_username', 'grp_id', 'emp_name', 'emp_email', 'emp_contact_no', 'emp_dob', 'emp_doj', 'emp_is_login', 'state_id', 'dist_id', 'tahsil_id', 'city_id', 'emp_is_deleted', 'emp_added_by', 'emp_modified_by', 'password','password2','ward_id' ]
 
         extra_kwargs = {
             'password':{'write_only':True}
@@ -100,6 +100,7 @@ class DMS_Employee_GET_serializer(serializers.ModelSerializer):
     cit_name = serializers.CharField(source='city_id.cit_name', read_only=True)
     grp_name = serializers.CharField(source='grp_id.grp_name', read_only=True)
     state_name = serializers.CharField(source='state_id.state_name', read_only=True)
+    ward_name = serializers.CharField(source='ward_id.ward_name', read_only=True)
     
 
     class Meta:
@@ -108,7 +109,7 @@ class DMS_Employee_GET_serializer(serializers.ModelSerializer):
             'emp_id', 'emp_username', 'grp_id', 'emp_name', 'emp_email',
             'emp_contact_no', 'emp_dob', 'emp_doj', 'emp_is_login',
             'state_id', 'state_name', 'dist_id','dis_name','tahsil_id','tah_name','city_id','cit_name','grp_name',
-            'emp_is_deleted', 'emp_added_by', 'emp_modified_by', 'password'
+            'emp_is_deleted', 'emp_added_by', 'emp_modified_by', 'password','ward_id'
         ]
         
     
@@ -451,3 +452,11 @@ class Responder_Scope_post_Serializer(serializers.ModelSerializer):
     class Meta:
         model = DMS_Disaster_Responder
         fields = ['res_id','dis_id','dr_added_by','dr_modified_by']
+        
+
+class Ward_get_Serializer(serializers.ModelSerializer):
+    class Meta:
+        model = DMS_Ward
+        # fields = '__all__'
+        fields = ['pk_id','ward_name']
+        
