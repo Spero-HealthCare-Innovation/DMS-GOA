@@ -751,9 +751,13 @@ const totalPages = Math.ceil(filteredDispatchList.length / rowsPerPage) || 1;
                               <IconButton
                                 onClick={() => {
                                   setSelectedIncident(item);
+                                  setIncidentId(item.inc_id);
+                                  setSelectedIncidentFromSop(item);
+                                  setDisasterIdFromSop(item.disaster_name);
+                                  setHighlightedId(item.incident_id);
+                                  console.log("Incident idd", setIncidentId);
                                   setFlag(0);
                                   setViewmode("closure");
-                                  setHighlightedId(item.incident_id);
                                 }}
                                 size="large"
                               >

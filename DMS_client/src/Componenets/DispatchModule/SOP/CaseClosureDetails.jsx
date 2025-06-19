@@ -10,6 +10,8 @@ import {
   Alert,
   Select,
   MenuItem,
+  Checkbox,
+  ListItemText,
 } from "@mui/material";
 import axios from "axios";
 import { useEffect, useState } from "react";
@@ -213,6 +215,7 @@ const CaseClosureDetails = ({
         selectedIncidentFromSop?.alert_type || selectedIncident?.alert_type
       ),
       inc_id: numericIncId, // Same numeric ID
+      vehicle_no:formData.vehicleNumber,
       closure_acknowledge: formData.acknowledge
         ? formatDate(formData.acknowledge)
         : "",
@@ -259,6 +262,7 @@ const CaseClosureDetails = ({
 
       // Clear form fields after successful submit
       setFormData({
+        vehicleNumber:"",
         acknowledge: "",
         startBaseLocation: "",
         atScene: "",
@@ -432,16 +436,16 @@ const CaseClosureDetails = ({
                 <Box>
                   <Grid container spacing={2} sx={{ mb: 2, mt: 0.6 }}>
                     <Grid item xs={6}>
-                      {renderText("Caller Name", "9876543487")}
+                      {renderText("Caller Name", selectedIncidentFromSop?.incident_details?.[0]?.caller_name || "N/A")}
                     </Grid>
                     <Grid item xs={6}>
-                      {renderText("Caller Number", "Person")}
+                      {renderText("Caller Number", selectedIncidentFromSop?.incident_details?.[0]?.caller_no || "N/A")}
                     </Grid>
                   </Grid>
-                  {renderText("Location", "Ahilyanagar, Maharashtra")}
+                  {renderText("Location", selectedIncidentFromSop?.incident_details?.[0]?.location || "N/A")}
                   {renderText(
                     "Summary",
-                    "In case of emergency, call the ambulance immediately.Provide your location and details clearly to ensure quick response."
+                    selectedIncidentFromSop?.incident_details?.[0]?.summary_name || "N/A"
                   )}
                 </Box>
               ) : (
@@ -514,7 +518,7 @@ const CaseClosureDetails = ({
                       if (selected.length === 0) {
                         return (
                           <span style={{ color: "#888", fontStyle: "normal" }}>
-                            Select Department
+                            Select Responder Scope
                           </span>
                         );
                       }
@@ -533,21 +537,66 @@ const CaseClosureDetails = ({
                     }}
                   >
                     <MenuItem disabled value="">
-                      <em>Select Department</em>
+                      <em>Select Responder Scope</em>
                     </MenuItem>
-                    {/* <MenuItem value="HR">HR</MenuItem>
-                    <MenuItem value="Finance">Finance</MenuItem>
-                    <MenuItem value="IT">IT</MenuItem> */}
+                    {selectedIncidentFromSop?.["responders scope"]?.map((responder) => (
+                      <MenuItem key={responder.responder_id} value={responder.responder_name}>
+                        <Checkbox
+                          checked={selectedDepartments.indexOf(responder.responder_name) > -1}
+                          size="small"
+                        />
+                        <ListItemText primary={responder.responder_name} />
+                      </MenuItem>
+                    ))}
                   </Select>
                 </Grid>
 
                 <Grid item xs={6.2}>
-                  <TextField
-                    fullWidth
-                    size="small"
-                    placeholder="Vehicle Number"
-                    InputLabelProps={{ shrink: false }}
-                  />
+             
+                 {/* <TextField id="outlined-basic" label="Vehical Number" variant="outlined"  size="small"  placeholder="Eg.MH-12-AB-1234"/> */}
+<TextField 
+  id="outlined-basic" 
+  label="Vehicle Number" 
+  variant="outlined"  
+  size="small"  
+  placeholder="Eg.MH-12-AB-1234"
+  value={formData.vehicleNumber || ''}
+  onChange={(e) => {
+    const value = e.target.value.toUpperCase();
+    // Allow only alphanumeric characters and hyphens, limit to 13 characters
+    const filteredValue = value.replace(/[^A-Z0-9-]/g, '').slice(0, 13);
+    handleChange("vehicleNumber", filteredValue);
+    
+    // Clear validation error when user starts typing
+    if (validationErrors.vehicleNumber) {
+      setValidationErrors((prev) => ({
+        ...prev,
+        vehicleNumber: null,
+      }));
+    }
+  }}
+  onBlur={(e) => {
+    const value = e.target.value.replace(/-/g, ''); // Remove hyphens for validation
+    // Validate both formats: MH12AB1234 and MH12A1234
+    const vehicleRegex = /^[A-Z]{2}[0-9]{2}[A-Z]{1,2}[0-9]{4}$/;
+    
+    if (value && !vehicleRegex.test(value)) {
+      setValidationErrors((prev) => ({
+        ...prev,
+        vehicleNumber: "Invalid format",
+      }));
+    }
+  }}
+  error={!!validationErrors.vehicleNumber}
+  helperText={validationErrors.vehicleNumber}
+  InputProps={{ 
+    sx: { 
+      color: textColor,
+      textTransform: 'uppercase'
+    } 
+  }}
+  // sx={textFieldStyle}
+/>
                 </Grid>
 
                 <LocalizationProvider dateAdapter={AdapterDateFns}>
@@ -565,6 +614,10 @@ const CaseClosureDetails = ({
                         }
                       }}
                       ampm={false}
+                      minDateTime={selectedIncidentFromSop?.incident_details?.[0]?.inc_datetime ?
+                        new Date(selectedIncidentFromSop.incident_details[0].inc_datetime) :
+                        new Date()
+                      }
                       inputFormat="yyyy-MM-dd | HH:mm"
                       views={["year", "month", "day", "hours", "minutes"]}
                       renderInput={(params) => (
@@ -608,7 +661,11 @@ const CaseClosureDetails = ({
                         }
                       }}
                       ampm={false}
-                      minDateTime={formData.acknowledge || new Date()}
+                      minDateTime={formData.acknowledge ||
+                        (selectedIncidentFromSop?.incident_details?.[0]?.inc_datetime ?
+                          new Date(selectedIncidentFromSop.incident_details[0].inc_datetime) :
+                          new Date())
+                      }
                       inputFormat="yyyy-MM-dd | HH:mm"
                       renderInput={(params) => (
                         <TextField
@@ -652,7 +709,11 @@ const CaseClosureDetails = ({
                         }
                       }}
                       ampm={false}
-                      minDateTime={formData.acknowledge || new Date()}
+                      minDateTime={formData.acknowledge ||
+                        (selectedIncidentFromSop?.incident_details?.[0]?.inc_datetime ?
+                          new Date(selectedIncidentFromSop.incident_details[0].inc_datetime) :
+                          new Date())
+                      }
                       inputFormat="yyyy-MM-dd | HH:mm"
                       renderInput={(params) => (
                         <TextField
@@ -696,7 +757,11 @@ const CaseClosureDetails = ({
                         }
                       }}
                       ampm={false}
-                      minDateTime={formData.acknowledge || new Date()}
+                      minDateTime={formData.acknowledge ||
+                        (selectedIncidentFromSop?.incident_details?.[0]?.inc_datetime ?
+                          new Date(selectedIncidentFromSop.incident_details[0].inc_datetime) :
+                          new Date())
+                      }
                       inputFormat="yyyy-MM-dd | HH:mm"
                       renderInput={(params) => (
                         <TextField
@@ -740,7 +805,11 @@ const CaseClosureDetails = ({
                         }
                       }}
                       ampm={false}
-                      minDateTime={formData.acknowledge || new Date()}
+                      minDateTime={formData.acknowledge ||
+                        (selectedIncidentFromSop?.incident_details?.[0]?.inc_datetime ?
+                          new Date(selectedIncidentFromSop.incident_details[0].inc_datetime) :
+                          new Date())
+                      }
                       inputFormat="yyyy-MM-dd | HH:mm"
                       renderInput={(params) => (
                         <TextField

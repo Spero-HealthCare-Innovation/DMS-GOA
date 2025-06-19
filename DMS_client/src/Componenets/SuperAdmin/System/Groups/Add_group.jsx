@@ -60,6 +60,7 @@ function Add_group({ darkMode }) {
   const [selectedGroup, setSelectedGroup] = useState(null);
   const [groupNameError, setGroupNameError] = useState("");
   const [departmentError, setDepartmentError] = useState("");
+   const [editSelectedRowId, setEditSelectedRowId] = useState(null);
 
 
   const userName = localStorage.getItem("userId");
@@ -303,7 +304,7 @@ function Add_group({ darkMode }) {
     console.log("Editing group:", group);
     setIsEditing(true);
     setEditingGroupId(group.id);
-
+    setEditSelectedRowId(group.id); // Set selected row for border
     // direct departmentIdValue use 
     setDepartmentId(group.departmentIdValue?.toString() || group.fullData?.dep_id?.toString() || "");
     setGroupName(group.groupName || "");
@@ -564,6 +565,7 @@ function Add_group({ darkMode }) {
                           width: "100%",
                           mb: 1,
                           fontFamily: "Roboto",
+                          border : editSelectedRowId === item.id ? "2px solid #5FC8EC" : "none",
                         }}
                       >
                         <StyledCardContent sx={{ flex: 0.6, justifyContent: "center" }}>

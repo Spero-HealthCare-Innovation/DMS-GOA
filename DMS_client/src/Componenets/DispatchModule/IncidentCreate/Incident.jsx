@@ -45,6 +45,7 @@ const Incident = ({ darkMode }) => {
     const [secondsElapsed, setSecondsElapsed] = useState(0);
     const [timerActive, setTimerActive] = useState(false);
     const now = new Date();
+    const { wardName, tehsilName, districtName } = useAuth();
     const formattedDate = now.toLocaleDateString('en-GB').slice(0, 8).replace(/\//g, '-').slice(0, -2) + now.getFullYear().toString().slice(2);
 
     const {
