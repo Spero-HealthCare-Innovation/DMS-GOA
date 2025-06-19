@@ -26,6 +26,7 @@ from django.utils.encoding import force_bytes
 from django.core.mail import send_mail
 from rest_framework_simplejwt.tokens import AccessToken
 from geopy.geocoders import Nominatim
+import ast
 
 class DMS_department_post_api(APIView):
     def post(self,request):
@@ -826,7 +827,6 @@ class Manual_Call_Incident_api(APIView):
             'inc_type', 'disaster_type', 'alert_type', 'location', 'summary',
             'responder_scope', 'latitude', 'longitude', 'caller_id',
             'inc_added_by', 'inc_modified_by', 'incident_id', 'inc_id', 'time', 'mode',
-            'ward','district','ward_officer','tahsil'
         ]
         caller_fields = ['caller_no', 'caller_name', 'caller_added_by', 'caller_modified_by']
         comments_fields = ['comments', 'comm_added_by', 'comm_modified_by']
@@ -1141,47 +1141,93 @@ class DMS_Disaster_Responder_GET_API(APIView):
         return Response(response_data)
 
 
-
 # class closure_Post_api(APIView):
-#     def post(self,request):
-#         serializers=ClosureSerializer(data=request.data)
-#         if serializers.is_valid():
-#             serializers.save()
-#             return Response(serializers.data,status=status.HTTP_201_CREATED)
-#         return Response(serializers.errors,status=status.HTTP_400_BAD_REQUEST)
+#     def post(self, request):
+        
+#         inccc = request.data.get('incident_id')
+#         print(inccc,'innnnnnnnn')
+#         nnnnnn = DMS_Incident.objects.get(inc_id=inccc)
+#         nnnnnn.clouser_status = True
+#         nnnnnn.save()
+#         serializer = ClosureSerializer(data=request.data)
+#         if serializer.is_valid():
+#             serializer.save()
+
+#             return Response(serializer.data, status=status.HTTP_201_CREATED)
+#         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 
 class closure_Post_api(APIView):
     def post(self, request):
-        
-        inccc = request.data.get('incident_id')
-        print(inccc,'innnnnnnnn')
-        nnnnnn = DMS_Incident.objects.get(inc_id=inccc)
-        nnnnnn.clouser_status = True
-        nnnnnn.save()
-        serializer = ClosureSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
+        try:
+            inccc = request.data.get('incident_id')
+            dpt = request.data.get('responder')
 
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            inc_dtl = DMS_Incident.objects.get(incident_id=inccc)
+            dpt_dtl = DMS_Responder.objects.get(responder_name=dpt)
+            inc_dpts = DMS_Notify.objects.filter(incident_id=inc_dtl, not_is_deleted=False)
+            inc_dpts_ids = sorted([int(j) for i in inc_dpts for j in i.alert_type_id])
+            get_closure_dtl = DMS_incident_closure.objects.filter(
+                incident_id=inc_dtl, responder=dpt_dtl, closure_is_deleted=False
+            )
+            all_clsr_dtls = DMS_incident_closure.objects.filter(incident_id=inc_dtl, closure_is_deleted=False)
+            if get_closure_dtl.exists():
+                inc_dtl.clouser_status = True
+                inc_dtl.save()
+                cl_dpts = sorted(all_clsr_dtls.values_list('responder', flat=True))
+                unmatched_from_inc = set(inc_dpts_ids) - set(cl_dpts)
+                get_unmatch_dpt_clsr_ntdn = DMS_Responder.objects.filter(responder_id__in=unmatched_from_inc)
+                dpts_unm_nms = get_unmatch_dpt_clsr_ntdn.values_list('responder_name', flat=True)
+                return Response({"msg":f"Closure already done for incident {inc_dtl.incident_id} of that department/Responder {dpt_dtl.responder_name}",
+                                 "Closure_Pending_Responders": dpts_unm_nms},status=status.HTTP_200_OK)
+            else:
+                cls_dtl_add = DMS_incident_closure.objects.create(
+                    incident_id=inc_dtl,
+                    responder=dpt_dtl,
+                    vehicle_no=request.data.get('vehicle_no'),
+                    closure_acknowledge=request.data.get('closure_acknowledge'),
+                    closure_start_base_location=request.data.get('closure_start_base_location'),
+                    closure_at_scene=request.data.get('closure_at_scene'),
+                    closure_from_scene=request.data.get('closure_from_scene'),
+                    closure_back_to_base=request.data.get('closure_back_to_base'),
+                    incident_responder_by=request.data.get('incident_responder_by'),
+                    closure_is_deleted=False,
+                    closure_added_by=request.data.get('closure_added_by'),
+                    closure_modified_by=request.data.get('closure_modified_by'),
+                    closure_modified_date=request.data.get('closure_modified_date'),
+                    closure_remark=request.data.get('closure_remark')
+                )
+                
+                cl_dpts = sorted(all_clsr_dtls.values_list('responder', flat=True))
+                if cl_dpts == inc_dpts_ids:
+                    inc_dtl.clouser_status = True
+                    inc_dtl.save()
+                    return Response("Closure done for all departments.", status=status.HTTP_201_CREATED)
+                else:
+                    unmatched_from_inc = set(inc_dpts_ids) - set(cl_dpts)
+                    get_unmatch_dpt_clsr_ntdn = DMS_Responder.objects.filter(responder_id__in=unmatched_from_inc)
+                    dpts_unm_nms = get_unmatch_dpt_clsr_ntdn.values_list('responder_name', flat=True)
+                    if len(dpts_unm_nms) == 0:
+                        return Response({
+                            "msg": f"Closure for {dpt_dtl.responder_name} is done",
+                            "Departments": "All Department Closure Done"
+                        }, status=status.HTTP_201_CREATED)
+                    else: 
+                        return Response({
+                        "msg": f"Closure for {dpt_dtl.responder_name} is done, but remaining departments pending: {list(dpts_unm_nms)}",
+                        "Departments": list(dpts_unm_nms)
+                    }, status=status.HTTP_201_CREATED)
+
+        except DMS_Incident.DoesNotExist:
+            return Response({"error": "Incident not found."}, status=status.HTTP_404_NOT_FOUND)
+        except DMS_Department.DoesNotExist:
+            return Response({"error": "Department not found."}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
 
 
-# class closure_Post_api2(APIView):
-#     def post(self,request):
-        
-#         inccc = request.data.get('closure_inc_id')
-#         print(inccc,'innnnnnnnn')
-#         nnnnnn = DMS_Incident.objects.get(incident_id=inccc)
-#         nnnnnn.clouser_status = True
-#         nnnnnn.save()
-        
-#         serializers=ClosureSerializer(data=request.data)
-#         if serializers.is_valid():
-#             serializers.save()
-#             return Response(serializers.data,status=status.HTTP_201_CREATED)
-#         return Response(serializers.errors,status=status.HTTP_400_BAD_REQUEST)
 
 class closure_Post_api2(APIView):
     def post(self, request):
@@ -1372,23 +1418,26 @@ class UpdateTriggerStatusAPIView(APIView):
                 'status': False,
                 'message': f'Record with ID {pk_id} already has triger_status = {record.triger_status}.'
             }, status=status.HTTP_200_OK)
-
-
-class Ward_get_API(APIView):
-    def get(self,request,tah_id):
-        ward = DMS_Ward.objects.filter(tah_id=tah_id)
-        serializer = Ward_get_Serializer(ward,many=True)
-        return Response(serializer.data,status=status.HTTP_200_OK)
-
-
-class Ward_Officer_get_API(APIView):
-    def get(self,request,ward_id):
-        ward = DMS_Employee.objects.filter(ward_id=ward_id,grp_id_id__grp_name='Ward Officer')
-        serializer = Ward_officer_get_Serializer(ward,many=True)
-        return Response(serializer.data,status=status.HTTP_200_OK)
-    
-
-
+            
 
 
         
+class incident_wise_responder_list(APIView):
+    def get(self, request,inc_id):
+        res_lst = list(set([]))
+        nid = DMS_Notify.objects.filter(incident_id=inc_id)
+        for i in nid:
+            for j in list(set(i.alert_type_id)):
+                res_lst.append(j)
+        kk=[]
+        vv = DMS_incident_closure.objects.filter(incident_id=inc_id, closure_is_deleted=False)
+        rs_ids = set(vv.values_list('responder', flat=True))
+        ll = sorted(set(int(x) for x in res_lst if int(x) not in rs_ids))
+        for m in ll:
+            mm=DMS_Responder.objects.get(responder_id=int(m))
+            dt={
+                'responder_id':mm.responder_id,
+                'responder_name':mm.responder_name
+                 }
+            kk.append(dt)
+        return Response(kk)
