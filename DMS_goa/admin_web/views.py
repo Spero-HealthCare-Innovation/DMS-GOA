@@ -1422,3 +1422,22 @@ class UpdateTriggerStatusAPIView(APIView):
 
 
         
+class incident_wise_responder_list(APIView):
+    def get(self, request,inc_id):
+        res_lst = list(set([]))
+        nid = DMS_Notify.objects.filter(incident_id=inc_id)
+        for i in nid:
+            for j in list(set(i.alert_type_id)):
+                res_lst.append(j)
+        kk=[]
+        vv = DMS_incident_closure.objects.filter(incident_id=inc_id, closure_is_deleted=False)
+        rs_ids = set(vv.values_list('responder', flat=True))
+        ll = sorted(set(int(x) for x in res_lst if int(x) not in rs_ids))
+        for m in ll:
+            mm=DMS_Responder.objects.get(responder_id=int(m))
+            dt={
+                'responder_id':mm.responder_id,
+                'responder_name':mm.responder_name
+                 }
+            kk.append(dt)
+        return Response(kk)
