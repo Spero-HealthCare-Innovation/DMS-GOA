@@ -213,7 +213,8 @@ const IncidentCreateMap = () => {
 
                 const label = response.data.items[0]?.address?.label || "No address found";
                 setPopupTextMap(label);
-                setQueryMap(label);
+                // setQueryMap(label);
+                setQuery(label);
 
                 // 👇 GeoJSON + Turf match
                 const geojsonRes = await fetch('/Boundaries/PUNEWARD_TD.geojson');
