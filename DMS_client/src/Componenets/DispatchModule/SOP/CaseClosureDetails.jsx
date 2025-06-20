@@ -116,7 +116,7 @@ const CaseClosureDetails = ({
   };
 
   const [formData, setFormData] = useState({
-    responderName:"",
+    responderName: "",
     vehicleNumber: "",
     acknowledge: "",
     startBaseLocation: "",
@@ -348,7 +348,7 @@ const CaseClosureDetails = ({
   // };
 
 
- const handleSubmit = async () => {
+  const handleSubmit = async () => {
     if (!validateForm()) {
       setSubmitStatus({
         type: "error",
@@ -361,7 +361,7 @@ const CaseClosureDetails = ({
     const numericIncId = selectedIncidentFromSop?.inc_id || selectedIncident?.inc_id;
     const incidentId =
       selectedIncidentFromSop?.incident_id || selectedIncident?.incident_id;
-    
+
 
     if (!numericIncId) {
       setSubmitStatus({ type: "error", message: "No incident ID found!" });
@@ -411,11 +411,12 @@ const CaseClosureDetails = ({
         message: "Closure details saved successfully!",
       });
 
-     // Check if API response has remaining departments
+      // Check if API response has remaining departments
       const remainingDepartments = res.data.Departments || [];
-      
+
       // Update selectedDepartments with remaining departments from API response
       setSelectedDepartments(remainingDepartments);
+
 
       // Only clear form and reset data if no more departments are pending (empty array)
       if (remainingDepartments.length === 0) {
@@ -448,7 +449,7 @@ const CaseClosureDetails = ({
           backToBase: "",
           // Keep the datetime fields as they are likely same for all responders
         }));
-                await fetchResponderList();
+        await fetchResponderList();
 
       }
 
@@ -794,40 +795,40 @@ const CaseClosureDetails = ({
                   />
                 </Grid>
                 <Grid item xs={6}>
-                {/* <TextField id="outlined-basic" label="Vehical Number" variant="outlined"  size="small"  placeholder="Eg.MH-12-AB-1234"/> */}
+                  {/* <TextField id="outlined-basic" label="Vehical Number" variant="outlined"  size="small"  placeholder="Eg.MH-12-AB-1234"/> */}
                   <TextField
-  id="responder-name-field"
-  label="Responder Name"
-  variant="outlined"
-  size="small"
-  value={formData.responderName || ''}
-  onChange={(e) => {
-    const value = e.target.value;
-    // Direct state update method
-    setFormData(prev => ({
-      ...prev,
-      responderName: value
-    }));
-    
-    // OR if you have handleChange function, use this:
-    // handleChange("responderName", value);
-    
-    // Clear validation error if exists
-    if (validationErrors.responderName) {
-      setValidationErrors((prev) => ({
-        ...prev,
-        responderName: null,
-      }));
-    }
-  }}
-  placeholder="Enter responder name"
-  InputProps={{
-    sx: {
-      color: textColor,
-    }
-  }}
-  // sx={textFieldStyle}
-/>
+                    id="responder-name-field"
+                    label="Responder Name"
+                    variant="outlined"
+                    size="small"
+                    value={formData.responderName || ''}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      // Direct state update method
+                      setFormData(prev => ({
+                        ...prev,
+                        responderName: value
+                      }));
+
+                      // OR if you have handleChange function, use this:
+                      // handleChange("responderName", value);
+
+                      // Clear validation error if exists
+                      if (validationErrors.responderName) {
+                        setValidationErrors((prev) => ({
+                          ...prev,
+                          responderName: null,
+                        }));
+                      }
+                    }}
+                    placeholder="Enter responder name"
+                    InputProps={{
+                      sx: {
+                        color: textColor,
+                      }
+                    }}
+                  // sx={textFieldStyle}
+                  />
                 </Grid>
 
                 <LocalizationProvider dateAdapter={AdapterDateFns}>

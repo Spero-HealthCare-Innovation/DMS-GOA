@@ -8,6 +8,7 @@ import TableBody from '@mui/material/TableBody';
 import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
+import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import DownloadIcon from "@mui/icons-material/Download";
@@ -351,80 +352,84 @@ function ClosureDetail({ darkMode, fromDate, toDate, onChange, onDownload }) {
           />
 
           {/* From Date */}
-          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-            <label
-              style={{
-                color: 'grey',
-                fontSize: '13px',
-                fontWeight: '600',
-                userSelect: 'none',
-              }}
-            >
-              From Date
-            </label>
-            <input
-              type="date"
-              name="fromDate"
-              className="custom-date-input"
-              value={
-                formData.fromDate
-                  ? new Date(formData.fromDate).toISOString().split('T')[0]
-                  : ''
-              }
-              onChange={(e) => handleChange("fromDate", new Date(e.target.value))}
-              style={{
-                width: '150px',
-                height: '35px',
-                padding: '10px',
-                backgroundColor: "202328 !important",
-                color: 'grey',
-                border: '1px solid gray',
-                borderRadius: '4px',
-                outline: 'none',
-                fontSize: '14px',
-                cursor: 'pointer',
-                appearance: 'none',
-              }}
-            />
-          </Box>
 
-          {/* To Date */}
-          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-            <label
-              style={{
-                color: 'grey',
-                fontSize: '13px',
-                fontWeight: '600',
-                userSelect: 'none',
-              }}
-            >
-              To Date
-            </label>
-            <input
-              type="date"
-              name="toDate"
-              className="custom-date-input"
-              value={
-                formData.toDate
-                  ? new Date(formData.toDate).toISOString().split('T')[0]
-                  : ''
-              }
-              onChange={(e) => handleChange("toDate", new Date(e.target.value))}
-              style={{
-                width: '150px',
-                height: '35px',
-                padding: '10px',
-                backgroundColor: bgColor,
-                color: 'grey',
-                border: '1px solid gray',
-                borderRadius: '4px',
-                outline: 'none',
-                fontSize: '14px',
-                cursor: 'pointer',
-                appearance: 'none',
-              }}
-            />
-          </Box>
+          
+
+
+           <Grid item md={4}>
+  <DatePicker
+    label="From Date *"
+    format="yyyy-MM-dd"
+    slotProps={{ textField: { size: 'small' } }}
+    value={formData.fromDate || null}
+    onChange={(newValue) => handleChange("fromDate", newValue)}
+    renderInput={(params) => (
+      <TextField
+        {...params}
+        fullWidth
+        placeholder="yyyy-MM-dd"
+        variant="outlined"
+        size="small"
+        required
+        error={!!validationErrors.fromdate}
+        helperText={validationErrors.fromdate}
+        InputLabelProps={{ shrink: true }}
+        InputProps={{
+          ...params.InputProps,
+          sx: {
+            color: textColor,
+            height: "35px",
+            fontSize: "0.45rem",
+            "& .MuiSvgIcon-root": {
+              color: "white",
+            },
+          },
+        }}
+        sx={textFieldStyle}
+      />
+    )}
+  />
+</Grid>
+
+        
+
+
+            {/* To Date */}
+         <Grid item>
+  <DatePicker
+    label="To Date *"
+    format="yyyy-MM-dd"
+    slotProps={{ textField: { size: 'small' } }}
+    value={formData.toDate || null}
+    onChange={(newValue) => handleChange("toDate", newValue)}
+    renderInput={(params) => (
+      <TextField
+        {...params}
+        fullWidth
+        placeholder="yyyy-MM-dd"
+        variant="outlined"
+        size="small"
+        required
+        error={!!validationErrors.startBaseLocation}
+        helperText={validationErrors.startBaseLocation}
+        InputLabelProps={{ shrink: true }}
+        InputProps={{
+          ...params.InputProps,
+          sx: {
+            color: textColor,
+            height: "35px",
+            fontSize: "0.45rem",
+            "& .MuiSvgIcon-root": {
+              color: "white",
+            },
+          },
+        }}
+        sx={textFieldStyle}
+      />
+    )}
+  />
+</Grid>
+
 
           {/* Submit Button */}
           <Button
