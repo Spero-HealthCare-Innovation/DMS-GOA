@@ -1393,7 +1393,7 @@ class incident_get_Api(APIView):
 
         # Get related comments
         comments_qs = DMS_Comments.objects.filter(incident_id=inc_id, comm_is_deleted=False)
-        comment_texts = comments_qs.values('comm_id', 'comments','comm_added_by')
+        comment_texts = comments_qs.values('comm_id', 'comments','comm_added_by','comm_added_date')
 
         # Final response
         data = {
