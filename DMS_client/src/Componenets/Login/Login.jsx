@@ -13,7 +13,9 @@ import {
 } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 // import loginBg from "../../assets/Bg_login1.png";
-import loginBg from "../../assets/pune_login_bg.png";
+// import loginBg from "../../assets/pune_login_bg.png";
+import loginBg from "../../assets/new_bg_image_login.png";
+
 import PMCLogo from "../../assets/PMC.png";
 import Spero from "../../assets/spero1.png";
 import { useNavigate } from "react-router-dom";
@@ -98,6 +100,7 @@ function Login() {
   }, []);
 
   const handleLogin = async () => {
+
     setUsernameError("");
     setPasswordError("");
     setCaptchaTextError("");
@@ -105,17 +108,17 @@ function Login() {
     let hasError = false;
 
     if (!emp_username) {
-      setUsernameError("Please enter User ID");
+      setUsernameError("Please Enter User ID");
       hasError = true;
     }
 
     if (!password) {
-      setPasswordError("Please enter Password");
+      setPasswordError("Please Enter Password");
       hasError = true;
     }
 
     if (captchaError || (!captchaValue && captchaKey)) {
-      setCaptchaTextError("Please enter valid captcha text");
+      setCaptchaTextError("Please Enter Valid Captcha Text");
       hasError = true;
     }
 
@@ -263,25 +266,70 @@ function Login() {
         height: "100vh",
         width: "100%",
         position: "relative",
-        overflow: "hidden",
+        // overflow: "hidden",
         display: "flex",
         flexDirection: isSmallScreen ? "column" : "row",
       }}
     >
       {/* Background Image */}
-      <Box
+      <Box>
+        {/* Background Image */}
+        <Box
+          sx={{
+            position: "absolute",
+            height: "100%",
+            width: "100%",
+            backgroundImage: `url(${loginBg})`,
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+            backgroundRepeat: "no-repeat",
+            zIndex: 0,
+            overflow: "hidden",
+          }}
+        />
+
+        {/* Overlay Text */}
+        <Box
+          sx={{
+            position: "absolute",
+            top: "20%",
+            width: "100%",
+            textAlign: "center",
+            zIndex: 1,
+            color: "#fff", // Change if needed for contrast
+            textShadow: "1px 1px 5px rgba(0,0,0,0.7)",
+          }}
+        >
+          <Typography variant="h3" sx={{ fontWeight: "bold", mr: '6em',fontFamily: 'Roboto, sans-serif' ,fontSize:45}}>
+            PUNE MUNICIPAL CORPORATION
+          </Typography>
+          <Typography variant="h3" sx={{ mt: 1, mr: '6em',fontFamily: 'Roboto, sans-serif' ,fontSize:45 }}>
+            DISASTER MANAGEMENT SYSTEM
+          </Typography>
+        </Box>
+      </Box>
+
+
+      {/* <Box
         sx={{
-          position: "fixed",
-          top: 0,
-          left: 0,
-          height: "100%",
-          width: "100%",
-          backgroundImage: `url(${loginBg})`,
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-          zIndex: 0,
+          // height: "100%",
+          // flex: 1,
+          // display: "flex",
+          // alignItems: "center",
+          // justifyContent: "center",
+          // zIndex: 1,
+          // flexDirection: "column",
+          // color: "#fff",
+          // textAlign: "center",
+          // p: 3,
+          // marginLeft: "10em",
         }}
-      />
+      >
+        <h2 style={{ marginBottom: 8 }}>
+          PUNE MUNICIPAL CORPORATION - Disaster Management System
+        </h2>
+      </Box> */}
+
 
       {/* Foreground */}
       <Box
@@ -320,24 +368,24 @@ function Login() {
             }}
           >
             <Box
-    sx={{
-      mb: 1, 
-      display: "flex",
-      justifyContent: "center",
-      alignItems: "center",
-    }}
-  >
-    <Box
-      component="img"
-      src={PMCLogo} 
-      alt="Company Logo"
-      sx={{
-        width: "70px", 
-        height: "auto",
-        objectFit: "contain",
-      }}
-    />
-  </Box>
+              sx={{
+                mb: 1,
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+              }}
+            >
+              <Box
+                component="img"
+                src={PMCLogo}
+                alt="Company Logo"
+                sx={{
+                  width: "70px",
+                  height: "auto",
+                  objectFit: "contain",
+                }}
+              />
+            </Box>
             <Typography variant="h6" gutterBottom sx={{ color: "white" }}>
               <b>User Login</b>
             </Typography>
