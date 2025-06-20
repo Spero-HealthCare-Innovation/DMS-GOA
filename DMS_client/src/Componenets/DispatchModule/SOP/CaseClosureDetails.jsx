@@ -563,7 +563,7 @@ const CaseClosureDetails = ({
           transition: "all 0.3s ease",
         }}
       >
-        <Grid container spacing={3} sx={{ height: "350px" }}>
+        <Grid container spacing={3} sx={{ height: "300px" }}>
           {/* Left Column - Incident Info (Reduced width) */}
           <Grid
             item
