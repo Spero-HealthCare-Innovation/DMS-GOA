@@ -195,7 +195,7 @@ class DMS_district_get_api(APIView):
         return Response(serializers.data,status=status.HTTP_200_OK)
 
 class DMS_district_idwise_get_api(APIView):
-    # permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated]
     def get(self,request,state_id):
         snippet = DMS_District.objects.filter(state_id=state_id,dis_is_deleted=False)
         serializers = DMS_District_Serializer(snippet,many=True)
