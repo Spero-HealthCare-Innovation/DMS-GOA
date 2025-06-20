@@ -196,8 +196,8 @@ class DMS_district_get_api(APIView):
 
 class DMS_district_idwise_get_api(APIView):
     permission_classes = [IsAuthenticated]
-    def get(self,request,dis_id):
-        snippet = DMS_District.objects.filter(dis_id=dis_id,dis_is_deleted=False)
+    def get(self,request,state_id):
+        snippet = DMS_District.objects.filter(state_id=state_id,dis_is_deleted=False)
         serializers = DMS_District_Serializer(snippet,many=True)
         return Response(serializers.data,status=status.HTTP_200_OK)
 
@@ -211,8 +211,8 @@ class DMS_Tahsil_get_api(APIView):
 
 class DMS_Tahsil_idwise_get_api(APIView):
     permission_classes = [IsAuthenticated]
-    def get(self,request,tah_id):
-        snippet = DMS_Tahsil.objects.filter(tah_id=tah_id,tah_is_deleted=False)
+    def get(self,request,dis_id):
+        snippet = DMS_Tahsil.objects.filter(dis_id=dis_id,tah_is_deleted=False)
         serializers = DMS_Tahsil_Serializer(snippet,many=True)
         return Response(serializers.data,status=status.HTTP_200_OK)
     
@@ -225,8 +225,8 @@ class DMS_City_get_api(APIView):
 
 class DMS_City_idwise_get_api(APIView):
     permission_classes = [IsAuthenticated]
-    def get(self,request,cit_id):
-        snippet = DMS_City.objects.filter(cit_id=cit_id,cit_is_deleted=False)
+    def get(self,request,tah_id):
+        snippet = DMS_City.objects.filter(tah_id=tah_id,cit_is_deleted=False)
         serializers = DMS_City_Serializer(snippet,many=True)
         return Response(serializers.data,status=status.HTTP_200_OK)
 
