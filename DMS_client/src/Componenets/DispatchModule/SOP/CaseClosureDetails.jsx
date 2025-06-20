@@ -43,23 +43,81 @@ const CaseClosureDetails = ({
   const [isDataCleared, setIsDataCleared] = useState(false);
   const [validationErrors, setValidationErrors] = useState({});
 
+  // New state for responder list
+  const [responderList, setResponderList] = useState([]);
+  const [responderLoading, setResponderLoading] = useState(false);
+  const [responderError, setResponderError] = useState(null);
+
+  // Function to fetch responder list
+  const fetchResponderList = async (inc_id) => {
+    if (!inc_id) return;
+
+    try {
+      setResponderLoading(true);
+      setResponderError(null);
+
+      const authToken = localStorage.getItem("access_token") || token;
+      const response = await axios.get(
+        `${port}/admin_web/get_responder_list/${inc_id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${authToken}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      console.log("Responder API Response:", response.data);
+
+      // Assuming the API returns responder data in response.data
+      // Adjust this based on your actual API response structure
+      if (response.data && Array.isArray(response.data)) {
+        setResponderList(response.data);
+      } else if (response.data && response.data.responders) {
+        setResponderList(response.data.responders);
+      } else {
+        setResponderList([]);
+      }
+
+    } catch (error) {
+      console.error("Error fetching responder list:", error);
+      setResponderError(error.response?.data?.message || "Failed to fetch responder list");
+      setResponderList([]);
+    } finally {
+      setResponderLoading(false);
+    }
+  };
+
+  // Fetch responder list when incidentId changes
+  useEffect(() => {
+    const currentIncId = selectedIncidentFromSop?.inc_id || selectedIncident?.inc_id;
+
+    if (currentIncId) {
+      console.log("Fetching responder list for inc_id:", currentIncId);
+      fetchResponderList(currentIncId);
+    }
+  }, [selectedIncidentFromSop, selectedIncident]);
+
   const validateForm = () => {
     const errors = {};
 
     if (!formData.acknowledge) errors.acknowledge = "Acknowledge is required";
-    if (!formData.startBaseLocation)
-      errors.startBaseLocation = "Start Base Location is required";
+    if (!formData.startBaseLocation) errors.startBaseLocation = "Start Base Location is required";
     if (!formData.atScene) errors.atScene = "At Scene is required";
     if (!formData.fromScene) errors.fromScene = "From Scene is required";
     if (!formData.backToBase) errors.backToBase = "Back to Base is required";
-    if (!formData.closureRemark.trim())
-      errors.closureRemark = "Remark is required";
+    if (!formData.closureRemark.trim()) errors.closureRemark = "Remark is required";
+
+    // Add vehicle number validation if needed
+    if (!formData.vehicleNumber) errors.vehicleNumber = "Vehicle Number is required";
 
     setValidationErrors(errors);
     return Object.keys(errors).length === 0;
   };
 
   const [formData, setFormData] = useState({
+    responderName:"",
+    vehicleNumber: "",
     acknowledge: "",
     startBaseLocation: "",
     atScene: "",
@@ -187,7 +245,110 @@ const CaseClosureDetails = ({
   //     }
   //   };
 
-  const handleSubmit = async () => {
+  // const handleSubmit = async () => {
+  //   if (!validateForm()) {
+  //     setSubmitStatus({
+  //       type: "error",
+  //       message: "Please fill all required fields",
+  //     });
+  //     return;
+
+  //   }
+  //   // Check if we have incident data
+  //   const incidentId =
+  //     selectedIncidentFromSop?.incident_id || selectedIncident?.incident_id;
+  //   const numericIncId =
+  //     selectedIncidentFromSop?.inc_id || selectedIncident?.inc_id;
+
+  //   if (!incidentId || !numericIncId) {
+  //     setSubmitStatus({ type: "error", message: "No incident ID found!" });
+  //     return;
+  //   }
+
+  //   const payload = {
+  //     incident_id: numericIncId, // Pass numeric inc_id (292) instead of string incident_id
+  //     Disaster_Type:
+  //       selectedIncidentFromSop?.disaster_name ||
+  //       selectedIncident?.disaster_name,
+  //     Alert_Type: getAlertTypeName(
+  //       selectedIncidentFromSop?.alert_type || selectedIncident?.alert_type
+  //     ),
+  //     inc_id: numericIncId, // Same numeric ID
+  //     vehicle_no:formData.vehicleNumber,
+  //     closure_acknowledge: formData.acknowledge
+  //       ? formatDate(formData.acknowledge)
+  //       : "",
+  //     closure_start_base_location: formData.startBaseLocation
+  //       ? formatDate(formData.startBaseLocation)
+  //       : "",
+  //     closure_at_scene: formData.atScene ? formatDate(formData.atScene) : "",
+  //     closure_from_scene: formData.fromScene
+  //       ? formatDate(formData.fromScene)
+  //       : "",
+  //     closure_back_to_base: formData.backToBase
+  //       ? formatDate(formData.backToBase)
+  //       : "",
+  //     closure_added_by: userName,
+  //     closure_modified_by: userName,
+  //     closure_remark: formData.closureRemark,
+  //   };
+
+  //   console.log("Payload being sent:", payload); // Debug log
+
+  //   try {
+  //     setLoading(true);
+  //     setSubmitStatus(null); // Clear previous status
+
+  //     // Get the correct token
+  //     const authToken = localStorage.getItem("access_token") || token;
+
+  //     const res = await axios.post(
+  //       `${port}/admin_web/closure_post_api/`,
+  //       payload,
+  //       {
+  //         headers: {
+  //           Authorization: `Bearer ${authToken}`,
+  //           "Content-Type": "application/json",
+  //         },
+  //       }
+  //     );
+
+  //     console.log("API Response:", res.data); // Debug log
+  //     setSubmitStatus({
+  //       type: "success",
+  //       message: "Closure details saved successfully!",
+  //     });
+
+  //     // Clear form fields after successful submit
+  //     setFormData({
+  //       vehicleNumber:"",
+  //       acknowledge: "",
+  //       startBaseLocation: "",
+  //       atScene: "",
+  //       fromScene: "",
+  //       backToBase: "",
+  //       closureRemark: "",
+  //     });
+  //     setSelectedIncidentFromSop(null);
+  //     setIsDataCleared(true);
+  //     fetchDispatchList();
+  //   } catch (error) {
+  //     console.error("API Error:", error); // Debug log
+  //     console.error("Error response:", error.response?.data); // Debug log
+
+  //     const errorMessage =
+  //       error.response?.data?.message ||
+  //       error.response?.data?.error ||
+  //       "Failed to save closure details.";
+
+  //     setSubmitStatus({ type: "error", message: errorMessage });
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+
+
+ const handleSubmit = async () => {
     if (!validateForm()) {
       setSubmitStatus({
         type: "error",
@@ -195,52 +356,42 @@ const CaseClosureDetails = ({
       });
       return;
     }
+
     // Check if we have incident data
+    const numericIncId = selectedIncidentFromSop?.inc_id || selectedIncident?.inc_id;
     const incidentId =
       selectedIncidentFromSop?.incident_id || selectedIncident?.incident_id;
-    const numericIncId =
-      selectedIncidentFromSop?.inc_id || selectedIncident?.inc_id;
+    
 
-    if (!incidentId || !numericIncId) {
+    if (!numericIncId) {
       setSubmitStatus({ type: "error", message: "No incident ID found!" });
       return;
     }
 
     const payload = {
-      incident_id: numericIncId, // Pass numeric inc_id (292) instead of string incident_id
-      Disaster_Type:
-        selectedIncidentFromSop?.disaster_name ||
-        selectedIncident?.disaster_name,
-      Alert_Type: getAlertTypeName(
-        selectedIncidentFromSop?.alert_type || selectedIncident?.alert_type
-      ),
-      inc_id: numericIncId, // Same numeric ID
-      vehicle_no:formData.vehicleNumber,
-      closure_acknowledge: formData.acknowledge
-        ? formatDate(formData.acknowledge)
-        : "",
-      closure_start_base_location: formData.startBaseLocation
-        ? formatDate(formData.startBaseLocation)
-        : "",
+      incident_id: incidentId,
+      inc_id: numericIncId,
+      responder: selectedDepartments.length > 0 ? selectedDepartments[0] : "", // Add responder
+      responder_name: formData.responderName || "", // Add responder_name if you have it
+      vehicle_no: formData.vehicleNumber,
+      closure_acknowledge: formData.acknowledge ? formatDate(formData.acknowledge) : "",
+      closure_start_base_location: formData.startBaseLocation ? formatDate(formData.startBaseLocation) : "",
       closure_at_scene: formData.atScene ? formatDate(formData.atScene) : "",
-      closure_from_scene: formData.fromScene
-        ? formatDate(formData.fromScene)
-        : "",
-      closure_back_to_base: formData.backToBase
-        ? formatDate(formData.backToBase)
-        : "",
+      closure_from_scene: formData.fromScene ? formatDate(formData.fromScene) : "",
+      closure_back_to_base: formData.backToBase ? formatDate(formData.backToBase) : "",
+      incident_responder_by: "PDA officer", // Add this field
       closure_added_by: userName,
       closure_modified_by: userName,
+      closure_modified_date: new Date().toISOString(), // Add current timestamp
       closure_remark: formData.closureRemark,
     };
 
-    console.log("Payload being sent:", payload); // Debug log
+    console.log("Payload being sent:", payload);
 
     try {
       setLoading(true);
-      setSubmitStatus(null); // Clear previous status
+      setSubmitStatus(null);
 
-      // Get the correct token
       const authToken = localStorage.getItem("access_token") || token;
 
       const res = await axios.post(
@@ -254,28 +405,56 @@ const CaseClosureDetails = ({
         }
       );
 
-      console.log("API Response:", res.data); // Debug log
+      console.log("API Response:", res.data);
       setSubmitStatus({
         type: "success",
         message: "Closure details saved successfully!",
       });
 
-      // Clear form fields after successful submit
-      setFormData({
-        vehicleNumber:"",
-        acknowledge: "",
-        startBaseLocation: "",
-        atScene: "",
-        fromScene: "",
-        backToBase: "",
-        closureRemark: "",
-      });
-      setSelectedIncidentFromSop(null);
-      setIsDataCleared(true);
-      fetchDispatchList();
+     // Check if API response has remaining departments
+      const remainingDepartments = res.data.Departments || [];
+      
+      // Update selectedDepartments with remaining departments from API response
+      setSelectedDepartments(remainingDepartments);
+
+      // Only clear form and reset data if no more departments are pending (empty array)
+      if (remainingDepartments.length === 0) {
+        // Clear ALL form fields and reset everything when no departments are left
+        setFormData({
+          vehicleNumber: "",
+          responderName: "",
+          acknowledge: "",
+          startBaseLocation: "",
+          atScene: "",
+          fromScene: "",
+          backToBase: "",
+          closureRemark: "",
+        });
+        setSelectedIncidentFromSop(null);
+        setIsDataCleared(true);
+        fetchDispatchList();
+        await fetchResponderList();
+      } else {
+        // If departments are still pending, only clear vehicle and responder specific fields
+        setFormData(prev => ({
+          ...prev,
+          vehicleNumber: "",
+          responderName: "",
+          closureRemark: "",
+          acknowledge: "",
+          startBaseLocation: "",
+          atScene: "",
+          fromScene: "",
+          backToBase: "",
+          // Keep the datetime fields as they are likely same for all responders
+        }));
+                await fetchResponderList();
+
+      }
+
     } catch (error) {
-      console.error("API Error:", error); // Debug log
-      console.error("Error response:", error.response?.data); // Debug log
+      console.error("API Error:", error);
+      console.error("Error response:", error.response?.data);
 
       const errorMessage =
         error.response?.data?.message ||
@@ -508,7 +687,7 @@ const CaseClosureDetails = ({
               }}
             >
               <Grid container spacing={2} sx={{ mt: 0.6 }}>
-                <Grid item xs={5.7}>
+                <Grid item xs={6}>
                   <Select
                     multiple
                     displayEmpty
@@ -518,7 +697,7 @@ const CaseClosureDetails = ({
                       if (selected.length === 0) {
                         return (
                           <span style={{ color: "#888", fontStyle: "normal" }}>
-                            Select Responder Scope
+                            {responderLoading ? "Loading..." : "Responder Scope"}
                           </span>
                         );
                       }
@@ -526,7 +705,8 @@ const CaseClosureDetails = ({
                     }}
                     size="small"
                     fullWidth
-                    inputProps={{ "aria-label": "Select Department" }}
+                    disabled={responderLoading}
+                    inputProps={{ "aria-label": "Select Responder" }}
                     MenuProps={{
                       PaperProps: {
                         style: {
@@ -537,72 +717,124 @@ const CaseClosureDetails = ({
                     }}
                   >
                     <MenuItem disabled value="">
-                      <em>Select Responder Scope</em>
+                      <em>
+                        {responderLoading
+                          ? "Loading responders..."
+                          : responderError
+                            ? "Error loading responders"
+                            : "Select Responder Scope"
+                        }
+                      </em>
                     </MenuItem>
-                    {selectedIncidentFromSop?.["responders scope"]?.map((responder) => (
-                      <MenuItem key={responder.responder_id} value={responder.responder_name}>
-                        <Checkbox
-                          checked={selectedDepartments.indexOf(responder.responder_name) > -1}
-                          size="small"
-                        />
-                        <ListItemText primary={responder.responder_name} />
+
+                    {responderList.map((responder, index) => (
+                      <MenuItem
+                        key={responder.responder_id || index}
+                        value={responder.responder_name || responder.name}
+                      >
+                        {/* Only show text, no checkbox */}
+                        {responder.responder_name || responder.name}
                       </MenuItem>
                     ))}
                   </Select>
+
+                  {responderError && (
+                    <Typography variant="caption" color="error" sx={{ mt: 0.5, display: 'block' }}>
+                      {responderError}
+                    </Typography>
+                  )}
                 </Grid>
 
-                <Grid item xs={6.2}>
-             
-                 {/* <TextField id="outlined-basic" label="Vehical Number" variant="outlined"  size="small"  placeholder="Eg.MH-12-AB-1234"/> */}
-<TextField 
-  id="outlined-basic" 
-  label="Vehicle Number" 
-  variant="outlined"  
-  size="small"  
-  placeholder="Eg.MH-12-AB-1234"
-  value={formData.vehicleNumber || ''}
+
+                <Grid item xs={6}>
+
+                  {/* <TextField id="outlined-basic" label="Vehical Number" variant="outlined"  size="small"  placeholder="Eg.MH-12-AB-1234"/> */}
+                  <TextField
+                    id="outlined-basic"
+                    label="Vehicle Number"
+                    variant="outlined"
+                    size="small"
+                    placeholder="Eg.MH-12-AB-1234"
+                    value={formData.vehicleNumber || ''}
+                    onChange={(e) => {
+                      const value = e.target.value.toUpperCase();
+                      // Allow only alphanumeric characters and hyphens, limit to 13 characters
+                      const filteredValue = value.replace(/[^A-Z0-9-]/g, '').slice(0, 13);
+                      handleChange("vehicleNumber", filteredValue);
+
+                      // Clear validation error when user starts typing
+                      if (validationErrors.vehicleNumber) {
+                        setValidationErrors((prev) => ({
+                          ...prev,
+                          vehicleNumber: null,
+                        }));
+                      }
+                    }}
+                    onBlur={(e) => {
+                      const value = e.target.value.replace(/-/g, ''); // Remove hyphens for validation
+                      // Validate both formats: MH12AB1234 and MH12A1234
+                      const vehicleRegex = /^[A-Z]{2}[0-9]{2}[A-Z]{1,2}[0-9]{4}$/;
+
+                      if (value && !vehicleRegex.test(value)) {
+                        setValidationErrors((prev) => ({
+                          ...prev,
+                          vehicleNumber: "Invalid format",
+                        }));
+                      }
+                    }}
+                    error={!!validationErrors.vehicleNumber}
+                    helperText={validationErrors.vehicleNumber}
+                    InputProps={{
+                      sx: {
+                        color: textColor,
+                        textTransform: 'uppercase'
+                      }
+                    }}
+                  // sx={textFieldStyle}
+                  />
+                </Grid>
+                <Grid item xs={6}>
+                {/* <TextField id="outlined-basic" label="Vehical Number" variant="outlined"  size="small"  placeholder="Eg.MH-12-AB-1234"/> */}
+                  <TextField
+  id="responder-name-field"
+  label="Responder Name"
+  variant="outlined"
+  size="small"
+  value={formData.responderName || ''}
   onChange={(e) => {
-    const value = e.target.value.toUpperCase();
-    // Allow only alphanumeric characters and hyphens, limit to 13 characters
-    const filteredValue = value.replace(/[^A-Z0-9-]/g, '').slice(0, 13);
-    handleChange("vehicleNumber", filteredValue);
+    const value = e.target.value;
+    // Direct state update method
+    setFormData(prev => ({
+      ...prev,
+      responderName: value
+    }));
     
-    // Clear validation error when user starts typing
-    if (validationErrors.vehicleNumber) {
+    // OR if you have handleChange function, use this:
+    // handleChange("responderName", value);
+    
+    // Clear validation error if exists
+    if (validationErrors.responderName) {
       setValidationErrors((prev) => ({
         ...prev,
-        vehicleNumber: null,
+        responderName: null,
       }));
     }
   }}
-  onBlur={(e) => {
-    const value = e.target.value.replace(/-/g, ''); // Remove hyphens for validation
-    // Validate both formats: MH12AB1234 and MH12A1234
-    const vehicleRegex = /^[A-Z]{2}[0-9]{2}[A-Z]{1,2}[0-9]{4}$/;
-    
-    if (value && !vehicleRegex.test(value)) {
-      setValidationErrors((prev) => ({
-        ...prev,
-        vehicleNumber: "Invalid format",
-      }));
-    }
-  }}
-  error={!!validationErrors.vehicleNumber}
-  helperText={validationErrors.vehicleNumber}
-  InputProps={{ 
-    sx: { 
+  placeholder="Enter responder name"
+  InputProps={{
+    sx: {
       color: textColor,
-      textTransform: 'uppercase'
-    } 
+    }
   }}
   // sx={textFieldStyle}
 />
                 </Grid>
 
                 <LocalizationProvider dateAdapter={AdapterDateFns}>
-                  <Grid item xs={5.5}>
+                  <Grid item xs={6}>
                     <DateTimePicker
                       label="Acknowledge *"
+                      slotProps={{ textField: { size: 'small' } }}
                       value={formData.acknowledge || null}
                       onChange={(newValue) => {
                         handleChange("acknowledge", newValue);
@@ -647,9 +879,10 @@ const CaseClosureDetails = ({
                     />
                   </Grid>
 
-                  <Grid item xs={6.4}>
+                  <Grid item xs={6}>
                     <DateTimePicker
-                      label="Start Base Location *"
+                      label="Start Location *"
+                      slotProps={{ textField: { size: 'small' } }}
                       value={formData.startBaseLocation || null}
                       onChange={(newValue) => {
                         handleChange("startBaseLocation", newValue);
@@ -695,9 +928,10 @@ const CaseClosureDetails = ({
                     />
                   </Grid>
 
-                  <Grid item xs={5.5}>
+                  <Grid item xs={6}>
                     <DateTimePicker
                       label="At Scene *"
+                      slotProps={{ textField: { size: 'small' } }}
                       value={formData.atScene || null}
                       onChange={(newValue) => {
                         handleChange("atScene", newValue);
@@ -743,9 +977,10 @@ const CaseClosureDetails = ({
                     />
                   </Grid>
 
-                  <Grid item xs={6.4}>
+                  <Grid item xs={6}>
                     <DateTimePicker
                       label="From Scene *"
+                      slotProps={{ textField: { size: 'small' } }}
                       value={formData.fromScene || null}
                       onChange={(newValue) => {
                         handleChange("fromScene", newValue);
@@ -791,9 +1026,10 @@ const CaseClosureDetails = ({
                     />
                   </Grid>
 
-                  <Grid item xs={12}>
+                  <Grid item xs={6}>
                     <DateTimePicker
                       label="Back to Base *"
+                      slotProps={{ textField: { size: 'small' } }}
                       value={formData.backToBase || null}
                       onChange={(newValue) => {
                         handleChange("backToBase", newValue);
