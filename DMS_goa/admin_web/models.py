@@ -373,7 +373,7 @@ class DMS_Incident(models.Model):
     ward = models.ForeignKey('DMS_Ward',on_delete=models.CASCADE,null=True,blank=True)
     tahsil = models.ForeignKey(DMS_Tahsil,on_delete=models.CASCADE,null=True,blank=True)
     district = models.ForeignKey(DMS_District,on_delete=models.CASCADE,null=True,blank=True)
-    ward_officer = models.ForeignKey(DMS_Employee,on_delete=models.CASCADE,null=True,blank=True)
+    ward_officer = models.JSONField(null=True,blank=True)
     inc_is_deleted = models.BooleanField(default=False)
     clouser_status = models.BooleanField(default=False,null=True,blank=True)
     inc_added_by=models.CharField(max_length=255,null=True,blank=True)
