@@ -233,9 +233,16 @@ class Sop_Put_Serializer(serializers.ModelSerializer):
         fields = ['sop_description','disaster_id']
 
 class WeatherAlertSerializer(serializers.ModelSerializer):
+    disaster_name = serializers.SerializerMethodField()
+
     class Meta:
         model = Weather_alerts
         fields = '__all__'
+
+    def get_disaster_name(self, obj):
+        if obj.disaster_id:
+            return obj.disaster_id.disaster_name  # assuming `disaster_name` is a field in DMS_Disaster_Type
+        return None
 
 # class Incident_Serializer(serializers.ModelSerializer):
 #     class Meta:
