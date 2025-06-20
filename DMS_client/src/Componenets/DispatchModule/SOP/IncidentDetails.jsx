@@ -86,7 +86,15 @@ function IncidentDetails({
   // Function to render text with label and value
   const renderText = (label, value) => (
     <Box sx={boxStyle}>
-      <Typography sx={{ color: labelColor, fontWeight: 500, fontFamily, fontSize: '14px', mt: 1 }}>
+      <Typography
+        sx={{
+          color: labelColor,
+          fontWeight: 500,
+          fontFamily,
+          fontSize: "14px",
+          mt: 1,
+        }}
+      >
         {label}
       </Typography>
       {selectedIncident ? (
@@ -159,16 +167,16 @@ function IncidentDetails({
                   "Time",
                   selectedIncident?.alert_datetime
                     ? new Date(selectedIncident.alert_datetime).toLocaleString(
-                      "en-US",
-                      {
-                        day: "2-digit",
-                        month: "long",
-                        year: "numeric",
-                        hour: "numeric",
-                        minute: "2-digit",
-                        hour12: true,
-                      }
-                    )
+                        "en-US",
+                        {
+                          day: "2-digit",
+                          month: "long",
+                          year: "numeric",
+                          hour: "numeric",
+                          minute: "2-digit",
+                          hour12: true,
+                        }
+                      )
                     : "N/A"
                 )}
                 {renderText("Disaster Type", selectedIncident?.disaster_name)}
@@ -184,38 +192,40 @@ function IncidentDetails({
                         incident?.inc_type === 1
                           ? "Emergency"
                           : incident?.inc_type === 2
-                            ? "Non-Emergency"
-                            : "N/A"
+                          ? "Non-Emergency"
+                          : "N/A"
                       )}
                       {renderText(
                         "Alert Type",
                         incident?.alert_type === 1
                           ? "High"
                           : incident?.alert_type === 2
-                            ? "Medium"
-                            : incident?.alert_type === 3
-                              ? "Low"
-                              : incident?.alert_type === 4
-                                ? "very Low"
-                                : "N/A"
+                          ? "Medium"
+                          : incident?.alert_type === 3
+                          ? "Low"
+                          : incident?.alert_type === 4
+                          ? "very Low"
+                          : "N/A"
                       )}
                       {renderText("Disaster Type", incident?.disaster_name)}
                     </>
                   ) : (
-                    <Box sx={{
-                      // maxHeight: '250px', overflowY: 'auto',
-                      scrollBehavior: "smooth",
-                      "&::-webkit-scrollbar": {
-                        width: "6px",
-                      },
-                      "&::-webkit-scrollbar-thumb": {
-                        backgroundColor: darkMode ? "#0288d1" : "#888",
-                        borderRadius: 3,
-                      },
-                      "&::-webkit-scrollbar-thumb:hover": {
-                        backgroundColor: darkMode ? "#5FC8EC" : "#555",
-                      },
-                    }}>
+                    <Box
+                      sx={{
+                        // maxHeight: '250px', overflowY: 'auto',
+                        scrollBehavior: "smooth",
+                        "&::-webkit-scrollbar": {
+                          width: "6px",
+                        },
+                        "&::-webkit-scrollbar-thumb": {
+                          backgroundColor: darkMode ? "#0288d1" : "#888",
+                          borderRadius: 3,
+                        },
+                        "&::-webkit-scrollbar-thumb:hover": {
+                          backgroundColor: darkMode ? "#5FC8EC" : "#555",
+                        },
+                      }}
+                    >
                       <Grid container spacing={2}>
                         {/* <Grid item xs={12} md={12}>
                           <Typography
@@ -230,13 +240,21 @@ function IncidentDetails({
                           <Box>
                             <Typography
                               variant="body2"
-                              sx={{ color: labelColor, fontWeight: 500, fontFamily }}
+                              sx={{
+                                color: labelColor,
+                                fontWeight: 500,
+                                fontFamily,
+                              }}
                             >
                               Caller Name
                             </Typography>
                             <Typography
                               variant="subtitle2"
-                              sx={{ fontFamily, color: textColor, wordBreak: "break-word" }}
+                              sx={{
+                                fontFamily,
+                                color: textColor,
+                                wordBreak: "break-word",
+                              }}
                             >
                               {incident?.caller_name || "N/A"}
                             </Typography>
@@ -247,13 +265,21 @@ function IncidentDetails({
                           <Box>
                             <Typography
                               variant="body2"
-                              sx={{ color: labelColor, fontWeight: 500, fontFamily }}
+                              sx={{
+                                color: labelColor,
+                                fontWeight: 500,
+                                fontFamily,
+                              }}
                             >
                               Caller Number
                             </Typography>
                             <Typography
                               variant="subtitle2"
-                              sx={{ fontFamily, color: textColor, wordBreak: "break-word" }}
+                              sx={{
+                                fontFamily,
+                                color: textColor,
+                                wordBreak: "break-word",
+                              }}
                             >
                               {incident?.caller_no || "N/A"}
                             </Typography>
@@ -264,13 +290,21 @@ function IncidentDetails({
                           <Box>
                             <Typography
                               variant="body2"
-                              sx={{ color: labelColor, fontWeight: 500, fontFamily }}
+                              sx={{
+                                color: labelColor,
+                                fontWeight: 500,
+                                fontFamily,
+                              }}
                             >
                               Ward
                             </Typography>
                             <Typography
                               variant="subtitle2"
-                              sx={{ fontFamily, color: textColor, wordBreak: "break-word" }}
+                              sx={{
+                                fontFamily,
+                                color: textColor,
+                                wordBreak: "break-word",
+                              }}
                             >
                               {incident?.ward || "N/A"}
                             </Typography>
@@ -281,15 +315,23 @@ function IncidentDetails({
                           <Box>
                             <Typography
                               variant="body2"
-                              sx={{ color: labelColor, fontWeight: 500, fontFamily }}
+                              sx={{
+                                color: labelColor,
+                                fontWeight: 500,
+                                fontFamily,
+                              }}
                             >
                               Tehsil
                             </Typography>
                             <Typography
                               variant="subtitle2"
-                              sx={{ fontFamily, color: textColor, wordBreak: "break-word" }}
+                              sx={{
+                                fontFamily,
+                                color: textColor,
+                                wordBreak: "break-word",
+                              }}
                             >
-                              {incident?.tehsil || "N/A"}
+                              {incident?.tahsil || "N/A"}
                             </Typography>
                           </Box>
                         </Grid>
@@ -298,13 +340,21 @@ function IncidentDetails({
                           <Box>
                             <Typography
                               variant="body2"
-                              sx={{ color: labelColor, fontWeight: 500, fontFamily }}
+                              sx={{
+                                color: labelColor,
+                                fontWeight: 500,
+                                fontFamily,
+                              }}
                             >
                               District
                             </Typography>
                             <Typography
                               variant="subtitle2"
-                              sx={{ fontFamily, color: textColor, wordBreak: "break-word" }}
+                              sx={{
+                                fontFamily,
+                                color: textColor,
+                                wordBreak: "break-word",
+                              }}
                             >
                               {incident?.district || "N/A"}
                             </Typography>
@@ -315,16 +365,26 @@ function IncidentDetails({
                           <Box>
                             <Typography
                               variant="body2"
-                              sx={{ color: labelColor, fontWeight: 500, fontFamily }}
+                              sx={{
+                                color: labelColor,
+                                fontWeight: 500,
+                                fontFamily,
+                              }}
                             >
                               Location
                             </Typography>
 
-                            {incident?.location && incident.location.length > 20 ? (
+                            {incident?.location &&
+                            incident.location.length > 20 ? (
                               <Tooltip title={incident.location} arrow>
                                 <Typography
                                   variant="subtitle2"
-                                  sx={{ fontFamily, color: textColor, wordBreak: "break-word", cursor: "pointer" }}
+                                  sx={{
+                                    fontFamily,
+                                    color: textColor,
+                                    wordBreak: "break-word",
+                                    cursor: "pointer",
+                                  }}
                                 >
                                   {incident.location.slice(0, 20)}...
                                 </Typography>
@@ -332,9 +392,51 @@ function IncidentDetails({
                             ) : (
                               <Typography
                                 variant="subtitle2"
-                                sx={{ fontFamily, color: textColor, wordBreak: "break-word" }}
+                                sx={{
+                                  fontFamily,
+                                  color: textColor,
+                                  wordBreak: "break-word",
+                                }}
                               >
                                 {incident?.location || "N/A"}
+                              </Typography>
+                            )}
+                          </Box>
+                        </Grid>
+                        <Grid item xs={12} md={6}>
+                          <Box>
+                            <Typography
+                              variant="body2"
+                              sx={{
+                                color: labelColor,
+                                fontWeight: 500,
+                                fontFamily,
+                              }}
+                            >
+                              Ward Officer
+                            </Typography>
+                            {Array.isArray(incident?.ward_officer_name) &&
+                            incident.ward_officer_name.length > 0 ? (
+                              <Typography
+                                variant="subtitle2"
+                                sx={{
+                                  fontFamily,
+                                  color: textColor,
+                                  wordBreak: "break-word",
+                                }}
+                              >
+                                {incident.ward_officer_name.join(", ")}
+                              </Typography>
+                            ) : (
+                              <Typography
+                                variant="subtitle2"
+                                sx={{
+                                  fontFamily,
+                                  color: textColor,
+                                  wordBreak: "break-word",
+                                }}
+                              >
+                                N/A
                               </Typography>
                             )}
                           </Box>
@@ -344,12 +446,17 @@ function IncidentDetails({
                           <Box>
                             <Typography
                               variant="body2"
-                              sx={{ color: labelColor, fontWeight: 500, fontFamily }}
+                              sx={{
+                                color: labelColor,
+                                fontWeight: 500,
+                                fontFamily,
+                              }}
                             >
                               Summary
                             </Typography>
 
-                            {incident?.summary_name && incident.summary_name.length > 40 ? (
+                            {incident?.summary_name &&
+                            incident.summary_name.length > 40 ? (
                               <Tooltip title={incident.summary_name} arrow>
                                 <Typography
                                   variant="subtitle2"
@@ -357,7 +464,7 @@ function IncidentDetails({
                                     fontFamily,
                                     color: textColor,
                                     wordBreak: "break-word",
-                                    cursor: "pointer"
+                                    cursor: "pointer",
                                   }}
                                 >
                                   {incident.summary_name.slice(0, 40)}...
@@ -366,7 +473,11 @@ function IncidentDetails({
                             ) : (
                               <Typography
                                 variant="subtitle2"
-                                sx={{ fontFamily, color: textColor, wordBreak: "break-word" }}
+                                sx={{
+                                  fontFamily,
+                                  color: textColor,
+                                  wordBreak: "break-word",
+                                }}
                               >
                                 {incident?.summary_name || "N/A"}
                               </Typography>
@@ -398,7 +509,12 @@ function IncidentDetails({
                 {/* Alert-panel */}
                 <Box sx={boxStyle}>
                   {/* Heading + Eye icon in one row */}
-                  <Box display="flex" justifyContent="space-between" alignItems="center" mb={1}>
+                  <Box
+                    display="flex"
+                    justifyContent="space-between"
+                    alignItems="center"
+                    mb={1}
+                  >
                     <Typography
                       variant="subtitle2"
                       sx={{ color: labelColor, fontWeight: 500, fontFamily }}
@@ -410,7 +526,7 @@ function IncidentDetails({
                       <IconButton
                         size="small"
                         onClick={() => setOpenDialog(true)}
-                        sx={{ color: 'orange' }} // eye icon in orange
+                        sx={{ color: "orange" }} // eye icon in orange
                       >
                         <VisibilityIcon fontSize="small" />
                       </IconButton>
@@ -430,12 +546,12 @@ function IncidentDetails({
                         variant="subtitle2"
                         sx={{
                           fontFamily,
-                          display: '-webkit-box',
+                          display: "-webkit-box",
                           WebkitLineClamp: 4,
-                          WebkitBoxOrient: 'vertical',
-                          overflow: 'hidden',
-                          textOverflow: 'ellipsis',
-                          whiteSpace: 'normal', // required for clamping to work
+                          WebkitBoxOrient: "vertical",
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                          whiteSpace: "normal", // required for clamping to work
                         }}
                       >
                         {responderScope.sop_responses[0].sop_description}
@@ -450,9 +566,9 @@ function IncidentDetails({
                       >
                         <DialogTitle
                           sx={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'space-between',
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "space-between",
                             pr: 1,
                           }}
                         >
@@ -468,7 +584,7 @@ function IncidentDetails({
                         <DialogContent>
                           <Typography
                             variant="body1"
-                            sx={{ whiteSpace: 'pre-line', fontFamily }}
+                            sx={{ whiteSpace: "pre-line", fontFamily }}
                           >
                             {responderScope.sop_responses[0].sop_description}
                           </Typography>
@@ -544,7 +660,12 @@ function IncidentDetails({
                 {/* Dispatch */}
                 <Box sx={boxStyle}>
                   {/* Heading + Eye icon in one row */}
-                  <Box display="flex" justifyContent="space-between" alignItems="center" mb={1}>
+                  <Box
+                    display="flex"
+                    justifyContent="space-between"
+                    alignItems="center"
+                    mb={1}
+                  >
                     <Typography
                       variant="subtitle2"
                       sx={{ color: labelColor, fontWeight: 500, fontFamily }}
@@ -556,7 +677,7 @@ function IncidentDetails({
                       <IconButton
                         size="small"
                         onClick={() => setOpenDialog(true)}
-                        sx={{ color: 'orange' }} // eye icon in orange
+                        sx={{ color: "orange" }} // eye icon in orange
                       >
                         <VisibilityIcon fontSize="small" />
                       </IconButton>
@@ -576,12 +697,12 @@ function IncidentDetails({
                         variant="subtitle2"
                         sx={{
                           fontFamily,
-                          display: '-webkit-box',
+                          display: "-webkit-box",
                           WebkitLineClamp: 4,
-                          WebkitBoxOrient: 'vertical',
-                          overflow: 'hidden',
-                          textOverflow: 'ellipsis',
-                          whiteSpace: 'normal', // required for clamping to work
+                          WebkitBoxOrient: "vertical",
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                          whiteSpace: "normal", // required for clamping to work
                         }}
                       >
                         {responderScope.sop_responses[0].sop_description}
@@ -596,9 +717,9 @@ function IncidentDetails({
                       >
                         <DialogTitle
                           sx={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'space-between',
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "space-between",
                             pr: 1,
                           }}
                         >
@@ -614,7 +735,7 @@ function IncidentDetails({
                         <DialogContent>
                           <Typography
                             variant="body1"
-                            sx={{ whiteSpace: 'pre-line', fontFamily }}
+                            sx={{ whiteSpace: "pre-line", fontFamily }}
                           >
                             {responderScope.sop_responses[0].sop_description}
                           </Typography>
@@ -639,7 +760,7 @@ function IncidentDetails({
                   </Typography>
 
                   {Array.isArray(incidentDetails?.["responders scope"]) &&
-                    incidentDetails["responders scope"].length > 0 ? (
+                  incidentDetails["responders scope"].length > 0 ? (
                     <Stack spacing={1} mt={1}>
                       <Box display="flex" flexWrap="wrap" gap={1}>
                         {incidentDetails["responders scope"].map(
@@ -663,20 +784,23 @@ function IncidentDetails({
                                         color: "#5FC8EC",
                                       },
                                       "&:hover": {
-                                        backgroundColor: "rgba(0, 191, 165, 0.1)",
+                                        backgroundColor:
+                                          "rgba(0, 191, 165, 0.1)",
                                         borderRadius: "6px",
                                       },
                                     }}
                                   />
                                 }
                                 label={
-                                  <Typography variant="subtitle2" sx={{ fontFamily }}>
+                                  <Typography
+                                    variant="subtitle2"
+                                    sx={{ fontFamily }}
+                                  >
                                     {responder_name}
                                   </Typography>
                                 }
                               />
                             );
-
                           }
                         )}
                       </Box>
@@ -714,7 +838,6 @@ function IncidentDetails({
                 fetchIncidentDetails={fetchIncidentDetails}
                 highlightedId={highlightedId}
                 setHighlightedId={setHighlightedId}
-
               />
             ) : (
               <Typography
@@ -725,9 +848,8 @@ function IncidentDetails({
               </Typography>
             )}
           </Grid>
-
         </Grid>
-      </Paper >
+      </Paper>
     </>
   );
 }
