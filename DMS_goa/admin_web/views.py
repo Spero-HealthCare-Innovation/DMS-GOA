@@ -836,6 +836,7 @@ class Manual_Call_Incident_api(APIView):
             'inc_type', 'disaster_type', 'alert_type', 'location', 'summary',
             'responder_scope', 'latitude', 'longitude', 'caller_id',
             'inc_added_by', 'inc_modified_by', 'incident_id', 'inc_id', 'time', 'mode',
+            'ward','district','ward_officer','tahsil',
         ]
         caller_fields = ['caller_no', 'caller_name', 'caller_added_by', 'caller_modified_by']
         comments_fields = ['comments', 'comm_added_by', 'comm_modified_by']
