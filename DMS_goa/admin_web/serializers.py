@@ -275,17 +275,21 @@ class Incident_Serializer(serializers.ModelSerializer):
         comments_text = validated_data.pop('comments')
         comm_added_by = validated_data.pop('comm_added_by')
 
-        notify = DMS_Notify.objects.create(
-            alert_type_id=responder_scope,
-            disaster_type=validated_data.get('disaster_type'),
-            not_added_by=validated_data.get('inc_added_by'),
-        )
-
         incident = DMS_Incident.objects.create(
             responder_scope=responder_scope,
-            notify_id=notify,
             **validated_data
         )
+
+        notify = DMS_Notify.objects.create(
+            alert_type_id=responder_scope,
+            disaster_type=incident.disaster_type,
+            not_added_by=incident.inc_added_by,
+            incident_id=incident  
+        )
+
+        incident.notify_id = notify
+        incident.save(update_fields=['notify_id'])
+
 
         comment = DMS_Comments.objects.create(
             alert_id=incident.alert_id,
