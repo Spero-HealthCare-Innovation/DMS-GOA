@@ -9,6 +9,7 @@ import {
     Button,
     Checkbox,
     FormControlLabel,
+    ListItemText,
     Stack
 } from "@mui/material";
 import { FormControl, InputLabel, Select } from "@mui/material";
@@ -82,7 +83,18 @@ const Incident = ({ darkMode }) => {
     const [ward, setWard] = useState([]);
     const [wardOfficer, setWardOfficer] = useState([]);
     const [selectedWard, setSelectedWard] = useState("");
-    const [selectedWardOfficer, setSelectedWardOfficer] = useState("");
+    const [selectedWardOfficer, setSelectedWardOfficer] = useState([]);
+
+    const handleCheckboxChangeWardOfficer = (event) => {
+        const {
+            target: { value },
+        } = event;
+
+        setSelectedWardOfficer(
+            Array.isArray(value) ? value.map((v) => Number(v)) : []
+        );
+    };
+
 
     useEffect(() => {
         if (selectedTehsilId) {
@@ -102,13 +114,13 @@ const Incident = ({ darkMode }) => {
     useEffect(() => {
         if (selectedWard) {
             const fetchWardOfficerList = async () => {
-                const res = await fetch(`${port}/admin_web/ward_get/${selectedWard}/`, {
+                const res = await fetch(`${port}/admin_web/ward_officer_get/${selectedWard}/`, {
                     headers: {
                         Authorization: `Bearer ${token || newToken}`,
                     }
                 });
                 const data = await res.json();
-                setWard(data);
+                setWardOfficer(data);
             };
             fetchWardOfficerList();
         }
@@ -237,6 +249,9 @@ const Incident = ({ darkMode }) => {
             if (!selectedDisaster) newErrors.disaster_type = "Disaster Type is required";
             if (!alertType) newErrors.alert_type = "Alert Type is required";
             if (!comments) newErrors.comments = "Comment is required";
+            if (!sopId || sopId.length === 0) {
+                newErrors.responder_scope = "At least one responder must be selected";
+            }
         }
 
         if (Object.keys(newErrors).length > 0) {
@@ -360,7 +375,7 @@ const Incident = ({ darkMode }) => {
                             borderRadius: 3,
                             backgroundColor: bgColor,
                             // height: 'auto',
-                            height: '62vh'
+                            height: 'auto'
                         }}
                     >
                         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
@@ -628,33 +643,66 @@ const Incident = ({ darkMode }) => {
                                     variant="outlined"
                                     value={selectedWard}
                                     onChange={(e) => setSelectedWard(e.target.value)}
-                                    sx={inputStyle}
+                                    sx={{
+                                        ...inputStyle,
+                                        '& .MuiSelect-select': {
+                                            overflowY: 'auto',
+                                            '&::-webkit-scrollbar': {
+                                                width: '6px',
+                                            },
+                                            '&::-webkit-scrollbar-track': {
+                                                background: darkMode ? '#2e2e2e' : '#f1f1f1',
+                                                borderRadius: '3px',
+                                            },
+                                            '&::-webkit-scrollbar-thumb': {
+                                                background: darkMode ? '#555' : '#888',
+                                                borderRadius: '3px',
+                                            },
+                                            '&::-webkit-scrollbar-thumb:hover': {
+                                                background: darkMode ? '#777' : '#555',
+                                            },
+                                        },
+                                    }}
+                                    SelectProps={{
+                                        MenuProps: {
+                                            PaperProps: {
+                                                style: {
+                                                    maxHeight: 200,
+                                                },
+                                            },
+                                        },
+                                    }}
                                 >
                                     {ward.map((ward) => (
-                                        <MenuItem key={ward.tah_id} value={ward.tah_id}>
-                                            {ward.tah_name}
+                                        <MenuItem key={ward.pk_id} value={ward.pk_id}>
+                                            {ward.ward_name}
                                         </MenuItem>
                                     ))}
                                 </TextField>
                             </Grid>
 
                             <Grid item xs={12} sm={6}>
-                                <TextField
-                                    fullWidth
-                                    size="small"
-                                    select
-                                    label="Ward Officer"
-                                    variant="outlined"
-                                    value={selectedWardOfficer}
-                                    onChange={(e) => setSelectedWardOfficer(e.target.value)}
-                                    sx={inputStyle}
-                                >
-                                    {wardOfficer.map((wardOff) => (
-                                        <MenuItem key={wardOff.tah_id} value={wardOff.tah_id}>
-                                            {wardOff.tah_name}
-                                        </MenuItem>
-                                    ))}
-                                </TextField>
+                                <FormControl fullWidth size="small">
+                                    <InputLabel>Ward Officer</InputLabel>
+                                    <Select
+                                        multiple
+                                        value={selectedWardOfficer}
+                                        onChange={handleCheckboxChangeWardOfficer}
+                                        renderValue={(selected) =>
+                                            wardOfficer
+                                                .filter((officer) => selected.includes(officer.emp_id))
+                                                .map((officer) => officer.emp_name)
+                                                .join(', ')
+                                        }
+                                    >
+                                        {wardOfficer.map((wardOff) => (
+                                            <MenuItem key={wardOff.emp_id} value={wardOff.emp_id}>
+                                                <Checkbox checked={selectedWardOfficer.includes(wardOff.emp_id)} />
+                                                <ListItemText primary={wardOff.emp_name} />
+                                            </MenuItem>
+                                        ))}
+                                    </Select>
+                                </FormControl>
                             </Grid>
 
                             <Grid item xs={12}>
@@ -691,9 +739,9 @@ const Incident = ({ darkMode }) => {
                 {
                     selectedEmergencyValue === 1 && (
                         <Grid item xs={12}>
-                            <Paper elevation={3} sx={{ ...inputStyle, p: 1, borderRadius: 3, backgroundColor: bgColor }}>
+                            <Paper elevation={3} sx={{ ...inputStyle, p: 1.5, borderRadius: 3, backgroundColor: bgColor }}>
                                 <Grid container spacing={2}>
-                                    <Grid item xs={12} md={3} sx={{ borderRight: { md: `1px solid white` }, pr: 2 }}>
+                                    <Grid item xs={12} md={3} sx={{ borderRight: { md: `1px solid white` }, pr: 2, mt: 1.5 }}>
                                         {/* <Box sx={boxStyle}>
                                         <Typography sx={{ color: labelColor, fontWeight: 500, fontFamily }}>
                                             Incident Type
@@ -747,7 +795,7 @@ const Incident = ({ darkMode }) => {
                                     </Grid>
 
                                     {/* SOP Section */}
-                                    <Grid item xs={12} md={5} sx={{ px: 2, borderRight: { md: `1px solid white` } }}>
+                                    <Grid item xs={12} md={5} sx={{ px: 2, borderRight: { md: `1px solid white` }, mt: 1.5 }}>
                                         <Box sx={boxStyle}>
                                             <Box sx={{ display: "flex", alignItems: "center" }}>
                                                 <Typography variant="subtitle2" sx={{ color: labelColor, fontWeight: 500, fontFamily, fontSize: '16px' }}>
@@ -840,6 +888,11 @@ const Incident = ({ darkMode }) => {
                                                     ))}
                                                 </Box>
                                             </Stack>
+                                            {errors?.responder_scope && (
+                                                <Typography color="error" variant="body2" mt={1}>
+                                                    {errors.responder_scope}
+                                                </Typography>
+                                            )}
                                         </Box>
                                     </Grid>
 
