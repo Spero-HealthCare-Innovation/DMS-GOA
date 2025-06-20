@@ -7,6 +7,8 @@ from admin_web.models import *
 from fastapi.responses import StreamingResponse
 from datetime import datetime, timedelta
 import pytz
+from openpyxl import Workbook
+from openpyxl.utils import get_column_letter
 
 india_tz = pytz.timezone('Asia/Kolkata')
 
@@ -21,8 +23,33 @@ def incident_report_incident_daywise(
         to_date_obj = datetime.strptime(to_date, "%Y-%m-%d") + timedelta(days=1)
         to_date_plus_one = to_date_obj.strftime("%Y-%m-%d")
 
-        incident_data = DMS_Incident.objects.filter(inc_added_date__range = (from_date,to_date_plus_one))
-        data=[{"incident_id": str(i.incident_id),"disaster_type": i.disaster_type.disaster_name if i.disaster_type else None,"incident_datetime": i.inc_datetime,"clouser_status": i.clouser_status,"incident_remark": i.comment_id.comments if i.comment_id else None} for i in incident_data]
+        incident_data = DMS_Incident.objects.filter(inc_added_date__range = (from_date,to_date_plus_one), inc_type=1)
+        # data=[]
+        # for i in incident_data:
+        #     bb = []
+        #     noti=DMS_Notify.objects.filter(incident_id=i,not_is_deleted=False)
+        #     for j in noti:
+        #         for k in j.alert_type_id:
+        #             res=DMS_Responder.objects.get(responder_id=int(k))
+        #             bb.append(res.responder_name)
+        #     dt = {
+        #     "incident_id": str(i.incident_id),
+        #     "incident_datetime":i.inc_datetime,
+        #     "disaster_name": i.disaster_type.disaster_name if i.disaster_type else None,
+        #     "incident_type": "Emergency" if i.inc_type==1 else "Non-Emergency",
+        #     "alert_type": "High" if i.alert_type==1 else "Medium" if i.alert_type==2 else "Low" if i.alert_type==3 else "Very Low" if i.alert_type==4 else "",
+        #     "responder": list(set(bb))
+        #     }
+        #     data.append(dt)
+
+        data = [{
+            "incident_id": str(incident.incident_id),
+            "incident_datetime": incident.inc_datetime,
+            "disaster_name": incident.disaster_type.disaster_name if incident.disaster_type else None,
+            "incident_type": "Emergency",
+            "alert_type": ("High" if incident.alert_type == 1 else "Medium" if incident.alert_type == 2 else "Low" if incident.alert_type == 3 else "Very Low" if incident.alert_type == 4 else "" ),
+            "responder": list({DMS_Responder.objects.get(responder_id=int(k)).responder_name for notif in DMS_Notify.objects.filter(incident_id=incident, not_is_deleted=False) for k in notif.alert_type_id })
+        } for incident in incident_data]
         return data
     except Exception as e:
         return {"Error":"Error","msg":str(e)}
@@ -31,26 +58,156 @@ def incident_report_incident_daywise(
 
 @router.get('/download_incident_report_incident_daywise')
 def download_incident_report_incident_daywise(
-    from_date:Optional[str]=Query(...,description="Start date in YYYY-MM-DD format"),
-    to_date:Optional[str]=Query(...,description="End date in YYYY-MM-DD format")):
+    from_date: Optional[str] = Query(..., description="Start date in YYYY-MM-DD format"),
+    to_date: Optional[str] = Query(..., description="End date in YYYY-MM-DD format")
+):
     try:
         to_date_obj = datetime.strptime(to_date, "%Y-%m-%d") + timedelta(days=1)
         to_date_plus_one = to_date_obj.strftime("%Y-%m-%d")
 
-        incident_data = DMS_Incident.objects.filter(inc_added_date__range = (from_date,to_date_plus_one))
-        data=[{"incident_id": str(i.incident_id),"disaster_type": i.disaster_type.disaster_name if i.disaster_type else None,"incident_datetime": i.inc_datetime,"clouser_status": i.clouser_status,"incident_remark": i.comment_id.comments if i.comment_id else None} for i in incident_data]
-        df = pd.DataFrame(data)
+        incident_data = DMS_Incident.objects.filter(
+            inc_added_date__range=(from_date, to_date_plus_one)
+        )
+
+        # Excel workbook setup
+        wb = Workbook()
+        ws = wb.active
+        ws.title = "Incident Report"
+
+        headers = [
+            "incident_id", "incident_datetime", "disaster_name", "incident_type", "alert_type", "responder",
+            "Caller Number", "Caller Name", "Call Duration", "Incident Address", "Incident District",
+            "Incident Tahsil", "Ward", "Incident Summary", "Remark"
+        ]
+        ws.append(headers)
+
+        row_num = 2  # Data starts from row 2
+
+        for i in incident_data:
+            # Get responders
+            responders = list({
+                DMS_Responder.objects.get(responder_id=int(k)).responder_name
+                for j in DMS_Notify.objects.filter(incident_id=i, not_is_deleted=False)
+                for k in j.alert_type_id
+            })
+
+            # Get remarks
+            remark_objs = DMS_Comments.objects.filter(incident_id=i, comm_is_deleted=False)
+            remark_list = [z.comments for z in remark_objs] or [""]
+
+            start_row = row_num
+
+            for remark in remark_list:
+                ws.append([
+                    str(i.incident_id),
+                    i.inc_datetime,
+                    i.disaster_type.disaster_name if i.disaster_type else None,
+                    "Emergency" if i.inc_type == 1 else "Non-Emergency",
+                    "High" if i.alert_type == 1 else "Medium" if i.alert_type == 2 else
+                    "Low" if i.alert_type == 3 else "Very Low" if i.alert_type == 4 else None,
+                    ', '.join(responders),
+                    i.caller_id.caller_no if i.caller_id else None,
+                    i.caller_id.caller_name if i.caller_id else None,
+                    i.time,
+                    i.location,
+                    i.district.dis_name if i.district else None,
+                    i.tahsil.tah_name if i.tahsil else None,
+                    i.ward.ward_name if i.ward else None,
+                    i.summary.summary if i.summary else None,
+                    remark
+                ])
+                row_num += 1
+
+            end_row = row_num - 1
+
+            # Merge all cells except the last column ("Remark") if more than 1 remark
+            if end_row > start_row:
+                for col_index in range(1, len(headers)):  # Skip last column
+                    cell_range = f"{get_column_letter(col_index)}{start_row}:{get_column_letter(col_index)}{end_row}"
+                    ws.merge_cells(cell_range)
+
+        # Save Excel to BytesIO
         output = BytesIO()
-        with pd.ExcelWriter(output, engine='openpyxl') as writer:
-            df.to_excel(writer, index=False, sheet_name='Incident Report')
+        wb.save(output)
         output.seek(0)
+
         filename = f"incident_report_{from_date}_to_{to_date}.xlsx"
         headers = {
             'Content-Disposition': f'attachment; filename="{filename}"'
         }
-        return StreamingResponse(output, media_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', headers=headers)
+
+        return StreamingResponse(
+            output,
+            media_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            headers=headers
+        )
+
     except Exception as e:
-        return {"Error":'Error',"msg":str(e)}
+        return {"Error": "Error", "msg": str(e)}
+
+# def download_incident_report_incident_daywise(
+#     from_date:Optional[str]=Query(...,description="Start date in YYYY-MM-DD format"),
+#     to_date:Optional[str]=Query(...,description="End date in YYYY-MM-DD format")):
+#     try:
+#         to_date_obj = datetime.strptime(to_date, "%Y-%m-%d") + timedelta(days=1)
+#         to_date_plus_one = to_date_obj.strftime("%Y-%m-%d")
+
+#         incident_data = DMS_Incident.objects.filter(inc_added_date__range = (from_date,to_date_plus_one))
+#         # data=[{"incident_id": str(i.incident_id),"disaster_type": i.disaster_type.disaster_name if i.disaster_type else None,"incident_datetime": i.inc_datetime,"clouser_status": i.clouser_status,"incident_remark": i.comment_id.comments if i.comment_id else None} for i in incident_data]
+
+#         # data = [{
+#         #     "incident_id": str(incident.incident_id),
+#         #     "incident_datetime": incident.inc_datetime,
+#         #     "disaster_name": incident.disaster_type.disaster_name if incident.disaster_type else None,
+#         #     "incident_type": "Emergency",
+#         #     "alert_type": ("High" if incident.alert_type == 1 else "Medium" if incident.alert_type == 2 else "Low" if incident.alert_type == 3 else "Very Low" if incident.alert_type == 4 else "" ),
+#         #     "responder": list({DMS_Responder.objects.get(responder_id=int(k)).responder_name for notif in DMS_Notify.objects.filter(incident_id=incident, not_is_deleted=False) for k in notif.alert_type_id })
+#         # } for incident in incident_data]
+
+
+
+#         data=[]
+#         for i in incident_data:
+#             bb = []
+#             noti=DMS_Notify.objects.filter(incident_id=i,not_is_deleted=False)
+#             for j in noti:
+#                 for k in j.alert_type_id:
+#                     res=DMS_Responder.objects.get(responder_id=int(k))
+#                     bb.append(res.responder_name)
+#             gg=DMS_Comments.objects.filter(incident_id=i,comm_is_deleted=False)
+#             uu=[z.comments for z in gg]
+#             dt = {
+#             "incident_id": str(i.incident_id),
+#             "incident_datetime":i.inc_datetime,
+#             "disaster_name": i.disaster_type.disaster_name if i.disaster_type else None,
+#             "incident_type": "Emergency" if i.inc_type==1 else "Non-Emergency",
+#             "alert_type": "High" if i.alert_type==1 else "Medium" if i.alert_type==2 else "Low" if i.alert_type==3 else "Very Low" if i.alert_type==4 else None,
+#             "responder": list(set(bb)),
+#             "Caller Number": i.caller_id.caller_no if i.caller_id else None,
+#             "Caller Name":i.caller_id.caller_name if i.caller_id else None,
+#             "Call Duration":i.time,
+#             "Incident Address": i.location,
+#             "Incident District":i.district.dis_name if i.district else None,
+#             "Incident Tahsil":i.tahsil.tah_name if i.tahsil else None,
+#             "Ward": i.ward.ward_name if i.ward else None,
+#             "Incident Summary":i.summary.summary if i.summary else  None,
+#             "Remark":uu
+#             }
+#             data.append(dt)
+
+
+#         df = pd.DataFrame(data)
+#         output = BytesIO()
+#         with pd.ExcelWriter(output, engine='openpyxl') as writer:
+#             df.to_excel(writer, index=False, sheet_name='Incident Report')
+#         output.seek(0)
+#         filename = f"incident_report_{from_date}_to_{to_date}.xlsx"
+#         headers = {
+#             'Content-Disposition': f'attachment; filename="{filename}"'
+#         }
+#         return StreamingResponse(output, media_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', headers=headers)
+#     except Exception as e:
+#         return {"Error":'Error',"msg":str(e)}
 
 
 
