@@ -18,11 +18,29 @@ const HERE_API_KEY = import.meta.env.VITE_APP_GOOGLE_MAPS_API_KEY;
 
 const FlyToLocation = ({ position, zoom }) => {
   const map = useMap();
+  const hasDragged = useRef(false);
+  const previousPosition = useRef(null);
+
   useEffect(() => {
-    if (position) {
-      map.flyTo(position, zoom ?? map.getZoom(), { duration: 2.0 });
+    // Skip on first load
+    if (!hasDragged.current && previousPosition.current === null) {
+      previousPosition.current = position;
+      return;
+    }
+
+    // Only fly if position has changed
+    if (
+      position &&
+      (!previousPosition.current ||
+        position[0] !== previousPosition.current[0] ||
+        position[1] !== previousPosition.current[1])
+    ) {
+      hasDragged.current = true;
+      map.flyTo(position, zoom ?? map.getZoom(), { duration: 1.5 });
+      previousPosition.current = position;
     }
   }, [position, zoom]);
+
   return null;
 };
 
@@ -53,7 +71,7 @@ const IncidentCreateMap = () => {
   // }, [queryMap]);
 
   useEffect(() => {
-    fetch('/Boundaries/PUNEWARD_TD.geojson')
+    fetch('/Boundaries/PUNEWARDS.geojson')
       .then(res => res.json())
       .then(data => {
         setStateData(data);
@@ -216,10 +234,10 @@ const IncidentCreateMap = () => {
                 // setQueryMap(label);
                 setQuery(label);
 
-                // 👇 GeoJSON + Turf match
-                const geojsonRes = await fetch('/Boundaries/PUNEWARD_TD.geojson');
-                const geojson = await geojsonRes.json();
-                const point = turf.point([position.lng, position.lat]);
+    // 👇 GeoJSON + Turf match
+    const geojsonRes = await fetch('/Boundaries/PUNEWARDS.geojson');
+    const geojson = await geojsonRes.json();
+    const point = turf.point([position.lng, position.lat]);
 
                 const matchedFeature = geojson.features.find(feature =>
                   turf.booleanPointInPolygon(point, feature)

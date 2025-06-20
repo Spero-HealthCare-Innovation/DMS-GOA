@@ -815,19 +815,21 @@ const Incident = ({ darkMode }) => {
                                                 color: labelColor1,
                                                 fontSize: '15px',
                                             }}>
-                                                {alertType === 1 ? "High" : alertType === 2 ? "Medium" : "Low"}
+                                                {alertType === 1 ? "High" : alertType === 2 ? "Medium" : alertType === 2 ? "Low" : '-'}
                                             </Typography>
                                         </Box>
                                         <Box>
                                             <Typography variant="subtitle2" sx={{ color: labelColor, fontWeight: 500, fontFamily, fontSize: '16px' }}>
-                                                Alert Type
+                                                Disaster Type
                                             </Typography>
                                             <Typography variant="subtitle2" sx={{
                                                 fontFamily, mb: 2, ml: 1,
                                                 color: labelColor1,
                                                 fontSize: '15px',
                                             }}>
-                                                {alertType === 1 ? "High" : alertType === 2 ? "Medium" : "Low"}
+                                                {
+                                                    disaster.find(item => item.disaster_id === selectedDisaster)?.disaster_name || '-'
+                                                }
                                             </Typography>
                                         </Box>
                                     </Grid>

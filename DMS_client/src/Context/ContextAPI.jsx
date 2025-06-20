@@ -15,6 +15,8 @@ export const AuthProvider = ({ children }) => {
   const [districts, setDistricts] = useState([]);
   // console.log(districts, "districts");
   // const HERE_API_KEY = 'FscCo6SQsrummInzClxlkdETkvx5T1r8VVI25XMGnyY'
+  console.log(districts, "districts");
+  
   const HERE_API_KEY = import.meta.env.VITE_APP_GOOGLE_MAPS_API_KEY;
   // const HERE_API_KEY = 'FscCo6SQsrummInzClxlkdETkvx5T1r8VVI25XMGnyY'
   const [Tehsils, setTehsils] = useState([]);
@@ -62,7 +64,6 @@ export const AuthProvider = ({ children }) => {
   const [wardName, setWardName] = useState("");
   const [tehsilName, setTehsilName] = useState("");
   const [districtName, setDistrictName] = useState("");
-
 
   // const [disasterIdFromSop, setDisasterIdFromSop] = useState(null);
   useEffect(() => {
@@ -278,8 +279,8 @@ export const AuthProvider = ({ children }) => {
 
 
     try {
-      const geojsonRes = await fetch('/Boundaries/PUNEWARD_TD.geojson'); // ✅ make sure this path is correct
-      const geojson = await geojsonRes.json();
+    const geojsonRes = await fetch('/Boundaries/PUNEWARDS.geojson'); // ✅ make sure this path is correct
+    const geojson = await geojsonRes.json();
 
       const point = turf.point([position.lng, position.lat]);
 
