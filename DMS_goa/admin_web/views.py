@@ -632,18 +632,27 @@ class DMS_Incident_Post_api(APIView):
             geolocator = Nominatim(user_agent="nikita.speroinfosystems@gmail.com")
 
             if alert_id:
+                try:
+                    weather_obj = Weather_alerts.objects.get(pk_id=alert_id)
+                    weather_obj.triger_status = 3
+                    weather_obj.save()
+                    print(f"Weather_alerts updated: triger_status set to 3 for alert_id {alert_id}")
+                except Weather_alerts.DoesNotExist:
+                    print(f"Weather_alerts with pk_id={alert_id} not found")
+
                 Inc_obj = DMS_Incident.objects.filter(alert_id=alert_id).last()
                 print("inc obj-", Inc_obj)
-                # Coordinates
-                latitude = Inc_obj.latitude
-                longitude = Inc_obj.longitude
 
-                # Reverse geocoding
-                location = geolocator.reverse((latitude, longitude), language='en')
-                print("location.address---",location.address)
+                if Inc_obj:
+                    latitude = Inc_obj.latitude
+                    longitude = Inc_obj.longitude
 
-                Inc_obj.location = location.address
-                Inc_obj.save()
+                    # Reverse geocoding
+                    location = geolocator.reverse((latitude, longitude), language='en')
+                    print("location.address---", location.address)
+
+                    Inc_obj.location = location.address
+                    Inc_obj.save()
 
             sinc = serializers.data.get('inc_id')
             incc = DMS_Incident.objects.get(inc_id=sinc)
