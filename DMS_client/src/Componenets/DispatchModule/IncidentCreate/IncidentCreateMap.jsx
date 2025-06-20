@@ -27,8 +27,8 @@ const FlyToLocation = ({ position, zoom }) => {
 };
 
 const IncidentCreateMap = () => {
-  const { query, suggestions,selectedPosition,popupText,handleSearchChange,handleSelectSuggestion,setQuery,
-  setWardName,setTehsilName,setDistrictName, } = useAuth();
+  const { query, suggestions, selectedPosition, popupText, handleSearchChange, handleSelectSuggestion, setQuery,
+    setWardName, setTehsilName, setDistrictName, } = useAuth();
   const [queryMap, setQueryMap] = useState('');
   const [suggestionsMap, setSuggestionsMap] = useState([]);
   const [selectedPositionMap, setSelectedPositionMap] = useState([18.519566133802865, 73.85534807018765]); // Default: Pune (PMC)
@@ -48,9 +48,9 @@ const IncidentCreateMap = () => {
     }
   }, [query, suggestions, selectedPosition]);
 
-  useEffect(() => {
-    setQuery(queryMap);  // send value to context
-  }, [queryMap]);
+  // useEffect(() => {
+  //   setQuery(queryMap);  // send value to context
+  // }, [queryMap]);
 
   useEffect(() => {
     fetch('/Boundaries/PUNEWARD_TD.geojson')
@@ -109,30 +109,30 @@ const IncidentCreateMap = () => {
   //   setSelectedPosition([lat, lng]);
   //   setPopupText(label);
   // };
-const checkPolygonMatch = (lat, lng) => {
-  if (!stateData) return;
+  const checkPolygonMatch = (lat, lng) => {
+    if (!stateData) return;
 
-  const point = turf.point([lng, lat]);
-  const matchedFeature = stateData.features.find(feature =>
-    turf.booleanPointInPolygon(point, feature)
-  );
+    const point = turf.point([lng, lat]);
+    const matchedFeature = stateData.features.find(feature =>
+      turf.booleanPointInPolygon(point, feature)
+    );
 
-  if (matchedFeature) {
-    const { ward_name, tehsil_name, district_name } = matchedFeature.properties;
-    setWardName(ward_name || "");
-    setTehsilName(tehsil_name || "");
-    setDistrictName(district_name || "");
-  } else {
-    setWardName("");
-    setTehsilName("");
-    setDistrictName("");
-  }
-};
+    if (matchedFeature) {
+      const { ward_name, tehsil_name, district_name } = matchedFeature.properties;
+      setWardName(ward_name || "");
+      setTehsilName(tehsil_name || "");
+      setDistrictName(district_name || "");
+    } else {
+      setWardName("");
+      setTehsilName("");
+      setDistrictName("");
+    }
+  };
 
 
 
   return (
-    <div style={{ position: "relative", width: "100%",height: "100%" }}>
+    <div style={{ position: "relative", width: "100%", height: "100%" }}>
       {/* Search input & suggestions */}
       <div
         style={{
@@ -193,54 +193,55 @@ const checkPolygonMatch = (lat, lng) => {
           draggable={true}
           icon={customIcon}
           eventHandlers={{
-           dragend: async (e) => {
-  const marker = e.target;
-  const position = marker.getLatLng();
-  setSelectedPositionMap([position.lat, position.lng]);
-  setMapZoom(13);
+            dragend: async (e) => {
+              const marker = e.target;
+              const position = marker.getLatLng();
+              setSelectedPositionMap([position.lat, position.lng]);
+              setMapZoom(13);
 
-  try {
-    // Reverse geocode
-    const response = await axios.get(
-      "https://revgeocode.search.hereapi.com/v1/revgeocode",
-      {
-        params: {
-          apiKey: HERE_API_KEY,
-          at: `${position.lat},${position.lng}`,
-        },
-      }
-    );
+              try {
+                // Reverse geocode
+                const response = await axios.get(
+                  "https://revgeocode.search.hereapi.com/v1/revgeocode",
+                  {
+                    params: {
+                      apiKey: HERE_API_KEY,
+                      at: `${position.lat},${position.lng}`,
+                    },
+                  }
+                );
 
-    const label = response.data.items[0]?.address?.label || "No address found";
-    setPopupTextMap(label);
-    setQueryMap(label);
+                const label = response.data.items[0]?.address?.label || "No address found";
+                setPopupTextMap(label);
+                // setQueryMap(label);
+                setQuery(label);
 
-    // 👇 GeoJSON + Turf match
-    const geojsonRes = await fetch('/Boundaries/PUNEWARD_TD.geojson');
-    const geojson = await geojsonRes.json();
-    const point = turf.point([position.lng, position.lat]);
+                // 👇 GeoJSON + Turf match
+                const geojsonRes = await fetch('/Boundaries/PUNEWARD_TD.geojson');
+                const geojson = await geojsonRes.json();
+                const point = turf.point([position.lng, position.lat]);
 
-    const matchedFeature = geojson.features.find(feature =>
-      turf.booleanPointInPolygon(point, feature)
-    );
+                const matchedFeature = geojson.features.find(feature =>
+                  turf.booleanPointInPolygon(point, feature)
+                );
 
-    if (matchedFeature) {
-      const { Name1, Teshil, District } = matchedFeature.properties;
-      setWardName(Name1 || "");
-      setTehsilName(Teshil || "");
-      setDistrictName(District || "");
-    } else {
-      setWardName("");
-      setTehsilName("");
-      setDistrictName("");
-    }
-  } catch (error) {
-    console.error("Reverse geocoding or geojson lookup failed:", error);
-    setPopupTextMap("Failed to fetch address");
-  }
-}
+                if (matchedFeature) {
+                  const { Name1, Teshil, District } = matchedFeature.properties;
+                  setWardName(Name1 || "");
+                  setTehsilName(Teshil || "");
+                  setDistrictName(District || "");
+                } else {
+                  setWardName("");
+                  setTehsilName("");
+                  setDistrictName("");
+                }
+              } catch (error) {
+                console.error("Reverse geocoding or geojson lookup failed:", error);
+                setPopupTextMap("Failed to fetch address");
+              }
+            }
 
-            
+
           }}
         >
           <Popup>{popupTextMap}</Popup>

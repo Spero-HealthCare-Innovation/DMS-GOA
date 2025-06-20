@@ -8,12 +8,12 @@ export const AuthProvider = ({ children }) => {
   const port = import.meta.env.VITE_APP_API_KEY;
   const token = localStorage.getItem("access_token");
   const refresh = localStorage.getItem("refresh_token");
-  console.log(refresh, "refreshhhhhhhhh");
+  // console.log(refresh, "refreshhhhhhhhh");
 
   const [newToken, setNewToken] = useState("");
   const [states, setStates] = useState([]);
   const [districts, setDistricts] = useState([]);
-  console.log(districts, "districts");
+  // console.log(districts, "districts");
   // const HERE_API_KEY = 'FscCo6SQsrummInzClxlkdETkvx5T1r8VVI25XMGnyY'
   const HERE_API_KEY = import.meta.env.VITE_APP_GOOGLE_MAPS_API_KEY;
   // const HERE_API_KEY = 'FscCo6SQsrummInzClxlkdETkvx5T1r8VVI25XMGnyY'
@@ -27,18 +27,18 @@ export const AuthProvider = ({ children }) => {
   const [selectedCityID, setSelectedCityId] = useState("");
   const [selectedWardId, setSelectedWardId] = useState("");
 
-  console.log(Citys, "selectedCityID");
+  // console.log(Citys, "selectedCityID");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [lattitude, setLattitude] = useState(null);
   const [longitude, setLongitude] = useState(null);
 
-  console.log(lattitude, longitude, "lattitude, longitude");
+  // console.log(lattitude, longitude, "lattitude, longitude");
 
   const [departments, setDepartments] = useState([]);
   const [disaterid, setDisaterid] = useState(null);
   const [disasterIdFromSop, setDisasterIdFromSop] = useState(null);
-  console.log(disasterIdFromSop, "disasterIdFromSop");
+  // console.log(disasterIdFromSop, "disasterIdFromSop");
 
   const [disasterIncident, setDisasterIncident] = useState(null);
   const [query, setQuery] = useState("");
@@ -54,7 +54,7 @@ export const AuthProvider = ({ children }) => {
   const [responderScopeForDispatch, setResponderScopeForDispatch] = useState(
     []
   );
-  console.log(responderScopeForDispatch, "disasterIncident");
+  // console.log(responderScopeForDispatch, "disasterIncident");
   const [enhancedIncidentData, setEnhancedIncidentData] = useState(null);
   const [selectedIncidentFromSop, setSelectedIncidentFromSop] = useState(null);
   const [isNewEntry, setIsNewEntry] = useState(false);
@@ -67,7 +67,7 @@ export const AuthProvider = ({ children }) => {
   // const [disasterIdFromSop, setDisasterIdFromSop] = useState(null);
   useEffect(() => {
     const disasterValue = disaterid || disasterIncident || disasterIdFromSop;
-    console.log(disasterValue, "passingValue");
+    // console.log(disasterValue, "passingValue");
 
     if (disasterValue) {
       fetchResponderScope(disasterValue);
@@ -266,6 +266,8 @@ export const AuthProvider = ({ children }) => {
   };
 
   const handleSelectSuggestion = async (item) => {
+    if (!item || !item.position || !item.address) return;
+
     const { position, address } = item;
     setSelectedPosition([position.lat, position.lng]);
     setLattitude(position.lat);

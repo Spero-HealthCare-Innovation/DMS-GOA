@@ -41,14 +41,21 @@ const boxStyle = {
 
 const Incident = ({ darkMode }) => {
     const port = import.meta.env.VITE_APP_API_KEY;
-    const googleKey = import.meta.env.VITE_APP_GOOGLE_MAPS_API_KEY;
+    // const googleKey = import.meta.env.VITE_APP_GOOGLE_MAPS_API_KEY;
     const location = useLocation();
     const [secondsElapsed, setSecondsElapsed] = useState(0);
     const [timerActive, setTimerActive] = useState(false);
     const now = new Date();
-    const { wardName, tehsilName, districtName } = useAuth();
     const formattedDate = now.toLocaleDateString('en-GB').slice(0, 8).replace(/\//g, '-').slice(0, -2) + now.getFullYear().toString().slice(2);
-
+    const { wardName, tehsilName, districtName } = useAuth();
+    console.log(wardName, 'fetching from map Ward');
+    console.log(tehsilName, 'fetching from map Tehsil');
+    console.log(districtName, 'fetching from map District');
+    // Ward API
+    const [ward, setWard] = useState([]);
+    const [wardOfficer, setWardOfficer] = useState([]);
+    const [selectedWard, setSelectedWard] = useState("");
+    const [selectedWardOfficer, setSelectedWardOfficer] = useState([]);
     const {
         districts,
         fetchDistrictsByState,
@@ -67,23 +74,50 @@ const Incident = ({ darkMode }) => {
         fetchDistrictsByState();
     }, []);
 
+    // useEffect(() => {
+    //     if (districts.length > 0) {
+    //         console.log("All districts:", districts);
+    //     }
+    // }, [districts]);
+
     useEffect(() => {
-        if (districts.length > 0) {
-            console.log("All districts:", districts);
+        if (districts.length > 0 && districtName) {
+            const matchingDistrict = districts.find(
+                (district) => district.dis_name.toLowerCase() === districtName.toLowerCase()
+            );
+            if (matchingDistrict) {
+                setSelectedDistrictId(matchingDistrict.dis_id);
+            }
         }
-    }, [districts]);
+    }, [districts, districtName]);
+
+    useEffect(() => {
+        if (Tehsils.length > 0 && tehsilName) {
+            const matchingTehsil = Tehsils.find(
+                (tehsil) => tehsil.tah_name.toLowerCase() === tehsilName.toLowerCase()
+            );
+            if (matchingTehsil) {
+                setSelectedTehsilId(matchingTehsil.tah_id);
+            }
+        }
+    }, [Tehsils, tehsilName]);
+
+    useEffect(() => {
+        if (ward.length > 0 && wardName) {
+            const matchingWard = ward.find(
+                (w) => w.ward_name.toLowerCase() === wardName.toLowerCase()
+            );
+            if (matchingWard) {
+                setSelectedWard(matchingWard.pk_id);
+            }
+        }
+    }, [ward, wardName]);
 
     useEffect(() => {
         if (selectedDistrictId) {
             fetchTehsilsByDistrict(selectedDistrictId);
         }
     }, [selectedDistrictId]);
-
-    // Ward API
-    const [ward, setWard] = useState([]);
-    const [wardOfficer, setWardOfficer] = useState([]);
-    const [selectedWard, setSelectedWard] = useState("");
-    const [selectedWardOfficer, setSelectedWardOfficer] = useState([]);
 
     const handleCheckboxChangeWardOfficer = (event) => {
         const {
@@ -161,12 +195,12 @@ const Incident = ({ darkMode }) => {
         .toString()
         .padStart(2, "0")}`;
 
-    console.log(googleKey, 'googleKey');
+    // console.log(googleKey, 'googleKey');
     const navigate = useNavigate();
     const token = localStorage.getItem("access_token");
     const { newToken, responderScope, setDisasterIncident, disaster, popupText, setPopupText, lattitude, setLattitude,
         longitude, setLongitude, } = useAuth();
-    console.log(popupText, 'popupTextpopupText');
+    // console.log(popupText, 'popupTextpopupText');
 
     const { handleSearchChange, handleSelectSuggestion, query } = useAuth();
     const bgColor = darkMode ? "#202328" : "#ffffff";
@@ -174,7 +208,7 @@ const Incident = ({ darkMode }) => {
     const labelColor1 = darkMode ? "white" : "#1976d2";
     const fontFamily = "Roboto, sans-serif";
     const [selectedEmergencyValue, setSelectedEmergencyValue] = useState('');
-    console.log(responderScope, 'Fetching Scope Data');
+    // console.log(responderScope, 'Fetching Scope Data');
     const [summary, setSummary] = useState([]);
     const [selectedDisaster, setSelectedDisaster] = useState('');
     const [alertType, setAlertType] = useState('');
@@ -589,8 +623,8 @@ const Incident = ({ darkMode }) => {
                                     variant="outlined"
                                     sx={inputStyle}
                                     onChange={handleSearchChange}
-                                    onClick={() => handleSelectSuggestion(item)}
-                                    value={query}
+                                    onClick={() => handleSelectSuggestion()}
+                                    value={query || ""}
                                     error={!!errors.location}
                                     helperText={errors.location}
                                 />
@@ -602,7 +636,9 @@ const Incident = ({ darkMode }) => {
                                     <Select
                                         labelId="district-label"
                                         id="district-select"
-                                        value={selectedDistrictId}
+                                        value={districtName && districts.find(d => d.dis_name.toLowerCase() === districtName.toLowerCase())
+                                            ? districts.find(d => d.dis_name.toLowerCase() === districtName.toLowerCase()).dis_id
+                                            : (selectedDistrictId || "")}
                                         label="District"
                                         onChange={(e) => setSelectedDistrictId(e.target.value)}
                                     >
@@ -622,7 +658,9 @@ const Incident = ({ darkMode }) => {
                                     select
                                     label="Tehsil"
                                     variant="outlined"
-                                    value={selectedTehsilId}
+                                    value={tehsilName && Tehsils.find(t => t.tah_name.toLowerCase() === tehsilName.toLowerCase())
+                                        ? Tehsils.find(t => t.tah_name.toLowerCase() === tehsilName.toLowerCase()).tah_id
+                                        : (selectedTehsilId || "")}
                                     onChange={(e) => setSelectedTehsilId(e.target.value)}
                                     sx={inputStyle}
                                 >
@@ -641,7 +679,7 @@ const Incident = ({ darkMode }) => {
                                     select
                                     label="Ward"
                                     variant="outlined"
-                                    value={selectedWard}
+                                    value={selectedWard || ""}
                                     onChange={(e) => setSelectedWard(e.target.value)}
                                     sx={{
                                         ...inputStyle,

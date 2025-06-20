@@ -306,7 +306,7 @@ function IncidentDetails({
                                 wordBreak: "break-word",
                               }}
                             >
-                              {incident?.ward || "N/A"}
+                              {incident?.ward_name || "N/A"}
                             </Typography>
                           </Box>
                         </Grid>
@@ -331,7 +331,7 @@ function IncidentDetails({
                                 wordBreak: "break-word",
                               }}
                             >
-                              {incident?.tahsil || "N/A"}
+                              {incident?.tahsil_name || "N/A"}
                             </Typography>
                           </Box>
                         </Grid>
@@ -356,7 +356,7 @@ function IncidentDetails({
                                 wordBreak: "break-word",
                               }}
                             >
-                              {incident?.district || "N/A"}
+                              {incident?.district_name || "N/A"}
                             </Typography>
                           </Box>
                         </Grid>
@@ -415,30 +415,32 @@ function IncidentDetails({
                             >
                               Ward Officer
                             </Typography>
-                            {Array.isArray(incident?.ward_officer_name) &&
-                            incident.ward_officer_name.length > 0 ? (
-                              <Typography
-                                variant="subtitle2"
-                                sx={{
-                                  fontFamily,
-                                  color: textColor,
-                                  wordBreak: "break-word",
-                                }}
-                              >
-                                {incident.ward_officer_name.join(", ")}
-                              </Typography>
-                            ) : (
-                              <Typography
-                                variant="subtitle2"
-                                sx={{
-                                  fontFamily,
-                                  color: textColor,
-                                  wordBreak: "break-word",
-                                }}
-                              >
-                                N/A
-                              </Typography>
-                            )}
+                           {Array.isArray(incident?.ward_officer_name) &&
+incident.ward_officer_name.length > 0 ? (
+  <Typography
+    variant="subtitle2"
+    sx={{
+      fontFamily,
+      color: textColor,
+      wordBreak: "break-word",
+    }}
+  >
+    {incident.ward_officer_name
+      .map((officer) => officer.ward_officer_name)
+      .join(", ")}
+  </Typography>
+) : (
+  <Typography
+    variant="subtitle2"
+    sx={{
+      fontFamily,
+      color: textColor,
+      wordBreak: "break-word",
+    }}
+  >
+    N/A
+  </Typography>
+)}
                           </Box>
                         </Grid>
 
