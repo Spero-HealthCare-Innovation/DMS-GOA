@@ -348,7 +348,8 @@ function CommentsPanel({
                 comm_id,
                 comments: commentMsg,
                 comm_added_by,
-                comm_created_at,
+                comm_added_date ,
+          
               }) => {
                 const isOwnComment = comm_added_by === userName;
                 return (
@@ -397,9 +398,15 @@ function CommentsPanel({
                           variant="caption"
                           sx={{ fontSize: "0.7rem", opacity: 0.7 }}
                         >
-                          {new Date(
-                            comm_created_at || Date.now()
-                          ).toLocaleTimeString()}
+                            {comm_added_date
+    ? new Date(comm_added_date).toLocaleString("en-IN", {
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+      })
+    : "N/A"}
                         </Typography>
                       </Box>
                     </Stack>
