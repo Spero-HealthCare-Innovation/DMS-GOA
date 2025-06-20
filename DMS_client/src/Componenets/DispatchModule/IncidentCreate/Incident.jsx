@@ -9,6 +9,7 @@ import {
     Button,
     Checkbox,
     FormControlLabel,
+    ListItemText,
     Stack
 } from "@mui/material";
 import { FormControl, InputLabel, Select } from "@mui/material";
@@ -82,7 +83,18 @@ const Incident = ({ darkMode }) => {
     const [ward, setWard] = useState([]);
     const [wardOfficer, setWardOfficer] = useState([]);
     const [selectedWard, setSelectedWard] = useState("");
-    const [selectedWardOfficer, setSelectedWardOfficer] = useState("");
+    const [selectedWardOfficer, setSelectedWardOfficer] = useState([]);
+
+    const handleCheckboxChangeWardOfficer = (event) => {
+        const {
+            target: { value },
+        } = event;
+
+        setSelectedWardOfficer(
+            Array.isArray(value) ? value.map((v) => Number(v)) : []
+        );
+    };
+
 
     useEffect(() => {
         if (selectedTehsilId) {
@@ -237,6 +249,9 @@ const Incident = ({ darkMode }) => {
             if (!selectedDisaster) newErrors.disaster_type = "Disaster Type is required";
             if (!alertType) newErrors.alert_type = "Alert Type is required";
             if (!comments) newErrors.comments = "Comment is required";
+            if (!sopId || sopId.length === 0) {
+                newErrors.responder_scope = "At least one responder must be selected";
+            }
         }
 
         if (Object.keys(newErrors).length > 0) {
@@ -667,22 +682,27 @@ const Incident = ({ darkMode }) => {
                             </Grid>
 
                             <Grid item xs={12} sm={6}>
-                                <TextField
-                                    fullWidth
-                                    size="small"
-                                    select
-                                    label="Ward Officer"
-                                    variant="outlined"
-                                    value={selectedWardOfficer}
-                                    onChange={(e) => setSelectedWardOfficer(e.target.value)}
-                                    sx={inputStyle}
-                                >
-                                    {wardOfficer.map((wardOff) => (
-                                        <MenuItem key={wardOff.emp_id} value={wardOff.emp_id}>
-                                            {wardOff.emp_name}
-                                        </MenuItem>
-                                    ))}
-                                </TextField>
+                                <FormControl fullWidth size="small">
+                                    <InputLabel>Ward Officer</InputLabel>
+                                    <Select
+                                        multiple
+                                        value={selectedWardOfficer}
+                                        onChange={handleCheckboxChangeWardOfficer}
+                                        renderValue={(selected) =>
+                                            wardOfficer
+                                                .filter((officer) => selected.includes(officer.emp_id))
+                                                .map((officer) => officer.emp_name)
+                                                .join(', ')
+                                        }
+                                    >
+                                        {wardOfficer.map((wardOff) => (
+                                            <MenuItem key={wardOff.emp_id} value={wardOff.emp_id}>
+                                                <Checkbox checked={selectedWardOfficer.includes(wardOff.emp_id)} />
+                                                <ListItemText primary={wardOff.emp_name} />
+                                            </MenuItem>
+                                        ))}
+                                    </Select>
+                                </FormControl>
                             </Grid>
 
                             <Grid item xs={12}>
@@ -868,6 +888,11 @@ const Incident = ({ darkMode }) => {
                                                     ))}
                                                 </Box>
                                             </Stack>
+                                            {errors?.responder_scope && (
+                                                <Typography color="error" variant="body2" mt={1}>
+                                                    {errors.responder_scope}
+                                                </Typography>
+                                            )}
                                         </Box>
                                     </Grid>
 
