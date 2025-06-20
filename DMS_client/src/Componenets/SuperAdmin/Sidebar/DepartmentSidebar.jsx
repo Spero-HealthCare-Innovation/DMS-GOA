@@ -35,9 +35,17 @@ const screenConfig = {
     icon: <AddCircleOutlineOutlinedIcon />,
     screens: [],
   },
-  "Closure Report": {
+  // "Closure Report": {
+  //   icon: <TextSnippetOutlinedIcon />,
+  //   screens: [],
+  // },
+
+   "Reports": {
     icon: <TextSnippetOutlinedIcon />,
-    screens: [],
+    screens: [
+      { id: 1, text: "Closure Report", path: "/Closure Report" },
+      { id: 2, text: "Incident Report", path: "/Incident Report" },
+    ],
   },
   Permission: {
     icon: <LockIcon />,
