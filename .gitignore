@@ -7214,3 +7214,4 @@ vvenv/Scripts/sqlformat.exe
 /DMS_goa/admin_web/__pycache__
 /DMS_goa/admin_web/migrations
 DMS_client/node_modules/
+/demo.py

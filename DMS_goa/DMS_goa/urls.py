@@ -22,7 +22,9 @@ from django.conf.urls.static import static
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('admin_web/',include('admin_web.urls')), 
-    path('captcha/', include('captcha.urls'))
+    path('captcha/', include('captcha.urls')),
+    path('DMS_CAD/', include('DMS_CAD.urls')),
+    
 ]
 
 

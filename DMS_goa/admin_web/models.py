@@ -529,4 +529,3 @@ class DMS_Ward(models.Model):
     ward_modified_by = models.CharField(max_length=255, null=True, blank=True)
     ward_modified_date = models.DateTimeField(auto_now=True,null=True, blank=True)
     
-    
