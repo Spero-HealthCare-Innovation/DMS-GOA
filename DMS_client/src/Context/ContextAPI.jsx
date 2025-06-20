@@ -16,7 +16,7 @@ export const AuthProvider = ({ children }) => {
   console.log(districts, "districts");
   // const HERE_API_KEY = 'FscCo6SQsrummInzClxlkdETkvx5T1r8VVI25XMGnyY'
   const HERE_API_KEY = import.meta.env.VITE_APP_GOOGLE_MAPS_API_KEY;
-// const HERE_API_KEY = 'FscCo6SQsrummInzClxlkdETkvx5T1r8VVI25XMGnyY'
+  // const HERE_API_KEY = 'FscCo6SQsrummInzClxlkdETkvx5T1r8VVI25XMGnyY'
   const [Tehsils, setTehsils] = useState([]);
   const [Citys, setCitys] = useState([]);
   const [Wards, setWards] = useState([]);
@@ -58,7 +58,7 @@ export const AuthProvider = ({ children }) => {
   const [enhancedIncidentData, setEnhancedIncidentData] = useState(null);
   const [selectedIncidentFromSop, setSelectedIncidentFromSop] = useState(null);
   const [isNewEntry, setIsNewEntry] = useState(false);
-// To fetch the ward,tehsil, district from the map
+  // To fetch the ward,tehsil, district from the map
   const [wardName, setWardName] = useState("");
   const [tehsilName, setTehsilName] = useState("");
   const [districtName, setDistrictName] = useState("");
@@ -198,7 +198,7 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-   const fetchWardsByTehshil = async (tehshilId) => {
+  const fetchWardsByTehshil = async (tehshilId) => {
     if (!tehshilId) return;
     try {
       setLoading(true);
@@ -261,7 +261,7 @@ export const AuthProvider = ({ children }) => {
         },
       }
     );
-console.log("🔍 HERE API full response:", response.data);
+    console.log("🔍 HERE API full response:", response.data);
     setSuggestions(response.data.items.filter((item) => item.position));
   };
 
@@ -276,28 +276,28 @@ console.log("🔍 HERE API full response:", response.data);
 
 
     try {
-    const geojsonRes = await fetch('/Boundaries/PUNEWARD_TD.geojson'); // ✅ make sure this path is correct
-    const geojson = await geojsonRes.json();
+      const geojsonRes = await fetch('/Boundaries/PUNEWARD_TD.geojson'); // ✅ make sure this path is correct
+      const geojson = await geojsonRes.json();
 
-    const point = turf.point([position.lng, position.lat]);
+      const point = turf.point([position.lng, position.lat]);
 
-    const matchedFeature = geojson.features.find(feature =>
-      turf.booleanPointInPolygon(point, feature)
-    );
+      const matchedFeature = geojson.features.find(feature =>
+        turf.booleanPointInPolygon(point, feature)
+      );
 
-    if (matchedFeature) {
-      const { Name1, Teshil, District } = matchedFeature.properties;
-setWardName(Name1 || "");
-setTehsilName(Teshil || "");
-setDistrictName(District || "");
-    } else {
-      setWardName("");
-      setTehsilName("");
-      setDistrictName("");
+      if (matchedFeature) {
+        const { Name1, Teshil, District } = matchedFeature.properties;
+        setWardName(Name1 || "");
+        setTehsilName(Teshil || "");
+        setDistrictName(District || "");
+      } else {
+        setWardName("");
+        setTehsilName("");
+        setDistrictName("");
+      }
+    } catch (err) {
+      console.error("❌ Error checking polygon match:", err);
     }
-  } catch (err) {
-    console.error("❌ Error checking polygon match:", err);
-  }
   };
 
   // 🔹 Effects
@@ -309,11 +309,11 @@ setDistrictName(District || "");
   useEffect(() => {
     if (selectedStateId) {
       // fetchDistrictsByState(selectedStateId);
-      const defaultId = selectedStateId || 1; 
+      const defaultId = selectedStateId || 1;
       fetchDistrictsByState(defaultId);
 
       if (!selectedStateId) {
-        setSelectedStateId(1); 
+        setSelectedStateId(1);
       }
 
       setSelectedDistrictId("");
@@ -322,12 +322,12 @@ setDistrictName(District || "");
       setSelectedWardId("");
       setTehsils([]);
       setCitys([]);
-      setWards([]); 
+      setWards([]);
     } else {
       setDistricts([]);
       setTehsils([]);
       setCitys([]);
-      setWards([]); 
+      setWards([]);
       setSelectedDistrictId("");
       setSelectedTehsilId("");
       setSelectedCityId("");
@@ -342,11 +342,11 @@ setDistrictName(District || "");
       setSelectedCityId("");
       setSelectedWardId("");
       setCitys([]);
-      setWards([]); 
+      setWards([]);
     } else {
       setTehsils([]);
       setCitys([]);
-      setWards([]); 
+      setWards([]);
       setSelectedTehsilId("");
       setSelectedCityId("");
     }
@@ -436,11 +436,11 @@ setDistrictName(District || "");
         fetchTehsilsByDistrict,
         wardName,
         setWardName,
-        tehsilName, 
+        tehsilName,
         setTehsilName,
         districtName,
         setDistrictName,
-        
+
       }}
     >
       {children}

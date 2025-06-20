@@ -176,7 +176,7 @@ const checkPolygonMatch = (lat, lng) => {
       <MapContainer
         center={selectedPosition}
         zoom={mapZoom}
-        style={{ height: "62vh", width: "100%", borderRadius: 10 }}
+        style={{ height: "68vh", width: "100%", borderRadius: 10 }}
         whenCreated={(mapInstance) => {
           mapRef.current = mapInstance;
         }}
