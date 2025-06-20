@@ -41,7 +41,7 @@ const boxStyle = {
 
 const Incident = ({ darkMode }) => {
     const port = import.meta.env.VITE_APP_API_KEY;
-    const googleKey = import.meta.env.VITE_APP_GOOGLE_MAPS_API_KEY;
+    // const googleKey = import.meta.env.VITE_APP_GOOGLE_MAPS_API_KEY;
     const location = useLocation();
     const [secondsElapsed, setSecondsElapsed] = useState(0);
     const [timerActive, setTimerActive] = useState(false);
@@ -161,12 +161,12 @@ const Incident = ({ darkMode }) => {
         .toString()
         .padStart(2, "0")}`;
 
-    console.log(googleKey, 'googleKey');
+    // console.log(googleKey, 'googleKey');
     const navigate = useNavigate();
     const token = localStorage.getItem("access_token");
     const { newToken, responderScope, setDisasterIncident, disaster, popupText, setPopupText, lattitude, setLattitude,
         longitude, setLongitude, } = useAuth();
-    console.log(popupText, 'popupTextpopupText');
+    // console.log(popupText, 'popupTextpopupText');
 
     const { handleSearchChange, handleSelectSuggestion, query } = useAuth();
     const bgColor = darkMode ? "#202328" : "#ffffff";
@@ -174,7 +174,7 @@ const Incident = ({ darkMode }) => {
     const labelColor1 = darkMode ? "white" : "#1976d2";
     const fontFamily = "Roboto, sans-serif";
     const [selectedEmergencyValue, setSelectedEmergencyValue] = useState('');
-    console.log(responderScope, 'Fetching Scope Data');
+    // console.log(responderScope, 'Fetching Scope Data');
     const [summary, setSummary] = useState([]);
     const [selectedDisaster, setSelectedDisaster] = useState('');
     const [alertType, setAlertType] = useState('');
@@ -589,8 +589,8 @@ const Incident = ({ darkMode }) => {
                                     variant="outlined"
                                     sx={inputStyle}
                                     onChange={handleSearchChange}
-                                    onClick={() => handleSelectSuggestion(item)}
-                                    value={query}
+                                    onClick={() => handleSelectSuggestion()}
+                                    value={query || ""}
                                     error={!!errors.location}
                                     helperText={errors.location}
                                 />
