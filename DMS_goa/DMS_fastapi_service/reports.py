@@ -25,7 +25,7 @@ def incident_report_incident_daywise(
         to_date_plus_one = to_date_obj.strftime("%Y-%m-%d")
 
         incident_data = DMS_Incident.objects.filter(inc_added_date__range = (from_date,to_date_plus_one), inc_type=1)
-        data = [{"incident_id": str(incident.incident_id),"incident_datetime": incident.inc_datetime,"disaster_name": incident.disaster_type.disaster_name if incident.disaster_type else None,"incident_type": "Emergency","alert_type": ("High" if incident.alert_type == 1 else "Medium" if incident.alert_type == 2 else "Low" if incident.alert_type == 3 else "Very Low" if incident.alert_type == 4 else "" ),"responder": list({DMS_Responder.objects.get(responder_id=int(k)).responder_name for notif in DMS_Notify.objects.filter(incident_id=incident, not_is_deleted=False) for k in notif.alert_type_id })} for incident in incident_data]
+        data = [{"incident_id": str(incident.incident_id),"incident_datetime": incident.inc_datetime,"disaster_name": incident.disaster_type.disaster_name if incident.disaster_type else None,"incident_type": "Emergency","alert_type": ("High" if incident.alert_type == 1 else "Medium" if incident.alert_type == 2 else "Low" if incident.alert_type == 3 else "Very Low" if incident.alert_type == 4 else "" ),"responder":  ', '.join(list({DMS_Responder.objects.get(responder_id=int(k)).responder_name for notif in DMS_Notify.objects.filter(incident_id=incident, not_is_deleted=False) for k in notif.alert_type_id }))} for incident in incident_data]
         return data
     except Exception as e:
         return {"Error":"Error","msg":str(e)}
