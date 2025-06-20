@@ -1486,7 +1486,7 @@ class incident_wise_responder_list(APIView):
 
 class Ward_get_API(APIView):
     def get(self,request,tah_id):
-        ward = DMS_Ward.objects.filter(tah_id=tah_id)
+        ward = DMS_Ward.objects.filter(tah_id=tah_id).order_by('pk_id')
         serializer = Ward_get_Serializer(ward,many=True)
         return Response(serializer.data,status=status.HTTP_200_OK)
 

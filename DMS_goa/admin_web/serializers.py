@@ -453,11 +453,24 @@ class incident_get_serializer(serializers.ModelSerializer):
     ward_name = serializers.CharField(source='ward.ward_name',read_only=True)
     district_name = serializers.CharField(source='district.dis_name',read_only=True)
     tahsil_name = serializers.CharField(source='tahsil.tah_name',read_only=True)
-    ward_officer_name = serializers.CharField(source='ward_officer.emp_name',read_only=True)
+    ward_officer_name = serializers.SerializerMethodField()
+    
+    
     class Meta:
         model = DMS_Incident
         fields=['incident_id','disaster_type','inc_type','responder_scope','caller_id','caller_name','caller_no','location','summary','summary_name','disaster_name','alert_type','mode','latitude','longitude','inc_datetime','location','comment_added_by','ward','district','ward_officer','tahsil','ward_name','district_name','tahsil_name','ward_officer_name']
 
+    
+    def get_ward_officer_name(self, obj):
+        try:
+            officer_ids = obj.ward_officer if isinstance(obj.ward_officer, list) else []
+            officers = DMS_Employee.objects.filter(emp_id__in=officer_ids)
+            return [{"emp_id": officer.emp_id, "ward_officer_name": officer.emp_name} for officer in officers]
+        except Exception:
+            return []
+        
+        
+        
 
 class Responder_Scope_post_Serializer(serializers.ModelSerializer):
     class Meta:
