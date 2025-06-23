@@ -13,9 +13,7 @@ import {
 } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 // import loginBg from "../../assets/Bg_login1.png";
-// import loginBg from "../../assets/pune_login_bg.png";
-import loginBg from "../../assets/new_bg_image_login.png";
-
+import loginBg from "../../assets/pune_login_bg.png";
 import PMCLogo from "../../assets/PMC.png";
 import Spero from "../../assets/spero1.png";
 import { useNavigate } from "react-router-dom";
@@ -42,17 +40,9 @@ function Login() {
   const [openForgotDialog, setOpenForgotDialog] = useState(false);
   const [username, setUsername] = useState("");
   const [contact, setContact] = useState("");
-
-
   useEffect(() => {
     document.title = "DMS|Login";
   }, []);
-
-
-  const handleSubmit = (e) => {
-  e.preventDefault(); // Prevent page reload
-  handleLogin();      // Call your login logic
-};
 
   const fetchCaptcha = async () => {
     try {
@@ -108,7 +98,6 @@ function Login() {
   }, []);
 
   const handleLogin = async () => {
-
     setUsernameError("");
     setPasswordError("");
     setCaptchaTextError("");
@@ -116,17 +105,17 @@ function Login() {
     let hasError = false;
 
     if (!emp_username) {
-      setUsernameError("Please Enter User ID");
+      setUsernameError("Please enter User ID");
       hasError = true;
     }
 
     if (!password) {
-      setPasswordError("Please Enter Password");
+      setPasswordError("Please enter Password");
       hasError = true;
     }
 
     if (captchaError || (!captchaValue && captchaKey)) {
-      setCaptchaTextError("Please Enter Valid Captcha Text");
+      setCaptchaTextError("Please enter valid captcha text");
       hasError = true;
     }
 
@@ -274,155 +263,81 @@ function Login() {
         height: "100vh",
         width: "100%",
         position: "relative",
-        // overflow: "hidden",
+        overflow: "hidden",
         display: "flex",
         flexDirection: isSmallScreen ? "column" : "row",
       }}
     >
       {/* Background Image */}
-      <Box>
-        {/* Background Image */}
-        <Box
-          sx={{
-            position: "absolute",
-            height: "100%",
-            width: "100%",
-            backgroundImage: `url(${loginBg})`,
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-            backgroundRepeat: "no-repeat",
-            zIndex: 0,
-            overflow: "hidden",
-          }}
-        />
-
-        {/* Overlay Text */}
-        <Box
-          sx={{
-            position: "absolute",
-            top: "20%",
-            width: "100%",
-            textAlign: "center",
-            zIndex: 1,
-            color: "#fff", // Change if needed for contrast
-            textShadow: "1px 1px 5px rgba(0,0,0,0.7)",
-          }}
-        >
-          <Typography variant="h3" sx={{ fontWeight: "bold", mr: '6em',fontFamily: 'Roboto, sans-serif' ,fontSize:45}}>
-            PUNE MUNICIPAL CORPORATION
-          </Typography>
-          <Typography variant="h3" sx={{ mt: 1, mr: '6em',fontFamily: 'Roboto, sans-serif' ,fontSize:45 }}>
-            DISASTER MANAGEMENT SYSTEM
-          </Typography>
-        </Box>
-      </Box>
-
-
-      {/* <Box
+      <Box
         sx={{
-          // height: "100%",
-          // flex: 1,
-          // display: "flex",
-          // alignItems: "center",
-          // justifyContent: "center",
-          // zIndex: 1,
-          // flexDirection: "column",
-          // color: "#fff",
-          // textAlign: "center",
-          // p: 3,
-          // marginLeft: "10em",
+          position: "fixed",
+          top: 0,
+          left: 0,
+          height: "100%",
+          width: "100%",
+          backgroundImage: `url(${loginBg})`,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          zIndex: 0,
         }}
-      >
-        <h2 style={{ marginBottom: 8 }}>
-          PUNE MUNICIPAL CORPORATION - Disaster Management System
-        </h2>
-      </Box> */}
-
+      />
 
       {/* Foreground */}
       <Box
         sx={{
           position: "relative",
-          overflow: "hidden",
+          zIndex: 1,
+          height: "100%",
+          width: "100%",
           display: "flex",
           flexDirection: isSmallScreen ? "column" : "row",
         }}
       >
-        {/* Background Image */}
-        <Box
-          sx={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            height: "100%",
-            width: "100%",
-            backgroundImage: `url(${loginBg})`,
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-            zIndex: 0,
-          }}
-        />
+        {!isSmallScreen && <Box sx={{ flex: 1 }} />}
 
-        {/* Foreground */}
+        {/* Form Panel */}
         <Box
           sx={{
-            position: "relative",
-            zIndex: 1,
+            width: isSmallScreen ? "100%" : "350px",
             height: "100%",
-            width: "100%",
             display: "flex",
-            flexDirection: isSmallScreen ? "column" : "row",
+            alignItems: "center",
+            justifyContent: "center",
+            background:
+              "radial-gradient(6035.71% 72.44% at 0% 50%, rgba(95, 236, 200, 0.7) 0%, rgba(95, 236, 200, 0.035) 100%)",
+            backdropFilter: "blur(10px)",
           }}
         >
-          {!isSmallScreen && <Box sx={{ flex: 1 }} />}
-
-          {/* Form Panel */}
-
-          <form
-  onSubmit={(e) => {
-    e.preventDefault(); // Prevent default reload
-    handleLogin(); // Call your login function
-  }}
-  style={{
-    width: "80%",
-    maxWidth: 400,
-    display: "flex",
-    flexDirection: "column",
-    justifyContent: "flex-start",
-    alignItems: "center",
-  }}
->
           <Box
             sx={{
-              width: isSmallScreen ? "100%" : "350px",
-              height: "100%",
+              width: "80%",
+              maxWidth: 400,
               display: "flex",
+              flexDirection: "column",
+              justifyContent: "flex-start",
               alignItems: "center",
-              justifyContent: "center",
-              background:
-                "radial-gradient(6035.71% 72.44% at 0% 50%, rgba(95, 236, 200, 0.7) 0%, rgba(95, 236, 200, 0.035) 100%)",
-              backdropFilter: "blur(10px)",
             }}
           >
             <Box
-              sx={{
-                mb: 1,
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-              }}
-            >
-              <Box
-                component="img"
-                src={PMCLogo}
-                alt="Company Logo"
-                sx={{
-                  width: "70px",
-                  height: "auto",
-                  objectFit: "contain",
-                }}
-              />
-            </Box>
+    sx={{
+      mb: 1, 
+      display: "flex",
+      justifyContent: "center",
+      alignItems: "center",
+    }}
+  >
+    <Box
+      component="img"
+      src={PMCLogo} 
+      alt="Company Logo"
+      sx={{
+        width: "70px", 
+        height: "auto",
+        objectFit: "contain",
+      }}
+    />
+  </Box>
             <Typography variant="h6" gutterBottom sx={{ color: "white" }}>
               <b>User Login</b>
             </Typography>
@@ -430,395 +345,367 @@ function Login() {
             <Box sx={{ width: "100%", mb: 2 }}>
               <Typography
                 sx={{
-                  mb: 1,
-                  display: "flex",
-                  justifyContent: "center",
-                  alignItems: "center",
+                  color: "white",
+                  mb: 0.5,
+                  fontWeight: 500,
+                  fontSize: "12px",
                 }}
               >
-                <Box
-                  component="img"
-                  src={PMCLogo}
-                  alt="Company Logo"
+                User Name
+              </Typography>
+              <TextField
+                value={emp_username}
+                onChange={(e) => setEmp_Username(e.target.value)}
+                fullWidth
+                variant="outlined"
+                placeholder="Enter Name"
+                InputLabelProps={{ shrink: false }}
+                sx={{
+                  "& .MuiInputBase-input": {
+                    color: "black",
+                  },
+                  borderRadius: "12px",
+                  "& fieldset": {
+                    borderRadius: "8px",
+                  },
+                  backgroundColor: "white",
+                  "& input::placeholder": {
+                    fontSize: "0.75rem",
+                    color: "#9e9e9e",
+                  },
+                }}
+              />
+              {usernameError && (
+                <Typography
                   sx={{
-                    width: "70px",
-                    height: "auto",
-                    objectFit: "contain",
+                    color: "#ff1744",
+                    fontSize: "0.75rem",
+                    mt: 0.5,
+                    ml: 0.5,
                   }}
-                />
-              </Box>
-              <Typography variant="h6" gutterBottom sx={{ color: "white" }}>
-                <b>User Login</b>
+                >
+                  {usernameError}
+                </Typography>
+              )}
+            </Box>
+
+            <Box sx={{ width: "100%", mb: 2 }}>
+              <Typography
+                sx={{
+                  color: "white",
+                  mb: 0.5,
+                  fontWeight: 500,
+                  fontSize: "12px",
+                }}
+              >
+                Password
+              </Typography>
+              <TextField
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                fullWidth
+                variant="outlined"
+                placeholder="Enter Password"
+                type="password"
+                InputLabelProps={{ shrink: false }}
+                sx={{
+                  "& .MuiInputBase-input": {
+                    color: "black",
+                  },
+                  borderRadius: "12px",
+                  "& fieldset": {
+                    borderRadius: "8px",
+                  },
+                  backgroundColor: "white",
+                  "& input::placeholder": {
+                    fontSize: "0.75rem",
+                    color: "#9e9e9e",
+                  },
+                }}
+              />
+              {passwordError && (
+                <Typography
+                  sx={{
+                    color: "#ff1744",
+                    fontSize: "0.75rem",
+                    mt: 0.5,
+                    ml: 0.5,
+                  }}
+                >
+                  {passwordError}
+                </Typography>
+              )}
+            </Box>
+
+            {/* Captcha Section */}
+            <Box sx={{ width: "100%", mb: 2 }}>
+              {/* Captcha Label (Typography) */}
+              <Typography
+                sx={{
+                  color: "white",
+                  mb: 0.5,
+                  fontWeight: 500,
+                  fontSize: "12px",
+                }}
+              >
+                Captcha
               </Typography>
 
-              <Box sx={{ width: "100%", mb: 2 }}>
-                <Typography
-                  sx={{
-                    color: "white",
-                    mb: 0.5,
-                    fontWeight: 500,
-                    fontSize: "12px",
-                  }}
-                >
-                  User Name
-                </Typography>
-                <TextField
-                  value={emp_username}
-                  onChange={(e) => setEmp_Username(e.target.value)}
-                  fullWidth
-                  variant="outlined"
-                  placeholder="Enter Name"
-                  InputLabelProps={{ shrink: false }}
-                  sx={{
-                    "& .MuiInputBase-input": {
-                      color: "black",
-                    },
-                    borderRadius: "12px",
-                    "& fieldset": {
-                      borderRadius: "8px",
-                    },
-                    backgroundColor: "white",
-                    "& input::placeholder": {
-                      fontSize: "0.75rem",
-                      color: "#9e9e9e",
-                    },
-                  }}
-                />
-                {usernameError && (
-                  <Typography
-                    sx={{
-                      color: "#ff1744",
-                      fontSize: "0.75rem",
-                      mt: 0.5,
-                      ml: 0.5,
-                    }}
-                  >
-                    {usernameError}
-                  </Typography>
-                )}
-              </Box>
-
-              <Box sx={{ width: "100%", mb: 2 }}>
-                <Typography
-                  sx={{
-                    color: "white",
-                    mb: 0.5,
-                    fontWeight: 500,
-                    fontSize: "12px",
-                  }}
-                >
-                  Password
-                </Typography>
-                <TextField
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  fullWidth
-                  variant="outlined"
-                  placeholder="Enter Password"
-                  type="password"
-                  InputLabelProps={{ shrink: false }}
-                  sx={{
-                    "& .MuiInputBase-input": {
-                      color: "black",
-                    },
-                    borderRadius: "12px",
-                    "& fieldset": {
-                      borderRadius: "8px",
-                    },
-                    backgroundColor: "white",
-                    "& input::placeholder": {
-                      fontSize: "0.75rem",
-                      color: "#9e9e9e",
-                    },
-                  }}
-                />
-                {passwordError && (
-                  <Typography
-                    sx={{
-                      color: "#ff1744",
-                      fontSize: "0.75rem",
-                      mt: 0.5,
-                      ml: 0.5,
-                    }}
-                  >
-                    {passwordError}
-                  </Typography>
-                )}
-              </Box>
-
-              {/* Captcha Section */}
-              <Box sx={{ width: "100%", mb: 2 }}>
-                {/* Captcha Label (Typography) */}
-                <Typography
-                  sx={{
-                    color: "white",
-                    mb: 0.5,
-                    fontWeight: 500,
-                    fontSize: "12px",
-                  }}
-                >
-                  Captcha
-                </Typography>
-
-                {/* Captcha Image and Input Row */}
-                <Box sx={{ display: "flex", alignItems: "center" }}>
-                  {/* Captcha Image Container */}
-                  {!captchaLoading && !captchaError && (
-                    <Box
-                      sx={{
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        height: "40px", // Ensures the image is vertically aligned
-                        mr: 1, // Adds space between the image and input field
-                      }}
-                    >
-                      <Box
-                        component="img"
-                        src={captchaImageUrl}
-                        alt="Captcha"
-                        onError={() => setCaptchaError(true)}
-                        sx={{
-                          height: "85%",
-                          maxWidth: "100px", // Controls the size of the captcha image
-                          objectFit: "contain",
-                          background: "transparent", // Ensures no background in the image container
-                        }}
-                      />
-                    </Box>
-                  )}
-
-                  {/* Captcha Input Field */}
+              {/* Captcha Image and Input Row */}
+              <Box sx={{ display: "flex", alignItems: "center" }}>
+                {/* Captcha Image Container */}
+                {!captchaLoading && !captchaError && (
                   <Box
                     sx={{
                       display: "flex",
                       alignItems: "center",
-                      backgroundColor: "white",
-                      borderRadius: "8px",
-                      px: 1,
-                      py: 0.5,
+                      justifyContent: "center",
+                      height: "40px", // Ensures the image is vertically aligned
+                      mr: 1, // Adds space between the image and input field
                     }}
                   >
-                    <TextField
-                      value={captchaValue}
-                      onChange={(e) => setCaptchaValue(e.target.value)}
-                      placeholder="Enter Captcha"
-                      variant="outlined"
-                      InputLabelProps={{ shrink: false }}
-                      inputProps={{
-                        style: {
-                          fontSize: "0.75rem",
-                          padding: "6px 10px",
-                          width: "100px", // Controls input box width
-                        },
-                      }}
+                    <Box
+                      component="img"
+                      src={captchaImageUrl}
+                      alt="Captcha"
+                      onError={() => setCaptchaError(true)}
                       sx={{
-                        "& .MuiInputBase-input": { color: "black" },
-                        "& fieldset": { borderRadius: "6px" },
-                        backgroundColor: "white",
-                        mr: 1,
+                        height: "85%",
+                        maxWidth: "100px", // Controls the size of the captcha image
+                        objectFit: "contain",
+                        background: "transparent", // Ensures no background in the image container
                       }}
                     />
-
-                    {/* Refresh Icon */}
-                    <IconButton
-                      onClick={fetchCaptcha}
-                      size="small"
-                      sx={{
-                        color: "#101329",
-                        backgroundColor: "#f0f0f0",
-                        "&:hover": {
-                          backgroundColor: "#e0e0e0",
-                        },
-                      }}
-                    >
-                      <CachedIcon />
-                    </IconButton>
                   </Box>
-                </Box>
-
-                {/* Captcha Error */}
-                {captchaTextError && (
-                  <Typography
-                    sx={{
-                      color: "#ff1744",
-                      fontSize: "0.75rem",
-                      mt: 0.5,
-                      ml: 0.5,
-                    }}
-                  >
-                    {captchaTextError}
-                  </Typography>
                 )}
-              </Box>
 
-              <Button
-              type="submit"
-                fullWidth
-                variant="contained"
-                onClick={handleLogin}
-                disabled={loading}
-                sx={{
-                  mt: 2,
-                  width: "50%",
-                  backgroundColor: "#101329",
-                  color: "#fff",
-                  borderRadius: "30px",
-                  textTransform: "none",
-                  fontWeight: "bold",
-                  border: loading ? "2px solid #101329" : "none",
-                  "&:hover": {
-                    backgroundColor: "#101329",
-                  },
-                }}
-              >
-                {loading ? "Logging in..." : "Login"}
-              </Button>
-              <Box
-                sx={{
-                  width: "100%",
-                  mt: 2,
-                  display: "flex",
-                  justifyContent: "center",
-                }}
-              >
-                <Typography
-                  component="span"
-                  onClick={() => setOpenForgotDialog(true)}
+                {/* Captcha Input Field */}
+                <Box
                   sx={{
-                    textDecoration: "underline",
-                    color: "primary.main",
-                    cursor: "pointer",
+                    display: "flex",
+                    alignItems: "center",
+                    backgroundColor: "white",
+                    borderRadius: "8px",
+                    px: 1,
+                    py: 0.5,
                   }}
                 >
-                  {/* Forgot Password? */}
-                </Typography>
+                  <TextField
+                    value={captchaValue}
+                    onChange={(e) => setCaptchaValue(e.target.value)}
+                    placeholder="Enter Captcha"
+                    variant="outlined"
+                    InputLabelProps={{ shrink: false }}
+                    inputProps={{
+                      style: {
+                        fontSize: "0.75rem",
+                        padding: "6px 10px",
+                        width: "100px", // Controls input box width
+                      },
+                    }}
+                    sx={{
+                      "& .MuiInputBase-input": { color: "black" },
+                      "& fieldset": { borderRadius: "6px" },
+                      backgroundColor: "white",
+                      mr: 1,
+                    }}
+                  />
+
+                  {/* Refresh Icon */}
+                  <IconButton
+                    onClick={fetchCaptcha}
+                    size="small"
+                    sx={{
+                      color: "#101329",
+                      backgroundColor: "#f0f0f0",
+                      "&:hover": {
+                        backgroundColor: "#e0e0e0",
+                      },
+                    }}
+                  >
+                    <CachedIcon />
+                  </IconButton>
+                </Box>
               </Box>
 
-              <Box
-                component="img"
-                src={Spero}
-                alt="Spero Logo"
-                sx={{
-                  width: "100px",
-                  // mt: 5,
-                }}
-              />
+              {/* Captcha Error */}
+              {captchaTextError && (
+                <Typography
+                  sx={{
+                    color: "#ff1744",
+                    fontSize: "0.75rem",
+                    mt: 0.5,
+                    ml: 0.5,
+                  }}
+                >
+                  {captchaTextError}
+                </Typography>
+              )}
             </Box>
-            
-          </Box>
-          </form>
-          <Dialog
-            open={openForgotDialog}
-            onClose={() => setOpenForgotDialog(false)}
-            PaperProps={{
-              sx: {
-                background:
-                  "radial-gradient(6035.71% 72.44% at 0% 50%, rgba(95, 236, 200, 0.7) 0%, rgba(95, 236, 200, 0.035) 100%)",
-                backdropFilter: "blur(10px)",
-                borderRadius: "12px",
-                padding: 2,
-              },
-            }}
-          >
-            <DialogTitle>Reset Password</DialogTitle>
-            <DialogContent
-              sx={{ display: "flex", flexDirection: "column", gap: 2, mt: 1 }}
+
+            <Button
+              fullWidth
+              variant="contained"
+              onClick={handleLogin}
+              disabled={loading}
+              sx={{
+                mt: 2,
+                width: "50%",
+                backgroundColor: "#101329",
+                color: "#fff",
+                borderRadius: "30px",
+                textTransform: "none",
+                fontWeight: "bold",
+                border: loading ? "2px solid #101329" : "none",
+                "&:hover": {
+                  backgroundColor: "#101329",
+                },
+              }}
+            >
+              {loading ? "Logging in..." : "Login"}
+            </Button>
+            <Box
+              sx={{
+                width: "100%",
+                mt: 2,
+                display: "flex",
+                justifyContent: "center",
+              }}
             >
               <Typography
-                sx={{ color: "white", fontWeight: 500, fontSize: "12px" }}
+                component="span"
+                onClick={() => setOpenForgotDialog(true)}
+                sx={{
+                  textDecoration: "underline",
+                  color: "primary.main",
+                  cursor: "pointer",
+                }}
               >
-                Enter User Name
+                {/* Forgot Password? */}
               </Typography>
+            </Box>
 
-              <TextField
-                fullWidth
-                variant="outlined"
-                placeholder="Enter User Name"
-                type="name"
-                InputLabelProps={{ shrink: false }}
-                sx={{
-                  "& .MuiInputBase-input": {
-                    color: "black",
-                  },
-                  borderRadius: "12px",
-                  "& fieldset": {
-                    borderRadius: "8px",
-                  },
-                  backgroundColor: "white",
-                  "& input::placeholder": {
-                    fontSize: "0.75rem",
-                    color: "#9e9e9e",
-                  },
-                }}
-              />
-
-              <Typography
-                sx={{ color: "white", fontWeight: 500, fontSize: "12px" }}
-              >
-                Email or Mobile Number
-              </Typography>
-              <TextField
-                fullWidth
-                variant="outlined"
-                placeholder="Email or Mobile Number"
-                onChange={(e) => setContact(e.target.value)}
-                InputLabelProps={{ shrink: false }}
-                sx={{
-                  "& .MuiInputBase-input": {
-                    color: "black",
-                  },
-                  borderRadius: "12px",
-                  "& fieldset": {
-                    borderRadius: "8px",
-                  },
-                  backgroundColor: "white",
-                  "& input::placeholder": {
-                    fontSize: "0.75rem",
-                    color: "#9e9e9e",
-                  },
-                }}
-              />
-            </DialogContent>
-            <DialogActions>
-              <Button
-                onClick={() => setOpenForgotDialog(false)}
-                sx={{
-                  mt: 1,
-                  width: "50%",
-                  // backgroundColor: '#101329',
-                  color: "#fff",
-                  borderRadius: "30px",
-                  textTransform: "none",
-                  fontWeight: "bold",
-                }}
-              >
-                Cancel
-              </Button>
-              <Button
-                variant="contained"
-                onClick={handleForgotPasswordSubmit}
-                sx={{
-                  mt: 1,
-                  width: "50%",
-                  backgroundColor: "#101329",
-                  color: "#fff",
-                  borderRadius: "30px",
-                  textTransform: "none",
-                  fontWeight: "bold",
-                  border: loading ? "2px solid #101329" : "none",
-                  "&:hover": {
-                    backgroundColor: "#101329",
-                  },
-                }}
-              >
-                Submit
-              </Button>
-            </DialogActions>
-          </Dialog>
+            <Box
+              component="img"
+              src={Spero}
+              alt="Spero Logo"
+              sx={{
+                width: "100px",
+                // mt: 5,
+              }}
+            />
+          </Box>
         </Box>
+        <Dialog
+          open={openForgotDialog}
+          onClose={() => setOpenForgotDialog(false)}
+          PaperProps={{
+            sx: {
+              background:
+                "radial-gradient(6035.71% 72.44% at 0% 50%, rgba(95, 236, 200, 0.7) 0%, rgba(95, 236, 200, 0.035) 100%)",
+              backdropFilter: "blur(10px)",
+              borderRadius: "12px",
+              padding: 2,
+            },
+          }}
+        >
+          <DialogTitle>Reset Password</DialogTitle>
+          <DialogContent
+            sx={{ display: "flex", flexDirection: "column", gap: 2, mt: 1 }}
+          >
+            <Typography
+              sx={{ color: "white", fontWeight: 500, fontSize: "12px" }}
+            >
+              Enter User Name
+            </Typography>
+
+            <TextField
+              fullWidth
+              variant="outlined"
+              placeholder="Enter User Name"
+              type="name"
+              InputLabelProps={{ shrink: false }}
+              sx={{
+                "& .MuiInputBase-input": {
+                  color: "black",
+                },
+                borderRadius: "12px",
+                "& fieldset": {
+                  borderRadius: "8px",
+                },
+                backgroundColor: "white",
+                "& input::placeholder": {
+                  fontSize: "0.75rem",
+                  color: "#9e9e9e",
+                },
+              }}
+            />
+
+            <Typography
+              sx={{ color: "white", fontWeight: 500, fontSize: "12px" }}
+            >
+              Email or Mobile Number
+            </Typography>
+            <TextField
+              fullWidth
+              variant="outlined"
+              placeholder="Email or Mobile Number"
+              onChange={(e) => setContact(e.target.value)}
+              InputLabelProps={{ shrink: false }}
+              sx={{
+                "& .MuiInputBase-input": {
+                  color: "black",
+                },
+                borderRadius: "12px",
+                "& fieldset": {
+                  borderRadius: "8px",
+                },
+                backgroundColor: "white",
+                "& input::placeholder": {
+                  fontSize: "0.75rem",
+                  color: "#9e9e9e",
+                },
+              }}
+            />
+          </DialogContent>
+          <DialogActions>
+            <Button
+              onClick={() => setOpenForgotDialog(false)}
+              sx={{
+                mt: 1,
+                width: "50%",
+                // backgroundColor: '#101329',
+                color: "#fff",
+                borderRadius: "30px",
+                textTransform: "none",
+                fontWeight: "bold",
+              }}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="contained"
+              onClick={handleForgotPasswordSubmit}
+              sx={{
+                mt: 1,
+                width: "50%",
+                backgroundColor: "#101329",
+                color: "#fff",
+                borderRadius: "30px",
+                textTransform: "none",
+                fontWeight: "bold",
+                border: loading ? "2px solid #101329" : "none",
+                "&:hover": {
+                  backgroundColor: "#101329",
+                },
+              }}
+            >
+              Submit
+            </Button>
+          </DialogActions>
+        </Dialog>
       </Box>
-    </>
+    </Box>
   );
 }
 
