@@ -1,6 +1,7 @@
 from django.db import models
 from admin_web.models import *
 from django_enumfield import enum
+from django.contrib.auth.hashers import make_password
 
 class status_enum(enum.Enum):
 	Active = 1
@@ -35,6 +36,7 @@ class Vehical(models.Model):
     veh_number = models.CharField(max_length=50, null=True)
     veh_default_mobile = models.CharField(max_length=15, null=True)
     veh_base_location = models.ForeignKey(Vehical_base_location, on_delete=models.CASCADE)
+    veh_hash = models.TextField(null=True)
     veh_state = models.ForeignKey(DMS_State, on_delete=models.CASCADE)
     veh_district = models.ForeignKey(DMS_District ,on_delete=models.CASCADE)
     veh_tahsil = models.ForeignKey(DMS_Tahsil, on_delete=models.CASCADE)
@@ -51,6 +53,10 @@ class Vehical(models.Model):
     veh_added_date = models.DateTimeField(auto_now_add=True)
     veh_modify_by = models.CharField(max_length=100, null=True)
     veh_modify_date = models.DateTimeField(auto_now=True)
+    
+    def save(self, *args, **kwargs):
+        self.veh_number==make_password(self.veh_default_mobile)
+        super.save(*args, **kwargs)
     
 class Device_version(models.Model):
     device_id = models.AutoField(primary_key=True)
