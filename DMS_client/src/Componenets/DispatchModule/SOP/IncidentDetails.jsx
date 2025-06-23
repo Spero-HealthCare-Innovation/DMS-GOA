@@ -8,6 +8,8 @@ import {
   FormControlLabel,
   Skeleton,
   Tooltip,
+  MenuItem,
+  TextField,
 } from "@mui/material";
 import CommentsPanel from "./CommentsPanel";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
@@ -33,6 +35,12 @@ function IncidentDetails({
   highlightedId,
   setHighlightedId,
 }) {
+  const [district, setDistrict] = useState("");
+  const [tahsil, setTahsil] = useState("");
+  const [ward, setWard] = useState("");
+  const [wardOfficer, setWardOfficer] = useState("");
+  const [summary, setSummary] = useState("");
+
   window.addEventListener("storage", (e) => {
     if (e.key === "logout") {
       location.href = "/login";
@@ -161,26 +169,172 @@ function IncidentDetails({
             }}
           >
             {flag === 1 ? (
-              <>
-                {renderText("Alert ID", selectedIncident?.pk_id)}
-                {renderText(
-                  "Time",
-                  selectedIncident?.alert_datetime
-                    ? new Date(selectedIncident.alert_datetime).toLocaleString(
-                        "en-US",
-                        {
-                          day: "2-digit",
-                          month: "long",
-                          year: "numeric",
-                          hour: "numeric",
-                          minute: "2-digit",
-                          hour12: true,
-                        }
-                      )
-                    : "N/A"
-                )}
-                {renderText("Disaster Type", selectedIncident?.disaster_name)}
-              </>
+              <Box
+                sx={{
+                  maxHeight: "280px",
+                  overflowY: "auto",
+                  pr: 1,
+                  pb: 1,
+                  scrollBehavior: "smooth",
+                  "&::-webkit-scrollbar": {
+                    width: "5px",
+                  },
+                  "&::-webkit-scrollbar-thumb": {
+                    backgroundColor: darkMode ? "#0288d1" : "#888",
+                    borderRadius: 3,
+                  },
+                  "&::-webkit-scrollbar-thumb:hover": {
+                    backgroundColor: darkMode ? "#5FC8EC" : "#555",
+                  },
+                }}
+              >
+                <Grid container spacing={1.5}>
+                  {/* DISTRICT */}
+                  <Grid item xs={12} md={6}>
+                    <Box sx={{ ...boxStyle, mt: 0 }}>
+                      <Typography
+                        sx={{
+                          color: labelColor,
+                          fontWeight: 500,
+                          fontFamily,
+                          fontSize: "13.5px",
+                        }}
+                      >
+                        District
+                      </Typography>
+                      <TextField
+                        select
+                        fullWidth
+                        size="small"
+                        value={district}
+                        onChange={(e) => setDistrict(e.target.value)}
+                        placeholder="Select District"
+                        sx={{ mt: 0.5, fontFamily }}
+                      >
+                        <MenuItem value="Select District" >Select District</MenuItem>
+                        <MenuItem value="pune">Pune</MenuItem>
+                        <MenuItem value="mumbai">Mumbai</MenuItem>
+                      </TextField>
+                    </Box>
+                  </Grid>
+
+                  {/* TAHSIL */}
+                  <Grid item xs={12} md={6}>
+                    <Box sx={boxStyle}>
+                      <Typography
+                        sx={{
+                          color: labelColor,
+                          fontWeight: 500,
+                          fontFamily,
+                          fontSize: "13.5px",
+                        }}
+                      >
+                        Tahsil
+                      </Typography>
+                      <TextField
+                        select
+                        fullWidth
+                        size="small"
+                        value={tahsil}
+                        onChange={(e) => setTahsil(e.target.value)}
+                        placeholder="Select Tahsil"
+                        sx={{ mt: 0.5, fontFamily }}
+                      >
+                        <MenuItem value="Select Tahsil" >Select Tahsil</MenuItem>
+                        <MenuItem value="haveli">Haveli</MenuItem>
+                        <MenuItem value="mulshi">Mulshi</MenuItem>
+                      </TextField>
+                    </Box>
+                  </Grid>
+
+                  {/* WARD */}
+                  <Grid item xs={12} md={6}>
+                    <Box sx={boxStyle}>
+                      <Typography
+                        sx={{
+                          color: labelColor,
+                          fontWeight: 500,
+                          fontFamily,
+                          fontSize: "13.5px",
+                        }}
+                      >
+                        Ward
+                      </Typography>
+                      <TextField
+                        select
+                        fullWidth
+                        size="small"
+                        value={ward}
+                        placeholder="Select Ward"
+                        onChange={(e) => setWard(e.target.value)}
+                        sx={{ mt: 0.5, fontFamily }}
+                      >
+                        <MenuItem value="Select Ward" >Select Ward</MenuItem>
+                        <MenuItem value="ward_a">Ward A</MenuItem>
+                        <MenuItem value="ward_b">Ward B</MenuItem>
+                      </TextField>
+                    </Box>
+                  </Grid>
+
+                  {/* WARD OFFICER */}
+                  <Grid item xs={12} md={6}>
+                    <Box sx={boxStyle}>
+                      <Typography
+                        sx={{
+                          color: labelColor,
+                          fontWeight: 500,
+                          fontFamily,
+                          fontSize: "13.5px",
+                        }}
+                      >
+                        Ward Officer
+                      </Typography>
+                      <TextField
+                        select
+                        fullWidth
+                        size="small"
+                        value={wardOfficer}
+                        placeholder="Select Ward Officer"
+                        onChange={(e) => setWardOfficer(e.target.value)}
+                        sx={{ mt: 0.5, fontFamily }}
+                      >
+                        <MenuItem value="Select Ward Officer" >Select Ward Officer</MenuItem>
+                        <MenuItem value="officer1">Officer 1</MenuItem>
+                        <MenuItem value="officer2">Officer 2</MenuItem>
+                      </TextField>
+                    </Box>
+                  </Grid>
+
+                  {/* SUMMARY */}
+                  <Grid item xs={12}>
+                    <Box sx={boxStyle}>
+                      <Typography
+                        sx={{
+                          color: labelColor,
+                          fontWeight: 500,
+                          fontFamily,
+                          fontSize: "13.5px",
+                        }}
+                      >
+                        Summary
+                      </Typography>
+                      <TextField
+                        select
+                        fullWidth
+                        size="small"
+                        value={summary}
+                        placeholder="Select Summary"
+                        onChange={(e) => setSummary(e.target.value)}
+                        sx={{ mt: 0.5, fontFamily }}
+                      >
+                        <MenuItem value="Select Summary" >Select Summary</MenuItem>
+                        <MenuItem value="summary1">Summary 1</MenuItem>
+                        <MenuItem value="summary2">Summary 2</MenuItem>
+                      </TextField>
+                    </Box>
+                  </Grid>
+                </Grid>
+              </Box>
             ) : (
               <>
                 <>
@@ -415,32 +569,32 @@ function IncidentDetails({
                             >
                               Ward Officer
                             </Typography>
-                           {Array.isArray(incident?.ward_officer_name) &&
-incident.ward_officer_name.length > 0 ? (
-  <Typography
-    variant="subtitle2"
-    sx={{
-      fontFamily,
-      color: textColor,
-      wordBreak: "break-word",
-    }}
-  >
-    {incident.ward_officer_name
-      .map((officer) => officer.ward_officer_name)
-      .join(", ")}
-  </Typography>
-) : (
-  <Typography
-    variant="subtitle2"
-    sx={{
-      fontFamily,
-      color: textColor,
-      wordBreak: "break-word",
-    }}
-  >
-    N/A
-  </Typography>
-)}
+                            {Array.isArray(incident?.ward_officer_name) &&
+                            incident.ward_officer_name.length > 0 ? (
+                              <Typography
+                                variant="subtitle2"
+                                sx={{
+                                  fontFamily,
+                                  color: textColor,
+                                  wordBreak: "break-word",
+                                }}
+                              >
+                                {incident.ward_officer_name
+                                  .map((officer) => officer.ward_officer_name)
+                                  .join(", ")}
+                              </Typography>
+                            ) : (
+                              <Typography
+                                variant="subtitle2"
+                                sx={{
+                                  fontFamily,
+                                  color: textColor,
+                                  wordBreak: "break-word",
+                                }}
+                              >
+                                N/A
+                              </Typography>
+                            )}
                           </Box>
                         </Grid>
 
