@@ -301,9 +301,14 @@ const AlertPanel = ({ darkMode }) => {
         ]
         : sortedCombined;
 
-    const filteredData = combinedData.filter(item =>
+    const statusFilteredData = combinedData.filter(item => item.triger_status !== 3);
+
+    const filteredData = statusFilteredData.filter(item =>
         item.pk_id.toString().toLowerCase().includes(searchText.toLowerCase())
     );
+    // const filteredData = combinedData.filter(item =>
+    //     item.pk_id.toString().toLowerCase().includes(searchText.toLowerCase())
+    // );
 
     const startIndex = (page - 1) * rowsPerPage;
     const endIndex = startIndex + rowsPerPage;
