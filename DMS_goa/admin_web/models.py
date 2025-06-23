@@ -309,6 +309,14 @@ class Weather_alerts(models.Model):
     precipitation = models.FloatField(null=True,blank=True)
     weather_code = models.IntegerField(null=True,blank=True)
     disaster_id = models.ForeignKey(DMS_Disaster_Type,on_delete=models.CASCADE,null=True,blank=True)
+    ward = models.ForeignKey('DMS_Ward',on_delete=models.CASCADE,null=True,blank=True)
+    relative_humidity_2m = models.IntegerField(null=True,blank=True)
+    weather_code = models.IntegerField(null=True,blank=True)
+    cloud_cover = models.IntegerField(null=True,blank=True)
+    wind_speed_10m = models.FloatField(null=True,blank=True)   
+    wind_gusts_10m  = models.FloatField(null=True,blank=True)      
+    wind_direction_10m = models.IntegerField(null=True,blank=True)   
+    visibility = models.FloatField(null=True,blank=True)       
     alert_type = models.IntegerField(null=True,blank=True)
     added_by=models.CharField(max_length=255,null=True,blank=True)
     added_date = models.DateTimeField(auto_now=True)
@@ -350,6 +358,7 @@ class DMS_Caller(models.Model):
 
 from django.utils.timezone import now
 from django.db.models import Max
+import re
 class DMS_Incident(models.Model):
     inc_id = models.AutoField(primary_key=True)
     incident_id = models.CharField(max_length=255, unique=True, blank=True)
@@ -381,14 +390,37 @@ class DMS_Incident(models.Model):
     inc_modified_by = models.CharField(max_length=255, null=True, blank=True)
     inc_modified_date = models.DateTimeField(auto_now=True,null=True, blank=True)
     
+    
     def save(self, *args, **kwargs):
         is_new = self.pk is None
-        super().save(*args, **kwargs)  
 
         if is_new and not self.incident_id:
-            date_prefix = now().strftime('%Y%m%d')
-            self.incident_id = f"{date_prefix}{str(self.inc_id).zfill(5)}"
-            super().save(update_fields=['incident_id'])
+            today_str = now().strftime('%Y%m%d')
+
+            latest_incident = DMS_Incident.objects.filter(
+                incident_id__startswith=today_str
+            ).aggregate(Max('incident_id'))
+
+            latest_id = latest_incident['incident_id__max']
+            if latest_id:
+                match = re.search(rf'{today_str}(\d+)', latest_id)
+                last_seq = int(match.group(1)) if match else 0
+                new_seq = last_seq + 1
+            else:
+                new_seq = 1
+
+            self.incident_id = f"{today_str}{str(new_seq).zfill(5)}"
+
+        super().save(*args, **kwargs)
+    
+    # def save(self, *args, **kwargs):
+    #     is_new = self.pk is None
+    #     super().save(*args, **kwargs)  
+
+    #     if is_new and not self.incident_id:
+    #         date_prefix = now().strftime('%Y%m%d')
+    #         self.incident_id = f"{date_prefix}{str(self.inc_id).zfill(5)}"
+    #         super().save(update_fields=['incident_id'])
     
 
     # def save(self, *args, **kwargs):
