@@ -35,11 +35,13 @@ function IncidentDetails({
   highlightedId,
   setHighlightedId,
 }) {
-  const [district, setDistrict] = useState("");
-  const [tahsil, setTahsil] = useState("");
-  const [ward, setWard] = useState("");
-  const [wardOfficer, setWardOfficer] = useState("");
-  const [summary, setSummary] = useState("");
+const [district, setDistrict] = useState("");
+const [tahsil, setTahsil] = useState("");
+const [ward, setWard] = useState("");
+const [wardOfficer, setWardOfficer] = useState("");
+const [summary, setSummary] = useState("");
+
+const [errors, setErrors] = useState({});
 
   window.addEventListener("storage", (e) => {
     if (e.key === "logout") {
@@ -90,6 +92,11 @@ function IncidentDetails({
     pb: 1.5,
     borderBottom: `1px solid ${borderColor}`,
   };
+    const Style = {
+    mb: 2,
+    pb: 1.5,
+    // borderBottom: `1px solid ${borderColor}`,
+  }
 
   // Function to render text with label and value
   const renderText = (label, value) => (
@@ -191,7 +198,7 @@ function IncidentDetails({
                 <Grid container spacing={1.5}>
                   {/* DISTRICT */}
                   <Grid item xs={12} md={6}>
-                    <Box sx={{ ...boxStyle, mt: 0 }}>
+                    <Box sx={{ ...Style, mt: 0 }}>
                       <Typography
                         sx={{
                           color: labelColor,
@@ -220,7 +227,7 @@ function IncidentDetails({
 
                   {/* TAHSIL */}
                   <Grid item xs={12} md={6}>
-                    <Box sx={boxStyle}>
+                    <Box sx={Style}>
                       <Typography
                         sx={{
                           color: labelColor,
@@ -249,7 +256,7 @@ function IncidentDetails({
 
                   {/* WARD */}
                   <Grid item xs={12} md={6}>
-                    <Box sx={boxStyle}>
+                    <Box sx={Style}>
                       <Typography
                         sx={{
                           color: labelColor,
@@ -278,7 +285,7 @@ function IncidentDetails({
 
                   {/* WARD OFFICER */}
                   <Grid item xs={12} md={6}>
-                    <Box sx={boxStyle}>
+                    <Box sx={Style}>
                       <Typography
                         sx={{
                           color: labelColor,
@@ -307,7 +314,7 @@ function IncidentDetails({
 
                   {/* SUMMARY */}
                   <Grid item xs={12}>
-                    <Box sx={boxStyle}>
+                    <Box sx={Style}>
                       <Typography
                         sx={{
                           color: labelColor,
