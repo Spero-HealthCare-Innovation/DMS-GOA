@@ -35,13 +35,15 @@ function IncidentDetails({
   highlightedId,
   setHighlightedId,
 }) {
-const [district, setDistrict] = useState("");
-const [tahsil, setTahsil] = useState("");
-const [ward, setWard] = useState("");
-const [wardOfficer, setWardOfficer] = useState("");
-const [summary, setSummary] = useState("");
+  const [district, setDistrict] = useState("");
+  const [tahsil, setTahsil] = useState("");
+  const [ward, setWard] = useState("");
+  const [wardOfficer, setWardOfficer] = useState("");
+  const [summary, setSummary] = useState("");
+  const [location, setLocation] = useState("");
 
-const [errors, setErrors] = useState({});
+
+
 
   window.addEventListener("storage", (e) => {
     if (e.key === "logout") {
@@ -92,11 +94,11 @@ const [errors, setErrors] = useState({});
     pb: 1.5,
     borderBottom: `1px solid ${borderColor}`,
   };
-    const Style = {
+  const Style = {
     mb: 2,
     pb: 1.5,
     // borderBottom: `1px solid ${borderColor}`,
-  }
+  };
 
   // Function to render text with label and value
   const renderText = (label, value) => (
@@ -176,172 +178,197 @@ const [errors, setErrors] = useState({});
             }}
           >
             {flag === 1 ? (
-              <Box
-                sx={{
-                  maxHeight: "280px",
-                  overflowY: "auto",
-                  pr: 1,
-                  pb: 1,
-                  scrollBehavior: "smooth",
-                  "&::-webkit-scrollbar": {
-                    width: "5px",
-                  },
-                  "&::-webkit-scrollbar-thumb": {
-                    backgroundColor: darkMode ? "#0288d1" : "#888",
-                    borderRadius: 3,
-                  },
-                  "&::-webkit-scrollbar-thumb:hover": {
-                    backgroundColor: darkMode ? "#5FC8EC" : "#555",
-                  },
-                }}
-              >
-                <Grid container spacing={1.5}>
-                  {/* DISTRICT */}
-                  <Grid item xs={12} md={6}>
-                    <Box sx={{ ...Style, mt: 0 }}>
-                      <Typography
-                        sx={{
-                          color: labelColor,
-                          fontWeight: 500,
-                          fontFamily,
-                          fontSize: "13.5px",
-                        }}
-                      >
-                        District
-                      </Typography>
-                      <TextField
-                        select
-                        fullWidth
-                        size="small"
-                        value={district}
-                        onChange={(e) => setDistrict(e.target.value)}
-                        placeholder="Select District"
-                        sx={{ mt: 0.5, fontFamily }}
-                      >
-                        <MenuItem value="Select District" >Select District</MenuItem>
-                        <MenuItem value="pune">Pune</MenuItem>
-                        <MenuItem value="mumbai">Mumbai</MenuItem>
-                      </TextField>
-                    </Box>
-                  </Grid>
+             <Box
+  sx={{
+    maxHeight: "280px",
+    overflowY: "auto",
+    pr: 1,
+    pb: 1,
+    scrollBehavior: "smooth",
+    "&::-webkit-scrollbar": {
+      width: "5px",
+    },
+    "&::-webkit-scrollbar-thumb": {
+      backgroundColor: darkMode ? "#0288d1" : "#888",
+      borderRadius: 3,
+    },
+    "&::-webkit-scrollbar-thumb:hover": {
+      backgroundColor: darkMode ? "#5FC8EC" : "#555",
+    },
+  }}
+>
+  <Grid container spacing={2}>
+    {/* DISTRICT */}
+    <Grid item xs={12} md={6}>
+      <Box sx={Style}>
+        <Typography
+          sx={{
+            color: labelColor,
+            fontWeight: 500,
+            fontFamily,
+            fontSize: "13.5px",
+          }}
+        >
+          District
+        </Typography>
+        <TextField
+          select
+          fullWidth
+          size="small"
+          value={district}
+          onChange={(e) => setDistrict(e.target.value)}
+          placeholder="Select District"
+          sx={{ mt: 0.5, fontFamily }}
+        >
+          <MenuItem value="Select District">Select District</MenuItem>
+          <MenuItem value="pune">Pune</MenuItem>
+          <MenuItem value="mumbai">Mumbai</MenuItem>
+        </TextField>
+      </Box>
+    </Grid>
 
-                  {/* TAHSIL */}
-                  <Grid item xs={12} md={6}>
-                    <Box sx={Style}>
-                      <Typography
-                        sx={{
-                          color: labelColor,
-                          fontWeight: 500,
-                          fontFamily,
-                          fontSize: "13.5px",
-                        }}
-                      >
-                        Tahsil
-                      </Typography>
-                      <TextField
-                        select
-                        fullWidth
-                        size="small"
-                        value={tahsil}
-                        onChange={(e) => setTahsil(e.target.value)}
-                        placeholder="Select Tahsil"
-                        sx={{ mt: 0.5, fontFamily }}
-                      >
-                        <MenuItem value="Select Tahsil" >Select Tahsil</MenuItem>
-                        <MenuItem value="haveli">Haveli</MenuItem>
-                        <MenuItem value="mulshi">Mulshi</MenuItem>
-                      </TextField>
-                    </Box>
-                  </Grid>
+    {/* TAHSIL */}
+    <Grid item xs={12} md={6}>
+      <Box sx={Style}>
+        <Typography
+          sx={{
+            color: labelColor,
+            fontWeight: 500,
+            fontFamily,
+            fontSize: "13.5px",
+          }}
+        >
+          Tahsil
+        </Typography>
+        <TextField
+          select
+          fullWidth
+          size="small"
+          value={tahsil}
+          onChange={(e) => setTahsil(e.target.value)}
+          placeholder="Select Tahsil"
+          sx={{ mt: 0.5, fontFamily }}
+        >
+          <MenuItem value="Select Tahsil">Select Tahsil</MenuItem>
+          <MenuItem value="haveli">Haveli</MenuItem>
+          <MenuItem value="mulshi">Mulshi</MenuItem>
+        </TextField>
+      </Box>
+    </Grid>
 
-                  {/* WARD */}
-                  <Grid item xs={12} md={6}>
-                    <Box sx={Style}>
-                      <Typography
-                        sx={{
-                          color: labelColor,
-                          fontWeight: 500,
-                          fontFamily,
-                          fontSize: "13.5px",
-                        }}
-                      >
-                        Ward
-                      </Typography>
-                      <TextField
-                        select
-                        fullWidth
-                        size="small"
-                        value={ward}
-                        placeholder="Select Ward"
-                        onChange={(e) => setWard(e.target.value)}
-                        sx={{ mt: 0.5, fontFamily }}
-                      >
-                        <MenuItem value="Select Ward" >Select Ward</MenuItem>
-                        <MenuItem value="ward_a">Ward A</MenuItem>
-                        <MenuItem value="ward_b">Ward B</MenuItem>
-                      </TextField>
-                    </Box>
-                  </Grid>
+    {/* WARD */}
+    <Grid item xs={12} md={6}>
+      <Box sx={Style}>
+        <Typography
+          sx={{
+            color: labelColor,
+            fontWeight: 500,
+            fontFamily,
+            fontSize: "13.5px",
+          }}
+        >
+          Ward
+        </Typography>
+        <TextField
+          select
+          fullWidth
+          size="small"
+          value={ward}
+          onChange={(e) => setWard(e.target.value)}
+          placeholder="Select Ward"
+          sx={{ mt: 0.5, fontFamily }}
+        >
+          <MenuItem value="Select Ward">Select Ward</MenuItem>
+          <MenuItem value="ward_a">Ward A</MenuItem>
+          <MenuItem value="ward_b">Ward B</MenuItem>
+        </TextField>
+      </Box>
+    </Grid>
 
-                  {/* WARD OFFICER */}
-                  <Grid item xs={12} md={6}>
-                    <Box sx={Style}>
-                      <Typography
-                        sx={{
-                          color: labelColor,
-                          fontWeight: 500,
-                          fontFamily,
-                          fontSize: "13.5px",
-                        }}
-                      >
-                        Ward Officer
-                      </Typography>
-                      <TextField
-                        select
-                        fullWidth
-                        size="small"
-                        value={wardOfficer}
-                        placeholder="Select Ward Officer"
-                        onChange={(e) => setWardOfficer(e.target.value)}
-                        sx={{ mt: 0.5, fontFamily }}
-                      >
-                        <MenuItem value="Select Ward Officer" >Select Ward Officer</MenuItem>
-                        <MenuItem value="officer1">Officer 1</MenuItem>
-                        <MenuItem value="officer2">Officer 2</MenuItem>
-                      </TextField>
-                    </Box>
-                  </Grid>
+    {/* WARD OFFICER */}
+    <Grid item xs={12} md={6}>
+      <Box sx={Style}>
+        <Typography
+          sx={{
+            color: labelColor,
+            fontWeight: 500,
+            fontFamily,
+            fontSize: "13.5px",
+          }}
+        >
+          Ward Officer
+        </Typography>
+        <TextField
+          select
+          fullWidth
+          size="small"
+          value={wardOfficer}
+          onChange={(e) => setWardOfficer(e.target.value)}
+          placeholder="Select Ward Officer"
+          sx={{ mt: 0.5, fontFamily }}
+        >
+          <MenuItem value="Select Ward Officer">Select Ward Officer</MenuItem>
+          <MenuItem value="officer1">Officer 1</MenuItem>
+          <MenuItem value="officer2">Officer 2</MenuItem>
+        </TextField>
+      </Box>
+    </Grid>
 
-                  {/* SUMMARY */}
-                  <Grid item xs={12}>
-                    <Box sx={Style}>
-                      <Typography
-                        sx={{
-                          color: labelColor,
-                          fontWeight: 500,
-                          fontFamily,
-                          fontSize: "13.5px",
-                        }}
-                      >
-                        Summary
-                      </Typography>
-                      <TextField
-                        select
-                        fullWidth
-                        size="small"
-                        value={summary}
-                        placeholder="Select Summary"
-                        onChange={(e) => setSummary(e.target.value)}
-                        sx={{ mt: 0.5, fontFamily }}
-                      >
-                        <MenuItem value="Select Summary" >Select Summary</MenuItem>
-                        <MenuItem value="summary1">Summary 1</MenuItem>
-                        <MenuItem value="summary2">Summary 2</MenuItem>
-                      </TextField>
-                    </Box>
-                  </Grid>
-                </Grid>
-              </Box>
+    {/* LOCATION */}
+    <Grid item xs={12} md={6}>
+      <Box sx={Style}>
+        <Typography
+          sx={{
+            color: labelColor,
+            fontWeight: 500,
+            fontFamily,
+            fontSize: "13.5px",
+          }}
+        >
+          Location
+        </Typography>
+        <TextField
+          fullWidth
+          size="small"
+          value={location}
+          onChange={(e) => setLocation(e.target.value)}
+          placeholder="Enter Location"
+          sx={{ mt: 0.5, fontFamily }}
+        />
+      </Box>
+    </Grid>
+
+    {/* SUMMARY */}
+    <Grid item xs={12} md={6}>
+      <Box sx={Style}>
+        <Typography
+          sx={{
+            color: labelColor,
+            fontWeight: 500,
+            fontFamily,
+            fontSize: "13.5px",
+          }}
+        >
+          Summary
+        </Typography>
+        <TextField
+          select
+          fullWidth
+          size="small"
+          value={summary}
+          onChange={(e) => setSummary(e.target.value)}
+          placeholder="Select Summary"
+          sx={{ mt: 0.5, fontFamily }}
+        >
+          <MenuItem value="Select Summary">Select Summary</MenuItem>
+          <MenuItem value="summary1">Summary 1</MenuItem>
+          <MenuItem value="summary2">Summary 2</MenuItem>
+        </TextField>
+      </Box>
+    </Grid>
+  </Grid>
+</Box>
+
             ) : (
               <>
                 <>
