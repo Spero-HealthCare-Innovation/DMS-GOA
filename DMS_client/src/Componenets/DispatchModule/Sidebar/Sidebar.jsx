@@ -8,25 +8,27 @@ import {
   Box,
 } from "@mui/material";
 
-import weatherImg from "../../../assets/Cloud angled rain zap.png";
-import heatWatchImg from "../../../assets/Group 427319122.png";
-import cycloneImg from "../../../assets/Tornado.png";
-import droughtImg from "../../../assets/Sun.png";
-import nowcastImg from "../../../assets/f1faf7e49dc03a9d97669947c2ea71a1f7b90dd3.png";
-import floodImg from "../../../assets/Cloud angled rain zap.png";
+import flood from "../../../assets/flood (1).png";
+import urbanflood from "../../../assets/Urbanflood.png";
+import cloudburst from "../../../assets/heavy-rain.png";
+import firehazard from "../../../assets/fire.png";
+import forestfirehazard from "../../../assets/forest.png";
+import landslide from "../../../assets/landslide.png";
+import masscasualty from "../../../assets/response.png";
+import heavyrainfall from "../../../assets/heavyRainfall.jpg";
+import thunderstorm from "../../../assets/thunder (1).png";
 import { useAuth } from "../../../Context/ContextAPI";
 
-// Array of disaster names and their matching images
 const disasterImages = [
-  { text: "Flood", img: weatherImg },
-  { text: "Urban Floods", img: heatWatchImg },
-  { text: "Cloudburst", img: cycloneImg },
-  { text: "Fire Hazard", img: droughtImg },
-  { text: "Forest Fire Hazard", img: nowcastImg },
-  { text: "Landslide", img: floodImg },
-  { text: "Thunderstorm", img: floodImg },
-  { text: "Mass Casualty", img: floodImg },
-  { text: "Other", img: floodImg },
+  { text: "Flood", img: flood },
+  { text: "Urban Floods", img: urbanflood },
+  { text: "Cloudburst", img: cloudburst },
+  { text: "Fire Hazard", img: firehazard },
+  { text: "Forest Fire Hazard", img: forestfirehazard },
+  { text: "Landslide", img: landslide },
+  { text: "Mass Casualty", img: masscasualty },
+  { text: "Heavy Rainfall", img: heavyrainfall },
+  { text: "Thunderstorm ", img: thunderstorm }, 
 ];
 
 const Sidebar = ({ darkMode }) => {
