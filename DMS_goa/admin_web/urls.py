@@ -73,13 +73,13 @@ urlpatterns = [
     path('state_get_idwise/<int:state_id>/',DMS_state_idwise_get_api.as_view(), name='state_get_idwise'),
     
     path('district_get/',DMS_district_get_api.as_view(), name='district_get'),
-    path('district_get_idwise/<int:dis_id>/',DMS_district_idwise_get_api.as_view(), name='district_get_idwise'),
+    path('district_get_idwise/<int:state_id>/',DMS_district_idwise_get_api.as_view(), name='district_get_idwise'),
     
     path('Tahsil_get/',DMS_Tahsil_get_api.as_view(), name='Tahsil_get'),
-    path('Tahsil_get_idwise/<int:tah_id>/',DMS_Tahsil_idwise_get_api.as_view(), name='Tahsil_get_idwise'),
+    path('Tahsil_get_idwise/<int:dis_id>/',DMS_Tahsil_idwise_get_api.as_view(), name='Tahsil_get_idwise'),
     
     path('City_get/',DMS_City_get_api.as_view(), name='City_get'),
-    path('City_get_idwise/<int:cit_id>/',DMS_City_idwise_get_api.as_view(), name='City_get'),
+    path('City_get_idwise/<int:tah_id>/',DMS_City_idwise_get_api.as_view(), name='City_get'),
     
     path('Group_get/',DMS_Group_get_api.as_view(), name='Group_get'),
     path('Group_get_idwise/<int:grp_id>/',DMS_Group_idwise_get_api.as_view(), name='Group_get_idwise'),
@@ -105,6 +105,8 @@ urlpatterns = [
     path('comments_post/<int:incident_id>/', CommentPostView.as_view(), name='comments_post'),
     
     path('ward_get/<int:tah_id>/', Ward_get_API.as_view(), name='ward_get'),
+    path('ward_officer_get/<int:ward_id>/', Ward_Officer_get_API.as_view(), name='ward_officer_get'),
+    
     
     
     #===================================Mohin==================================================
@@ -127,4 +129,8 @@ urlpatterns = [
     path('logout/', LogoutView.as_view(), name='logout'),
     path('alert/', DMS_Alert_idwise_get_api.as_view(), name='DMS_Alert_idwise'),
     #=============================== Nikita =========================================================
+
+    #=================================  Vinayak =====================================================
+    path('get_responder_list/<int:inc_id>/',incident_wise_responder_list.as_view()),
+    #=================================  Vinayak =====================================================
 ]

@@ -146,7 +146,7 @@ class DMS_Disaster_Type(models.Model):
 # Custom User Manager
 class DMS_Employee_Manager(BaseUserManager):
 
-    def create_user(self, emp_username, grp_id, emp_name, emp_email, emp_contact_no, emp_dob, emp_doj, emp_is_login, state_id, dist_id, tahsil_id, city_id, emp_is_deleted, emp_added_by, emp_modified_by,password=None, password2=None):
+    def create_user(self, emp_username, grp_id, emp_name, emp_email, emp_contact_no, emp_dob, emp_doj, emp_is_login, state_id, dist_id, tahsil_id, city_id, emp_is_deleted, emp_added_by, emp_modified_by,ward_id,password=None, password2=None):
 
         """
         Creates and saves a User with the given email, name, tc and password.
@@ -170,13 +170,14 @@ class DMS_Employee_Manager(BaseUserManager):
             emp_is_deleted = emp_is_deleted,
             emp_added_by = emp_added_by,
             emp_modified_by = emp_modified_by,
+            ward_id=ward_id,
         )
 
         user.set_password(password)
         user.save(using=self._db)
         return user
 
-    def create_superuser(self, emp_username, grp_id, emp_name, emp_email, emp_contact_no, emp_dob, emp_doj, emp_is_login, state_id, dist_id, tahsil_id, city_id, emp_is_deleted, emp_added_by, emp_modified_by, password=None,):
+    def create_superuser(self, emp_username, grp_id, emp_name, emp_email, emp_contact_no, emp_dob, emp_doj, emp_is_login, state_id, dist_id, tahsil_id, city_id,ward_id, emp_is_deleted, emp_added_by, emp_modified_by, password=None,):
 
         """Creates and saves a superuser with the given email, name, tc and password."""
         user = self.create_user(
@@ -196,6 +197,7 @@ class DMS_Employee_Manager(BaseUserManager):
             emp_is_deleted = emp_is_deleted,
             emp_added_by = emp_added_by,
             emp_modified_by = emp_modified_by,
+            ward_id=ward_id,
         )
 
         user.is_admin = True
@@ -244,7 +246,7 @@ class DMS_Employee(AbstractBaseUser):
     USERNAME_FIELD = 'emp_username'
 
 
-    REQUIRED_FIELDS = ['grp_id', 'emp_name', 'emp_email', 'emp_contact_no', 'emp_dob', 'emp_doj', 'emp_is_login', 'state_id', 'dist_id', 'tahsil_id', 'city_id', 'emp_is_deleted', 'emp_added_by', 'emp_modified_by']
+    REQUIRED_FIELDS = ['grp_id', 'emp_name', 'emp_email', 'emp_contact_no', 'emp_dob', 'emp_doj', 'emp_is_login', 'state_id', 'dist_id', 'tahsil_id', 'city_id','ward_id', 'emp_is_deleted', 'emp_added_by', 'emp_modified_by']
 
     def __str__(self):
         return str(self.emp_username)
@@ -307,6 +309,14 @@ class Weather_alerts(models.Model):
     precipitation = models.FloatField(null=True,blank=True)
     weather_code = models.IntegerField(null=True,blank=True)
     disaster_id = models.ForeignKey(DMS_Disaster_Type,on_delete=models.CASCADE,null=True,blank=True)
+    ward = models.ForeignKey('DMS_Ward',on_delete=models.CASCADE,null=True,blank=True)
+    relative_humidity_2m = models.IntegerField(null=True,blank=True)
+    weather_code = models.IntegerField(null=True,blank=True)
+    cloud_cover = models.IntegerField(null=True,blank=True)
+    wind_speed_10m = models.FloatField(null=True,blank=True)   
+    wind_gusts_10m  = models.FloatField(null=True,blank=True)      
+    wind_direction_10m = models.IntegerField(null=True,blank=True)   
+    visibility = models.FloatField(null=True,blank=True)       
     alert_type = models.IntegerField(null=True,blank=True)
     added_by=models.CharField(max_length=255,null=True,blank=True)
     added_date = models.DateTimeField(auto_now=True)
@@ -348,6 +358,7 @@ class DMS_Caller(models.Model):
 
 from django.utils.timezone import now
 from django.db.models import Max
+import re
 class DMS_Incident(models.Model):
     inc_id = models.AutoField(primary_key=True)
     incident_id = models.CharField(max_length=255, unique=True, blank=True)
@@ -368,6 +379,10 @@ class DMS_Incident(models.Model):
     inc_datetime = models.DateTimeField(auto_now=True)
     mode = models.IntegerField(null=True,blank=True)
     time = models.CharField(max_length=255,null=True,blank=True)
+    ward = models.ForeignKey('DMS_Ward',on_delete=models.CASCADE,null=True,blank=True)
+    tahsil = models.ForeignKey(DMS_Tahsil,on_delete=models.CASCADE,null=True,blank=True)
+    district = models.ForeignKey(DMS_District,on_delete=models.CASCADE,null=True,blank=True)
+    ward_officer = models.JSONField(null=True,blank=True)
     inc_is_deleted = models.BooleanField(default=False)
     clouser_status = models.BooleanField(default=False,null=True,blank=True)
     inc_added_by=models.CharField(max_length=255,null=True,blank=True)
@@ -375,14 +390,37 @@ class DMS_Incident(models.Model):
     inc_modified_by = models.CharField(max_length=255, null=True, blank=True)
     inc_modified_date = models.DateTimeField(auto_now=True,null=True, blank=True)
     
+    
     def save(self, *args, **kwargs):
         is_new = self.pk is None
-        super().save(*args, **kwargs)  
 
         if is_new and not self.incident_id:
-            date_prefix = now().strftime('%Y%m%d')
-            self.incident_id = f"{date_prefix}{str(self.inc_id).zfill(5)}"
-            super().save(update_fields=['incident_id'])
+            today_str = now().strftime('%Y%m%d')
+
+            latest_incident = DMS_Incident.objects.filter(
+                incident_id__startswith=today_str
+            ).aggregate(Max('incident_id'))
+
+            latest_id = latest_incident['incident_id__max']
+            if latest_id:
+                match = re.search(rf'{today_str}(\d+)', latest_id)
+                last_seq = int(match.group(1)) if match else 0
+                new_seq = last_seq + 1
+            else:
+                new_seq = 1
+
+            self.incident_id = f"{today_str}{str(new_seq).zfill(5)}"
+
+        super().save(*args, **kwargs)
+    
+    # def save(self, *args, **kwargs):
+    #     is_new = self.pk is None
+    #     super().save(*args, **kwargs)  
+
+    #     if is_new and not self.incident_id:
+    #         date_prefix = now().strftime('%Y%m%d')
+    #         self.incident_id = f"{date_prefix}{str(self.inc_id).zfill(5)}"
+    #         super().save(update_fields=['incident_id'])
     
 
     # def save(self, *args, **kwargs):
@@ -470,7 +508,7 @@ class DMS_Disaster_Responder(models.Model):
 class DMS_incident_closure(models.Model):
     closure_id=models.AutoField(primary_key=True)
     incident_id=models.ForeignKey(DMS_Incident,on_delete=models.CASCADE,null=True,blank=True)
-    department = models.ForeignKey(DMS_Department, on_delete=models.CASCADE, null=True, blank=True)
+    responder = models.ForeignKey(DMS_Responder, on_delete=models.CASCADE, null=True, blank=True)
     vehicle_no = models.CharField(max_length=100, null= True, blank=True)
     closure_acknowledge=models.DateTimeField(null=True, blank=True)
     closure_start_base_location=models.DateTimeField(null=True, blank=True)
@@ -524,5 +562,4 @@ class DMS_Ward(models.Model):
     ward_added_date = models.DateTimeField(auto_now=True)
     ward_modified_by = models.CharField(max_length=255, null=True, blank=True)
     ward_modified_date = models.DateTimeField(auto_now=True,null=True, blank=True)
-    
     

@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     'rest_framework',
     "corsheaders",
     "captcha",
+    "DMS_MDT",
 
 ]
 

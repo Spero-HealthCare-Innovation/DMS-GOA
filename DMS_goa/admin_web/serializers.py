@@ -109,7 +109,7 @@ class DMS_Employee_GET_serializer(serializers.ModelSerializer):
             'emp_id', 'emp_username', 'grp_id', 'emp_name', 'emp_email',
             'emp_contact_no', 'emp_dob', 'emp_doj', 'emp_is_login',
             'state_id', 'state_name', 'dist_id','dis_name','tahsil_id','tah_name','city_id','cit_name','grp_name',
-            'emp_is_deleted', 'emp_added_by', 'emp_modified_by', 'password','ward_id'
+            'emp_is_deleted', 'emp_added_by', 'emp_modified_by', 'password','ward_id','ward_name'
         ]
         
     
@@ -233,10 +233,16 @@ class Sop_Put_Serializer(serializers.ModelSerializer):
         fields = ['sop_description','disaster_id']
 
 class WeatherAlertSerializer(serializers.ModelSerializer):
+    disaster_name = serializers.SerializerMethodField()
+
     class Meta:
         model = Weather_alerts
         fields = '__all__'
 
+    def get_disaster_name(self, obj):
+        if obj.disaster_id:
+            return obj.disaster_id.disaster_name  # assuming `disaster_name` is a field in DMS_Disaster_Type
+        return None
 
 # class Incident_Serializer(serializers.ModelSerializer):
 #     class Meta:
@@ -269,17 +275,21 @@ class Incident_Serializer(serializers.ModelSerializer):
         comments_text = validated_data.pop('comments')
         comm_added_by = validated_data.pop('comm_added_by')
 
-        notify = DMS_Notify.objects.create(
-            alert_type_id=responder_scope,
-            disaster_type=validated_data.get('disaster_type'),
-            not_added_by=validated_data.get('inc_added_by'),
-        )
-
         incident = DMS_Incident.objects.create(
             responder_scope=responder_scope,
-            notify_id=notify,
             **validated_data
         )
+
+        notify = DMS_Notify.objects.create(
+            alert_type_id=responder_scope,
+            disaster_type=incident.disaster_type,
+            not_added_by=incident.inc_added_by,
+            incident_id=incident  
+        )
+
+        incident.notify_id = notify
+        incident.save(update_fields=['notify_id'])
+
 
         comment = DMS_Comments.objects.create(
             alert_id=incident.alert_id,
@@ -324,7 +334,7 @@ class Alert_Type_Serializer(serializers.ModelSerializer):
 class Manual_call_incident_dispatch_Serializer(serializers.ModelSerializer):
     class Meta:
         model = DMS_Incident
-        fields = ['inc_type','disaster_type','alert_type','location','summary','responder_scope','latitude','longitude','caller_id','inc_added_by','inc_modified_by','time','mode']   
+        fields = ['inc_type','disaster_type','alert_type','location','summary','responder_scope','latitude','longitude','caller_id','inc_added_by','inc_modified_by','time','mode','ward','district','ward_officer','tahsil','ward','district','ward_officer','tahsil']   
 
 class Manual_call_data_Serializer(serializers.ModelSerializer):
     class Meta:
@@ -437,10 +447,27 @@ class incident_get_serializer(serializers.ModelSerializer):
     summary_name = serializers.CharField(source='summary.summary', read_only=True)
     disaster_name=serializers.CharField(source='disaster_type.disaster_name', read_only=True)
     comment_added_by = serializers.CharField(source='comment_id.comm_added_by',read_only=True)
+    ward_name = serializers.CharField(source='ward.ward_name',read_only=True)
+    district_name = serializers.CharField(source='district.dis_name',read_only=True)
+    tahsil_name = serializers.CharField(source='tahsil.tah_name',read_only=True)
+    ward_officer_name = serializers.SerializerMethodField()
+    
+    
     class Meta:
         model = DMS_Incident
-        fields=['incident_id','disaster_type','inc_type','responder_scope','caller_id','caller_name','caller_no','location','summary','summary_name','disaster_name','alert_type','mode','latitude','longitude','inc_datetime','location','comment_added_by']
+        fields=['incident_id','disaster_type','inc_type','responder_scope','caller_id','caller_name','caller_no','location','summary','summary_name','disaster_name','alert_type','mode','latitude','longitude','inc_datetime','location','comment_added_by','ward','district','ward_officer','tahsil','ward_name','district_name','tahsil_name','ward_officer_name']
 
+    
+    def get_ward_officer_name(self, obj):
+        try:
+            officer_ids = obj.ward_officer if isinstance(obj.ward_officer, list) else []
+            officers = DMS_Employee.objects.filter(emp_id__in=officer_ids)
+            return [{"emp_id": officer.emp_id, "ward_officer_name": officer.emp_name} for officer in officers]
+        except Exception:
+            return []
+        
+        
+        
 
 class Responder_Scope_post_Serializer(serializers.ModelSerializer):
     class Meta:
@@ -453,4 +480,10 @@ class Ward_get_Serializer(serializers.ModelSerializer):
         model = DMS_Ward
         # fields = '__all__'
         fields = ['pk_id','ward_name']
-        
+
+
+class Ward_officer_get_Serializer(serializers.ModelSerializer):
+    class Meta:
+        model = DMS_Employee
+        # fields = '__all__'
+        fields = ['emp_id','emp_name']
