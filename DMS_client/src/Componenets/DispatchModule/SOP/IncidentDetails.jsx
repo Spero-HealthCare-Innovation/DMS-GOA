@@ -71,6 +71,8 @@ function IncidentDetails({
   const [selectedWardOfficer, setSelectedWardOfficer] = useState("");
   const [wardOfficerList, setWardOfficerList] = useState([]);
   const [selectedResponders, setSelectedResponders] = useState([]);
+  const [Lattitude,setLattitude] = useState("");
+  const [Longitude,setLongitude]=useState("");
 
   const {
     newToken,
@@ -135,6 +137,21 @@ function IncidentDetails({
       fetchWardOfficerList();
     }
   }, [selectedWard]);
+
+  
+
+useEffect(() => {
+  if (selectedIncident) {
+    setLattitude(selectedIncident.latitude || "");
+    setLongitude(selectedIncident.longitude || "");
+  }
+}, [selectedIncident]);
+
+console.log(`Latitude: ${Lattitude}, Longitude: ${Longitude}`);
+
+
+  
+  
 
   const fetchSummary = async () => {
     const res = await fetch(`${port}/admin_web/DMS_Summary_Get/1/`, {
@@ -1106,7 +1123,7 @@ function IncidentDetails({
                 fetchIncidentDetails={fetchIncidentDetails}
                 highlightedId={highlightedId}
                 setHighlightedId={setHighlightedId}
-                
+
               />
             ) : (
               <Typography
