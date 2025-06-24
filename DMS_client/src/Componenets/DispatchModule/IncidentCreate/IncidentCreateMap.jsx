@@ -262,7 +262,8 @@ const IncidentCreateMap = () => {
 
           }}
         >
-          <Popup>{popupTextMap}</Popup>
+          <Popup>{popupTextMap || "PUNE"}</Popup>
+
         </Marker>
       </MapContainer>
     </div>
