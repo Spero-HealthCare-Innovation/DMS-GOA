@@ -402,6 +402,41 @@ def get_old_weather_alerts():
         return []
 
 
+@sync_to_async
+def get_old_weather_alerts_disaster_based(dis_id):
+    try:
+        # alerts = Weather_alerts.objects.order_by("-time")
+        # alerts = Weather_alerts.objects.order_by("-alert_datetime")
+        alerts = Weather_alerts.objects.filter(disaster_id=dis_id).order_by("-alert_datetime", "-pk_id")
+        for alert in alerts:
+            print(alert.pk_id, alert.alert_datetime)
+        return [
+            {
+                "pk_id": alert.pk_id,
+                "latitude": alert.latitude,
+                "longitude": alert.longitude,
+                "elevation": alert.elevation,
+                # "time": alert.time.isoformat() if alert.time else None,
+                "alert_datetime": alert.alert_datetime.isoformat() if alert.alert_datetime else None,
+                "temperature_2m": alert.temperature_2m,
+                "rain": alert.rain,
+                "precipitation": alert.precipitation,
+                "weather_code": alert.weather_code,
+                "triger_status": alert.triger_status,
+                "disaster_id": alert.disaster_id.disaster_id if alert.disaster_id else None,
+                "disaster_name": alert.disaster_id.disaster_name if alert.disaster_id else None,
+                "alert_type":alert.alert_type
+            }
+            for alert in alerts
+        ]
+    except Exception as e:
+        logger.error(f"Error in get_old_weather_alerts: {e}")
+        return []
+
+
+
+
+
 connected_clients2 = set()
 
 # Build DSN from Django settings
@@ -656,43 +691,84 @@ async def websocket_trigger2(websocket: WebSocket):
 
 # Based on disaster id webcoket to fetch weather alerts
 
-# connected_disaster_clients = {}  # { websocket: disaster_id }
+connected_disaster_clients = {}  # { websocket: disaster_id }
 
-# @app.websocket("/ws/disaster_alerts")
-# async def websocket_disaster_alerts(websocket: WebSocket):
-#     await websocket.accept()
+@app.websocket("/ws/disaster_alerts")
+async def websocket_disaster_alerts(websocket: WebSocket):
+    print("started...---")
+    await websocket.accept()
 
-#     try:
-#         # Wait for client to send disaster_id
-#         data = await websocket.receive_text()
-#         message = json.loads(data)
-#         disaster_id = message.get("disaster_id")
+    try:
+        # Get disaster_id from query param
+        disaster_id = websocket.query_params.get("disaster_id")
+        print("dis id---", disaster_id)
 
-#         if not disaster_id:
-#             await websocket.send_text("Error: 'disaster_id' is required.")
-#             await websocket.close(code=1008)
-#             return
+        if not disaster_id:
+            await websocket.send_text("Error: 'disaster_id' is required.")
+            await websocket.close(code=1008)
+            return
 
-#         connected_disaster_clients[websocket] = disaster_id
-#         print(f"WebSocket connected for disaster_id: {disaster_id}")
-#         print("Total connected disaster alert clients:", len(connected_disaster_clients))
+        connected_disaster_clients[websocket] = disaster_id
+        old_messages = await get_old_weather_alerts_disaster_based(disaster_id)
+        # print("old msg-", old_messages)
+        for msg in old_messages:
+            print("MSSSSSSSSSSSSSSGGGGG----", msg)
+            await websocket.send_text(json.dumps(msg))  # ✅ flat format
+            await asyncio.sleep(0.05)
 
-#         # Listen loop
-#         while True:
-#             await asyncio.sleep(5)  # Optional heartbeat
-#             # You can push data here based on disaster_id
-#             # Example dummy data push:
-#             alert_data = {
-#                 "disaster_id": disaster_id,
-#                 "alert": f"Sample alert for disaster {disaster_id}"
-#             }
-#             await websocket.send_text(json.dumps(alert_data))
+        # Get latest pk_id after old messages
+        if old_messages:
+            last_sent_pk = max(msg["pk_id"] for msg in old_messages if "pk_id" in msg)
+            print("last sent pk--", last_sent_pk)
 
-#     except WebSocketDisconnect:
-#         print("Disaster alert WebSocket disconnected.")
-#     except Exception as e:
-#         print(f"Disaster alert WebSocket error: {e}")
-#     finally:
-#         connected_disaster_clients.pop(websocket, None)
-#         print(f"Disaster alert WebSocket removed: {websocket.client}")
+        # Background task to check for new entries
+        async def send_new_alerts():
+            nonlocal last_sent_pk
+            while True:
+                try:
+                    new_alerts = await sync_to_async(list)(
+                        Weather_alerts.objects.filter(pk_id__gt=last_sent_pk, disaster_id=disaster_id)
+                        .order_by("pk_id")
+                        .values("pk_id", "latitude", "longitude", "elevation", "alert_datetime", 
+                                "temperature_2m", "rain", "precipitation", 
+                                "weather_code", "triger_status", "alert_type", "disaster_id")
+                    )
+
+                    for alert in new_alerts:
+                        # if alert["time"]:
+                        #     alert["time"] = alert["time"].isoformat()
+                        dis_nm = get_disaster_name(disaster_id)
+                        print("dis nm------", dis_nm)
+                        if alert["alert_datetime"]:
+                            alert["alert_datetime"] = alert["alert_datetime"].isoformat()
+                            alert["disaster_name"] = dis_nm
+                        await websocket.send_text(json.dumps(alert))  # ✅ same flat format
+                        last_sent_pk = max(last_sent_pk, alert["pk_id"])
+                        await asyncio.sleep(0.05)
+
+                    await asyncio.sleep(5)  # Check for new data every 5 seconds
+                except Exception as e:
+                    print(f"Error in background task: {e}")
+                    break
+
+        # Start the background task
+        background_task = asyncio.create_task(send_new_alerts())
+
+        # Keep the connection alive (optional: handle incoming messages)
+        while True:
+            try:
+                msg = await asyncio.wait_for(websocket.receive_text(), timeout=30.0)
+                print(f"Received message from client: {msg}")
+            except asyncio.TimeoutError:
+                pass  # Just keep alive
+
+    except WebSocketDisconnect:
+        print(f"WebSocket disconnected by client: {websocket.client}")
+    except Exception as e:
+        print(f"WebSocket error: {e}")
+    finally:
+        # connected_clients_trigger2.remove(websocket)
+        connected_clients_trigger2.pop(websocket, None)
+        print(f"WebSocket removed: {websocket.client}")
+        background_task.cancel()  # Stop the background polling
 # # --------------------------------------####NIKITA###-------------------------------------
