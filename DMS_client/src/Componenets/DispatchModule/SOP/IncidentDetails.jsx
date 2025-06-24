@@ -35,15 +35,22 @@ function IncidentDetails({
   highlightedId,
   setHighlightedId,
 }) {
-  const [district, setDistrict] = useState("");
-  const [tahsil, setTahsil] = useState("");
-  const [ward, setWard] = useState("");
-  const [wardOfficer, setWardOfficer] = useState("");
-  const [summary, setSummary] = useState("");
-  const [location, setLocation] = useState("");
+  // Define colors and styles based on dark mode
+  const labelColor = darkMode ? "#5FC8EC" : "#1976d2";
+  const textColor = darkMode ? "#ffffff" : "#000000";
+  const borderColor = darkMode ? "#7F7F7F" : "#ccc";
+  const fontFamily = "Roboto, sans-serif";
 
-
-
+  const boxStyle = {
+    mb: 2,
+    pb: 1.5,
+    borderBottom: `1px solid ${borderColor}`,
+  };
+  const Style = {
+    // mb: 2,
+    // pb: 1.5,
+    // // borderBottom: `1px solid ${borderColor}`,
+  };
 
   window.addEventListener("storage", (e) => {
     if (e.key === "logout") {
@@ -51,54 +58,103 @@ function IncidentDetails({
     }
   });
 
+  const port = import.meta.env.VITE_APP_API_KEY;
+  const token = localStorage.getItem("access_token");
+
   const userName = localStorage.getItem("userId");
-  console.log(
-    selectedIncident?.inc_id,
-    "selectedIncidentselectedIncidentselectedIncident"
-  );
+
+  const [selectedWard, setSelectedWard] = useState("");
+  const [wardList, setWardList] = useState([]);
+  const [selectedSummary, setSelectedSummary] = useState("");
+  const [summaryList, setSummaryList] = useState([]);
+  const [location, setLocation] = useState("");
+  const [selectedWardOfficer, setSelectedWardOfficer] = useState("");
+  const [wardOfficerList, setWardOfficerList] = useState([]);
+  const [selectedResponders, setSelectedResponders] = useState([]);
+
+  const {
+    newToken,
+    disaterid,
+    setResponderScopeForDispatch,
+    responderScopeForDispatch,
+    districts,
+    fetchDistrictsByState,
+    Tehsils,
+    selectedDistrictId,
+    selectedTehsilId,
+    selectedCityID,
+    setSelectedStateId,
+    setSelectedDistrictId,
+    setSelectedTehsilId,
+    setSelectedCityId,
+    fetchTehsilsByDistrict,
+  } = useAuth();
+
   let incident = {};
 
   if (selectedIncident?.inc_id) {
-    console.log(
-      selectedIncident.inc_id,
-      "selectedIncidentselectedIncidentselectedIncident"
-    );
     incident = incidentDetails?.incident_details?.[0] || {};
   }
 
-  const { disaterid, setResponderScopeForDispatch, responderScopeForDispatch } =
-    useAuth();
+  useEffect(() => {
+    fetchDistrictsByState();
+  }, []);
 
-  // const incident = incidentDetails?.incident_details?.[0] || {};
-  console.log("Incident Details:", incident);
+  useEffect(() => {
+    if (selectedTehsilId) {
+      const fetchWardList = async () => {
+        const res = await fetch(
+          `${port}/admin_web/ward_get/${selectedTehsilId}/`,
+          {
+            headers: {
+              Authorization: `Bearer ${token || newToken}`,
+            },
+          }
+        );
+        const data = await res.json();
+        setWardList(data);
+      };
+      fetchWardList();
+    }
+  }, [selectedTehsilId]);
+
+  useEffect(() => {
+    if (selectedWard) {
+      const fetchWardOfficerList = async () => {
+        const res = await fetch(
+          `${port}/admin_web/ward_officer_get/${selectedWard}/`,
+          {
+            headers: {
+              Authorization: `Bearer ${token || newToken}`,
+            },
+          }
+        );
+        const data = await res.json();
+        setWardOfficerList(data);
+      };
+      fetchWardOfficerList();
+    }
+  }, [selectedWard]);
+
+  const fetchSummary = async () => {
+    const res = await fetch(`${port}/admin_web/DMS_Summary_Get/1/`, {
+      headers: {
+        Authorization: `Bearer ${token || newToken}`,
+      },
+    });
+    const data = await res.json();
+    setSummaryList(data);
+  };
+  useEffect(() => {
+    fetchSummary();
+  }, []);
+
   const respondersList = incidentDetails?.responders || [];
-
-  // const [selectedResponders, setSelectedResponders] = useState(
-  //   responderScope?.responder_scope?.map((item) => item.pk_id)
-  // );
-  const [selectedResponders, setSelectedResponders] = useState([]);
-  console.log(selectedResponders, "selectedReasdadadaspondersssss");
 
   const comments = incidentDetails?.comments || [];
 
-  // Define colors and styles based on dark mode
-  const labelColor = darkMode ? "#5FC8EC" : "#1976d2";
-  const textColor = darkMode ? "#ffffff" : "#000000";
-  const borderColor = darkMode ? "#7F7F7F" : "#ccc";
-  const fontFamily = "Roboto, sans-serif";
-
   // Style for the box containing label and value
   // This can be customized further based on your design requirements
-  const boxStyle = {
-    mb: 2,
-    pb: 1.5,
-    borderBottom: `1px solid ${borderColor}`,
-  };
-  const Style = {
-    mb: 2,
-    pb: 1.5,
-    // borderBottom: `1px solid ${borderColor}`,
-  };
 
   // Function to render text with label and value
   const renderText = (label, value) => (
@@ -178,197 +234,219 @@ function IncidentDetails({
             }}
           >
             {flag === 1 ? (
-             <Box
-  sx={{
-    maxHeight: "280px",
-    overflowY: "auto",
-    pr: 1,
-    pb: 1,
-    scrollBehavior: "smooth",
-    "&::-webkit-scrollbar": {
-      width: "5px",
-    },
-    "&::-webkit-scrollbar-thumb": {
-      backgroundColor: darkMode ? "#0288d1" : "#888",
-      borderRadius: 3,
-    },
-    "&::-webkit-scrollbar-thumb:hover": {
-      backgroundColor: darkMode ? "#5FC8EC" : "#555",
-    },
-  }}
->
-  <Grid container spacing={2}>
-    {/* DISTRICT */}
-    <Grid item xs={12} md={6}>
-      <Box sx={Style}>
-        <Typography
-          sx={{
-            color: labelColor,
-            fontWeight: 500,
-            fontFamily,
-            fontSize: "13.5px",
-          }}
-        >
-          District
-        </Typography>
-        <TextField
-          select
-          fullWidth
-          size="small"
-          value={district}
-          onChange={(e) => setDistrict(e.target.value)}
-          placeholder="Select District"
-          sx={{ mt: 0.5, fontFamily }}
-        >
-          <MenuItem value="Select District">Select District</MenuItem>
-          <MenuItem value="pune">Pune</MenuItem>
-          <MenuItem value="mumbai">Mumbai</MenuItem>
-        </TextField>
-      </Box>
-    </Grid>
+              <Box
+                sx={{
+                  maxHeight: "280px",
+                  overflowY: "auto",
+                  pr: 1,
+                  pb: 1,
+                  scrollBehavior: "smooth",
+                  "&::-webkit-scrollbar": {
+                    width: "5px",
+                  },
+                  "&::-webkit-scrollbar-thumb": {
+                    backgroundColor: darkMode ? "#0288d1" : "#888",
+                    borderRadius: 3,
+                  },
+                  "&::-webkit-scrollbar-thumb:hover": {
+                    backgroundColor: darkMode ? "#5FC8EC" : "#555",
+                  },
+                }}
+              >
+                <Grid container spacing={2}>
+                  {/* DISTRICT */}
+                  <Grid item xs={12} md={6}>
+                    <Box sx={Style}>
+                      <Typography
+                        sx={{
+                          color: labelColor,
+                          fontWeight: 500,
+                          fontFamily,
+                          fontSize: "13.5px",
+                        }}
+                      >
+                        District
+                      </Typography>
+                      <TextField
+                        select
+                        fullWidth
+                        size="small"
+                        value={selectedDistrictId}
+                        onChange={(e) => setSelectedDistrictId(e.target.value)}
+                        placeholder="Select District"
+                        sx={{ mt: 0.5, fontFamily }}
+                      >
+                        <MenuItem value="" disabled>
+                          Select District
+                        </MenuItem>
+                        {districts?.map((item, index) => (
+                          <MenuItem key={item.dis_id} value={item.dis_id}>
+                            {item.dis_name}
+                          </MenuItem>
+                        ))}
+                        {/* <MenuItem value="pune">Pune</MenuItem>
+                        <MenuItem value="mumbai">Mumbai</MenuItem> */}
+                      </TextField>
+                    </Box>
+                  </Grid>
+                  {/* TAHSIL */}
+                  <Grid item xs={12} md={6}>
+                    <Box sx={Style}>
+                      <Typography
+                        sx={{
+                          color: labelColor,
+                          fontWeight: 500,
+                          fontFamily,
+                          fontSize: "13.5px",
+                        }}
+                      >
+                        Tahsil
+                      </Typography>
+                      <TextField
+                        select
+                        fullWidth
+                        size="small"
+                        value={selectedTehsilId}
+                        onChange={(e) => setSelectedTehsilId(e.target.value)}
+                        placeholder="Select Tahsil"
+                        sx={{ mt: 0.5, fontFamily }}
+                      >
+                        <MenuItem value="" disabled>
+                          Select Tahsil
+                        </MenuItem>
+                        {Tehsils?.map((item, index) => (
+                          <MenuItem key={item.tah_id} value={item.tah_id}>
+                            {item.tah_name}
+                          </MenuItem>
+                        ))}
+                      </TextField>
+                    </Box>
+                  </Grid>
+                  {/* WARD */}
+                  <Grid item xs={12} md={6}>
+                    <Box sx={Style}>
+                      <Typography
+                        sx={{
+                          color: labelColor,
+                          fontWeight: 500,
+                          fontFamily,
+                          fontSize: "13.5px",
+                        }}
+                      >
+                        Ward
+                      </Typography>
+                      <TextField
+                        select
+                        fullWidth
+                        size="small"
+                        value={selectedWard}
+                        onChange={(e) => setSelectedWard(e.target.value)}
+                        placeholder="Select Ward"
+                        sx={{ mt: 0.5, fontFamily }}
+                      >
+                        <MenuItem value="" disabled>
+                          Select Ward
+                        </MenuItem>
+                        {wardList?.map((item, index) => (
+                          <MenuItem key={item.pk_id} value={item.pk_id}>
+                            {item.ward_name}
+                          </MenuItem>
+                        ))}
+                      </TextField>
+                    </Box>
+                  </Grid>
+                  {/* WARD OFFICER */}
+                  <Grid item xs={12} md={6}>
+                    <Box sx={Style}>
+                      <Typography
+                        sx={{
+                          color: labelColor,
+                          fontWeight: 500,
+                          fontFamily,
+                          fontSize: "13.5px",
+                        }}
+                      >
+                        Ward Officer
+                      </Typography>
+                      <TextField
+                        select
+                        fullWidth
+                        size="small"
+                        value={selectedWardOfficer}
+                        onChange={(e) => setSelectedWardOfficer(e.target.value)}
+                        placeholder="Select Ward Officer"
+                        sx={{ mt: 0.5, fontFamily }}
+                      >
+                        <MenuItem value="" disabled>
+                          Select Ward Officer
+                        </MenuItem>
+                        {wardOfficerList?.map((item, index) => (
+                          <MenuItem key={item.emp_id} value={item.emp_id}>
+                            {item.emp_name}
+                          </MenuItem>
+                        ))}
+                      </TextField>
+                    </Box>
+                  </Grid>
 
-    {/* TAHSIL */}
-    <Grid item xs={12} md={6}>
-      <Box sx={Style}>
-        <Typography
-          sx={{
-            color: labelColor,
-            fontWeight: 500,
-            fontFamily,
-            fontSize: "13.5px",
-          }}
-        >
-          Tahsil
-        </Typography>
-        <TextField
-          select
-          fullWidth
-          size="small"
-          value={tahsil}
-          onChange={(e) => setTahsil(e.target.value)}
-          placeholder="Select Tahsil"
-          sx={{ mt: 0.5, fontFamily }}
-        >
-          <MenuItem value="Select Tahsil">Select Tahsil</MenuItem>
-          <MenuItem value="haveli">Haveli</MenuItem>
-          <MenuItem value="mulshi">Mulshi</MenuItem>
-        </TextField>
-      </Box>
-    </Grid>
-
-    {/* WARD */}
-    <Grid item xs={12} md={6}>
-      <Box sx={Style}>
-        <Typography
-          sx={{
-            color: labelColor,
-            fontWeight: 500,
-            fontFamily,
-            fontSize: "13.5px",
-          }}
-        >
-          Ward
-        </Typography>
-        <TextField
-          select
-          fullWidth
-          size="small"
-          value={ward}
-          onChange={(e) => setWard(e.target.value)}
-          placeholder="Select Ward"
-          sx={{ mt: 0.5, fontFamily }}
-        >
-          <MenuItem value="Select Ward">Select Ward</MenuItem>
-          <MenuItem value="ward_a">Ward A</MenuItem>
-          <MenuItem value="ward_b">Ward B</MenuItem>
-        </TextField>
-      </Box>
-    </Grid>
-
-    {/* WARD OFFICER */}
-    <Grid item xs={12} md={6}>
-      <Box sx={Style}>
-        <Typography
-          sx={{
-            color: labelColor,
-            fontWeight: 500,
-            fontFamily,
-            fontSize: "13.5px",
-          }}
-        >
-          Ward Officer
-        </Typography>
-        <TextField
-          select
-          fullWidth
-          size="small"
-          value={wardOfficer}
-          onChange={(e) => setWardOfficer(e.target.value)}
-          placeholder="Select Ward Officer"
-          sx={{ mt: 0.5, fontFamily }}
-        >
-          <MenuItem value="Select Ward Officer">Select Ward Officer</MenuItem>
-          <MenuItem value="officer1">Officer 1</MenuItem>
-          <MenuItem value="officer2">Officer 2</MenuItem>
-        </TextField>
-      </Box>
-    </Grid>
-
-    {/* LOCATION */}
-    <Grid item xs={12} md={6}>
-      <Box sx={Style}>
-        <Typography
-          sx={{
-            color: labelColor,
-            fontWeight: 500,
-            fontFamily,
-            fontSize: "13.5px",
-          }}
-        >
-          Location
-        </Typography>
-        <TextField
-          fullWidth
-          size="small"
-          value={location}
-          onChange={(e) => setLocation(e.target.value)}
-          placeholder="Enter Location"
-          sx={{ mt: 0.5, fontFamily }}
-        />
-      </Box>
-    </Grid>
-
-    {/* SUMMARY */}
-    <Grid item xs={12} md={6}>
-      <Box sx={Style}>
-        <Typography
-          sx={{
-            color: labelColor,
-            fontWeight: 500,
-            fontFamily,
-            fontSize: "13.5px",
-          }}
-        >
-          Summary
-        </Typography>
-        <TextField
-          select
-          fullWidth
-          size="small"
-          value={summary}
-          onChange={(e) => setSummary(e.target.value)}
-          placeholder="Select Summary"
-          sx={{ mt: 0.5, fontFamily }}
-        >
-          <MenuItem value="Select Summary">Select Summary</MenuItem>
-          <MenuItem value="summary1">Summary 1</MenuItem>
-          <MenuItem value="summary2">Summary 2</MenuItem>
-        </TextField>
-      </Box>
-    </Grid>
-  </Grid>
-</Box>
-
+                  {/* LOCATION */}
+                  <Grid item xs={12} md={6}>
+                    <Box sx={Style}>
+                      <Typography
+                        sx={{
+                          color: labelColor,
+                          fontWeight: 500,
+                          fontFamily,
+                          fontSize: "13.5px",
+                        }}
+                      >
+                        Location
+                      </Typography>
+                      <TextField
+                        fullWidth
+                        size="small"
+                        value={location}
+                        onChange={(e) => setLocation(e.target.value)}
+                        placeholder="Enter Location"
+                        sx={{ mt: 0.5, fontFamily }}
+                      />
+                    </Box>
+                  </Grid>
+                  {/* SUMMARY */}
+                  <Grid item xs={12} md={6}>
+                    <Box sx={Style}>
+                      <Typography
+                        sx={{
+                          color: labelColor,
+                          fontWeight: 500,
+                          fontFamily,
+                          fontSize: "13.5px",
+                        }}
+                      >
+                        Summary
+                      </Typography>
+                      <TextField
+                        select
+                        fullWidth
+                        size="small"
+                        value={selectedSummary}
+                        onChange={(e) => setSelectedSummary(e.target.value)}
+                        placeholder="Select Summary"
+                        sx={{ mt: 0.5, fontFamily }}
+                      >
+                        <MenuItem value="" disabled>
+                          Select Summary
+                        </MenuItem>
+                        {summaryList?.map((item, index) => (
+                          <MenuItem key={item.sum_id} value={item.sum_id}>
+                            {item.summary}
+                          </MenuItem>
+                        ))}
+                      </TextField>
+                    </Box>
+                  </Grid>
+                </Grid>
+              </Box>
             ) : (
               <>
                 <>
@@ -1028,6 +1106,7 @@ function IncidentDetails({
                 fetchIncidentDetails={fetchIncidentDetails}
                 highlightedId={highlightedId}
                 setHighlightedId={setHighlightedId}
+                
               />
             ) : (
               <Typography
