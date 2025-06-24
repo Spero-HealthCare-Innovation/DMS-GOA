@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import axios from "axios";
-import * as turf from '@turf/turf';
+import * as turf from "@turf/turf";
 const AuthContext = createContext();
 export const useAuth = () => useContext(AuthContext);
 
@@ -16,7 +16,7 @@ export const AuthProvider = ({ children }) => {
   // console.log(districts, "districts");
   // const HERE_API_KEY = 'FscCo6SQsrummInzClxlkdETkvx5T1r8VVI25XMGnyY'
   console.log(districts, "districts");
-  
+
   const HERE_API_KEY = import.meta.env.VITE_APP_GOOGLE_MAPS_API_KEY;
   // const HERE_API_KEY = 'FscCo6SQsrummInzClxlkdETkvx5T1r8VVI25XMGnyY'
   const [Tehsils, setTehsils] = useState([]);
@@ -153,7 +153,6 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-
   // 🔹 3. Fetch tehsils based on selected district
   const fetchTehsilsByDistrict = async (districtId) => {
     if (!districtId) return;
@@ -203,14 +202,11 @@ export const AuthProvider = ({ children }) => {
     if (!tehshilId) return;
     try {
       setLoading(true);
-      const res = await axios.get(
-        `${port}/admin_web/ward_get/${tehshilId}/`,
-        {
-          headers: {
-            Authorization: `Bearer ${newToken || token}`,
-          },
-        }
-      );
+      const res = await axios.get(`${port}/admin_web/ward_get/${tehshilId}/`, {
+        headers: {
+          Authorization: `Bearer ${newToken || token}`,
+        },
+      });
       console.log(`Ward by tehshil ${tehshilId}:`, res.data);
       setWards(res.data || []);
     } catch (err) {
@@ -249,7 +245,10 @@ export const AuthProvider = ({ children }) => {
   const handleSearchChange = async (e) => {
     const value = e.target.value;
     setQuery(value);
-    if (value.length < 3) return;
+    if (value.length < 3) {
+      setSuggestions([]);
+      return;
+    }
 
     const response = await axios.get(
       "https://autosuggest.search.hereapi.com/v1/autosuggest",
@@ -277,14 +276,13 @@ export const AuthProvider = ({ children }) => {
     setQuery(address.label);
     setSuggestions([]);
 
-
     try {
-    const geojsonRes = await fetch('/Boundaries/PUNEWARDS.geojson'); // ✅ make sure this path is correct
-    const geojson = await geojsonRes.json();
+      const geojsonRes = await fetch("/Boundaries/PUNEWARDS.geojson"); // ✅ make sure this path is correct
+      const geojson = await geojsonRes.json();
 
       const point = turf.point([position.lng, position.lat]);
 
-      const matchedFeature = geojson.features.find(feature =>
+      const matchedFeature = geojson.features.find((feature) =>
         turf.booleanPointInPolygon(point, feature)
       );
 
@@ -443,7 +441,6 @@ export const AuthProvider = ({ children }) => {
         setTehsilName,
         districtName,
         setDistrictName,
-
       }}
     >
       {children}

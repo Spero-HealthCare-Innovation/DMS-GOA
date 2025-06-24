@@ -10,6 +10,9 @@ import {
   Tooltip,
   MenuItem,
   TextField,
+  InputAdornment,
+  Autocomplete,
+  Popper,
 } from "@mui/material";
 import CommentsPanel from "./CommentsPanel";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
@@ -21,6 +24,7 @@ import Dialog from "@mui/material/Dialog";
 import DialogTitle from "@mui/material/DialogTitle";
 import DialogContent from "@mui/material/DialogContent";
 import CloseIcon from "@mui/icons-material/Close";
+import { ArrowDropDownCircleOutlined } from "@mui/icons-material";
 
 function IncidentDetails({
   darkMode,
@@ -67,10 +71,12 @@ function IncidentDetails({
   const [wardList, setWardList] = useState([]);
   const [selectedSummary, setSelectedSummary] = useState("");
   const [summaryList, setSummaryList] = useState([]);
-  const [location, setLocation] = useState("");
+  // const [location, setLocation] = useState("");
   const [selectedWardOfficer, setSelectedWardOfficer] = useState("");
   const [wardOfficerList, setWardOfficerList] = useState([]);
   const [selectedResponders, setSelectedResponders] = useState([]);
+  const [Lattitude, setLattitude] = useState("");
+  const [Longitude, setLongitude] = useState("");
 
   const {
     newToken,
@@ -88,6 +94,13 @@ function IncidentDetails({
     setSelectedTehsilId,
     setSelectedCityId,
     fetchTehsilsByDistrict,
+    query,
+    handleSearchChange,
+    suggestions,
+    handleSelectSuggestion,
+    location,
+    lattitude,
+    longitude,
   } = useAuth();
 
   let incident = {};
@@ -135,6 +148,15 @@ function IncidentDetails({
       fetchWardOfficerList();
     }
   }, [selectedWard]);
+
+  useEffect(() => {
+    if (selectedIncident) {
+      setLattitude(selectedIncident.latitude || "");
+      setLongitude(selectedIncident.longitude || "");
+    }
+  }, [selectedIncident]);
+
+  console.log(`Latitude: ${Lattitude}, Longitude: ${Longitude}`);
 
   const fetchSummary = async () => {
     const res = await fetch(`${port}/admin_web/DMS_Summary_Get/1/`, {
@@ -390,6 +412,7 @@ function IncidentDetails({
                   </Grid>
 
                   {/* LOCATION */}
+
                   <Grid item xs={12} md={6}>
                     <Box sx={Style}>
                       <Typography
@@ -402,16 +425,65 @@ function IncidentDetails({
                       >
                         Location
                       </Typography>
-                      <TextField
+
+                      <Autocomplete
                         fullWidth
+                        freeSolo
                         size="small"
-                        value={location}
-                        onChange={(e) => setLocation(e.target.value)}
-                        placeholder="Enter Location"
-                        sx={{ mt: 0.5, fontFamily }}
+                        options={suggestions.map((item) => item.address.label)}
+                        inputValue={query}
+                        onInputChange={(event, newValue) => {
+                          if (event)
+                            handleSearchChange({ target: { value: newValue } });
+                        }}
+                        onChange={(event, newValue) => {
+                          const selected = suggestions.find(
+                            (s) => s.address.label === newValue
+                          );
+                          if (selected) handleSelectSuggestion(selected);
+                        }}
+                        renderInput={(params) => (
+                          <TextField
+                            {...params}
+                            placeholder="Enter Location"
+                            sx={{
+                              mt: 0.5,
+                              fontFamily,
+                            }}
+                          />
+                        )}
+                        PaperComponent={({ children }) => (
+                          <Paper
+                            sx={{
+                              backgroundColor: "#fff",
+                              color: "#000",
+                              border: "1px solid #ccc",
+                              borderRadius: 1,
+                              maxHeight: 220,
+                              overflowY: "auto",
+                              boxShadow: "0 8px 24px rgba(0,0,0,0.1)",
+                              "&::-webkit-scrollbar": {
+                                width: "6px",
+                              },
+                              "&::-webkit-scrollbar-thumb": {
+                                backgroundColor: "#0288d1",
+                                borderRadius: "4px",
+                              },
+                              "&::-webkit-scrollbar-thumb:hover": {
+                                backgroundColor: "#56c8f2",
+                              },
+                            }}
+                          >
+                            {children}
+                          </Paper>
+                        )}
+                        PopperComponent={(props) => (
+                          <Popper {...props} placement="bottom-start" />
+                        )}
                       />
                     </Box>
                   </Grid>
+
                   {/* SUMMARY */}
                   <Grid item xs={12} md={6}>
                     <Box sx={Style}>
@@ -1106,7 +1178,6 @@ function IncidentDetails({
                 fetchIncidentDetails={fetchIncidentDetails}
                 highlightedId={highlightedId}
                 setHighlightedId={setHighlightedId}
-                
               />
             ) : (
               <Typography
