@@ -28,6 +28,7 @@ import { useAuth } from "./../../Context/ContextAPI";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import DialogContentText from '@mui/material/DialogContentText';
+import { Snackbar, Alert } from "@mui/material";
 
 // import DialogActions from '@mui/material/DialogActions';
 // import DialogContent from '@mui/material/DialogContent';
@@ -94,6 +95,11 @@ const Navbar = ({ darkMode, toggleDarkMode }) => {
   const [openProfileDialog, setOpenProfileDialog] = useState(false);
   const user = JSON.parse(localStorage.getItem("user"));
   const [logoutConfirmOpen, setLogoutConfirmOpen] = useState(false);
+  const [oldPassword, setOldPassword] = useState('');
+const [newPassword, setNewPassword] = useState('');
+const [confirmPassword, setConfirmPassword] = useState('');
+const [newPasswordError, setNewPasswordError] = useState("");
+
 
   // Determine effective token (context token takes priority)
   const effectiveToken = newToken || localStorage.getItem("access_token");
@@ -281,6 +287,66 @@ const Navbar = ({ darkMode, toggleDarkMode }) => {
   //   };
   // }, []);
 
+  const validatePassword = (password) => {
+  const regex = /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/;
+  return regex.test(password);
+};
+
+
+ const handleChangePassword = async () => {
+  if (!validatePassword(newPassword)) {
+  setSnackbar({
+    open: true,
+    message: "Password must be at least 8 characters, include 1 uppercase, 1 lowercase, 1 number, and 1 special character.",
+    severity: "error",
+  });
+  return;
+}
+
+
+  try {
+    const response = await fetch(`${port}/admin_web/emp_changepassword/`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${effectiveToken}`,
+      },
+      body: JSON.stringify({
+        old_password: oldPassword,
+        new_password: newPassword,
+      }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      setSnackbar({
+        open: true,
+        message: data.message || "Failed to change password.",
+        severity: "error",
+      });
+      return;
+    }
+
+    setSnackbar({
+      open: true,
+      message: "Password changed successfully!",
+      severity: "success",
+    });
+
+    handleClose();
+    setOldPassword('');
+    setNewPassword('');
+    setConfirmPassword('');
+  } catch (error) {
+    setSnackbar({
+      open: true,
+      message: "An error occurred. Please try again.",
+      severity: "error",
+    });
+    console.error("Change password error:", error);
+  }
+}
 
   const [open, setOpen] = React.useState(false);
 
@@ -292,7 +358,16 @@ const Navbar = ({ darkMode, toggleDarkMode }) => {
     setOpen(false);
   };
 
+  const [snackbar, setSnackbar] = useState({
+  open: false,
+  message: "",
+  severity: "success", // "success" | "error"
+});
+
+
+
   return (
+    
     <AppBar
       position="static"
       sx={{
@@ -632,6 +707,8 @@ const Navbar = ({ darkMode, toggleDarkMode }) => {
                           type="password"
                           fullWidth
                           size="small"
+                           value={oldPassword}
+  onChange={(e) => setOldPassword(e.target.value)}
                           InputLabelProps={{
                             sx: { fontSize: '13px' } // set your desired size
                           }}
@@ -644,6 +721,16 @@ const Navbar = ({ darkMode, toggleDarkMode }) => {
                           type="password"
                           fullWidth
                           size="small"
+                            value={newPassword}
+  onChange={(e) => {
+  setNewPassword(e.target.value);
+  if (!validatePassword(e.target.value)) {
+    setNewPasswordError("Weak password. Use 8+ chars, A-Z, 0-9, and symbol.");
+  } else {
+    setNewPasswordError("");
+  }
+}}
+
                           InputLabelProps={{
                             sx: { fontSize: '13px' } // set your desired size
                           }}
@@ -656,16 +743,19 @@ const Navbar = ({ darkMode, toggleDarkMode }) => {
                           type="password"
                           fullWidth
                           size="small"
+                            value={confirmPassword}
+  onChange={(e) => setConfirmPassword(e.target.value)}
                           InputLabelProps={{
                             sx: { fontSize: '13px' } // set your desired size
                           }}
                         />
                       </Grid>
+                      
                     </Grid>
                   </DialogContent>
                   <DialogActions sx={{ justifyContent: "center", }}>
                     <Button
-                    onClick={handleClose}
+                  onClick={handleChangePassword}
                       sx={{
                         backgroundColor: "rgb(18,166,95,0.8)",
                         color: "white",
@@ -718,6 +808,23 @@ const Navbar = ({ darkMode, toggleDarkMode }) => {
           </Dialog>
         </Box>
       </Toolbar>
+
+      <Snackbar
+  open={snackbar.open}
+  autoHideDuration={3000}
+  onClose={() => setSnackbar({ ...snackbar, open: false })}
+  anchorOrigin={{ vertical: "top", horizontal: "center" }}
+>
+  <Alert
+    severity={snackbar.severity}
+    variant="filled"
+    onClose={() => setSnackbar({ ...snackbar, open: false })}
+    sx={{ width: "100%" }}
+  >
+    {snackbar.message}
+  </Alert>
+</Snackbar>
+
     </AppBar>
   );
 };
