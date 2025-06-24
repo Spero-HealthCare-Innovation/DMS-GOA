@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import AppBar from "@mui/material/AppBar";
 import Box from "@mui/material/Box";
 import Toolbar from "@mui/material/Toolbar";
@@ -19,12 +19,19 @@ import DialogContent from "@mui/material/DialogContent";
 import DialogTitle from "@mui/material/DialogTitle";
 import DialogActions from "@mui/material/DialogActions";
 import CallIcon from "@mui/icons-material/Call";
+import { TextField, Grid } from '@mui/material';
 import EmailIcon from "@mui/icons-material/Email";
+import VpnKeyIcon from '@mui/icons-material/VpnKey';
 import EditIcon from "@mui/icons-material/Edit";
 import { styled, Switch } from "@mui/material";
 import { useAuth } from "./../../Context/ContextAPI";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
+import DialogContentText from '@mui/material/DialogContentText';
+
+// import DialogActions from '@mui/material/DialogActions';
+// import DialogContent from '@mui/material/DialogContent';
+// import DialogTitle from '@mui/material/DialogTitle';
 
 const pages = [];
 const settings = ["Profile", "Logout"];
@@ -273,6 +280,17 @@ const Navbar = ({ darkMode, toggleDarkMode }) => {
   //     window.removeEventListener('storage', handleStorage);
   //   };
   // }, []);
+
+
+  const [open, setOpen] = React.useState(false);
+
+  const handleClickOpen = () => {
+    setOpen(true);
+  };
+
+  const handleClose = () => {
+    setOpen(false);
+  };
 
   return (
     <AppBar
@@ -560,6 +578,112 @@ const Navbar = ({ darkMode, toggleDarkMode }) => {
                   {email}
                 </Typography>
               </Box>
+
+              <React.Fragment>
+                <Box display="flex" alignItems="center" gap={1.5} sx={{ mt: 2 }}>
+                  <Box
+                    sx={{
+                      backgroundColor: "#FFFFED",
+                      borderRadius: "50%",
+                      padding: "6px",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                  >
+                    <VpnKeyIcon sx={{ color: "#EDED00", fontSize: 20, rotate: "20deg" }} />
+                  </Box>
+                  <Typography
+                    sx={{
+                      color: "#FFFFAD",
+                      fontSize: "14px",
+                      cursor: "pointer",
+                      "&:hover": { textDecoration: "underline" },
+
+                    }}
+                    onClick={handleClickOpen}
+                  >
+                    Change Password
+                  </Typography>
+                </Box>
+                <Dialog
+                  open={open}
+                  onClose={handleClose}
+                  maxWidth="xs" // sets a smaller default width
+                  PaperProps={{
+                    sx: {
+                      background: 'linear-gradient(to bottom,rgb(57, 114, 135), rgb(19, 26, 28))',
+                      color: 'white',// optional: make text readable on dark bg
+                      width: "25%",
+                    }
+                  }}
+                >
+                  <DialogTitle id="alert-dialog-title">
+                    {"Change Password"}
+                  </DialogTitle>
+                  <DialogContent>
+                    <DialogContentText id="alert-dialog-description">
+                      Please enter your current password and choose a new one.
+                    </DialogContentText>
+                    <Grid container direction="column" spacing={2} sx={{ mt: 1 }}>
+                      <Grid item sx={{ width: '100%' }}>
+                        <TextField
+                          label="Old Password"
+                          type="password"
+                          fullWidth
+                          size="small"
+                          InputLabelProps={{
+                            sx: { fontSize: '13px' } // set your desired size
+                          }}
+                        />
+                      </Grid>
+
+                      <Grid item sx={{ width: '100%' }}>
+                        <TextField
+                          label="New Password"
+                          type="password"
+                          fullWidth
+                          size="small"
+                          InputLabelProps={{
+                            sx: { fontSize: '13px' } // set your desired size
+                          }}
+                        />
+                      </Grid>
+
+                      <Grid item sx={{ width: '100%' }}>
+                        <TextField
+                          label="Confirm Password"
+                          type="password"
+                          fullWidth
+                          size="small"
+                          InputLabelProps={{
+                            sx: { fontSize: '13px' } // set your desired size
+                          }}
+                        />
+                      </Grid>
+                    </Grid>
+                  </DialogContent>
+                  <DialogActions sx={{ justifyContent: "center", }}>
+                    <Button
+                    onClick={handleClose}
+                      sx={{
+                        backgroundColor: "rgb(18,166,95,0.8)",
+                        color: "white",
+                        textTransform: 'none',
+                        px: 4,
+                        "&:hover": {
+                          backgroundColor: "rgb(18,166,95,0.8)"
+                        }
+                      }}
+                    >
+                      Change
+                    </Button>
+                  </DialogActions>
+                </Dialog>
+              </React.Fragment>
+
+
+
             </DialogContent>
 
             <DialogActions>

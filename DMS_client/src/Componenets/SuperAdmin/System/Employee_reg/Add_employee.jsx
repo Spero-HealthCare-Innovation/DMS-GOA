@@ -387,6 +387,10 @@ function Add_employee({ darkMode }) {
     if (!selectedCityID) {
       errors.selectedCityID = 'Please select a city';
     }
+    //ward validation
+    if (!selectedWardId) {
+      errors.selectedWardId = 'Please select a ward';
+    }
 
     // Group validation
     if (!groupId) {
@@ -1505,6 +1509,7 @@ function Add_employee({ darkMode }) {
                   placeholder="Select Ward"
                   defaultValue=""
                   error={!!formErrors.selectedWardId}
+                  helperText={formErrors.empName}
                   inputProps={{
                     "aria-label": "Select Ward",
                   }}
@@ -1576,6 +1581,30 @@ function Add_employee({ darkMode }) {
                   onFocus={(e) => {
                     e.target.showPicker();
                   }}
+                />
+              </Grid>
+
+                <Grid item xs={12} sm={6}>
+                <TextField
+                  fullWidth
+                  // value={password}
+                  placeholder="Password"
+                  error={!!formErrors.empName}
+                  helperText={formErrors.empName}
+                  InputLabelProps={{ shrink: false }}
+                  sx={inputStyle}
+                />
+              </Grid>
+
+               <Grid item xs={12} sm={6}>
+                <TextField
+                  fullWidth
+                  // value={password}
+                  placeholder="Password 1"
+                  error={!!formErrors.empName}
+                  helperText={formErrors.empName}
+                  InputLabelProps={{ shrink: false }}
+                  sx={inputStyle}
                 />
               </Grid>
             </Grid>
