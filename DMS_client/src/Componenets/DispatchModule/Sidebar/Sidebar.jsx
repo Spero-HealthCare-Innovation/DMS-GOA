@@ -8,15 +8,15 @@ import {
   Box,
 } from "@mui/material";
 
-import flood from "../../../assets/flood.png";
-import urbanflood from "../../../assets/Group 1000003338.png";
-import cloudburst from "../../../assets/Cloud mid rain.png";
+import flood from "../../../assets/flood (1).png";
+import urbanflood from "../../../assets/Urbanflood.png";
+import cloudburst from "../../../assets/heavy-rain.png";
 import firehazard from "../../../assets/fire.png";
 import forestfirehazard from "../../../assets/forest.png";
 import landslide from "../../../assets/landslide.png";
-import thunderstrom from "../../../assets/thunderstrom.png";
 import masscasualty from "../../../assets/response.png";
-import heavyrainfall from "../../../assets/Cloud angled rain zap.png";
+import heavyrainfall from "../../../assets/heavyRainfall.jpg";
+import thunderstorm from "../../../assets/thunder (1).png";
 import { useAuth } from "../../../Context/ContextAPI";
 
 const disasterImages = [
@@ -26,9 +26,9 @@ const disasterImages = [
   { text: "Fire Hazard", img: firehazard },
   { text: "Forest Fire Hazard", img: forestfirehazard },
   { text: "Landslide", img: landslide },
-  { text: "Thunderstorm", img: thunderstrom },
   { text: "Mass Casualty", img: masscasualty },
   { text: "Heavy Rainfall", img: heavyrainfall },
+  { text: "Thunderstorm ", img: thunderstorm }, 
 ];
 
 const Sidebar = ({ darkMode }) => {
