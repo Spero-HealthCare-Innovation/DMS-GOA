@@ -13,6 +13,10 @@ export const AuthProvider = ({ children }) => {
   const [newToken, setNewToken] = useState("");
   const [states, setStates] = useState([]);
   const [districts, setDistricts] = useState([]);
+  //selected disaster id
+  const [selectedDisasterId, setSelectedDisasterId] = useState(null);
+  const [selectedDisasterName, setSelectedDisasterName] = useState(""); // <-- add this
+
   // console.log(districts, "districts");
   // const HERE_API_KEY = 'FscCo6SQsrummInzClxlkdETkvx5T1r8VVI25XMGnyY'
   console.log(districts, "districts");
@@ -441,6 +445,10 @@ export const AuthProvider = ({ children }) => {
         setTehsilName,
         districtName,
         setDistrictName,
+        selectedDisasterId,
+        setSelectedDisasterId,
+        selectedDisasterName,        
+        setSelectedDisasterName,
       }}
     >
       {children}
