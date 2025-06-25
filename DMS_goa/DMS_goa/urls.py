@@ -23,7 +23,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('admin_web/',include('admin_web.urls')), 
     path('captcha/', include('captcha.urls')),
-    path('DMS_CAD/', include('DMS_CAD.urls')),
+    path('DMS_mdt/', include('DMS_MDT.urls')),
     
 ]
 
