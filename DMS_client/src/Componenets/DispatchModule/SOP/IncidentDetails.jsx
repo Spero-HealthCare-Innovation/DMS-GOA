@@ -568,28 +568,284 @@ function IncidentDetails({
                 <>
                   {incident?.mode === 2 ? (
                     <>
-                      {renderText("Incident Id", incident?.incident_id)}
-                      {renderText(
-                        "Incident Type",
-                        incident?.inc_type === 1
-                          ? "Emergency"
-                          : incident?.inc_type === 2
-                          ? "Non-Emergency"
-                          : "N/A"
-                      )}
-                      {renderText(
-                        "Alert Type",
-                        incident?.alert_type === 1
-                          ? "High"
-                          : incident?.alert_type === 2
-                          ? "Medium"
-                          : incident?.alert_type === 3
-                          ? "Low"
-                          : incident?.alert_type === 4
-                          ? "very Low"
-                          : "N/A"
-                      )}
-                      {renderText("Disaster Type", incident?.disaster_name)}
+                      <Box
+                      sx={{
+                        // maxHeight: '250px', overflowY: 'auto',
+                        scrollBehavior: "smooth",
+                        "&::-webkit-scrollbar": {
+                          width: "6px",
+                        },
+                        "&::-webkit-scrollbar-thumb": {
+                          backgroundColor: darkMode ? "#0288d1" : "#888",
+                          borderRadius: 3,
+                        },
+                        "&::-webkit-scrollbar-thumb:hover": {
+                          backgroundColor: darkMode ? "#5FC8EC" : "#555",
+                        },
+                      }}
+                    >
+                      <Grid container spacing={2}>
+                        {/* <Grid item xs={12} md={12}>
+                          <Typography
+                            variant="body2"
+                            sx={{ color: labelColor, fontWeight: 500, fontFamily, fontSize: '18px', borderBottom: '1px solid #ccc' }}
+                          >
+                            Incident Details
+                          </Typography>
+                        </Grid> */}
+{/* 
+                        <Grid item xs={12} md={6}>
+                          <Box>
+                            <Typography
+                              variant="body2"
+                              sx={{
+                                color: labelColor,
+                                fontWeight: 500,
+                                fontFamily,
+                              }}
+                            >
+                              Caller Name
+                            </Typography>
+                            <Typography
+                              variant="subtitle2"
+                              sx={{
+                                fontFamily,
+                                color: textColor,
+                                wordBreak: "break-word",
+                              }}
+                            >
+                              {incident?.caller_name || "N/A"}
+                            </Typography>
+                          </Box>
+                        </Grid> */}
+
+                        {/* <Grid item xs={12} md={6}>
+                          <Box>
+                            <Typography
+                              variant="body2"
+                              sx={{
+                                color: labelColor,
+                                fontWeight: 500,
+                                fontFamily,
+                              }}
+                            >
+                              Caller Number
+                            </Typography>
+                            <Typography
+                              variant="subtitle2"
+                              sx={{
+                                fontFamily,
+                                color: textColor,
+                                wordBreak: "break-word",
+                              }}
+                            >
+                              {incident?.caller_no || "N/A"}
+                            </Typography>
+                          </Box>
+                        </Grid> */}
+
+                        <Grid item xs={12} md={6}>
+                          <Box>
+                            <Typography
+                              variant="body2"
+                              sx={{
+                                color: labelColor,
+                                fontWeight: 500,
+                                fontFamily,
+                              }}
+                            >
+                              Ward
+                            </Typography>
+                            <Typography
+                              variant="subtitle2"
+                              sx={{
+                                fontFamily,
+                                color: textColor,
+                                wordBreak: "break-word",
+                              }}
+                            >
+                              {incident?.ward_name || "N/A"}
+                            </Typography>
+                          </Box>
+                        </Grid>
+
+                        <Grid item xs={12} md={6}>
+                          <Box>
+                            <Typography
+                              variant="body2"
+                              sx={{
+                                color: labelColor,
+                                fontWeight: 500,
+                                fontFamily,
+                              }}
+                            >
+                              Tehsil
+                            </Typography>
+                            <Typography
+                              variant="subtitle2"
+                              sx={{
+                                fontFamily,
+                                color: textColor,
+                                wordBreak: "break-word",
+                              }}
+                            >
+                              {incident?.tahsil_name || "N/A"}
+                            </Typography>
+                          </Box>
+                        </Grid>
+
+                        <Grid item xs={12} md={6}>
+                          <Box>
+                            <Typography
+                              variant="body2"
+                              sx={{
+                                color: labelColor,
+                                fontWeight: 500,
+                                fontFamily,
+                              }}
+                            >
+                              District
+                            </Typography>
+                            <Typography
+                              variant="subtitle2"
+                              sx={{
+                                fontFamily,
+                                color: textColor,
+                                wordBreak: "break-word",
+                              }}
+                            >
+                              {incident?.district_name || "N/A"}
+                            </Typography>
+                          </Box>
+                        </Grid>
+
+                        <Grid item xs={12} md={6}>
+                          <Box>
+                            <Typography
+                              variant="body2"
+                              sx={{
+                                color: labelColor,
+                                fontWeight: 500,
+                                fontFamily,
+                              }}
+                            >
+                              Location
+                            </Typography>
+
+                            {incident?.location &&
+                            incident.location.length > 20 ? (
+                              <Tooltip title={incident.location} arrow>
+                                <Typography
+                                  variant="subtitle2"
+                                  sx={{
+                                    fontFamily,
+                                    color: textColor,
+                                    wordBreak: "break-word",
+                                    cursor: "pointer",
+                                  }}
+                                >
+                                  {incident.location.slice(0, 20)}...
+                                </Typography>
+                              </Tooltip>
+                            ) : (
+                              <Typography
+                                variant="subtitle2"
+                                sx={{
+                                  fontFamily,
+                                  color: textColor,
+                                  wordBreak: "break-word",
+                                }}
+                              >
+                                {incident?.location || "N/A"}
+                              </Typography>
+                            )}
+                          </Box>
+                        </Grid>
+                        <Grid item xs={12} md={6}>
+                          <Box>
+                            <Typography
+                              variant="body2"
+                              sx={{
+                                color: labelColor,
+                                fontWeight: 500,
+                                fontFamily,
+                              }}
+                            >
+                              Ward Officer
+                            </Typography>
+                            {Array.isArray(incident?.ward_officer_name) &&
+                            incident.ward_officer_name.length > 0 ? (
+                              <Typography
+                                variant="subtitle2"
+                                sx={{
+                                  fontFamily,
+                                  color: textColor,
+                                  wordBreak: "break-word",
+                                }}
+                              >
+                                {incident.ward_officer_name
+                                  .map((officer) => officer.ward_officer_name)
+                                  .join(", ")}
+                              </Typography>
+                            ) : (
+                              <Typography
+                                variant="subtitle2"
+                                sx={{
+                                  fontFamily,
+                                  color: textColor,
+                                  wordBreak: "break-word",
+                                }}
+                              >
+                                N/A
+                              </Typography>
+                            )}
+                          </Box>
+                        </Grid>
+
+                        <Grid item xs={12} md={12}>
+                          <Box>
+                            <Typography
+                              variant="body2"
+                              sx={{
+                                color: labelColor,
+                                fontWeight: 500,
+                                fontFamily,
+                              }}
+                            >
+                              Summary
+                            </Typography>
+
+                            {incident?.summary_name &&
+                            incident.summary_name.length > 40 ? (
+                              <Tooltip title={incident.summary_name} arrow>
+                                <Typography
+                                  variant="subtitle2"
+                                  sx={{
+                                    fontFamily,
+                                    color: textColor,
+                                    wordBreak: "break-word",
+                                    cursor: "pointer",
+                                  }}
+                                >
+                                  {incident.summary_name.slice(0, 40)}...
+                                </Typography>
+                              </Tooltip>
+                            ) : (
+                              <Typography
+                                variant="subtitle2"
+                                sx={{
+                                  fontFamily,
+                                  color: textColor,
+                                  wordBreak: "break-word",
+                                }}
+                              >
+                                {incident?.summary_name || "N/A"}
+                              </Typography>
+                            )}
+                          </Box>
+                        </Grid>
+                      </Grid>
+                    </Box>
                     </>
                   ) : (
                     <Box
