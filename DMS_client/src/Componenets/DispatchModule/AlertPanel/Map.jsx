@@ -3,7 +3,7 @@ import { MapContainer, TileLayer, Marker, Popup, GeoJSON, LayersControl, useMap 
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 import customIconUrl from '../../../assets/Rectangle.png';
-
+ 
 const customIcon = new L.Icon({
   iconUrl: customIconUrl,
   iconSize: [32, 32],
@@ -11,7 +11,7 @@ const customIcon = new L.Icon({
   popupAnchor: [0, -32],
   shadowUrl: null
 });
-
+ 
 // Component to handle flyTo when triggeredData updates
 const FlyToLocation = ({ position, zoom }) => {
   const map = useMap();
@@ -22,30 +22,30 @@ const FlyToLocation = ({ position, zoom }) => {
   }, [position, zoom, map]);
   return null;
 };
-
+ 
 const MapView = ({ data }) => {
   const position = [18.51956674674116, 73.85536020335581]; // Default location (Goa)
   const [stateData, setStateData] = useState();
   const [triggeredData, setTriggeredData] = useState(null);
   const [mapZoom, setMapZoom] = useState(11);
   const { BaseLayer, Overlay } = LayersControl;
-
+ 
   useEffect(() => {
     setTriggeredData(data);
   }, [data]);
-
+ 
   useEffect(() => {
-    fetch('/Boundaries/pune-2022-wards.geojson')
+    fetch('/Boundaries/PUNEWARDS.geojson')
       .then(res => res.json())
       .then(data => setStateData(data));
   }, []);
-
+ 
   // Determine marker position
   const markerPosition =
     triggeredData?.latitude && triggeredData?.longitude
       ? [triggeredData.latitude, triggeredData.longitude]
       : position;
-
+ 
   // Update zoom if triggeredData is available
   useEffect(() => {
     if (triggeredData?.latitude && triggeredData?.longitude) {
@@ -54,13 +54,13 @@ const MapView = ({ data }) => {
       setMapZoom(11); // Default zoom
     }
   }, [triggeredData]);
-
+ 
   const geoJsonStyle = {
     weight: 2,
     color: '#BE5103',
     fillOpacity: 0.1,
   };
-
+ 
   const popupContent = triggeredData ? (
     <div>
       <strong>Latitude:</strong> {triggeredData.latitude}<br />
@@ -72,7 +72,7 @@ const MapView = ({ data }) => {
       <strong>Time:</strong> {new Date(triggeredData.alert_datetime).toLocaleString()}<br />
     </div>
   ) : "No data";
-
+ 
   return (
     <MapContainer
       center={markerPosition}
@@ -88,14 +88,14 @@ const MapView = ({ data }) => {
             attribution='&copy; <a href="https://www.thunderforest.com/">Thunderforest</a>'
           />
         </BaseLayer>
-
+ 
         {/* Base Layer 2: ESRI Satellite */}
         <BaseLayer name="ESRI Satellite">
           <TileLayer
             url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
             attribution='&copy; <a href="https://www.esri.com/">Esri</a>, Earthstar Geographics'
           />
-
+ 
         </BaseLayer>
         <BaseLayer name="Google Satellite">
           <TileLayer
@@ -103,7 +103,7 @@ const MapView = ({ data }) => {
             attribution='&copy; <a href="https://www.google.com/">google</a>'
           />
         </BaseLayer>
-
+ 
         <BaseLayer name="Maptiler Satellite">
           <TileLayer
             url="https://api.maptiler.com/maps/hybrid/256/{z}/{x}/{y}.jpg?key=HBBM5qrIqQ5Y0hnH7gln"
@@ -126,22 +126,22 @@ const MapView = ({ data }) => {
             zIndex={1000}
           />
         </Overlay>
-
-
+ 
+ 
       </LayersControl>
-
+ 
       {/* GeoJSON layer (Always visible) */}
       {stateData && <GeoJSON data={stateData} style={geoJsonStyle} />}
-
+ 
       {/* Marker (Always visible) */}
       <Marker position={markerPosition} icon={customIcon}>
         <Popup>{popupContent}</Popup>
       </Marker>
-
+ 
       {/* Optional fly-to animation */}
       <FlyToLocation position={markerPosition} zoom={mapZoom} />
     </MapContainer>
   );
 };
-
+ 
 export default MapView;

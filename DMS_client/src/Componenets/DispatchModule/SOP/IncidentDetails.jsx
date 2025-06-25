@@ -25,6 +25,7 @@ import DialogTitle from "@mui/material/DialogTitle";
 import DialogContent from "@mui/material/DialogContent";
 import CloseIcon from "@mui/icons-material/Close";
 import { ArrowDropDownCircleOutlined } from "@mui/icons-material";
+import * as turf from "@turf/turf";
 
 function IncidentDetails({
   darkMode,
@@ -79,9 +80,11 @@ function IncidentDetails({
 const [selectedWardOfficer, setSelectedWardOfficer] = useState([]);
   const [wardOfficerList, setWardOfficerList] = useState([]);
   const [selectedResponders, setSelectedResponders] = useState([]);
-  const [Lattitude, setLattitude] = useState("");
+  const [Latitude, setLatitude] = useState("");
   const [Longitude, setLongitude] = useState("");
   const [openDialog, setOpenDialog] = useState(false);
+  const { wardName, setWardName, tehsilName, setTehsilName, districtName, setDistrictName } = useAuth();
+  const [stateData, setStateData] = useState(null);
 
   const {
     newToken,
@@ -104,7 +107,7 @@ const [selectedWardOfficer, setSelectedWardOfficer] = useState([]);
     suggestions,
     handleSelectSuggestion,
     location,
-    lattitude,
+    latitude,
     longitude,
     setQuery,
   } = useAuth();
@@ -154,13 +157,73 @@ const [selectedWardOfficer, setSelectedWardOfficer] = useState([]);
       fetchWardOfficerList();
     }
   }, [selectedWard]);
+  // 1. Set Lattitude and Longitude from selectedIncident
+useEffect(() => {
+  if (selectedIncident) {
+    setLatitude(selectedIncident.latitude || "");
+    setLongitude(selectedIncident.longitude || "");
+  }
+}, [selectedIncident]);
 
-  useEffect(() => {
-    if (selectedIncident) {
-      setLattitude(selectedIncident.latitude || "");
-      setLongitude(selectedIncident.longitude || "");
-    }
-  }, [selectedIncident]);
+    console.log(`Latitude: ${Latitude}, Longitude: ${Longitude}`);
+
+// 2. Load administrative boundary GeoJSON
+useEffect(() => {
+  fetch('/Boundaries/PUNEWARDS.geojson')   // Your GeoJSON with ward, tehsil, district  
+  .then(res => res.json())
+    .then(data => setStateData(data))
+    .catch(err => console.error("GeoJSON Load Error:", err));
+}, []);
+
+// 3. Extract administrative names using Turf.js
+const getAdministrativeNames = (lat, lng, geojson) => {
+  if (!geojson || !lat || !lng) return { ward: "", tehsil: "", district: "" };
+
+  const latNum = parseFloat(lat);
+  const lngNum = parseFloat(lng);
+  if (isNaN(latNum) || isNaN(lngNum)) {
+    console.log("❌ Invalid coordinates – skipping boundary match.");
+    return { ward: "", tehsil: "", district: "" };
+  }
+
+  const point = turf.point([lngNum, latNum]);
+
+  const matchedFeature = geojson.features.find(feature =>
+    turf.booleanPointInPolygon(point, feature)
+  );
+
+  if (matchedFeature) {
+    
+    const { Name1, Teshil, District } = matchedFeature.properties;
+    return {
+      ward: Name1 || "",
+      tehsil: Teshil || "",
+      //district: Name || ""
+      district:  District|| ""
+    };
+  }
+
+  return { ward: "", tehsil: "", district: "" };
+};
+
+// 4. Run match logic on selectedIncident change
+useEffect(() => {
+  if (!selectedIncident || !stateData || !stateData.features?.length) return;
+
+  const { latitude, longitude } = selectedIncident;
+
+  const { ward, tehsil, district } = getAdministrativeNames(latitude, longitude, stateData);
+
+  if (!ward && !tehsil && !district) {
+    console.log("⚠️ No administrative boundary matched for this location.");
+  } else {
+    console.log(`📍 Administrative Match: 📍Ward: ${ward}, 📍Tehsil: ${tehsil}, 📍District: ${district}`);
+  }
+
+  setWardName(ward);
+  setTehsilName(tehsil);
+  setDistrictName(district);
+}, [selectedIncident, stateData]);
 
   useEffect(() => {
     if (selectedIncident?.location) {
