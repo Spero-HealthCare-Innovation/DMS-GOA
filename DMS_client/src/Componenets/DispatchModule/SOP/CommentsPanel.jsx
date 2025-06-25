@@ -26,6 +26,18 @@ function CommentsPanel({
   fetchIncidentDetails,
   highlightedId,
   setHighlightedId,
+  selectedDistrictId,
+  selectedTehsilId,
+  selectedWard,
+  selectedWardOfficer,
+  selectedSummary,
+  locationQuery,
+  setSelectedDistrictId,
+  setSelectedTehsilId,
+  setSelectedWard,
+  setSelectedWardOfficer,
+  setSelectedSummary,
+  setQuery,
 }) {
   const port = import.meta.env.VITE_APP_API_KEY;
   const userName = localStorage.getItem("userId");
@@ -107,6 +119,12 @@ function CommentsPanel({
       longitude: selectedIncident?.longitude,
       alert_type: selectedIncident?.alert_type,
       mode: "2",
+      district: selectedDistrictId,
+      tahsil: selectedTehsilId,
+      ward: selectedWard,
+      ward_officer: selectedWardOfficer,
+      summary: selectedSummary,
+      address: locationQuery,
     };
 
     try {
@@ -130,6 +148,13 @@ function CommentsPanel({
         setFlag(0);
 
         setHighlightedId(null);
+
+        setSelectedDistrictId("");
+        setSelectedTehsilId("");
+        setSelectedWard("");
+        setSelectedWardOfficer("");
+        setSelectedSummary("");
+        setQuery("");
         await fetchDispatchList();
       } else {
         throw new Error("API Error");
@@ -348,8 +373,7 @@ function CommentsPanel({
                 comm_id,
                 comments: commentMsg,
                 comm_added_by,
-                comm_added_date ,
-          
+                comm_added_date,
               }) => {
                 const isOwnComment = comm_added_by === userName;
                 return (
@@ -398,15 +422,18 @@ function CommentsPanel({
                           variant="caption"
                           sx={{ fontSize: "0.7rem", opacity: 0.7 }}
                         >
-                            {comm_added_date
-    ? new Date(comm_added_date).toLocaleString("en-IN", {
-        day: "2-digit",
-        month: "short",
-        year: "numeric",
-        hour: "2-digit",
-        minute: "2-digit",
-      })
-    : "N/A"}
+                          {comm_added_date
+                            ? new Date(comm_added_date).toLocaleString(
+                                "en-IN",
+                                {
+                                  day: "2-digit",
+                                  month: "short",
+                                  year: "numeric",
+                                  hour: "2-digit",
+                                  minute: "2-digit",
+                                }
+                              )
+                            : "N/A"}
                         </Typography>
                       </Box>
                     </Stack>
@@ -458,7 +485,7 @@ function CommentsPanel({
             color="primary"
             onClick={handlealertSaveClick}
             disabled={!commentText.trim()}
-            sx={{ alignSelf: "flex-end", px: 4 ,textTransform: 'none'}}
+            sx={{ alignSelf: "flex-end", px: 4, textTransform: "none" }}
           >
             Save
           </Button>
@@ -501,27 +528,25 @@ function CommentsPanel({
             sx={{ backgroundColor: "transparent" }}
           />
 
- <Button
-  variant="contained"
-  onClick={handleCommentSendClick}
-  disabled={!commentText.trim()}
-  sx={{
-    backgroundColor: "#0F4D0F",
-    color: "#fff",
-    borderRadius: 2,
-    px: 3,
-    whiteSpace: "nowrap",
-    height: "100%",
-    textTransform: "none", 
-    '&:hover': {
-      backgroundColor: "#006400",
-    },
-  }}
->
-  Send
-</Button>
-
-
+          <Button
+            variant="contained"
+            onClick={handleCommentSendClick}
+            disabled={!commentText.trim()}
+            sx={{
+              backgroundColor: "#0F4D0F",
+              color: "#fff",
+              borderRadius: 2,
+              px: 3,
+              whiteSpace: "nowrap",
+              height: "100%",
+              textTransform: "none",
+              "&:hover": {
+                backgroundColor: "#006400",
+              },
+            }}
+          >
+            Send
+          </Button>
         </Box>
       ) : (
         // No Incident Selected UI

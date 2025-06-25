@@ -56,6 +56,10 @@ function IncidentDetails({
     // // borderBottom: `1px solid ${borderColor}`,
   };
 
+  const inputStyle = {
+    mb: 0.5,
+    color: "white",
+  };
   window.addEventListener("storage", (e) => {
     if (e.key === "logout") {
       location.href = "/login";
@@ -101,6 +105,7 @@ function IncidentDetails({
     location,
     lattitude,
     longitude,
+    setQuery,
   } = useAuth();
 
   let incident = {};
@@ -364,7 +369,26 @@ function IncidentDetails({
                         value={selectedWard}
                         onChange={(e) => setSelectedWard(e.target.value)}
                         placeholder="Select Ward"
-                        sx={{ mt: 0.5, fontFamily }}
+                        sx={{
+                          ...inputStyle,
+                          "& .MuiSelect-select": {
+                            overflowY: "auto",
+                            "&::-webkit-scrollbar": {
+                              width: "6px",
+                            },
+                            "&::-webkit-scrollbar-track": {
+                              background: darkMode ? "#2e2e2e" : "#f1f1f1",
+                              borderRadius: "3px",
+                            },
+                            "&::-webkit-scrollbar-thumb": {
+                              background: darkMode ? "#555" : "#888",
+                              borderRadius: "3px",
+                            },
+                            "&::-webkit-scrollbar-thumb:hover": {
+                              background: darkMode ? "#777" : "#555",
+                            },
+                          },
+                        }}
                       >
                         <MenuItem value="" disabled>
                           Select Ward
@@ -375,6 +399,14 @@ function IncidentDetails({
                           </MenuItem>
                         ))}
                       </TextField>
+                      <MenuItem value="" disabled>
+                        Select Ward
+                      </MenuItem>
+                      {wardList?.map((item, index) => (
+                        <MenuItem key={item.pk_id} value={item.pk_id}>
+                          {item.ward_name}
+                        </MenuItem>
+                      ))}
                     </Box>
                   </Grid>
                   {/* WARD OFFICER */}
@@ -413,7 +445,7 @@ function IncidentDetails({
 
                   {/* LOCATION */}
 
-                  <Grid item xs={12} md={6}>
+                  <Grid item xs={12} md={12}>
                     <Box sx={Style}>
                       <Typography
                         sx={{
@@ -485,7 +517,7 @@ function IncidentDetails({
                   </Grid>
 
                   {/* SUMMARY */}
-                  <Grid item xs={12} md={6}>
+                  <Grid item xs={12} md={12}>
                     <Box sx={Style}>
                       <Typography
                         sx={{
@@ -1178,6 +1210,18 @@ function IncidentDetails({
                 fetchIncidentDetails={fetchIncidentDetails}
                 highlightedId={highlightedId}
                 setHighlightedId={setHighlightedId}
+                selectedDistrictId={selectedDistrictId}
+                setSelectedDistrictId={setSelectedDistrictId}
+                selectedTehsilId={selectedTehsilId}
+                setSelectedTehsilId={setSelectedTehsilId}
+                selectedWard={selectedWard}
+                setSelectedWard={setSelectedWard}
+                selectedWardOfficer={selectedWardOfficer}
+                setSelectedWardOfficer={setSelectedWardOfficer}
+                selectedSummary={selectedSummary}
+                setSelectedSummary={setSelectedSummary}
+                query={query}
+                setQuery={setQuery}
               />
             ) : (
               <Typography
