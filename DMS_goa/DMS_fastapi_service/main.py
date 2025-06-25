@@ -41,7 +41,7 @@ from starlette.routing import WebSocketRoute
 import asyncio
 from datetime import timedelta
 from django.utils import timezone
-
+from geopy.geocoders import Nominatim
 
 # ----------------------Authentication for websockets---------------------------------------------------
 from rest_framework_simplejwt.tokens import UntypedToken
@@ -520,6 +520,21 @@ async def on_notify(conn, pid, channel, payload):
             try:
                 if data.get("modified_by") == emp_username:
                     print(f"Sending to {emp_username}")
+                    print("data123---123---123---123-----", data.get("latitude"))
+                    print("data123---123---123---123-----", data.get("longitude"))
+                    # Initialize the geocoder
+                    geolocator = Nominatim(user_agent="nikita.speroinfosystems@gmail.com")
+                    latitude = data.get("latitude")
+                    longitude = data.get("longitude")
+
+                    # Reverse geocoding
+                    location = geolocator.reverse((latitude, longitude), language='en')
+                    print("location.address---", location.address)
+                    print("data++++++++++++==", data)
+
+                    data["location"] = location.address
+                    # data.save()
+                    
                     await ws.send_text(json.dumps(data))
             except Exception as e:
                 print(f"Error sending to trigger2 client: {e}")
