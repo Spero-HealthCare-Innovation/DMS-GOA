@@ -89,20 +89,31 @@ WSGI_APPLICATION = 'DMS_goa.wsgi.application'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
 DATABASES = {
-       'default': {
+    #    'default': {
+    #     'ENGINE': 'django.db.backends.postgresql',
+    #     'NAME': 'DMS_GOA_DB_2025',
+    #     'USER': 'postgres',
+    #     'PASSWORD': 'spero@123#2025$', 
+    #     'HOST': '122.176.232.35',
+    #     'PORT': '5433', 
+    #     'OPTIONS': {
+    #         'options': '-c timezone=Asia/Kolkata',
+    #     },
+    # },
+    #     'hive': {
+    #         'ENGINE': '', 
+    #         'NAME': 'processed_dms',  
+    # }
+    'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'DMS_GOA_DB_2025',
+        'NAME': 'DMS_MDT',
         'USER': 'postgres',
-        'PASSWORD': 'spero@123#2025$', 
-        'HOST': '122.176.232.35',
-        'PORT': '5433', 
+        'PASSWORD': 'postgres',
+        'HOST': '192.168.1.109',
+        'PORT': '5432',  # Default PostgreSQL port
         'OPTIONS': {
             'options': '-c timezone=Asia/Kolkata',
         },
-    },
-        'hive': {
-            'ENGINE': '', 
-            'NAME': 'processed_dms',  
     }
 }
 
