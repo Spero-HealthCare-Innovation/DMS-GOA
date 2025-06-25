@@ -8,6 +8,7 @@ import asyncpg
 import urllib.parse
 from django.conf import settings
 import json
+from datetime import datetime, timedelta
 # ----------------------------###Nikita###-------------------------------------
 
 
@@ -147,3 +148,116 @@ async def listen_to_postgres():
                     print(f"⚠️ Cleanup error: {cleanup_error}")
 
 # -------------------------------###NIKITA###-----------------------------------------
+
+
+
+
+
+
+
+# Mayank
+
+import json
+import asyncio
+import httpx
+from shapely.geometry import shape
+# from cache_store import alert_cache
+from datetime import datetime
+import pytz  # pip install pytz
+
+
+OPENWEATHER_API_KEY = "959e8b3d77615bcdb1659ff5bd74e791"  # 👈 Replace with your actual API key
+
+def convert_to_ist(utc_time_str):
+    utc_dt = datetime.strptime(utc_time_str, "%Y-%m-%dT%H:%M")
+    utc_dt = utc_dt.replace(tzinfo=pytz.utc)
+    ist_dt = utc_dt.astimezone(pytz.timezone("Asia/Kolkata"))
+    return ist_dt.isoformat(timespec='seconds')
+
+def load_ward_centroids(filepath="pune-2022-wa.geojson"):
+    with open(filepath, "r") as f:
+        geojson_data = json.load(f)
+
+    centroids = {}
+    for feature in geojson_data["features"]:
+        props = feature["properties"]
+        geom = shape(feature["geometry"])
+        name = props.get("Name2") or "Unknown"
+        centroid = geom.centroid
+        centroids[name] = (round(centroid.y, 4), round(centroid.x, 4))
+    return centroids
+
+def get_next_hour_ist_timestamp():
+    ist = pytz.timezone("Asia/Kolkata")
+    now_ist = datetime.now(ist)
+    next_hour = now_ist + timedelta(hours=1)
+    next_hour = next_hour.replace(minute=0, second=0, microsecond=0)
+    return next_hour.isoformat(timespec='minutes')
+
+# ✅ Updated for OpenWeatherMap
+async def fetch_weather(client, ward, lat, lon):
+    url = (
+        f"https://api.openweathermap.org/data/3.0/onecall"
+        f"?lat={lat}&lon={lon}&appid={OPENWEATHER_API_KEY}&units=metric"
+    )
+    try:
+        res = await client.get(url, timeout=10)
+        data = res.json()
+
+        current = data.get("current", {})
+        alerts = data.get("alerts", [])
+
+        ist = pytz.timezone("Asia/Kolkata")
+        now = datetime.now(ist).isoformat()
+
+        # Prepare full alert list with additional context
+        full_alerts = []
+        for alert in alerts:
+            start = datetime.fromtimestamp(alert.get("start")).astimezone(ist).isoformat()
+            end = datetime.fromtimestamp(alert.get("end")).astimezone(ist).isoformat()
+
+            # 🔎 Attach current weather data as 'parameters'
+            parameters = {
+                "temperature": current.get("temp"),
+                "humidity": current.get("humidity"),
+                "uvi": current.get("uvi"),
+                "wind_speed": current.get("wind_speed"),
+                "wind_gust": current.get("wind_gust"),
+                "pressure": current.get("pressure"),
+                "rain_1h": current.get("rain", {}).get("1h") if current.get("rain") else None,
+                "visibility": current.get("visibility"),
+                "weather_desc": current.get("weather", [{}])[0].get("description")
+            }
+
+            full_alerts.append({
+                "sender_name": alert.get("sender_name"),
+                "event": alert.get("event"),
+                "start": start,
+                "end": end,
+                "description": alert.get("description"),
+                "tags": alert.get("tags"),
+                "parameters": parameters  # 👈 Your custom weather context
+            })
+
+        return {
+            "ward": ward,
+            "lat": lat,
+            "lon": lon,
+            "timestamp": now,
+            "alerts": full_alerts
+        }
+
+    except Exception as e:
+        print(f"⚠️ Error fetching weather for {ward}: {e}")
+        return None
+
+async def update_alerts(centroids):
+    print("🔄 Fetching fresh OpenWeatherMap alert data...")
+    async with httpx.AsyncClient() as client:
+        tasks = [fetch_weather(client, ward, lat, lon) for ward, (lat, lon) in centroids.items()]
+        results = await asyncio.gather(*tasks)
+
+    alerts = [r for r in results if r]
+    print(f"✅ Alerts fetched at {datetime.now().isoformat()} with {len(alerts)} ward entries.")
+    return alerts
+
