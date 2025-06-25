@@ -123,7 +123,7 @@ function CommentsPanel({
       district: selectedDistrictId,
       tahsil: selectedTehsilId,
       ward: selectedWard,
-      ward_officer: selectedWardOfficer,
+ward_officer: selectedWardOfficer.map(Number),
       summary: selectedSummary,
      location: query,
     };

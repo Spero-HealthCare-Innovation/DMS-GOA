@@ -76,7 +76,7 @@ function IncidentDetails({
   const [selectedSummary, setSelectedSummary] = useState("");
   const [summaryList, setSummaryList] = useState([]);
   // const [location, setLocation] = useState("");
-  const [selectedWardOfficer, setSelectedWardOfficer] = useState("");
+const [selectedWardOfficer, setSelectedWardOfficer] = useState([]);
   const [wardOfficerList, setWardOfficerList] = useState([]);
   const [selectedResponders, setSelectedResponders] = useState([]);
   const [Lattitude, setLattitude] = useState("");
@@ -176,7 +176,7 @@ function IncidentDetails({
     setSelectedDistrictId("");
     setSelectedTehsilId("");
     setSelectedWard("");
-    setSelectedWardOfficer("");
+ setSelectedWardOfficer([]);
     setSelectedSummary("");
     // setQuery(""); // for location input
     // Optionally reset lat/long etc. too
@@ -423,39 +423,37 @@ function IncidentDetails({
                   </Grid>
 
                   {/* WARD OFFICER */}
-                  <Grid item xs={12} md={6}>
-                    <Box sx={Style}>
-                      <Typography
-                        sx={{
-                          color: labelColor,
-                          fontWeight: 500,
-                          fontFamily,
-                          fontSize: "13.5px",
-                        }}
-                      >
-                        Ward Officer
-                      </Typography>
-                      <TextField
-                        select
-                        fullWidth
-                        size="small"
-                        value={selectedWardOfficer}
-                        onChange={(e) => setSelectedWardOfficer(e.target.value)}
-                        placeholder="Select Ward Officer"
-                        disabled={!selectedWard}
-                        sx={{ mt: 0.5, fontFamily }}
-                      >
-                        <MenuItem value="" disabled>
-                          Select Ward Officer
-                        </MenuItem>
-                        {wardOfficerList?.map((item) => (
-                          <MenuItem key={item.emp_id} value={item.emp_id}>
-                            {item.emp_name}
-                          </MenuItem>
-                        ))}
-                      </TextField>
-                    </Box>
-                  </Grid>
+                 <Grid item xs={12} md={6}>
+  <Box sx={Style}>
+    <Typography
+      sx={{
+        color: labelColor,
+        fontWeight: 500,
+        fontFamily,
+        fontSize: "13.5px",
+      }}
+    >
+      Ward Officer
+    </Typography>
+    <TextField
+  select
+  fullWidth
+  size="small"
+  SelectProps={{ multiple: true }}
+  value={selectedWardOfficer}
+  onChange={(e) => setSelectedWardOfficer(e.target.value)}
+  disabled={!selectedWard}
+  sx={{ mt: 0.5, fontFamily }}
+>
+  {wardOfficerList?.map((item) => (
+    <MenuItem key={item.emp_id} value={item.emp_id}>
+      {item.emp_name}
+    </MenuItem>
+  ))}
+</TextField>
+  </Box>
+</Grid>
+
 
                   {/* LOCATION */}
                   <Grid item xs={12}>
