@@ -31,7 +31,8 @@ function CommentsPanel({
   selectedWard,
   selectedWardOfficer,
   selectedSummary,
-  locationQuery,
+  query,
+
   setSelectedDistrictId,
   setSelectedTehsilId,
   setSelectedWard,
@@ -124,9 +125,10 @@ function CommentsPanel({
       ward: selectedWard,
       ward_officer: selectedWardOfficer,
       summary: selectedSummary,
-      address: locationQuery,
+     location: query,
     };
 
+    console.log(location)
     try {
       const response = await fetch(`${port}/admin_web/DMS_Incident_Post/`, {
         method: "POST",

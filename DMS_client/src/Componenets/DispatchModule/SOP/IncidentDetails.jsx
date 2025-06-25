@@ -81,6 +81,7 @@ function IncidentDetails({
   const [selectedResponders, setSelectedResponders] = useState([]);
   const [Lattitude, setLattitude] = useState("");
   const [Longitude, setLongitude] = useState("");
+  const [openDialog, setOpenDialog] = useState(false);
 
   const {
     newToken,
@@ -161,7 +162,28 @@ function IncidentDetails({
     }
   }, [selectedIncident]);
 
-  console.log(`Latitude: ${Lattitude}, Longitude: ${Longitude}`);
+  useEffect(() => {
+    if (selectedIncident?.location) {
+      setQuery(selectedIncident.location); // update input field via context
+      handleSearchChange({ target: { value: selectedIncident.location } }); // trigger suggestions
+    }
+  }, [selectedIncident]);
+
+
+  useEffect(() => {
+  if (selectedIncident) {
+    // Alert aya — reset form fields
+    setSelectedDistrictId("");
+    setSelectedTehsilId("");
+    setSelectedWard("");
+    setSelectedWardOfficer("");
+    setSelectedSummary("");
+    // setQuery(""); // for location input
+    // Optionally reset lat/long etc. too
+  }
+}, [selectedIncident]);
+
+  console.log(selectedIncident?.location, "locationlocation");
 
   const fetchSummary = async () => {
     const res = await fetch(`${port}/admin_web/DMS_Summary_Get/1/`, {
@@ -215,8 +237,6 @@ function IncidentDetails({
       setSelectedResponders(defaultSelected);
     }
   }, [responderScope]);
-
-  const [openDialog, setOpenDialog] = useState(false);
 
   // Get the response procedure text
   const responseProcedure =
@@ -306,16 +326,15 @@ function IncidentDetails({
                         <MenuItem value="" disabled>
                           Select District
                         </MenuItem>
-                        {districts?.map((item, index) => (
+                        {districts?.map((item) => (
                           <MenuItem key={item.dis_id} value={item.dis_id}>
                             {item.dis_name}
                           </MenuItem>
                         ))}
-                        {/* <MenuItem value="pune">Pune</MenuItem>
-                        <MenuItem value="mumbai">Mumbai</MenuItem> */}
                       </TextField>
                     </Box>
                   </Grid>
+
                   {/* TAHSIL */}
                   <Grid item xs={12} md={6}>
                     <Box sx={Style}>
@@ -336,12 +355,13 @@ function IncidentDetails({
                         value={selectedTehsilId}
                         onChange={(e) => setSelectedTehsilId(e.target.value)}
                         placeholder="Select Tahsil"
+                        disabled={!selectedDistrictId}
                         sx={{ mt: 0.5, fontFamily }}
                       >
                         <MenuItem value="" disabled>
                           Select Tahsil
                         </MenuItem>
-                        {Tehsils?.map((item, index) => (
+                        {Tehsils?.map((item) => (
                           <MenuItem key={item.tah_id} value={item.tah_id}>
                             {item.tah_name}
                           </MenuItem>
@@ -349,6 +369,7 @@ function IncidentDetails({
                       </TextField>
                     </Box>
                   </Grid>
+
                   {/* WARD */}
                   <Grid item xs={12} md={6}>
                     <Box sx={Style}>
@@ -370,12 +391,11 @@ function IncidentDetails({
                         onChange={(e) => setSelectedWard(e.target.value)}
                         placeholder="Select Ward"
                         sx={{
+                          mt: 0.5,
                           ...inputStyle,
                           "& .MuiSelect-select": {
                             overflowY: "auto",
-                            "&::-webkit-scrollbar": {
-                              width: "6px",
-                            },
+                            "&::-webkit-scrollbar": { width: "6px" },
                             "&::-webkit-scrollbar-track": {
                               background: darkMode ? "#2e2e2e" : "#f1f1f1",
                               borderRadius: "3px",
@@ -393,22 +413,15 @@ function IncidentDetails({
                         <MenuItem value="" disabled>
                           Select Ward
                         </MenuItem>
-                        {wardList?.map((item, index) => (
+                        {wardList?.map((item) => (
                           <MenuItem key={item.pk_id} value={item.pk_id}>
                             {item.ward_name}
                           </MenuItem>
                         ))}
                       </TextField>
-                      <MenuItem value="" disabled>
-                        Select Ward
-                      </MenuItem>
-                      {wardList?.map((item, index) => (
-                        <MenuItem key={item.pk_id} value={item.pk_id}>
-                          {item.ward_name}
-                        </MenuItem>
-                      ))}
                     </Box>
                   </Grid>
+
                   {/* WARD OFFICER */}
                   <Grid item xs={12} md={6}>
                     <Box sx={Style}>
@@ -429,12 +442,13 @@ function IncidentDetails({
                         value={selectedWardOfficer}
                         onChange={(e) => setSelectedWardOfficer(e.target.value)}
                         placeholder="Select Ward Officer"
+                        disabled={!selectedWard}
                         sx={{ mt: 0.5, fontFamily }}
                       >
                         <MenuItem value="" disabled>
                           Select Ward Officer
                         </MenuItem>
-                        {wardOfficerList?.map((item, index) => (
+                        {wardOfficerList?.map((item) => (
                           <MenuItem key={item.emp_id} value={item.emp_id}>
                             {item.emp_name}
                           </MenuItem>
@@ -444,9 +458,8 @@ function IncidentDetails({
                   </Grid>
 
                   {/* LOCATION */}
-
-                  <Grid item xs={12} md={12}>
-                    <Box sx={Style}>
+                  <Grid item xs={12}>
+                    <Box sx={{  }}>
                       <Typography
                         sx={{
                           color: labelColor,
@@ -463,12 +476,14 @@ function IncidentDetails({
                         freeSolo
                         size="small"
                         options={suggestions.map((item) => item.address.label)}
-                        inputValue={query}
+                        inputValue={query || ""} // fallback to avoid crash
                         onInputChange={(event, newValue) => {
+                          setQuery(newValue); // even "" works
                           if (event)
                             handleSearchChange({ target: { value: newValue } });
                         }}
                         onChange={(event, newValue) => {
+                          setQuery(newValue || ""); // prevent null crash
                           const selected = suggestions.find(
                             (s) => s.address.label === newValue
                           );
@@ -478,10 +493,7 @@ function IncidentDetails({
                           <TextField
                             {...params}
                             placeholder="Enter Location"
-                            sx={{
-                              mt: 0.5,
-                              fontFamily,
-                            }}
+                            sx={{ mt: 0.5, fontFamily }}
                           />
                         )}
                         PaperComponent={({ children }) => (
@@ -517,7 +529,7 @@ function IncidentDetails({
                   </Grid>
 
                   {/* SUMMARY */}
-                  <Grid item xs={12} md={12}>
+                  <Grid item xs={12}>
                     <Box sx={Style}>
                       <Typography
                         sx={{
@@ -541,7 +553,7 @@ function IncidentDetails({
                         <MenuItem value="" disabled>
                           Select Summary
                         </MenuItem>
-                        {summaryList?.map((item, index) => (
+                        {summaryList?.map((item) => (
                           <MenuItem key={item.sum_id} value={item.sum_id}>
                             {item.summary}
                           </MenuItem>

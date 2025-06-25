@@ -261,6 +261,8 @@ const totalPages = Math.ceil(filteredDispatchList.length / rowsPerPage) || 1;
     navigate("/create-incident", { state: { startData: "start" } });
   };
 
+
+  // api for cancel trigger 
   const handleCancelTrigger = async () => {
     const payload = {
       id: selectedAlert,
@@ -802,7 +804,7 @@ const totalPages = Math.ceil(filteredDispatchList.length / rowsPerPage) || 1;
         open={openSnackbar}
         autoHideDuration={5000}
         onClose={() => setOpenSnackbar(false)}
-        anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
       >
         <Alert
           onClose={() => setOpenSnackbar(false)}
