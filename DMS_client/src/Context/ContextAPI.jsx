@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import axios from "axios";
-
+import * as turf from "@turf/turf";
 const AuthContext = createContext();
 export const useAuth = () => useContext(AuthContext);
 
@@ -8,33 +8,43 @@ export const AuthProvider = ({ children }) => {
   const port = import.meta.env.VITE_APP_API_KEY;
   const token = localStorage.getItem("access_token");
   const refresh = localStorage.getItem("refresh_token");
-  console.log(refresh, "refreshhhhhhhhh");
+  // console.log(refresh, "refreshhhhhhhhh");
 
   const [newToken, setNewToken] = useState("");
   const [states, setStates] = useState([]);
   const [districts, setDistricts] = useState([]);
-  console.log(districts, "districts");
-  // const HERE_API_KEY = 'FscCo6SQsrummInzClxlkdETkvx5T1r8VVI25XMGnyY'
-  const HERE_API_KEY = import.meta.env.VITE_APP_GOOGLE_MAPS_API_KEY;
+  //selected disaster id
+  const [selectedDisasterId, setSelectedDisasterId] = useState(null);
+  const [selectedDisasterName, setSelectedDisasterName] = useState(""); // <-- add this
 
+  // console.log(districts, "districts");
+  // const HERE_API_KEY = 'FscCo6SQsrummInzClxlkdETkvx5T1r8VVI25XMGnyY'
+  console.log(districts, "districts");
+
+  const HERE_API_KEY = import.meta.env.VITE_APP_GOOGLE_MAPS_API_KEY;
+  // const HERE_API_KEY = 'FscCo6SQsrummInzClxlkdETkvx5T1r8VVI25XMGnyY'
   const [Tehsils, setTehsils] = useState([]);
   const [Citys, setCitys] = useState([]);
+  const [Wards, setWards] = useState([]);
+
   const [selectedStateId, setSelectedStateId] = useState("");
   const [selectedDistrictId, setSelectedDistrictId] = useState("");
   const [selectedTehsilId, setSelectedTehsilId] = useState("");
   const [selectedCityID, setSelectedCityId] = useState("");
-  console.log(Citys, "selectedCityID");
+  const [selectedWardId, setSelectedWardId] = useState("");
+
+  // console.log(Citys, "selectedCityID");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [lattitude, setLattitude] = useState(null);
   const [longitude, setLongitude] = useState(null);
 
-  console.log(lattitude, longitude, "lattitude, longitude");
+  // console.log(lattitude, longitude, "lattitude, longitude");
 
   const [departments, setDepartments] = useState([]);
   const [disaterid, setDisaterid] = useState(null);
   const [disasterIdFromSop, setDisasterIdFromSop] = useState(null);
-  console.log(disasterIdFromSop, "disasterIdFromSop");
+  // console.log(disasterIdFromSop, "disasterIdFromSop");
 
   const [disasterIncident, setDisasterIncident] = useState(null);
   const [query, setQuery] = useState("");
@@ -47,14 +57,24 @@ export const AuthProvider = ({ children }) => {
 
   // 🔹 sop page
   const [responderScope, setResponderScope] = useState([]);
-  const [responderScopeForDispatch, setResponderScopeForDispatch] = useState([]);
-  console.log(responderScopeForDispatch, "disasterIncident");
+  const [responderScopeForDispatch, setResponderScopeForDispatch] = useState(
+    []
+  );
+  // console.log(responderScopeForDispatch, "disasterIncident");
   const [enhancedIncidentData, setEnhancedIncidentData] = useState(null);
   const [selectedIncidentFromSop, setSelectedIncidentFromSop] = useState(null);
+  console.log(selectedIncidentFromSop,'selectedIncidentFromSopselectedIncidentFromSop');
+  
+  const [isNewEntry, setIsNewEntry] = useState(false);
+  // To fetch the ward,tehsil, district from the map
+  const [wardName, setWardName] = useState("");
+  const [tehsilName, setTehsilName] = useState("");
+  const [districtName, setDistrictName] = useState("");
+
   // const [disasterIdFromSop, setDisasterIdFromSop] = useState(null);
   useEffect(() => {
     const disasterValue = disaterid || disasterIncident || disasterIdFromSop;
-    console.log(disasterValue, "passingValue");
+    // console.log(disasterValue, "passingValue");
 
     if (disasterValue) {
       fetchResponderScope(disasterValue);
@@ -118,18 +138,18 @@ export const AuthProvider = ({ children }) => {
 
   // 🔹 2. Fetch districts based on selected state
   const fetchDistrictsByState = async (stateId) => {
-    if (!stateId) return;
+    const validStateId = stateId || 1;
     try {
       setLoading(true);
       const res = await axios.get(
-        `${port}/admin_web/district_get_idwise/${stateId}/`,
+        `${port}/admin_web/district_get_idwise/${validStateId}/`,
         {
           headers: {
             Authorization: `Bearer ${token || newToken}`,
           },
         }
       );
-      console.log(`Districts by state ${stateId}:`, res.data);
+      console.log(`Districts by state ${validStateId}:`, res.data);
       setDistricts(res.data || []);
     } catch (err) {
       console.error("Error fetching districts:", err);
@@ -174,8 +194,27 @@ export const AuthProvider = ({ children }) => {
           },
         }
       );
-      console.log(`Tehsils by district ${tehshilId}:`, res.data);
+      console.log(`City by tehshil ${tehshilId}:`, res.data);
       setCitys(res.data || []);
+    } catch (err) {
+      console.error("Error fetching tehsils:", err);
+      setError(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchWardsByTehshil = async (tehshilId) => {
+    if (!tehshilId) return;
+    try {
+      setLoading(true);
+      const res = await axios.get(`${port}/admin_web/ward_get/${tehshilId}/`, {
+        headers: {
+          Authorization: `Bearer ${newToken || token}`,
+        },
+      });
+      console.log(`Ward by tehshil ${tehshilId}:`, res.data);
+      setWards(res.data || []);
     } catch (err) {
       console.error("Error fetching tehsils:", err);
       setError(err);
@@ -212,7 +251,10 @@ export const AuthProvider = ({ children }) => {
   const handleSearchChange = async (e) => {
     const value = e.target.value;
     setQuery(value);
-    if (value.length < 3) return;
+    if (value.length < 3) {
+      setSuggestions([]);
+      return;
+    }
 
     const response = await axios.get(
       "https://autosuggest.search.hereapi.com/v1/autosuggest",
@@ -225,11 +267,13 @@ export const AuthProvider = ({ children }) => {
         },
       }
     );
-
+    console.log("🔍 HERE API full response:", response.data);
     setSuggestions(response.data.items.filter((item) => item.position));
   };
 
   const handleSelectSuggestion = async (item) => {
+    if (!item || !item.position || !item.address) return;
+
     const { position, address } = item;
     setSelectedPosition([position.lat, position.lng]);
     setLattitude(position.lat);
@@ -237,6 +281,30 @@ export const AuthProvider = ({ children }) => {
     setPopupText(address.label);
     setQuery(address.label);
     setSuggestions([]);
+
+    try {
+      const geojsonRes = await fetch("/Boundaries/PUNEWARDS.geojson"); // ✅ make sure this path is correct
+      const geojson = await geojsonRes.json();
+
+      const point = turf.point([position.lng, position.lat]);
+
+      const matchedFeature = geojson.features.find((feature) =>
+        turf.booleanPointInPolygon(point, feature)
+      );
+
+      if (matchedFeature) {
+        const { Name1, Teshil, District } = matchedFeature.properties;
+        setWardName(Name1 || "");
+        setTehsilName(Teshil || "");
+        setDistrictName(District || "");
+      } else {
+        setWardName("");
+        setTehsilName("");
+        setDistrictName("");
+      }
+    } catch (err) {
+      console.error("❌ Error checking polygon match:", err);
+    }
   };
 
   // 🔹 Effects
@@ -247,16 +315,26 @@ export const AuthProvider = ({ children }) => {
   // 🔹 useEffect for selectedStateId change
   useEffect(() => {
     if (selectedStateId) {
-      fetchDistrictsByState(selectedStateId);
+      // fetchDistrictsByState(selectedStateId);
+      const defaultId = selectedStateId || 1;
+      fetchDistrictsByState(defaultId);
+
+      if (!selectedStateId) {
+        setSelectedStateId(1);
+      }
+
       setSelectedDistrictId("");
       setSelectedTehsilId("");
       setSelectedCityId("");
+      setSelectedWardId("");
       setTehsils([]);
       setCitys([]);
+      setWards([]);
     } else {
       setDistricts([]);
       setTehsils([]);
       setCitys([]);
+      setWards([]);
       setSelectedDistrictId("");
       setSelectedTehsilId("");
       setSelectedCityId("");
@@ -269,10 +347,13 @@ export const AuthProvider = ({ children }) => {
       fetchTehsilsByDistrict(selectedDistrictId);
       setSelectedTehsilId("");
       setSelectedCityId("");
+      setSelectedWardId("");
       setCitys([]);
+      setWards([]);
     } else {
       setTehsils([]);
       setCitys([]);
+      setWards([]);
       setSelectedTehsilId("");
       setSelectedCityId("");
     }
@@ -282,6 +363,7 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     if (selectedTehsilId) {
       fetchCitysByTehshil(selectedTehsilId);
+      fetchWardsByTehshil(selectedTehsilId);
       setSelectedCityId("");
     } else {
       setCitys([]);
@@ -311,15 +393,18 @@ export const AuthProvider = ({ children }) => {
         districts,
         Tehsils,
         Citys,
+        Wards,
         departments,
         selectedStateId,
         selectedDistrictId,
         selectedTehsilId,
         selectedCityID,
+        selectedWardId,
         setSelectedStateId,
         setSelectedDistrictId,
         setSelectedTehsilId,
         setSelectedCityId,
+        setSelectedWardId,
         loading,
         error,
         newToken,
@@ -348,9 +433,24 @@ export const AuthProvider = ({ children }) => {
         setResponderScopeForDispatch,
         enhancedIncidentData,
         setEnhancedIncidentData,
-        lattitude, setLattitude,
-        longitude, setLongitude,
-        commentText, setCommentText
+        lattitude,
+        setLattitude,
+        longitude,
+        setLongitude,
+        commentText,
+        setCommentText,
+        fetchDistrictsByState,
+        fetchTehsilsByDistrict,
+        wardName,
+        setWardName,
+        tehsilName,
+        setTehsilName,
+        districtName,
+        setDistrictName,
+        selectedDisasterId,
+        setSelectedDisasterId,
+        selectedDisasterName,        
+        setSelectedDisasterName,
       }}
     >
       {children}

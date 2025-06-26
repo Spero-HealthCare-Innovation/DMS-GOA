@@ -50,7 +50,7 @@ function App() {
         style={{
           display: "flex",
           minHeight: "100vh",
-          backgroundColor: darkMode ? "#0a1929" : "#f5f5f5",
+          backgroundColor: darkMode ? "black" : "#f5f5f5",
           transition: "background-color 0.5s ease-in-out",
         }}
       >
