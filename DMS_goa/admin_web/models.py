@@ -563,3 +563,43 @@ class DMS_Ward(models.Model):
     ward_modified_by = models.CharField(max_length=255, null=True, blank=True)
     ward_modified_date = models.DateTimeField(auto_now=True,null=True, blank=True)
     
+
+
+class DMS_open_weather_alerts(models.Model):
+    alert_id = models.AutoField(primary_key=True)
+    alert_code = models.CharField(max_length=255, null=True, blank=True, unique=True)
+    location_ward = models.TextField()
+    latitude = models.FloatField()
+    longitude = models.FloatField()
+    current_weather_time = models.DateTimeField()
+    forecast_time = models.DateTimeField()
+    last_updated = models.DateTimeField()
+    temperature = models.FloatField(null=True, blank=True)
+    feels_like = models.FloatField(null=True, blank=True)
+    temp_min = models.FloatField(null=True, blank=True)
+    temp_max = models.FloatField(null=True, blank=True)
+    humidity = models.FloatField(null=True, blank=True)
+    pressure = models.FloatField(null=True, blank=True)
+    sea_level = models.FloatField(null=True, blank=True)
+    grnd_level = models.FloatField(null=True, blank=True)
+    visibility = models.FloatField(null=True, blank=True)
+    wind_speed = models.FloatField(null=True, blank=True)
+    wind_deg = models.FloatField(null=True, blank=True)
+    wind_gust = models.FloatField(null=True, blank=True)
+    cloud_coverage = models.FloatField(null=True, blank=True)
+    weather_main = models.CharField(max_length=100, null=True, blank=True)
+    weather_desc = models.CharField(max_length=200, null=True, blank=True)
+    rain_past_1h = models.FloatField(null=True, blank=True)
+    snow_past_1h = models.FloatField(null=True, blank=True)
+    rain_forecast_3h = models.FloatField(null=True, blank=True)
+    alerts = models.JSONField(null=True, blank=True)
+    triger_status = models.IntegerField(null=True,blank=True)
+    disaster_id = models.ForeignKey(DMS_Disaster_Type,on_delete=models.CASCADE,null=True,blank=True)
+    alert_type = models.IntegerField(null=True,blank=True)
+    added_by = models.CharField(max_length=255, null=True, blank=True)
+    added_date = models.DateTimeField(auto_now_add=True)  # Only once at creation
+    modified_by = models.CharField(max_length=255, null=True, blank=True)
+    modified_date = models.DateTimeField(auto_now=True)   # Every time on update
+ 
+    def __str__(self):
+        return f"{self.alert_id } @ {self.current_weather_time}"
