@@ -51,8 +51,8 @@ const StyledCardContent = styled(CardContent)({
 });
 
 const AlertPanel = ({ darkMode }) => {
-    const { newToken, selectedDisasterId: contextDisasterId, selectedDisasterName } = useAuth();
-    const selectedDisasterId = contextDisasterId ?? 0;
+    const { newToken, selectedDisasterId, selectedDisasterName } = useAuth();
+    console.log(selectedDisasterId, selectedDisasterName, 'mmmmmmm');
 
     useEffect(() => {
         if (selectedDisasterName) {
@@ -404,308 +404,134 @@ const AlertPanel = ({ darkMode }) => {
                     </Grid>
 
                     <TableContainer style={{ marginTop: '1em' }}>
-                        {
-                            selectedDisasterId === 3 &&
-                            (
-                                <>
-                                    <Table>
-                                        <TableHead>
-                                            <TableRow>
-                                                <EnquiryCard>
-                                                    <StyledCardContent style={{ flex: 0.3, borderRight: "1px solid black" }}>
-                                                        <Typography variant="subtitle2">Sr No</Typography>
-                                                    </StyledCardContent>
-                                                    <StyledCardContent style={{ flex: 0.5, borderRight: "1px solid black" }}>
-                                                        <Typography variant="subtitle2">Alert Id</Typography>
-                                                    </StyledCardContent>
-                                                    <StyledCardContent style={{ flex: 1.5, borderRight: "1px solid black" }}>
-                                                        <Typography variant="subtitle2">Date & Time</Typography>
-                                                    </StyledCardContent>
-                                                    <StyledCardContent style={{ flex: 1, borderRight: "1px solid black" }}>
-                                                        <Typography variant="subtitle2">Disaster Name</Typography>
-                                                    </StyledCardContent>
-                                                    <StyledCardContent style={{ flex: 0.5, borderRight: "1px solid black" }}>
-                                                        <Typography variant="subtitle2">Temperature</Typography>
-                                                    </StyledCardContent>
-                                                    <StyledCardContent style={{ flex: 1, marginTop: '15px' }}>
-                                                        <Typography variant="subtitle2">Status</Typography>
-                                                    </StyledCardContent>
-                                                </EnquiryCard>
-                                            </TableRow>
-                                        </TableHead>
-                                    </Table>
+                        <Table>
+                            <TableHead>
+                                <TableRow>
+                                    <EnquiryCard>
+                                        <StyledCardContent style={{ flex: 0.3, borderRight: "1px solid black" }}>
+                                            <Typography variant="subtitle2">Sr No</Typography>
+                                        </StyledCardContent>
+                                        <StyledCardContent style={{ flex: 0.5, borderRight: "1px solid black" }}>
+                                            <Typography variant="subtitle2">Alert Id</Typography>
+                                        </StyledCardContent>
+                                        <StyledCardContent style={{ flex: 1.5, borderRight: "1px solid black" }}>
+                                            <Typography variant="subtitle2">Date & Time</Typography>
+                                        </StyledCardContent>
+                                        <StyledCardContent style={{ flex: 1, borderRight: "1px solid black" }}>
+                                            <Typography variant="subtitle2">Disaster Name</Typography>
+                                        </StyledCardContent>
+                                        <StyledCardContent style={{ flex: 0.5, borderRight: "1px solid black" }}>
+                                            <Typography variant="subtitle2">Severity</Typography>
+                                        </StyledCardContent>
+                                        <StyledCardContent style={{ flex: 1, marginTop: '15px' }}>
+                                            <Typography variant="subtitle2">Status</Typography>
+                                        </StyledCardContent>
+                                    </EnquiryCard>
+                                </TableRow>
+                            </TableHead>
+                        </Table>
 
-                                    <Box sx={{
-                                        maxHeight: 500,
-                                        overflowY: 'auto',
-                                        scrollBehavior: "smooth",
-                                        "&::-webkit-scrollbar": {
-                                            width: "6px",
-                                        },
-                                        "&::-webkit-scrollbar-thumb": {
-                                            backgroundColor: darkMode ? "#0288d1" : "#888",
-                                            borderRadius: 3,
-                                        },
-                                        "&::-webkit-scrollbar-thumb:hover": {
-                                            backgroundColor: darkMode ? "#5FC8EC" : "#555",
-                                        },
-                                    }}>
-                                        <Table>
-                                            <TableBody>
-                                                {paginatedData.length === 0 ? (
-                                                    <TableRow>
-                                                        <TableCell colSpan={5} align="center">
-                                                            <Typography variant="subtitle2" sx={{ color: textColor }}>
-                                                                No alerts available.
-                                                            </Typography>
-                                                        </TableCell>
-                                                    </TableRow>
-                                                ) : (
-                                                    paginatedData.map((item, index) => (
-                                                        <EnquiryCardBody
-                                                            key={startIndex + index}
-                                                            sx={{
-                                                                backgroundColor: darkMode ? "rgb(53 53 53)" : "#FFFFFF",
-                                                                // backgroundColor: darkMode ? "rgb(88,92,99)" : "#FFFFFF",
-                                                                color: "white",
-                                                                cursor: "pointer",
-                                                            }}
-                                                        >
-                                                            <StyledCardContent style={{ flex: 0.3 }}>
-                                                                <Typography variant="subtitle2">{index + 1}</Typography>
-                                                            </StyledCardContent>
-                                                            <StyledCardContent style={{ flex: 0.5 }}>
-                                                                <Typography variant="subtitle2">{item.pk_id}</Typography>
-                                                            </StyledCardContent>
-                                                            <StyledCardContent style={{ flex: 1.5 }}>
-                                                                <Typography variant="subtitle2">
-                                                                    {new Date(item.alert_datetime).toLocaleString('en-GB', {
-                                                                        hour12: false,
-                                                                        year: 'numeric',
-                                                                        month: '2-digit',
-                                                                        day: '2-digit',
-                                                                        hour: '2-digit',
-                                                                        minute: '2-digit',
-                                                                        second: '2-digit'
-                                                                    })}
-                                                                </Typography>
-                                                            </StyledCardContent>
-                                                            <StyledCardContent style={{ flex: 1 }}>
-                                                                <Typography variant="subtitle2">
-                                                                    {item.disaster_name || 'N/A'}
-                                                                </Typography>
-                                                            </StyledCardContent>
-                                                            <StyledCardContent style={{ flex: 0.5 }}>
-                                                                <Typography variant="subtitle2">
-                                                                    {item.temperature_2m || 'N/A'}
-                                                                </Typography>
-                                                            </StyledCardContent>
-                                                            {/* <StyledCardContent style={{ flex: 0.5 }}>
-                                                                    <Typography variant="subtitle2">
-                                                                        {(() => {
-                                                                            const config = {
-                                                                                1: { color: '#FF3B30', label: 'High' },
-                                                                                2: { color: '#FF9500', label: 'Medium' },
-                                                                                3: { color: '#FFD60A', label: 'Low' },
-                                                                                4: { color: 'green', label: 'Very Low' },
-                                                                            };
-                                                                            const severity = config[item.alert_type];
-                                                                            return severity ? (
-                                                                                <Tooltip
-                                                                                    title={severity.label}
-                                                                                    arrow
-                                                                                    componentsProps={{
-                                                                                        tooltip: {
-                                                                                            sx: {
-                                                                                                backgroundColor: 'black',
-                                                                                                color: 'white',
-                                                                                                fontSize: '12px',
-                                                                                            },
-                                                                                            arrow: {
-                                                                                                color: 'black',
-                                                                                            },
-                                                                                        },
-                                                                                    }}
-                                                                                >
-                                                                                    <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                                                                        <span style={{
-                                                                                            width: 15,
-                                                                                            height: 15,
-                                                                                            borderRadius: '50%',
-                                                                                            backgroundColor: severity.color,
-                                                                                        }} />
-                                                                                    </span>
-                                                                                </Tooltip>
-                                                                            ) : 'N/A';
-                                                                        })()}
-                                                                    </Typography>
-                                                                </StyledCardContent> */}
-                                                            <StyledCardContent style={{ flex: 1 }}>
-                                                                <Button
-                                                                    onClick={(e) => {
-                                                                        e.stopPropagation();
-                                                                        handleTriggerClick(item.pk_id, item.triger_status);
-                                                                    }}
-                                                                    style={{
-                                                                        width: '70%',
-                                                                        backgroundColor: item.triger_status === 1 ? 'rgb(223,76,76)' : "rgb(18,166,95)",
-                                                                        color: 'white',
-                                                                        borderRadius: '10px',
-                                                                        height: '30px',
-                                                                        marginTop: '15px',
-                                                                        fontSize: '13px',
-                                                                        textTransform: 'none'
+                        <Box sx={{
+                            maxHeight: 500,
+                            overflowY: 'auto',
+                            scrollBehavior: "smooth",
+                            "&::-webkit-scrollbar": {
+                                width: "6px",
+                            },
+                            "&::-webkit-scrollbar-thumb": {
+                                backgroundColor: darkMode ? "#0288d1" : "#888",
+                                borderRadius: 3,
+                            },
+                            "&::-webkit-scrollbar-thumb:hover": {
+                                backgroundColor: darkMode ? "#5FC8EC" : "#555",
+                            },
+                        }}>
+                            <Table>
+                                <TableBody>
+                                    {paginatedData.length === 0 ? (
+                                        <TableRow>
+                                            <TableCell colSpan={5} align="center">
+                                                <Typography variant="subtitle2" sx={{ color: textColor }}>
+                                                    No alerts available.
+                                                </Typography>
+                                            </TableCell>
+                                        </TableRow>
+                                    ) : (
+                                        paginatedData.map((item, index) => (
+                                            <EnquiryCardBody
+                                                key={startIndex + index}
+                                                sx={{
+                                                    backgroundColor: darkMode ? "rgb(53 53 53)" : "#FFFFFF",
+                                                    // backgroundColor: darkMode ? "rgb(88,92,99)" : "#FFFFFF",
+                                                    color: "white",
+                                                    cursor: "pointer",
+                                                }}
+                                            >
+                                                <StyledCardContent style={{ flex: 0.3 }}>
+                                                    <Typography variant="subtitle2">{index + 1}</Typography>
+                                                </StyledCardContent>
+                                                <StyledCardContent style={{ flex: 0.5 }}>
+                                                    <Typography variant="subtitle2">{item.pk_id}</Typography>
+                                                </StyledCardContent>
+                                                <StyledCardContent style={{ flex: 1.5 }}>
+                                                    <Typography variant="subtitle2">
+                                                        {new Date(item.alert_datetime).toLocaleString('en-GB', {
+                                                            hour12: false,
+                                                            year: 'numeric',
+                                                            month: '2-digit',
+                                                            day: '2-digit',
+                                                            hour: '2-digit',
+                                                            minute: '2-digit',
+                                                            second: '2-digit'
+                                                        })}
+                                                    </Typography>
+                                                </StyledCardContent>
+                                                <StyledCardContent style={{ flex: 1 }}>
+                                                    <Typography variant="subtitle2">
+                                                        {item.disaster_name || 'N/A'}
+                                                    </Typography>
+                                                </StyledCardContent>
+                                                <StyledCardContent style={{ flex: 0.5 }}>
+                                                    <Typography variant="subtitle2">
+                                                        {(() => {
+                                                            const config = {
+                                                                1: { color: '#FF3B30', label: 'High' },
+                                                                2: { color: '#FF9500', label: 'Medium' },
+                                                                3: { color: '#FFD60A', label: 'Low' },
+                                                                4: { color: 'green', label: 'Very Low' },
+                                                            };
+                                                            const severity = config[item.alert_type];
+                                                            return severity ? (
+                                                                <Tooltip
+                                                                    title={severity.label}
+                                                                    arrow
+                                                                    componentsProps={{
+                                                                        tooltip: {
+                                                                            sx: {
+                                                                                backgroundColor: 'black',
+                                                                                color: 'white',
+                                                                                fontSize: '12px',
+                                                                            },
+                                                                            arrow: {
+                                                                                color: 'black',
+                                                                            },
+                                                                        },
                                                                     }}
                                                                 >
-                                                                    {(() => {
-                                                                        const label = item.triger_status === 1 ? "trigger" : "triggered";
-                                                                        return label.charAt(0).toUpperCase() + label.slice(1).toLowerCase();
-                                                                    })()}
-                                                                </Button>
-                                                            </StyledCardContent>
-                                                        </EnquiryCardBody>
-                                                    ))
-                                                )}
-                                            </TableBody>
-                                        </Table>
-                                    </Box>
-                                </>
-                            )
-
-                        }
-
-                        {
-                            selectedDisasterId === 0 &&
-                            (
-                                <>
-                                    <Table>
-                                        <TableHead>
-                                            <TableRow>
-                                                <EnquiryCard>
-                                                    <StyledCardContent style={{ flex: 0.3, borderRight: "1px solid black" }}>
-                                                        <Typography variant="subtitle2">Sr No</Typography>
-                                                    </StyledCardContent>
-                                                    <StyledCardContent style={{ flex: 0.5, borderRight: "1px solid black" }}>
-                                                        <Typography variant="subtitle2">Alert Id</Typography>
-                                                    </StyledCardContent>
-                                                    <StyledCardContent style={{ flex: 1.5, borderRight: "1px solid black" }}>
-                                                        <Typography variant="subtitle2">Date & Time</Typography>
-                                                    </StyledCardContent>
-                                                    <StyledCardContent style={{ flex: 1, borderRight: "1px solid black" }}>
-                                                        <Typography variant="subtitle2">Disaster Name</Typography>
-                                                    </StyledCardContent>
-                                                    <StyledCardContent style={{ flex: 0.5, borderRight: "1px solid black" }}>
-                                                        <Typography variant="subtitle2">Severity</Typography>
-                                                    </StyledCardContent>
-                                                    <StyledCardContent style={{ flex: 1, marginTop: '15px' }}>
-                                                        <Typography variant="subtitle2">Status</Typography>
-                                                    </StyledCardContent>
-                                                </EnquiryCard>
-                                            </TableRow>
-                                        </TableHead>
-                                    </Table>
-
-                                    <Box sx={{
-                                        maxHeight: 500,
-                                        overflowY: 'auto',
-                                        scrollBehavior: "smooth",
-                                        "&::-webkit-scrollbar": {
-                                            width: "6px",
-                                        },
-                                        "&::-webkit-scrollbar-thumb": {
-                                            backgroundColor: darkMode ? "#0288d1" : "#888",
-                                            borderRadius: 3,
-                                        },
-                                        "&::-webkit-scrollbar-thumb:hover": {
-                                            backgroundColor: darkMode ? "#5FC8EC" : "#555",
-                                        },
-                                    }}>
-                                        <Table>
-                                            <TableBody>
-                                                {paginatedData.length === 0 ? (
-                                                    <TableRow>
-                                                        <TableCell colSpan={5} align="center">
-                                                            <Typography variant="subtitle2" sx={{ color: textColor }}>
-                                                                No alerts available.
-                                                            </Typography>
-                                                        </TableCell>
-                                                    </TableRow>
-                                                ) : (
-                                                    paginatedData.map((item, index) => (
-                                                        <EnquiryCardBody
-                                                            key={startIndex + index}
-                                                            sx={{
-                                                                backgroundColor: darkMode ? "rgb(53 53 53)" : "#FFFFFF",
-                                                                // backgroundColor: darkMode ? "rgb(88,92,99)" : "#FFFFFF",
-                                                                color: "white",
-                                                                cursor: "pointer",
-                                                            }}
-                                                        >
-                                                            <StyledCardContent style={{ flex: 0.3 }}>
-                                                                <Typography variant="subtitle2">{index + 1}</Typography>
-                                                            </StyledCardContent>
-                                                            <StyledCardContent style={{ flex: 0.5 }}>
-                                                                <Typography variant="subtitle2">{item.pk_id}</Typography>
-                                                            </StyledCardContent>
-                                                            <StyledCardContent style={{ flex: 1.5 }}>
-                                                                <Typography variant="subtitle2">
-                                                                    {new Date(item.alert_datetime).toLocaleString('en-GB', {
-                                                                        hour12: false,
-                                                                        year: 'numeric',
-                                                                        month: '2-digit',
-                                                                        day: '2-digit',
-                                                                        hour: '2-digit',
-                                                                        minute: '2-digit',
-                                                                        second: '2-digit'
-                                                                    })}
-                                                                </Typography>
-                                                            </StyledCardContent>
-                                                            <StyledCardContent style={{ flex: 1 }}>
-                                                                <Typography variant="subtitle2">
-                                                                    {item.disaster_name || 'N/A'}
-                                                                </Typography>
-                                                            </StyledCardContent>
-                                                            <StyledCardContent style={{ flex: 0.5 }}>
-                                                                <Typography variant="subtitle2">
-                                                                    {(() => {
-                                                                        const config = {
-                                                                            1: { color: '#FF3B30', label: 'High' },
-                                                                            2: { color: '#FF9500', label: 'Medium' },
-                                                                            3: { color: '#FFD60A', label: 'Low' },
-                                                                            4: { color: 'green', label: 'Very Low' },
-                                                                        };
-                                                                        const severity = config[item.alert_type];
-                                                                        return severity ? (
-                                                                            <Tooltip
-                                                                                title={severity.label}
-                                                                                arrow
-                                                                                componentsProps={{
-                                                                                    tooltip: {
-                                                                                        sx: {
-                                                                                            backgroundColor: 'black',
-                                                                                            color: 'white',
-                                                                                            fontSize: '12px',
-                                                                                        },
-                                                                                        arrow: {
-                                                                                            color: 'black',
-                                                                                        },
-                                                                                    },
-                                                                                }}
-                                                                            >
-                                                                                <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                                                                    <span style={{
-                                                                                        width: 15,
-                                                                                        height: 15,
-                                                                                        borderRadius: '50%',
-                                                                                        backgroundColor: severity.color,
-                                                                                    }} />
-                                                                                </span>
-                                                                            </Tooltip>
-                                                                        ) : 'N/A';
-                                                                    })()}
-                                                                </Typography>
-                                                            </StyledCardContent>
-                                                            {/* <StyledCardContent style={{ flex: 1 }}>
+                                                                    <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                                                        <span style={{
+                                                                            width: 15,
+                                                                            height: 15,
+                                                                            borderRadius: '50%',
+                                                                            backgroundColor: severity.color,
+                                                                        }} />
+                                                                    </span>
+                                                                </Tooltip>
+                                                            ) : 'N/A';
+                                                        })()}
+                                                    </Typography>
+                                                </StyledCardContent>
+                                                {/* <StyledCardContent style={{ flex: 1 }}>
                                                     <Button
                                                         onClick={(e) => {
                                                             e.stopPropagation();
@@ -725,38 +551,35 @@ const AlertPanel = ({ darkMode }) => {
                                                             .charAt(0).toUpperCase() + (item.triger_status === 1 ? "trigger" : "triggered").slice(1).toLowerCase()}
                                                     </Button>
                                                 </StyledCardContent> */}
-                                                            <StyledCardContent style={{ flex: 1 }}>
-                                                                <Button
-                                                                    onClick={(e) => {
-                                                                        e.stopPropagation();
-                                                                        handleTriggerClick(item.pk_id, item.triger_status);
-                                                                    }}
-                                                                    style={{
-                                                                        width: '70%',
-                                                                        backgroundColor: item.triger_status === 1 ? 'rgb(223,76,76)' : "rgb(18,166,95)",
-                                                                        color: 'white',
-                                                                        borderRadius: '10px',
-                                                                        height: '30px',
-                                                                        marginTop: '15px',
-                                                                        fontSize: '13px',
-                                                                        textTransform: 'none'
-                                                                    }}
-                                                                >
-                                                                    {(() => {
-                                                                        const label = item.triger_status === 1 ? "trigger" : "triggered";
-                                                                        return label.charAt(0).toUpperCase() + label.slice(1).toLowerCase();
-                                                                    })()}
-                                                                </Button>
-                                                            </StyledCardContent>
-                                                        </EnquiryCardBody>
-                                                    ))
-                                                )}
-                                            </TableBody>
-                                        </Table>
-                                    </Box>
-                                </>
-                            )
-                        }
+                                                <StyledCardContent style={{ flex: 1 }}>
+                                                    <Button
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            handleTriggerClick(item.pk_id, item.triger_status);
+                                                        }}
+                                                        style={{
+                                                            width: '70%',
+                                                            backgroundColor: item.triger_status === 1 ? 'rgb(223,76,76)' : "rgb(18,166,95)",
+                                                            color: 'white',
+                                                            borderRadius: '10px',
+                                                            height: '30px',
+                                                            marginTop: '15px',
+                                                            fontSize: '13px',
+                                                            textTransform: 'none'
+                                                        }}
+                                                    >
+                                                        {(() => {
+                                                            const label = item.triger_status === 1 ? "trigger" : "triggered";
+                                                            return label.charAt(0).toUpperCase() + label.slice(1).toLowerCase();
+                                                        })()}
+                                                    </Button>
+                                                </StyledCardContent>
+                                            </EnquiryCardBody>
+                                        ))
+                                    )}
+                                </TableBody>
+                            </Table>
+                        </Box>
                     </TableContainer>
 
                     <Box
