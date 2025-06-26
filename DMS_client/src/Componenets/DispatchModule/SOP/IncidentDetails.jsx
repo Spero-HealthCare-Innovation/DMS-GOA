@@ -1010,15 +1010,6 @@ function IncidentDetails({
                       }}
                     >
                       <Grid container spacing={2}>
-                        {/* <Grid item xs={12} md={12}>
-                          <Typography
-                            variant="body2"
-                            sx={{ color: labelColor, fontWeight: 500, fontFamily, fontSize: '18px', borderBottom: '1px solid #ccc' }}
-                          >
-                            Incident Details
-                          </Typography>
-                        </Grid> */}
-
                         <Grid item xs={12} md={6}>
                           <Box>
                             <Typography
@@ -1186,6 +1177,7 @@ function IncidentDetails({
                             )}
                           </Box>
                         </Grid>
+
                         <Grid item xs={12} md={6}>
                           <Box>
                             <Typography

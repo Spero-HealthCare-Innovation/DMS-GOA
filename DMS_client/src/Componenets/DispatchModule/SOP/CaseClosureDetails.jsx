@@ -19,6 +19,7 @@ import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { DateTimePicker } from "@mui/x-date-pickers/DateTimePicker";
 import { useAuth } from "../../../Context/ContextAPI";
+import { Tooltip } from "@mui/material";
 
 const CaseClosureDetails = ({
   darkMode,
@@ -212,142 +213,6 @@ const CaseClosureDetails = ({
     );
   };
 
-  //   const handleSubmit = async () => {
-  //     if (!selectedIncident?.IncidentId) return;
-
-  //    const payload = {
-  //   Incident_ID: selectedIncidentFromSop?.incident_id || selectedIncident?.IncidentId,
-  //   Disaster_Type: selectedIncidentFromSop?.disaster_name || selectedIncident?.disasterId,
-  //   Alert_Type: "High", // set this statically as required
-  //   inc_id: selectedIncident?.IncidentId,
-  //   closure_acknowledge: formData.acknowledge ? formatDate(formData.acknowledge) : "",
-  //   closure_start_base_location: formData.startBaseLocation ? formatDate(formData.startBaseLocation) : "",
-  //   closure_at_scene: formData.atScene ? formatDate(formData.atScene) : "",
-  //   closure_from_scene: formData.fromScene ? formatDate(formData.fromScene) : "",
-  //   closure_back_to_base: formData.backToBase ? formatDate(formData.backToBase) : "",
-  //   closure_added_by: userName,
-  //   closure_modified_by: userName,
-  //   closure_remark: formData.closureRemark,
-  // };
-
-  //     try {
-  //       setLoading(true);
-  //       const res = await axios.post(
-  //         `${port}/admin_web/closure_post_api/`,
-  //         payload
-  //       );
-  //       setSubmitStatus({ type: "success", message: "Closure details saved successfully!" });
-  //     } catch (error) {
-  //       setSubmitStatus({ type: "error", message: "Failed to save closure details." });
-  //       console.error(error);
-  //     } finally {
-  //       setLoading(false);
-  //     }
-  //   };
-
-  // const handleSubmit = async () => {
-  //   if (!validateForm()) {
-  //     setSubmitStatus({
-  //       type: "error",
-  //       message: "Please fill all required fields",
-  //     });
-  //     return;
-
-  //   }
-  //   // Check if we have incident data
-  //   const incidentId =
-  //     selectedIncidentFromSop?.incident_id || selectedIncident?.incident_id;
-  //   const numericIncId =
-  //     selectedIncidentFromSop?.inc_id || selectedIncident?.inc_id;
-
-  //   if (!incidentId || !numericIncId) {
-  //     setSubmitStatus({ type: "error", message: "No incident ID found!" });
-  //     return;
-  //   }
-
-  //   const payload = {
-  //     incident_id: numericIncId, // Pass numeric inc_id (292) instead of string incident_id
-  //     Disaster_Type:
-  //       selectedIncidentFromSop?.disaster_name ||
-  //       selectedIncident?.disaster_name,
-  //     Alert_Type: getAlertTypeName(
-  //       selectedIncidentFromSop?.alert_type || selectedIncident?.alert_type
-  //     ),
-  //     inc_id: numericIncId, // Same numeric ID
-  //     vehicle_no:formData.vehicleNumber,
-  //     closure_acknowledge: formData.acknowledge
-  //       ? formatDate(formData.acknowledge)
-  //       : "",
-  //     closure_start_base_location: formData.startBaseLocation
-  //       ? formatDate(formData.startBaseLocation)
-  //       : "",
-  //     closure_at_scene: formData.atScene ? formatDate(formData.atScene) : "",
-  //     closure_from_scene: formData.fromScene
-  //       ? formatDate(formData.fromScene)
-  //       : "",
-  //     closure_back_to_base: formData.backToBase
-  //       ? formatDate(formData.backToBase)
-  //       : "",
-  //     closure_added_by: userName,
-  //     closure_modified_by: userName,
-  //     closure_remark: formData.closureRemark,
-  //   };
-
-  //   console.log("Payload being sent:", payload); // Debug log
-
-  //   try {
-  //     setLoading(true);
-  //     setSubmitStatus(null); // Clear previous status
-
-  //     // Get the correct token
-  //     const authToken = localStorage.getItem("access_token") || token;
-
-  //     const res = await axios.post(
-  //       `${port}/admin_web/closure_post_api/`,
-  //       payload,
-  //       {
-  //         headers: {
-  //           Authorization: `Bearer ${authToken}`,
-  //           "Content-Type": "application/json",
-  //         },
-  //       }
-  //     );
-
-  //     console.log("API Response:", res.data); // Debug log
-  //     setSubmitStatus({
-  //       type: "success",
-  //       message: "Closure details saved successfully!",
-  //     });
-
-  //     // Clear form fields after successful submit
-  //     setFormData({
-  //       vehicleNumber:"",
-  //       acknowledge: "",
-  //       startBaseLocation: "",
-  //       atScene: "",
-  //       fromScene: "",
-  //       backToBase: "",
-  //       closureRemark: "",
-  //     });
-  //     setSelectedIncidentFromSop(null);
-  //     setIsDataCleared(true);
-  //     fetchDispatchList();
-  //   } catch (error) {
-  //     console.error("API Error:", error); // Debug log
-  //     console.error("Error response:", error.response?.data); // Debug log
-
-  //     const errorMessage =
-  //       error.response?.data?.message ||
-  //       error.response?.data?.error ||
-  //       "Failed to save closure details.";
-
-  //     setSubmitStatus({ type: "error", message: errorMessage });
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
-
-
   const handleSubmit = async () => {
     if (!validateForm()) {
       setSubmitStatus({
@@ -472,11 +337,9 @@ const CaseClosureDetails = ({
   useEffect(() => {
     if (submitStatus) {
       const timer = setTimeout(() => {
-        // Clear the submitStatus after 5 seconds
         setSubmitStatus(null);
       }, 3000);
 
-      // Cleanup the timer if component unmounts or submitStatus changes before timeout
       return () => clearTimeout(timer);
     }
   }, [submitStatus]);
@@ -555,7 +418,7 @@ const CaseClosureDetails = ({
       <Paper
         elevation={3}
         sx={{
-          p: 3,
+          p: 2,
           mb: 5,
           borderRadius: 2,
           backgroundColor: darkMode ? "#121212" : "#FFFFFF",
@@ -563,7 +426,7 @@ const CaseClosureDetails = ({
           transition: "all 0.3s ease",
         }}
       >
-        <Grid container spacing={3} sx={{ height: "300px" }}>
+        <Grid container spacing={1} sx={{ height: "300px" }}>
           {/* Left Column - Incident Info (Reduced width) */}
           <Grid
             item
@@ -582,7 +445,7 @@ const CaseClosureDetails = ({
                 fontWeight: 500,
                 color: labelColor,
                 fontFamily,
-                // mb: 2,
+                mb: 2,
                 textAlign: "left",
                 // borderBottom: `2px solid ${labelColor}`,
                 // pb: 1
@@ -594,7 +457,7 @@ const CaseClosureDetails = ({
             <Box
               sx={{
                 height: "250px",
-                // overflowY: "auto",
+                overflowY: "auto",
                 "&::-webkit-scrollbar": {
                   width: "6px",
                 },
@@ -613,20 +476,258 @@ const CaseClosureDetails = ({
               }}
             >
               {flag === 0 ? (
-                <Box>
-                  <Grid container spacing={2} sx={{ mb: 2, mt: 0.6 }}>
-                    <Grid item xs={6}>
-                      {renderText("Caller Name", selectedIncidentFromSop?.incident_details?.[0]?.caller_name || "N/A")}
+                <Box
+                  sx={{
+                    scrollBehavior: "smooth",
+                    "&::-webkit-scrollbar": {
+                      width: "6px",
+                    },
+                    "&::-webkit-scrollbar-thumb": {
+                      backgroundColor: darkMode ? "#0288d1" : "#888",
+                      borderRadius: 3,
+                    },
+                    "&::-webkit-scrollbar-thumb:hover": {
+                      backgroundColor: darkMode ? "#5FC8EC" : "#555",
+                    },
+                  }}
+                >
+                  <Grid container spacing={2}>
+                    <Grid item xs={12} md={6}>
+                      <Box>
+                        <Typography
+                          variant="body2"
+                          sx={{
+                            color: labelColor,
+                            fontWeight: 500,
+                            fontFamily,
+                          }}
+                        >
+                          Caller Name
+                        </Typography>
+                        <Typography
+                          variant="subtitle2"
+                          sx={{
+                            fontFamily,
+                            color: textColor,
+                            wordBreak: "break-word",
+                          }}
+                        >
+                          {selectedIncidentFromSop?.incident_details?.[0]?.caller_name || "N/A"}
+                        </Typography>
+                      </Box>
                     </Grid>
-                    <Grid item xs={6}>
-                      {renderText("Caller Number", selectedIncidentFromSop?.incident_details?.[0]?.caller_no || "N/A")}
+
+                    <Grid item xs={12} md={6}>
+                      <Box>
+                        <Typography
+                          variant="body2"
+                          sx={{
+                            color: labelColor,
+                            fontWeight: 500,
+                            fontFamily,
+                          }}
+                        >
+                          Caller Number
+                        </Typography>
+                        <Typography
+                          variant="subtitle2"
+                          sx={{
+                            fontFamily,
+                            color: textColor,
+                            wordBreak: "break-word",
+                          }}
+                        >
+                          {selectedIncidentFromSop?.incident_details?.[0]?.caller_no || "N/A"}
+                        </Typography>
+                      </Box>
+                    </Grid>
+
+                    <Grid item xs={12} md={6}>
+                      <Box>
+                        <Typography
+                          variant="body2"
+                          sx={{
+                            color: labelColor,
+                            fontWeight: 500,
+                            fontFamily,
+                          }}
+                        >
+                          District
+                        </Typography>
+                        <Typography
+                          variant="subtitle2"
+                          sx={{
+                            fontFamily,
+                            color: textColor,
+                            wordBreak: "break-word",
+                          }}
+                        >
+                          {selectedIncidentFromSop?.incident_details?.[0]?.district_name || "N/A"}
+                        </Typography>
+                      </Box>
+                    </Grid>
+
+                    <Grid item xs={12} md={6}>
+                      <Box>
+                        <Typography
+                          variant="body2"
+                          sx={{
+                            color: labelColor,
+                            fontWeight: 500,
+                            fontFamily,
+                          }}
+                        >
+                          Tehsil
+                        </Typography>
+                        <Typography
+                          variant="subtitle2"
+                          sx={{
+                            fontFamily,
+                            color: textColor,
+                            wordBreak: "break-word",
+                          }}
+                        >
+                          {selectedIncidentFromSop?.incident_details?.[0]?.tahsil_name || "N/A"}
+                        </Typography>
+                      </Box>
+                    </Grid>
+
+                    <Grid item xs={12} md={6}>
+                      <Box>
+                        <Typography
+                          variant="body2"
+                          sx={{
+                            color: labelColor,
+                            fontWeight: 500,
+                            fontFamily,
+                          }}
+                        >
+                          Ward
+                        </Typography>
+                        <Typography
+                          variant="subtitle2"
+                          sx={{
+                            fontFamily,
+                            color: textColor,
+                            wordBreak: "break-word",
+                          }}
+                        >
+                          {selectedIncidentFromSop?.incident_details?.[0]?.ward_name || "N/A"}
+                        </Typography>
+                      </Box>
+                    </Grid>
+
+                    <Grid item xs={12} md={6}>
+                      <Box>
+                        <Typography
+                          variant="body2"
+                          sx={{
+                            color: labelColor,
+                            fontWeight: 500,
+                            fontFamily,
+                          }}
+                        >
+                          Ward Officer
+                        </Typography>
+                        <Typography
+                          variant="subtitle2"
+                          sx={{
+                            fontFamily,
+                            color: textColor,
+                            wordBreak: "break-word",
+                          }}
+                        >
+                          {selectedIncidentFromSop?.incident_details?.[0]?.ward_officer_name &&
+                            selectedIncidentFromSop.incident_details[0].ward_officer_name.length > 0
+                            ? selectedIncidentFromSop.incident_details[0].ward_officer_name.map((officer, idx) => {
+                              const name = officer.ward_officer_name;
+                              const displayName = name.length > 15 ? name.slice(0, 15) + "..." : name;
+                              return (
+                                <Tooltip key={officer.emp_id} title={name.length > 15 ? name : ""} arrow>
+                                  <span>
+                                    {displayName}
+                                    {idx !== selectedIncidentFromSop.incident_details[0].ward_officer_name.length - 1 ? ", " : ""}
+                                  </span>
+                                </Tooltip>
+                              );
+                            })
+                            : "N/A"}
+                        </Typography>
+                      </Box>
+                    </Grid>
+
+                    <Grid item xs={12} md={12}>
+                      <Box>
+                        <Typography
+                          variant="body2"
+                          sx={{
+                            color: labelColor,
+                            fontWeight: 500,
+                            fontFamily,
+                          }}
+                        >
+                          Location
+                        </Typography>
+                        <Typography
+                          variant="subtitle2"
+                          sx={{
+                            fontFamily,
+                            color: textColor,
+                            wordBreak: "break-word",
+                          }}
+                        >
+                          {(() => {
+                            const location = selectedIncidentFromSop?.incident_details?.[0]?.location || "N/A";
+                            const showTooltip = location !== "N/A" && location.length > 40;
+                            const displayLocation = showTooltip ? location.slice(0, 40) + "..." : location;
+                            return showTooltip ? (
+                              <Tooltip title={location} arrow>
+                                <span>{displayLocation}</span>
+                              </Tooltip>
+                            ) : (
+                              location
+                            );
+                          })()}
+                        </Typography>
+                      </Box>
+                    </Grid>
+
+                    <Grid item xs={12} md={12}>
+                      <Box>
+                        <Typography
+                          variant="body2"
+                          sx={{
+                            color: labelColor,
+                            fontWeight: 500,
+                            fontFamily,
+                          }}
+                        >
+                          Summary
+                        </Typography>
+                        <Typography
+                          variant="subtitle2"
+                          sx={{
+                            fontFamily,
+                            color: textColor,
+                            wordBreak: "break-word",
+                          }}
+                        >
+                          {(() => {
+                            const summary = selectedIncidentFromSop?.incident_details?.[0]?.summary_name || "N/A";
+                            const showTooltip = summary !== "N/A" && summary.length > 50;
+                            const displaySummary = showTooltip ? summary.slice(0, 50) + "..." : summary;
+                            return showTooltip ? (
+                              <Tooltip title={summary} arrow>
+                                <span>{displaySummary}</span>
+                              </Tooltip>
+                            ) : (
+                              summary
+                            );
+                          })()}
+                        </Typography>
+                      </Box>
                     </Grid>
                   </Grid>
-                  {renderText("Location", selectedIncidentFromSop?.incident_details?.[0]?.location || "N/A")}
-                  {renderText(
-                    "Summary",
-                    selectedIncidentFromSop?.incident_details?.[0]?.summary_name || "N/A"
-                  )}
                 </Box>
               ) : (
                 <Typography
