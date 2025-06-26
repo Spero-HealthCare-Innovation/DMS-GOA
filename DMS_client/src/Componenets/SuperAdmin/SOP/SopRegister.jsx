@@ -41,7 +41,7 @@ function SopRegister({ darkMode }) {
     display: "flex",
     alignItems: "center",
     justifyContent: "space-between",
-    background: "#5FECC8",
+    background: "linear-gradient(to bottom, #53bce1, rgb(173, 207, 216))",
     borderRadius: "8px 10px 0 0",
     padding: "6px 12px",
     color: "black",
@@ -60,15 +60,14 @@ function SopRegister({ darkMode }) {
     transition: "all 0.3s ease",
     cursor: "pointer",
     "&:hover": {
-      boxShadow: `0 0 8px ${
-        status === "Completed"
-          ? "#00e67699"
-          : status === "Pending"
+      boxShadow: `0 0 8px ${status === "Completed"
+        ? "#00e67699"
+        : status === "Pending"
           ? "#f4433699"
           : "#88888855"
-      }`,
+        }`,
     },
-    height: "45px",
+    height: "40px",
   }));
 
   const StyledCardContent = styled("td")({
@@ -101,7 +100,9 @@ function SopRegister({ darkMode }) {
   const { newToken, disaster } = useAuth();
   const token = localStorage.getItem("access_token");
   const textColor = darkMode ? "#ffffff" : "#000000";
-  const bgColor = darkMode ? "#0a1929" : "#0a1929";
+  const bgColor = "linear-gradient(to bottom, #53bce1, rgb(173, 207, 216))";
+  const paper = darkMode ? "202328":"#FFFFFF";
+  const tableRow = "rgb(53 53 53)";
   const labelColor = darkMode ? "#5FECC8" : "#1976d2";
   const fontFamily = "Roboto, sans-serif";
   const borderColor = darkMode ? "#7F7F7F" : "#ccc";
@@ -383,10 +384,10 @@ function SopRegister({ darkMode }) {
         <Typography
           variant="h6"
           sx={{
-            color: labelColor,
+            color: "rgb(95,200,236)",
             fontWeight: 600,
             fontFamily,
-            fontSize: 16,
+            fontSize: 18,
           }}
         >
           Register SOP
@@ -433,7 +434,7 @@ function SopRegister({ darkMode }) {
             sx={{
               padding: 2,
               borderRadius: 3,
-              backgroundColor: bgColor,
+              backgroundColor: paper,
               mt: 1,
               mb: 5,
               ml: 1,
@@ -445,7 +446,7 @@ function SopRegister({ darkMode }) {
                   <TableRow>
                     <EnquiryCard
                       sx={{
-                        backgroundColor: "#5FECC8",
+                        backgroundColor: bgColor,
                         color: "#000",
                         display: "flex",
                         width: "100%",
@@ -496,131 +497,154 @@ function SopRegister({ darkMode }) {
                           ...fontsTableHeading,
                         }}
                       >
-                        <Typography variant="subtitle2">Actions</Typography>
+                        <Typography variant="subtitle2">Action</Typography>
                       </StyledCardContent>
                     </EnquiryCard>
                   </TableRow>
                 </TableHead>
 
-                <TableBody>
-                  {paginatedData.map((item, index) => (
-                    <EnquiryCardBody
-                      key={(page - 1) * rowsPerPage + index}
-                      sx={{
-                        backgroundColor: inputBgColor,
-                        p: 2,
-                        borderRadius: 2,
-                        color: textColor,
-                        display: "flex",
-                        width: "100%",
-                        mb: 1,
-                      }}
-                    >
-                      <StyledCardContent
-                        sx={{ flex: 0.6, justifyContent: "center" }}
-                      >
-                        <Typography variant="subtitle2" sx={fontsTableBody}>
-                          {(page - 1) * rowsPerPage + index + 1}
-                        </Typography>
-                      </StyledCardContent>
+                <Box sx={{
+                  height: '250px',
+                  overflowY: 'auto',
+                  paddingRight: '10px',
+                  '&::-webkit-scrollbar': {
+                    width: '6px',
+                  },
+                  '&::-webkit-scrollbar-track': {
+                    background: darkMode ? '#2e2e2e' : '#f1f1f1',
+                    borderRadius: '3px',
+                    marginTop: '1rem',
+                  },
+                  '&::-webkit-scrollbar-thumb': {
+                    backgroundColor: darkMode ? "#5FC8EC" : "#555",
+                    borderRadius: '3px',
+                  },
+                  '&::-webkit-scrollbar-thumb:hover': {
+                    background: darkMode ? '#777' : '#555',
+                  },
+                }}>
+                  <Table>
+                    <TableBody>
+                      {paginatedData.map((item, index) => (
+                        <EnquiryCardBody
+                          key={(page - 1) * rowsPerPage + index}
+                          sx={{
+                            backgroundColor: tableRow,
+                            p: 2,
+                            borderRadius: 2,
+                            color: textColor,
+                            display: "flex",
+                            width: "100%",
+                            mb: 1,
+                          }}
+                        >
+                          <StyledCardContent
+                            sx={{ flex: 0.6, justifyContent: "center" }}
+                          >
+                            <Typography variant="subtitle2" sx={fontsTableBody}>
+                              {(page - 1) * rowsPerPage + index + 1}
+                            </Typography>
+                          </StyledCardContent>
 
-                      <StyledCardContent
-                        sx={{
-                          flex: 1.9,
-                          justifyContent: "center",
-                          ...fontsTableBody,
-                        }}
-                      >
-                        <Typography variant="subtitle2">
-                          {item.disaster_name || "-"}
-                        </Typography>
-                      </StyledCardContent>
+                          <StyledCardContent
+                            sx={{
+                              flex: 1.9,
+                              justifyContent: "center",
+                              ...fontsTableBody,
+                            }}
+                          >
+                            <Typography variant="subtitle2">
+                              {item.disaster_name || "-"}
+                            </Typography>
+                          </StyledCardContent>
 
-                      <StyledCardContent
-                        sx={{
-                          flex: 2,
-                          justifyContent: "left",
-                          ...fontsTableBody,
-                        }}
-                      >
-                        {/* <Tooltip
+                          <StyledCardContent
+                            sx={{
+                              flex: 2,
+                              justifyContent: "left",
+                              ...fontsTableBody,
+                            }}
+                          >
+                            {/* <Tooltip
                           title={item.sop_description || ""}
                           arrow
                           disableHoverListener={!item.sop_description}
                         > */}
-                        <Typography
-                          variant="subtitle2"
+                            <Typography
+                              variant="subtitle2"
+                              sx={{
+                                cursor: item.sop_description
+                                  ? "pointer"
+                                  : "default",
+                                whiteSpace: "nowrap",
+                                overflow: "hidden",
+                                textOverflow: "ellipsis",
+                                maxWidth: 180, // adjust as needed for your layout
+                              }}
+                              onClick={() => {
+                                if (item.sop_description) {
+                                  setDescDialogText(item.sop_description);
+                                  setDescDialogOpen(true);
+                                }
+                              }}
+                            >
+                              {item.sop_description
+                                ? item.sop_description.length > 45
+                                  ? item.sop_description.slice(0, 45) + "..."
+                                  : item.sop_description
+                                : "No Description"}
+                            </Typography>
+                            {/* </Tooltip> */}
+                          </StyledCardContent>
+
+                          <StyledCardContent
+                            sx={{
+                              flex: 0.3,
+                              justifyContent: "center",
+                              ...fontsTableBody,
+                            }}
+                          >
+                            <MoreHorizIcon
+                              onClick={(e) => handleOpen(e, item)}
+                              sx={{
+                                fontSize: "1.6em",
+                                color: "rgb(95,200,236)",
+                                cursor: "pointer",
+                              }}
+                            />
+                          </StyledCardContent>
+                        </EnquiryCardBody>
+                      ))}
+                      <Dialog
+                        open={descDialogOpen}
+                        onClose={() => setDescDialogOpen(false)}
+                        maxWidth="sm"
+                        fullWidth
+                      >
+                        <DialogTitle
                           sx={{
-                            cursor: item.sop_description
-                              ? "pointer"
-                              : "default",
-                            whiteSpace: "nowrap",
-                            overflow: "hidden",
-                            textOverflow: "ellipsis",
-                            maxWidth: 180, // adjust as needed for your layout
-                          }}
-                          onClick={() => {
-                            if (item.sop_description) {
-                              setDescDialogText(item.sop_description);
-                              setDescDialogOpen(true);
-                            }
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "space-between",
+                            pr: 1,
                           }}
                         >
-                          {item.sop_description
-                            ? item.sop_description.length > 45
-                              ? item.sop_description.slice(0, 45) + "..."
-                              : item.sop_description
-                            : "No Description"}
-                        </Typography>
-                        {/* </Tooltip> */}
-                      </StyledCardContent>
-
-                      <StyledCardContent
-                        sx={{
-                          flex: 0.3,
-                          justifyContent: "center",
-                          ...fontsTableBody,
-                        }}
-                      >
-                        <MoreHorizIcon
-                          onClick={(e) => handleOpen(e, item)}
-                          sx={{
-                            fontSize: "1.6em",
-                            color: "#00f0c0",
-                            cursor: "pointer",
-                          }}
-                        />
-                      </StyledCardContent>
-                    </EnquiryCardBody>
-                  ))}
-                  <Dialog
-                    open={descDialogOpen}
-                    onClose={() => setDescDialogOpen(false)}
-                    maxWidth="sm"
-                    fullWidth
-                  >
-                    <DialogTitle
-                      sx={{
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "space-between",
-                        pr: 1,
-                      }}
-                    >
-                      Full Description
-                      <Button
-                        onClick={() => setDescDialogOpen(false)}
-                        sx={{ minWidth: 0, color: "grey.700" }}
-                      >
-                        <CloseIcon />
-                      </Button>
-                    </DialogTitle>
-                    <DialogContent>
-                      <Typography>{descDialogText}</Typography>
-                      <Box textAlign="right" mt={2}></Box>
-                    </DialogContent>
-                  </Dialog>
-                </TableBody>
+                          Full Description
+                          <Button
+                            onClick={() => setDescDialogOpen(false)}
+                            sx={{ minWidth: 0, color: "grey.700" }}
+                          >
+                            <CloseIcon />
+                          </Button>
+                        </DialogTitle>
+                        <DialogContent>
+                          <Typography>{descDialogText}</Typography>
+                          <Box textAlign="right" mt={2}></Box>
+                        </DialogContent>
+                      </Dialog>
+                    </TableBody>
+                  </Table>
+                </Box>
 
                 {open && (
                   <Box
@@ -696,7 +720,7 @@ function SopRegister({ darkMode }) {
                     borderColor: borderColor,
                     height: "30px",
                     minWidth: "70px",
-                    backgroundColor: bgColor,
+                    backgroundColor: darkMode ? "#202328" : "#FFFFFF",
                     "& .MuiOutlinedInput-notchedOutline": {
                       borderColor: borderColor,
                     },
@@ -723,6 +747,7 @@ function SopRegister({ darkMode }) {
                   gap: 2,
                   color: textColor,
                   fontSize: "13px",
+                  backCoundColor: "#202328 !important",
                 }}
               >
                 <Box
@@ -761,7 +786,7 @@ function SopRegister({ darkMode }) {
             sx={{
               padding: 2,
               borderRadius: 3,
-              backgroundColor: bgColor,
+              backgroundColor: paper,
               mt: 1,
               mb: 5,
             }}
@@ -782,11 +807,11 @@ function SopRegister({ darkMode }) {
                         sx={{
                           mb: 1,
                           width: "40%",
-                          backgroundColor: "#00f0c0",
-                          color: "black",
-                          fontWeight: "bold",
+                          backgroundColor: "rgb(223,76,76)",
+                          color: "#fff",
                           borderRadius: "12px",
                           cursor: "pointer",
+                          textTransform: "none",
                         }}
                         onClick={() => {
                           setSelectedDisaster("");
@@ -795,7 +820,10 @@ function SopRegister({ darkMode }) {
                           setShowSubmitButton(true);
                         }}
                       >
-                        + Add SOP
+                        {"+ add sop"
+                          .split(" ")
+                          .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+                          .join(" ")}
                       </Button>
                     </Box>
                   )}
@@ -809,6 +837,7 @@ function SopRegister({ darkMode }) {
                     label="Disaster Type"
                     variant="outlined"
                     value={selectedDisaster || ""}
+                    sx={{ backgroundColor: tableRow }}
                     onChange={(e) => {
                       setSelectedDisaster(e.target.value);
                       setDisasterError(false); // reset on change
@@ -823,6 +852,7 @@ function SopRegister({ darkMode }) {
                           style: {
                             maxHeight: 250,
                             width: "250",
+
                           },
                         },
                       },
@@ -844,12 +874,13 @@ function SopRegister({ darkMode }) {
                     InputLabelProps={{ shrink: false }}
                     multiline
                     value={description}
-                     onChange={(e) => {
-    setDescription(e.target.value);
-    setDescriptionError(false); // reset on change
-  }}
-   error={descriptionError}
-  helperText={descriptionError ? "Please enter a valid description" : ""}
+                    sx={{ backgroundColor: tableRow}}
+                    onChange={(e) => {
+                      setDescription(e.target.value);
+                      setDescriptionError(false); // reset on change
+                    }}
+                    error={descriptionError}
+                    helperText={descriptionError ? "Please enter a valid description" : ""}
                     minRows={1} // initial visible lines
                     maxRows={6} // maximum visible lines
                   />
@@ -871,22 +902,25 @@ function SopRegister({ darkMode }) {
                 sx={{
                   mt: 2,
                   width: "40%",
-                  backgroundColor: "#00f0c0",
-                  color: "black",
-                  fontWeight: "bold",
+                  backgroundColor: "rgb(18,166,95,0.8)",
+                  color: "#fff",
                   borderRadius: "12px",
+                  textTransform: "none",
                   "&:hover": {
                     backgroundColor: bgColor,
                     color: "white !important",
                   },
                 }}
-              onClick={() => {
-  if (validateForm()) {
-    isEditMode ? handleUpdate() : handleSubmit();
-  }
-}}
+                onClick={() => {
+                  if (validateForm()) {
+                    isEditMode ? handleUpdate() : handleSubmit();
+                  }
+                }}
               >
-                {showSubmitButton ? "Submit" : isEditMode ? "Update" : "Submit"}
+                {(() => {
+                  const label = showSubmitButton ? "submit" : isEditMode ? "update" : "submit";
+                  return label.charAt(0).toUpperCase() + label.slice(1);
+                })()}
               </Button>
             </Box>
           </Paper>
