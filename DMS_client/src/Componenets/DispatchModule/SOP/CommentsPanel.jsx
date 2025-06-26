@@ -39,6 +39,9 @@ function CommentsPanel({
   setSelectedWardOfficer,
   setSelectedSummary,
   setQuery,
+  validateFields,
+  fieldErrors,
+  setFieldErrors,
 }) {
   const port = import.meta.env.VITE_APP_API_KEY;
   const userName = localStorage.getItem("userId");
@@ -107,7 +110,29 @@ function CommentsPanel({
   }, [fetchIncidentDetails]);
 
   const handlealertSaveClick = async () => {
-    if (!commentText.trim()) return;
+    // Prepare error object
+    const errors = {};
+
+    if (!commentText.trim()) errors.comment = "Comment is required";
+    if (!selectedDistrictId) errors.district = "District is required";
+    if (!selectedTehsilId) errors.tehsil = "Tehsil is required";
+    if (!selectedWard) errors.ward = "Ward is required";
+    if (!selectedWardOfficer || selectedWardOfficer.length === 0) errors.wardOfficer = "Ward Officer is required";
+    if (!selectedSummary) errors.summary = "Summary is required";
+    if (!query) errors.location = "Location is required";
+
+    // If any errors, set them and show snackbar
+    if (Object.keys(errors).length > 0) {
+      setFieldErrors(errors);
+      setSnackbar({
+        open: true,
+        message: "Please fill all required fields.",
+        severity: "error",
+      });
+      return;
+    } else {
+      setFieldErrors({});
+    }
 
     const payload = {
       responder_scope: selectedResponders.map(String),
@@ -123,12 +148,11 @@ function CommentsPanel({
       district: selectedDistrictId,
       tahsil: selectedTehsilId,
       ward: selectedWard,
-ward_officer: selectedWardOfficer.map(Number),
+      ward_officer: selectedWardOfficer.map(Number),
       summary: selectedSummary,
-     location: query,
+      location: query,
     };
 
-    console.log(location)
     try {
       const response = await fetch(`${port}/admin_web/DMS_Incident_Post/`, {
         method: "POST",
@@ -157,6 +181,7 @@ ward_officer: selectedWardOfficer.map(Number),
         setSelectedWardOfficer("");
         setSelectedSummary("");
         setQuery("");
+        setFieldErrors({});
         await fetchDispatchList();
       } else {
         throw new Error("API Error");
@@ -170,6 +195,70 @@ ward_officer: selectedWardOfficer.map(Number),
       });
     }
   };
+  //   const handlealertSaveClick = async () => {
+  //     if (!commentText.trim()) return;
+
+  //     const payload = {
+  //       responder_scope: selectedResponders.map(String),
+  //       alert_id: selectedIncident?.pk_id,
+  //       disaster_type: selectedIncident?.disaster_id_id,
+  //       comments: commentText,
+  //       comm_added_by: userName,
+  //       inc_added_by: userName,
+  //       latitude: selectedIncident?.latitude,
+  //       longitude: selectedIncident?.longitude,
+  //       alert_type: selectedIncident?.alert_type,
+  //       mode: "2",
+  //       district: selectedDistrictId,
+  //       tahsil: selectedTehsilId,
+  //       ward: selectedWard,
+  // ward_officer: selectedWardOfficer.map(Number),
+  //       summary: selectedSummary,
+  //      location: query,
+  //     };
+
+  //     console.log(location)
+  //     try {
+  //       const response = await fetch(`${port}/admin_web/DMS_Incident_Post/`, {
+  //         method: "POST",
+  //         headers: {
+  //           "Content-Type": "application/json",
+  //           Authorization: `Bearer ${Token || newToken}`,
+  //         },
+  //         body: JSON.stringify(payload),
+  //       });
+
+  //       if (response.ok) {
+  //         setSnackbar({
+  //           open: true,
+  //           message: "Dispatch alert sent successfully!",
+  //           severity: "success",
+  //         });
+  //         setCommentText("");
+  //         setSelectedResponders([]);
+  //         setFlag(0);
+
+  //         setHighlightedId(null);
+
+  //         setSelectedDistrictId("");
+  //         setSelectedTehsilId("");
+  //         setSelectedWard("");
+  //         setSelectedWardOfficer("");
+  //         setSelectedSummary("");
+  //         setQuery("");
+  //         await fetchDispatchList();
+  //       } else {
+  //         throw new Error("API Error");
+  //       }
+  //     } catch (err) {
+  //       console.error(err);
+  //       setSnackbar({
+  //         open: true,
+  //         message: "Failed to send dispatch alert.",
+  //         severity: "error",
+  //       });
+  //     }
+  //   };
 
   // const handleCommentSendClick = async () => {
   //   if (!commentText.trim()) return;
@@ -426,15 +515,15 @@ ward_officer: selectedWardOfficer.map(Number),
                         >
                           {comm_added_date
                             ? new Date(comm_added_date).toLocaleString(
-                                "en-IN",
-                                {
-                                  day: "2-digit",
-                                  month: "short",
-                                  year: "numeric",
-                                  hour: "2-digit",
-                                  minute: "2-digit",
-                                }
-                              )
+                              "en-IN",
+                              {
+                                day: "2-digit",
+                                month: "short",
+                                year: "numeric",
+                                hour: "2-digit",
+                                minute: "2-digit",
+                              }
+                            )
                             : "N/A"}
                         </Typography>
                       </Box>

@@ -334,6 +334,21 @@ function IncidentDetails({
     }
   }, [responderScope]);
 
+  // ================== FIELD VALIDATION LOGIC ==========================
+
+  const [fieldErrors, setFieldErrors] = useState({});
+  const validateFields = () => {
+    const errors = {};
+    if (!selectedDistrictId) errors.district = "District is required";
+    if (!selectedTehsilId) errors.tehsil = "Tahsil is required";
+    if (!selectedWard) errors.ward = "Ward is required";
+    if (!selectedWardOfficer.length) errors.wardOfficer = "Ward Officer is required";
+    if (!query) errors.location = "Location is required";
+    if (!selectedSummary) errors.summary = "Summary is required";
+    setFieldErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
   return (
     <>
       <Typography variant="h6" color="#fff" sx={{ fontFamily, ml: 2 }}>
@@ -395,7 +410,7 @@ function IncidentDetails({
                           fontSize: "13.5px",
                         }}
                       >
-                        District
+                        District *
                       </Typography>
                       <TextField
                         select
@@ -408,6 +423,8 @@ function IncidentDetails({
                         }}
                         placeholder="Select District"
                         sx={{ mt: 0.5, fontFamily }}
+                        error={!!fieldErrors.district}
+                        helperText={fieldErrors.district}
                       >
                         <MenuItem value="" disabled>
                           Select District
@@ -432,7 +449,7 @@ function IncidentDetails({
                           fontSize: "13.5px",
                         }}
                       >
-                        Tahsil
+                        Tahsil *
                       </Typography>
                       <TextField
                         select
@@ -446,6 +463,8 @@ function IncidentDetails({
                         placeholder="Select Tahsil"
                         disabled={!selectedDistrictId}
                         sx={{ mt: 0.5, fontFamily }}
+                        error={!!fieldErrors.tehsil}
+                        helperText={fieldErrors.tehsil}
                       >
                         <MenuItem value="" disabled>
                           Select Tahsil
@@ -470,7 +489,7 @@ function IncidentDetails({
                           fontSize: "13.5px",
                         }}
                       >
-                        Ward
+                        Ward *
                       </Typography>
                       <TextField
                         select
@@ -501,6 +520,18 @@ function IncidentDetails({
                             },
                           },
                         }}
+                        SelectProps={{
+                          MenuProps: {
+                            PaperProps: {
+                              style: {
+                                maxHeight: 200,
+                                maxWidth: 400,
+                              },
+                            },
+                          },
+                        }}
+                        error={!!fieldErrors.ward}
+                        helperText={fieldErrors.ward}
                       >
                         <MenuItem value="" disabled>
                           Select Ward
@@ -525,20 +556,39 @@ function IncidentDetails({
                           fontSize: "13.5px",
                         }}
                       >
-                        Ward Officer
+                        Ward Officer *
                       </Typography>
                       <TextField
                         select
                         fullWidth
                         size="small"
-                        SelectProps={{ multiple: true }}
+                        SelectProps={{
+                          multiple: true, renderValue: (selected) => selected.map(id => {
+                            const officer = wardOfficerList.find(item => item.emp_id === id);
+                            return officer ? officer.emp_name : id;
+                          }).join(', ')
+                        }}
                         value={selectedWardOfficer}
                         onChange={(e) => setSelectedWardOfficer(e.target.value)}
                         disabled={!selectedWard}
                         sx={{ mt: 0.5, fontFamily }}
+                        error={!!fieldErrors.wardOfficer}
+                        helperText={fieldErrors.wardOfficer}
                       >
+                        <MenuItem
+                          value="all"
+                          onClick={() => {
+                            if (selectedWardOfficer.length === wardOfficerList.length) {
+                              setSelectedWardOfficer([]);
+                            } else {
+                              setSelectedWardOfficer(wardOfficerList.map(item => item.emp_id));
+                            }
+                          }}
+                        >
+                        </MenuItem>
                         {wardOfficerList?.map((item) => (
                           <MenuItem key={item.emp_id} value={item.emp_id}>
+                            <Checkbox checked={selectedWardOfficer.indexOf(item.emp_id) > -1} />
                             {item.emp_name}
                           </MenuItem>
                         ))}
@@ -557,7 +607,7 @@ function IncidentDetails({
                           fontSize: "13.5px",
                         }}
                       >
-                        Location
+                        Location *
                       </Typography>
 
                       <Autocomplete
@@ -565,14 +615,16 @@ function IncidentDetails({
                         freeSolo
                         size="small"
                         options={suggestions.map((item) => item.address.label)}
-                        inputValue={query || ""} // fallback to avoid crash
+                        inputValue={query || ""}
                         onInputChange={(event, newValue) => {
-                          setQuery(newValue); // even "" works
+                          setQuery(newValue);
+                          setFieldErrors((prev) => ({ ...prev, location: undefined }));
                           if (event)
                             handleSearchChange({ target: { value: newValue } });
                         }}
                         onChange={(event, newValue) => {
-                          setQuery(newValue || ""); // prevent null crash
+                          setQuery(newValue || "");
+                          setFieldErrors((prev) => ({ ...prev, location: undefined }));
                           const selected = suggestions.find(
                             (s) => s.address.label === newValue
                           );
@@ -583,6 +635,8 @@ function IncidentDetails({
                             {...params}
                             placeholder="Enter Location"
                             sx={{ mt: 0.5, fontFamily }}
+                            error={!!fieldErrors.location}
+                            helperText={fieldErrors.location}
                           />
                         )}
                         PaperComponent={({ children }) => (
@@ -628,7 +682,7 @@ function IncidentDetails({
                           fontSize: "13.5px",
                         }}
                       >
-                        Summary
+                        Summary *
                       </Typography>
                       <TextField
                         select
@@ -638,6 +692,8 @@ function IncidentDetails({
                         onChange={(e) => setSelectedSummary(e.target.value)}
                         placeholder="Select Summary"
                         sx={{ mt: 0.5, fontFamily }}
+                        error={!!fieldErrors.summary}
+                        helperText={fieldErrors.summary}
                       >
                         <MenuItem value="" disabled>
                           Select Summary
@@ -822,7 +878,7 @@ function IncidentDetails({
                               </Typography>
 
                               {incident?.location &&
-                              incident.location.length > 20 ? (
+                                incident.location.length > 20 ? (
                                 <Tooltip title={incident.location} arrow>
                                   <Typography
                                     variant="subtitle2"
@@ -863,7 +919,7 @@ function IncidentDetails({
                                 Ward Officer
                               </Typography>
                               {Array.isArray(incident?.ward_officer_name) &&
-                              incident.ward_officer_name.length > 0 ? (
+                                incident.ward_officer_name.length > 0 ? (
                                 <Typography
                                   variant="subtitle2"
                                   sx={{
@@ -905,7 +961,7 @@ function IncidentDetails({
                               </Typography>
 
                               {incident?.summary_name &&
-                              incident.summary_name.length > 40 ? (
+                                incident.summary_name.length > 40 ? (
                                 <Tooltip title={incident.summary_name} arrow>
                                   <Typography
                                     variant="subtitle2"
@@ -1102,7 +1158,7 @@ function IncidentDetails({
                             </Typography>
 
                             {incident?.location &&
-                            incident.location.length > 20 ? (
+                              incident.location.length > 20 ? (
                               <Tooltip title={incident.location} arrow>
                                 <Typography
                                   variant="subtitle2"
@@ -1143,7 +1199,7 @@ function IncidentDetails({
                               Ward Officer
                             </Typography>
                             {Array.isArray(incident?.ward_officer_name) &&
-                            incident.ward_officer_name.length > 0 ? (
+                              incident.ward_officer_name.length > 0 ? (
                               <Typography
                                 variant="subtitle2"
                                 sx={{
@@ -1185,7 +1241,7 @@ function IncidentDetails({
                             </Typography>
 
                             {incident?.summary_name &&
-                            incident.summary_name.length > 40 ? (
+                              incident.summary_name.length > 40 ? (
                               <Tooltip title={incident.summary_name} arrow>
                                 <Typography
                                   variant="subtitle2"
@@ -1222,7 +1278,6 @@ function IncidentDetails({
           </Grid>
 
           {/* Middle Column */}
-
           <Grid
             item
             xs={12}
@@ -1489,7 +1544,7 @@ function IncidentDetails({
                   </Typography>
 
                   {Array.isArray(incidentDetails?.["responders scope"]) &&
-                  incidentDetails["responders scope"].length > 0 ? (
+                    incidentDetails["responders scope"].length > 0 ? (
                     <Stack spacing={1} mt={1}>
                       <Box display="flex" flexWrap="wrap" gap={1}>
                         {incidentDetails["responders scope"].map(
@@ -1579,6 +1634,9 @@ function IncidentDetails({
                 setSelectedSummary={setSelectedSummary}
                 query={query}
                 setQuery={setQuery}
+                validateFields={validateFields}
+                fieldErrors={fieldErrors}
+                setFieldErrors={setFieldErrors}
               />
             ) : (
               <Typography
