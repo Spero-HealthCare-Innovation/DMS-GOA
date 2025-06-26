@@ -102,15 +102,38 @@ const CaseClosureDetails = ({
   const validateForm = () => {
     const errors = {};
 
+    // Responder Scope
+    if (!selectedDepartments || selectedDepartments.length === 0) {
+      errors.selectedDepartments = "Responder Scope is required";
+    }
+
+    // Vehicle Number
+    if (!formData.vehicleNumber) {
+      errors.vehicleNumber = "Vehicle Number is required";
+    } else {
+      const value = formData.vehicleNumber.replace(/-/g, '');
+      const vehicleRegex = /^[A-Z]{2}[0-9]{2}[A-Z]{1,2}[0-9]{4}$/;
+      if (value && !vehicleRegex.test(value)) {
+        errors.vehicleNumber = "Invalid format";
+      }
+    }
+
+    // Responder Name
+    if (!formData.responderName || !formData.responderName.trim()) {
+      errors.responderName = "Responder Name is required";
+    }
+
+    // Date fields
     if (!formData.acknowledge) errors.acknowledge = "Acknowledge is required";
     if (!formData.startBaseLocation) errors.startBaseLocation = "Start Base Location is required";
     if (!formData.atScene) errors.atScene = "At Scene is required";
     if (!formData.fromScene) errors.fromScene = "From Scene is required";
     if (!formData.backToBase) errors.backToBase = "Back to Base is required";
-    if (!formData.closureRemark.trim()) errors.closureRemark = "Remark is required";
 
-    // Add vehicle number validation if needed
-    if (!formData.vehicleNumber) errors.vehicleNumber = "Vehicle Number is required";
+    // Closure Remark
+    if (!formData.closureRemark || !formData.closureRemark.trim()) {
+      errors.closureRemark = "Remark is required";
+    }
 
     setValidationErrors(errors);
     return Object.keys(errors).length === 0;
@@ -770,7 +793,7 @@ const CaseClosureDetails = ({
             <Box
               sx={{
                 height: "250px",
-                // overflowY: "auto",
+                overflowY: "auto",
                 "&::-webkit-scrollbar": {
                   width: "6px",
                 },
@@ -794,7 +817,15 @@ const CaseClosureDetails = ({
                     multiple
                     displayEmpty
                     value={selectedDepartments}
-                    onChange={handleChange1}
+                    onChange={(event) => {
+                      setSelectedDepartments(event.target.value);
+                      if (validationErrors.selectedDepartments) {
+                        setValidationErrors((prev) => ({
+                          ...prev,
+                          selectedDepartments: null,
+                        }));
+                      }
+                    }}
                     renderValue={(selected) => {
                       if (selected.length === 0) {
                         return (
@@ -817,6 +848,8 @@ const CaseClosureDetails = ({
                         },
                       },
                     }}
+                    error={!!validationErrors.selectedDepartments} // <-- Add this for red border
+                    sx={validationErrors.selectedDepartments ? { border: '1px solid #d32f2f', borderRadius: 1 } : {}}
                   >
                     <MenuItem disabled value="">
                       <em>
@@ -840,17 +873,19 @@ const CaseClosureDetails = ({
                     ))}
                   </Select>
 
-                  {responderError && (
-                    <Typography variant="caption" color="error" sx={{ mt: 0.5, display: 'block' }}>
-                      {responderError}
+                  {/* Show validation error below the Select */}
+                  {(validationErrors.selectedDepartments || responderError) && (
+                    <Typography
+                      variant="caption"
+                      color="error"
+                      sx={{ mt: 0.5, display: 'block' }}
+                    >
+                      {validationErrors.selectedDepartments || responderError}
                     </Typography>
                   )}
                 </Grid>
 
-
                 <Grid item xs={6}>
-
-                  {/* <TextField id="outlined-basic" label="Vehical Number" variant="outlined"  size="small"  placeholder="Eg.MH-12-AB-1234"/> */}
                   <TextField
                     id="outlined-basic"
                     label="Vehicle Number"
@@ -895,8 +930,8 @@ const CaseClosureDetails = ({
                   // sx={textFieldStyle}
                   />
                 </Grid>
+
                 <Grid item xs={6}>
-                  {/* <TextField id="outlined-basic" label="Vehical Number" variant="outlined"  size="small"  placeholder="Eg.MH-12-AB-1234"/> */}
                   <TextField
                     id="responder-name-field"
                     label="Responder Name"
@@ -905,14 +940,10 @@ const CaseClosureDetails = ({
                     value={formData.responderName || ''}
                     onChange={(e) => {
                       const value = e.target.value;
-                      // Direct state update method
                       setFormData(prev => ({
                         ...prev,
                         responderName: value
                       }));
-
-                      // OR if you have handleChange function, use this:
-                      // handleChange("responderName", value);
 
                       // Clear validation error if exists
                       if (validationErrors.responderName) {
@@ -922,7 +953,18 @@ const CaseClosureDetails = ({
                         }));
                       }
                     }}
+                    onBlur={(e) => {
+                      // Show error if left empty on blur
+                      if (!e.target.value.trim()) {
+                        setValidationErrors((prev) => ({
+                          ...prev,
+                          responderName: "Responder Name is required",
+                        }));
+                      }
+                    }}
                     placeholder="Enter responder name"
+                    error={!!validationErrors.responderName}
+                    helperText={validationErrors.responderName}
                     InputProps={{
                       sx: {
                         color: textColor,
@@ -935,8 +977,7 @@ const CaseClosureDetails = ({
                 <LocalizationProvider dateAdapter={AdapterDateFns}>
                   <Grid item xs={6}>
                     <DateTimePicker
-                      label="Acknowledge *"
-                      slotProps={{ textField: { size: 'small' } }}
+                      label="Acknowledge"
                       value={formData.acknowledge || null}
                       onChange={(newValue) => {
                         handleChange("acknowledge", newValue);
@@ -954,19 +995,16 @@ const CaseClosureDetails = ({
                       }
                       inputFormat="yyyy-MM-dd | HH:mm"
                       views={["year", "month", "day", "hours", "minutes"]}
-                      renderInput={(params) => (
-                        <TextField
-                          {...params}
-                          fullWidth
-                          placeholder="yyyy-MM-dd | hh:mm"
-                          variant="outlined"
-                          size="small"
-                          required
-                          error={!!validationErrors.acknowledge}
-                          helperText={validationErrors.acknowledge}
-                          InputLabelProps={{ shrink: true }}
-                          InputProps={{
-                            ...params.InputProps,
+                      slotProps={{
+                        textField: {
+                          size: 'small',
+                          required: true,
+                          error: !!validationErrors.acknowledge,
+                          helperText: validationErrors.acknowledge,
+                          fullWidth: true,
+                          placeholder: "yyyy-MM-dd | hh:mm",
+                          InputLabelProps: { shrink: true },
+                          InputProps: {
                             sx: {
                               color: textColor,
                               height: "35px",
@@ -974,17 +1012,16 @@ const CaseClosureDetails = ({
                                 color: "white",
                               },
                             },
-                          }}
-                          sx={textFieldStyle}
-                        />
-                      )}
+                          },
+                          sx: textFieldStyle,
+                        }
+                      }}
                     />
                   </Grid>
 
                   <Grid item xs={6}>
                     <DateTimePicker
-                      label="Start Location *"
-                      slotProps={{ textField: { size: 'small' } }}
+                      label="Start Location"
                       value={formData.startBaseLocation || null}
                       onChange={(newValue) => {
                         handleChange("startBaseLocation", newValue);
@@ -996,44 +1033,40 @@ const CaseClosureDetails = ({
                         }
                       }}
                       ampm={false}
-                      minDateTime={formData.acknowledge ||
-                        (selectedIncidentFromSop?.incident_details?.[0]?.inc_datetime ?
-                          new Date(selectedIncidentFromSop.incident_details[0].inc_datetime) :
-                          new Date())
+                      minDateTime={
+                        formData.acknowledge ||
+                        (selectedIncidentFromSop?.incident_details?.[0]?.inc_datetime
+                          ? new Date(selectedIncidentFromSop.incident_details[0].inc_datetime)
+                          : new Date())
                       }
                       inputFormat="yyyy-MM-dd | HH:mm"
-                      renderInput={(params) => (
-                        <TextField
-                          {...params}
-                          fullWidth
-                          placeholder="yyyy-MM-dd | hh:mm"
-                          variant="outlined"
-                          size="small"
-                          required
-                          error={!!validationErrors.startBaseLocation}
-                          helperText={validationErrors.startBaseLocation}
-                          InputLabelProps={{ shrink: true }}
-                          InputProps={{
-                            ...params.InputProps,
+                      slotProps={{
+                        textField: {
+                          size: 'small',
+                          required: true,
+                          error: !!validationErrors.startBaseLocation,
+                          helperText: validationErrors.startBaseLocation,
+                          fullWidth: true,
+                          placeholder: "yyyy-MM-dd | hh:mm",
+                          InputLabelProps: { shrink: true },
+                          InputProps: {
                             sx: {
                               color: textColor,
                               height: "35px",
-                              fontSize: "0.45rem",
                               "& .MuiSvgIcon-root": {
                                 color: "white",
                               },
                             },
-                          }}
-                          sx={textFieldStyle}
-                        />
-                      )}
+                          },
+                          sx: textFieldStyle,
+                        }
+                      }}
                     />
                   </Grid>
 
                   <Grid item xs={6}>
                     <DateTimePicker
-                      label="At Scene *"
-                      slotProps={{ textField: { size: 'small' } }}
+                      label="At Scene"
                       value={formData.atScene || null}
                       onChange={(newValue) => {
                         handleChange("atScene", newValue);
@@ -1045,25 +1078,23 @@ const CaseClosureDetails = ({
                         }
                       }}
                       ampm={false}
-                      minDateTime={formData.acknowledge ||
-                        (selectedIncidentFromSop?.incident_details?.[0]?.inc_datetime ?
-                          new Date(selectedIncidentFromSop.incident_details[0].inc_datetime) :
-                          new Date())
+                      minDateTime={
+                        formData.acknowledge ||
+                        (selectedIncidentFromSop?.incident_details?.[0]?.inc_datetime
+                          ? new Date(selectedIncidentFromSop.incident_details[0].inc_datetime)
+                          : new Date())
                       }
                       inputFormat="yyyy-MM-dd | HH:mm"
-                      renderInput={(params) => (
-                        <TextField
-                          {...params}
-                          fullWidth
-                          placeholder="yyyy-MM-dd | hh:mm"
-                          variant="outlined"
-                          size="small"
-                          required
-                          error={!!validationErrors.atScene}
-                          helperText={validationErrors.atScene}
-                          InputLabelProps={{ shrink: true }}
-                          InputProps={{
-                            ...params.InputProps,
+                      slotProps={{
+                        textField: {
+                          size: 'small',
+                          required: true,
+                          error: !!validationErrors.atScene,
+                          helperText: validationErrors.atScene,
+                          fullWidth: true,
+                          placeholder: "yyyy-MM-dd | hh:mm",
+                          InputLabelProps: { shrink: true },
+                          InputProps: {
                             sx: {
                               color: textColor,
                               height: "35px",
@@ -1072,17 +1103,16 @@ const CaseClosureDetails = ({
                                 color: "white",
                               },
                             },
-                          }}
-                          sx={textFieldStyle}
-                        />
-                      )}
+                          },
+                          sx: textFieldStyle,
+                        }
+                      }}
                     />
                   </Grid>
 
                   <Grid item xs={6}>
                     <DateTimePicker
-                      label="From Scene *"
-                      slotProps={{ textField: { size: 'small' } }}
+                      label="From Scene"
                       value={formData.fromScene || null}
                       onChange={(newValue) => {
                         handleChange("fromScene", newValue);
@@ -1094,25 +1124,23 @@ const CaseClosureDetails = ({
                         }
                       }}
                       ampm={false}
-                      minDateTime={formData.acknowledge ||
-                        (selectedIncidentFromSop?.incident_details?.[0]?.inc_datetime ?
-                          new Date(selectedIncidentFromSop.incident_details[0].inc_datetime) :
-                          new Date())
+                      minDateTime={
+                        formData.acknowledge ||
+                        (selectedIncidentFromSop?.incident_details?.[0]?.inc_datetime
+                          ? new Date(selectedIncidentFromSop.incident_details[0].inc_datetime)
+                          : new Date())
                       }
                       inputFormat="yyyy-MM-dd | HH:mm"
-                      renderInput={(params) => (
-                        <TextField
-                          {...params}
-                          fullWidth
-                          placeholder="yyyy-MM-dd | hh:mm"
-                          variant="outlined"
-                          size="small"
-                          required
-                          error={!!validationErrors.fromScene}
-                          helperText={validationErrors.fromScene}
-                          InputLabelProps={{ shrink: true }}
-                          InputProps={{
-                            ...params.InputProps,
+                      slotProps={{
+                        textField: {
+                          size: 'small',
+                          required: true,
+                          error: !!validationErrors.fromScene,
+                          helperText: validationErrors.fromScene,
+                          fullWidth: true,
+                          placeholder: "yyyy-MM-dd | hh:mm",
+                          InputLabelProps: { shrink: true },
+                          InputProps: {
                             sx: {
                               color: textColor,
                               height: "35px",
@@ -1121,17 +1149,16 @@ const CaseClosureDetails = ({
                                 color: "white",
                               },
                             },
-                          }}
-                          sx={textFieldStyle}
-                        />
-                      )}
+                          },
+                          sx: textFieldStyle,
+                        }
+                      }}
                     />
                   </Grid>
 
                   <Grid item xs={6}>
                     <DateTimePicker
-                      label="Back to Base *"
-                      slotProps={{ textField: { size: 'small' } }}
+                      label="Back to Base"
                       value={formData.backToBase || null}
                       onChange={(newValue) => {
                         handleChange("backToBase", newValue);
@@ -1143,38 +1170,35 @@ const CaseClosureDetails = ({
                         }
                       }}
                       ampm={false}
-                      minDateTime={formData.acknowledge ||
-                        (selectedIncidentFromSop?.incident_details?.[0]?.inc_datetime ?
-                          new Date(selectedIncidentFromSop.incident_details[0].inc_datetime) :
-                          new Date())
+                      minDateTime={
+                        formData.acknowledge ||
+                        (selectedIncidentFromSop?.incident_details?.[0]?.inc_datetime
+                          ? new Date(selectedIncidentFromSop.incident_details[0].inc_datetime)
+                          : new Date())
                       }
                       inputFormat="yyyy-MM-dd | HH:mm"
-                      renderInput={(params) => (
-                        <TextField
-                          {...params}
-                          fullWidth
-                          placeholder="yyyy-MM-dd | hh:mm"
-                          variant="outlined"
-                          size="small"
-                          required
-                          error={!!validationErrors.backToBase}
-                          helperText={validationErrors.backToBase}
-                          InputLabelProps={{ shrink: true }}
-                          InputProps={{
-                            ...params.InputProps,
+                      slotProps={{
+                        textField: {
+                          size: 'small',
+                          required: true,
+                          error: !!validationErrors.backToBase,
+                          helperText: validationErrors.backToBase,
+                          fullWidth: true,
+                          placeholder: "yyyy-MM-dd | hh:mm",
+                          InputLabelProps: { shrink: true },
+                          InputProps: {
                             sx: {
                               color: textColor,
                               height: "35px",
                               fontSize: "0.85rem",
                               "& .MuiSvgIcon-root": {
                                 color: "white",
-                                fontSize: "0.8rem",
                               },
                             },
-                          }}
-                          sx={textFieldStyle}
-                        />
-                      )}
+                          },
+                          sx: textFieldStyle,
+                        }
+                      }}
                     />
                   </Grid>
                 </LocalizationProvider>
@@ -1229,7 +1253,7 @@ const CaseClosureDetails = ({
                 }}
               >
                 <TextField
-                  label="Remark *"
+                  label="Remark"
                   variant="outlined"
                   fullWidth
                   multiline
