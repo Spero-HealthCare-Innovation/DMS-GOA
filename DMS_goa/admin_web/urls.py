@@ -21,6 +21,7 @@ urlpatterns = [
     path('employee_changepasswordput/<int:emp_id>/',DMS_ChangePassword_put_api.as_view(),name='employee_put'),
 
     path('emp_changepassword/',DMS_ChangePassword_api.as_view(),name='employee_password'),
+    path('emp_forgotpassword/',DMS_ForgotPassword_api.as_view(),name='employee_forgot_password'),
     path('reset-password-request/', PasswordResetRequestView.as_view(), name='reset-password-request'),
     path('reset-password-confirm/<uid>/<token>/', PasswordResetConfirmView.as_view(), name='reset-password-confirm'),
 
