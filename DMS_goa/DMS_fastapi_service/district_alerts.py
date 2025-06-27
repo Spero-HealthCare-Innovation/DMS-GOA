@@ -187,6 +187,7 @@ zone_district_points = {
 #             }
 #         }]
 
+
 async def fetch_alert_and_weather(lat: float, lon: float, name: str, ward_no: str):
     ist = pytz.timezone("Asia/Kolkata")
     try:

@@ -925,6 +925,9 @@ async def send_weather_to_kafka_periodically():
 @app.on_event("startup")
 async def start_background_task():
     asyncio.create_task(send_weather_to_kafka_periodically())
+    
+    
+    
 
 
 
