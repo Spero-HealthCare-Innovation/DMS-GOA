@@ -133,6 +133,13 @@ class DMS_Employee_post_api(APIView):
             serializers.save()
             return Response(serializers.data,status=status.HTTP_201_CREATED)
         return Response(serializers.errors,status=status.HTTP_400_BAD_REQUEST) 
+    
+
+class DMS_Employee_Idwise_get_api(APIView):
+    def get(self,request,emp_id):
+        snippet = DMS_Employee.objects.filter(emp_is_deleted=False,emp_id=emp_id).order_by('-emp_added_date')
+        serializers = DMS_Employee_GET_serializer(snippet,many=True)
+        return Response(serializers.data,status=status.HTTP_200_OK)
 
 class DMS_Employee_put_api(APIView):
     def get(self, request, emp_id):
@@ -1485,3 +1492,6 @@ class Ward_Officer_get_API(APIView):
         ward = DMS_Employee.objects.filter(ward_id=ward_id,grp_id_id__grp_name='Ward Officer')
         serializer = Ward_officer_get_Serializer(ward,many=True)
         return Response(serializer.data,status=status.HTTP_200_OK)
+    
+    
+    
