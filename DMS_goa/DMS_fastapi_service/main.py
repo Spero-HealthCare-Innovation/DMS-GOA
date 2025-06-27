@@ -920,11 +920,14 @@ async def send_weather_to_kafka_periodically():
             print("✅ Sent to Kafka (new)")
         except Exception as e:
             print(f"❌ Kafka error (new): {e}")
-        await asyncio.sleep(300)  # 5 minutes
+        await asyncio.sleep(900)  # 5 minutes
 
 @app.on_event("startup")
 async def start_background_task():
     asyncio.create_task(send_weather_to_kafka_periodically())
+    
+    
+    
 
 
 

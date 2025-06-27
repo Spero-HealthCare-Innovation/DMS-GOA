@@ -18,6 +18,14 @@ class ChangePasswordSerializer(serializers.Serializer):
         password_validation.validate_password(value)
         return value
     
+class ForgotPasswordSerializer(serializers.Serializer):
+    new_password = serializers.CharField(required=True)
+
+    def validate_new_password(self, value):
+        # Optional: add Django's password validation
+        password_validation.validate_password(value)
+        return value
+    
 class PasswordResetRequestSerializer(serializers.Serializer):
     emp_email = serializers.EmailField()
 
