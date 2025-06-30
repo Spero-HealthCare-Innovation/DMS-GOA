@@ -72,6 +72,11 @@ function IncidentDetails({
   const port = import.meta.env.VITE_APP_API_KEY;
   const token = localStorage.getItem("access_token");
   const userName = localStorage.getItem("userId");
+  window.addEventListener('storage', (e) => {
+    if (e.key === 'logout') {
+      location.href = '/login';
+    }
+  });
 
   // ================================ STATES ================================
   const [selectedWard, setSelectedWard] = useState("");
