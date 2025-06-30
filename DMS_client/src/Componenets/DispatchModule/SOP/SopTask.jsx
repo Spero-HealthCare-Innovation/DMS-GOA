@@ -147,7 +147,7 @@ function SopTask({
   const [openCancelDialog, setOpenCancelDialog] = useState(false);
   const [selectedAlert, setSelectedAlert] = useState(null);
 
-  
+
   const {
     snackbarOpen,
     snackbarMessage,
@@ -770,7 +770,7 @@ function SopTask({
                               >
                                 <TextSnippetIcon
                                   // sx={{ color: "#ffccf2", fontSize: 20 }}
-                                  sx={{ color: "rgb(122 255 242)", fontSize: 20, ml: 2 }}
+                                  sx={{ color: "rgb(122 255 242)", fontSize: 20 }}
                                 />
                               </IconButton>
                             </Tooltip>
