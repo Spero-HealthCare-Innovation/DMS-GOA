@@ -1099,7 +1099,6 @@ const CaseClosureDetails = ({
                             sx: {
                               color: textColor,
                               height: "35px",
-                              fontSize: "0.85rem",
                               "& .MuiSvgIcon-root": {
                                 color: "white",
                               },
@@ -1145,7 +1144,6 @@ const CaseClosureDetails = ({
                             sx: {
                               color: textColor,
                               height: "35px",
-                              fontSize: "0.85rem",
                               "& .MuiSvgIcon-root": {
                                 color: "white",
                               },
@@ -1191,7 +1189,6 @@ const CaseClosureDetails = ({
                             sx: {
                               color: textColor,
                               height: "35px",
-                              fontSize: "0.85rem",
                               "& .MuiSvgIcon-root": {
                                 color: "white",
                               },
@@ -1271,7 +1268,6 @@ const CaseClosureDetails = ({
                             sx: {
                               color: textColor,
                               height: "35px",
-                              fontSize: "0.85rem",
                               "& .MuiSvgIcon-root": {
                                 color: "white",
                               },
@@ -1312,7 +1308,6 @@ const CaseClosureDetails = ({
                             sx: {
                               color: textColor,
                               height: "35px",
-                              fontSize: "0.85rem",
                               "& .MuiSvgIcon-root": {
                                 color: "white",
                               },
@@ -1353,7 +1348,6 @@ const CaseClosureDetails = ({
                             sx: {
                               color: textColor,
                               height: "35px",
-                              fontSize: "0.85rem",
                               "& .MuiSvgIcon-root": {
                                 color: "white",
                               },
