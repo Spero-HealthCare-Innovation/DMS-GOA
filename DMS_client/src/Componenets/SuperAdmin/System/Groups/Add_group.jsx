@@ -61,6 +61,7 @@ function Add_group({ darkMode }) {
   const [groupNameError, setGroupNameError] = useState("");
   const [departmentError, setDepartmentError] = useState("");
    const [editSelectedRowId, setEditSelectedRowId] = useState(null);
+   const [depName, setDepName]= useState([]);
 
 
   const userName = localStorage.getItem("userId");
@@ -300,16 +301,34 @@ function Add_group({ darkMode }) {
   }, []);
 
   // Handle Edit functionality
-  const handleEdit = (group) => {
-    console.log("Editing group:", group);
-    setIsEditing(true);
-    setEditingGroupId(group.id);
-    setEditSelectedRowId(group.id); // Set selected row for border
-    // direct departmentIdValue use 
-    setDepartmentId(group.departmentIdValue?.toString() || group.fullData?.dep_id?.toString() || "");
-    setGroupName(group.groupName || "");
-    handleClose();
-  };
+ const handleEdit = async (group) => {
+  setIsEditing(true);
+  setEditingGroupId(group.id);
+  setEditSelectedRowId(group.id);
+
+  try {
+    const url = `${port}/admin_web/Group_get_idwise/${group.id}/`;
+    const response = await axios.get(url, {
+      headers: {
+        Authorization: `Bearer ${effectiveToken}`,
+      },
+    });
+
+    const data = response.data?.[0];
+
+    if (data) {
+      setGroupName(data.grp_name || "");
+      setDepartmentId(data.dep_id?.toString() || ""); // यहाँ departmentId set करें
+      // setDepName को हटा दें, इसकी जरूरत नहीं है
+    }
+
+  } catch (err) {
+    console.error("Error fetching group data:", err);
+  }
+
+  handleClose();
+};
+
 
   // Delete functionality
   const deleteGroup = async (groupId) => {
@@ -867,39 +886,38 @@ function Add_group({ darkMode }) {
 
               {/* Department Select with Box wrapper */}
               <Box sx={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
-                <Select
-                  fullWidth
-                  displayEmpty
-                  placeholder="Select Department"
-                  value={departmentId}
-                  onChange={(e) => {
-                    setDepartmentId(e.target.value);
-                    if (departmentError) setDepartmentError(""); // Clear error on change
-                  }}
-                  inputProps={{
-                    "aria-label": "Select Department",
-                  }}
-                  sx={{
-                    fontFamily: "Roboto",
-                        // backgroundColor: darkMode ? "rgb(88,92,99)" : "#FFFFFF",
-                    ...selectStyles,
-                    ...(departmentError && {
-                      "& .MuiOutlinedInput-notchedOutline": {
-                        borderColor: "#d32f2f !important",
-                      },
-                    }),
-                  }}
-                  IconComponent={KeyboardArrowDownIcon}
-                >
-                  <MenuItem value="" disabled>
-                    Select Department
-                  </MenuItem>
-                  {departmentList.map((department) => (
-                    <MenuItem key={department.dep_id} value={department.dep_id.toString()}>
-                      {department.dep_name}
-                    </MenuItem>
-                  ))}
-                </Select>
+               <Select
+  fullWidth
+  displayEmpty
+  placeholder="Select Department"
+  value={departmentId} // यहाँ departmentId use करें, depName नहीं
+  onChange={(e) => {
+    setDepartmentId(e.target.value);
+    if (departmentError) setDepartmentError(""); // Clear error on change
+  }}
+  inputProps={{
+    "aria-label": "Select Department",
+  }}
+  sx={{
+    fontFamily: "Roboto",
+    ...selectStyles,
+    ...(departmentError && {
+      "& .MuiOutlinedInput-notchedOutline": {
+        borderColor: "#d32f2f !important",
+      },
+    }),
+  }}
+  IconComponent={KeyboardArrowDownIcon}
+>
+  <MenuItem value="" disabled>
+    Select Department
+  </MenuItem>
+  {departmentList.map((department) => (
+    <MenuItem key={department.dep_id} value={department.dep_id.toString()}>
+      {department.dep_name}
+    </MenuItem>
+  ))}
+</Select>
                 {departmentError && (
                   <Typography
                     sx={{
