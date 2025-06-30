@@ -304,11 +304,7 @@ const CaseClosureDetails = ({
 
       // Update selectedDepartments with remaining departments from API response
       setSelectedDepartments(remainingDepartments);
-
-
-      // Only clear form and reset data if no more departments are pending (empty array)
       if (remainingDepartments.length === 0) {
-        // Clear ALL form fields and reset everything when no departments are left
         setFormData({
           vehicleNumber: "",
           responderName: "",
