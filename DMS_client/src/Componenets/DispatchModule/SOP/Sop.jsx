@@ -38,6 +38,10 @@ function Sop({ darkMode, setDarkMode, comments }) {
   const [incidentDetails, setIncidentDetails] = useState(null);
   console.log(" incidentDetails", incidentDetails);
   const [incidentId, setIncidentId] = useState(null);
+  const [incidentIdClosure, setIncidentIdClosure] = useState(null);
+
+  console.log(incidentId, incidentIdClosure, 'incidentIdClosureincidentIdClosure');
+
   // const [disasterIdFromSop, setDisasterIdFromSop] = useState(null);
   const { setSelectedIncidentFromSop } = useAuth();
   const [highlightedId, setHighlightedId] = useState(null);
@@ -165,13 +169,15 @@ function Sop({ darkMode, setDarkMode, comments }) {
   //   }
   // };
 
+  const selectedIncidentValue = incidentId || incidentIdClosure;
+
   const fetchIncidentDetails = async () => {
-    if (!incidentId) return;
-    console.log("Fetching incident details for ID:", incidentId);
+    if (!selectedIncidentValue) return;
+    console.log("Fetching incident details for ID:", selectedIncidentValue);
     try {
       setLoading(true);
       const res = await axios.get(
-        `${port}/admin_web/incident_get/${incidentId}/`,
+        `${port}/admin_web/incident_get/${selectedIncidentValue}/`,
         {
           headers: {
             Authorization: `Bearer ${Token || newToken}`,
@@ -179,27 +185,23 @@ function Sop({ darkMode, setDarkMode, comments }) {
         }
       );
       const incidentData = res.data;
-      console.log(
-        "Disaster Detail Fetched",
-        incidentData
-      );
+      console.log("Disaster Detail Fetched", incidentData);
 
+      const details = incidentData.incident_details[0] || {};
       const enhancedIncident = {
         ...incidentData,
-        incident_id: incidentData.incident_details[0]?.incident_id, // Get from incident_details array
-        disaster_name: incidentData.incident_details[0]?.disaster_name,
-        alert_type: incidentData.incident_details[0]?.alert_type,
-        inc_id: incidentData.inc_id, // This is the numeric ID for POST
+        incident_id: details.incident_id,
+        disaster_name: details.disaster_name,
+        alert_type: details.alert_type,
+        inc_id: incidentData.inc_id,
         comments: incidentData.comments || [],
         respondersScope: incidentData["responders scope"] || [],
       };
-      // Create enhanced incident object with proper data
 
-
-      setDisasterIdFromSop(incidentData.incident_details[0]?.disaster_type);
+      setDisasterIdFromSop(details.disaster_type);
       setIncidentDetails(incidentData);
       setSelectedIncident(enhancedIncident);
-      setSelectedIncidentFromSop(enhancedIncident,incidentData); 
+      setSelectedIncidentFromSop(enhancedIncident, incidentData);
     } catch (error) {
       console.error("Error fetching incident details:", error);
       setSnackbarMessage("Failed to load incident details");
@@ -210,12 +212,10 @@ function Sop({ darkMode, setDarkMode, comments }) {
   };
 
   useEffect(() => {
-    if (incidentId) {
-      fetchIncidentDetails(); // Remove the param
+    if (selectedIncidentValue) {
+      fetchIncidentDetails();
     }
-  }, [incidentId]);
-
-
+  }, [selectedIncidentValue]);
 
 
   return (
@@ -244,11 +244,14 @@ function Sop({ darkMode, setDarkMode, comments }) {
             loading={loading}
             incidentId={incidentId}
             setIncidentId={setIncidentId}
+            setIncidentIdClosure={setIncidentIdClosure}
             incidentid={incidentId}
+            incidentIdClosure={incidentIdClosure}
             selectedIncident={selectedIncident}
             fetchDispatchList={fetchDispatchList}
             highlightedId={highlightedId}
             setHighlightedId={setHighlightedId}
+            fetchIncidentDetails={fetchIncidentDetails}
           />
         </Grid>
 
@@ -276,13 +279,14 @@ function Sop({ darkMode, setDarkMode, comments }) {
               darkMode={darkMode}
               flag={flag}
               setFlag={setFlag}
+              setSelectedIncident={setSelectedIncident}
               selectedIncident={selectedIncident}
               responderScope={responderScope}
               fetchResponderScope={fetchResponderScope}
               fetchDispatchList={fetchDispatchList}
               highlightedId={highlightedId}
               setHighlightedId={setHighlightedId}
-              
+              fetchIncidentDetails={fetchIncidentDetails}
             />
           </Grid>
         )}

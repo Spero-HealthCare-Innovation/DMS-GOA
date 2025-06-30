@@ -47,12 +47,12 @@ function Add_employee({ darkMode }) {
     selectedDistrictId,
     selectedTehsilId,
     selectedCityID,
-     selectedWardId,
+    selectedWardId,
     setSelectedStateId,
     setSelectedDistrictId,
     setSelectedTehsilId,
     setSelectedCityId,
-    setSelectedWardId ,
+    setSelectedWardId,
     loading,
     error,
   } = useAuth();
@@ -100,6 +100,9 @@ function Add_employee({ darkMode }) {
   const [showAlert, setShowAlert] = useState(false);
   const [alertMessage, setAlertMessage] = useState('');
   const [alertType, setAlertType] = useState('success'); // or 'error'
+  const [password, setPassword] = useState('');
+  const [password2, setPassword2] = useState('');
+
 
   const userName = localStorage.getItem("userId");
   console.log(userName, "userName");
@@ -203,6 +206,28 @@ function Add_employee({ darkMode }) {
       return;
     }
 
+    if (password !== password2) {
+      setFormErrors(prev => ({
+        ...prev,
+        password: "Passwords do not match",
+        password2: "Passwords do not match",
+      }));
+      showAlertMessage("Passwords do not match", 'error');
+      return;
+    }
+
+    if (!validatePassword(password)) {
+      setFormErrors(prev => ({
+        ...prev,
+        password: "Weak password",
+      }));
+      showAlertMessage(
+        "Password must be at least 8 characters and include 1 uppercase, 1 lowercase, 1 number, and 1 special character.",
+        'error'
+      );
+      return;
+    }
+
     // Generate a unique username based on name and timestamp
     const timestamp = new Date().getTime();
     const uniqueUsername = `${empName.replace(/\s+/g, '_').toLowerCase()}`;
@@ -220,12 +245,12 @@ function Add_employee({ darkMode }) {
       dist_id: selectedDistrictId,
       tahsil_id: selectedTehsilId,
       city_id: selectedCityID,
-      ward_id:selectedWardId,
+      ward_id: selectedWardId,
       emp_is_deleted: "0",
       emp_added_by: userName,
       emp_modified_by: userName,
-      password: "DMS@Spero",
-      password2: "DMS@Spero"
+      password: password,
+      password2: password2
     };
 
     try {
@@ -424,6 +449,8 @@ function Add_employee({ darkMode }) {
       }
     }
 
+
+
     setFormErrors(errors);
     return Object.keys(errors).length === 0;
   };
@@ -470,6 +497,31 @@ function Add_employee({ darkMode }) {
       return;
     }
 
+    if (password || password2) {
+      if (password !== password2) {
+        setFormErrors(prev => ({
+          ...prev,
+          password: "Passwords do not match",
+          password2: "Passwords do not match",
+        }));
+        showAlertMessage("Passwords do not match", 'error');
+        return;
+      }
+
+      if (!validatePassword(password)) {
+        setFormErrors(prev => ({
+          ...prev,
+          password: "Weak password",
+        }));
+        showAlertMessage(
+          "Password must be at least 8 characters and include 1 uppercase, 1 lowercase, 1 number, and 1 special character.",
+          'error'
+        );
+        return;
+      }
+    }
+
+
     // Create payload with only fields that have values
     const payload = {};
 
@@ -483,6 +535,9 @@ function Add_employee({ darkMode }) {
     if (selectedDistrictId) payload.dist_id = selectedDistrictId;
     if (selectedTehsilId) payload.tahsil_id = selectedTehsilId;
     if (selectedCityID) payload.city_id = selectedCityID;
+    if (selectedWardId) payload.ward_id = selectedWardId;
+    if (password) payload.password = password;
+    if (password2) payload.password2 = password2;
 
     payload.emp_modified_by = userName;
 
@@ -525,10 +580,13 @@ function Add_employee({ darkMode }) {
     setEmpDOJ('');
     setEmpDOB('');
     setGroupId('');
+    setPassword('');
+    setPassword2('');
     setSelectedStateId('');
     setSelectedDistrictId('');
     setSelectedTehsilId('');
     setSelectedCityId('');
+    setSelectedWardId(''); // Add this line
 
     // Reset editing state
     setIsEditing(false);
@@ -636,6 +694,31 @@ function Add_employee({ darkMode }) {
   //   setFormErrors(errors);
   //   return Object.keys(errors).length === 0;
   // };
+
+
+  const validatePassword = (password) => {
+    return /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?#&])[A-Za-z\d@$!%*?#&]{8,}$/.test(password);
+  };
+
+  const fetchDistrictsByState = async (stateId) => {
+    // This function should already exist in your context, if not add it
+    setSelectedStateId(stateId);
+  };
+
+  const fetchTehsilsByDistrict = async (districtId) => {
+    // This function should already exist in your context, if not add it  
+    setSelectedDistrictId(districtId);
+  };
+
+  const fetchCitiesByTehsil = async (tehsilId) => {
+    // This function should already exist in your context, if not add it
+    setSelectedTehsilId(tehsilId);
+  };
+
+  const fetchWardsByCity = async (cityId) => {
+    // This function should already exist in your context, if not add it
+    setSelectedCityId(cityId);
+  };
 
 
   return (
@@ -1101,7 +1184,7 @@ function Add_employee({ darkMode }) {
               if (selectedEmployee && selectedEmployee.fullData) {
                 const empData = selectedEmployee.fullData;
 
-                // First populate basic fields
+                // Basic field values
                 setEmpName(empData.emp_name);
                 setEmpContact(empData.emp_contact_no);
                 setEmpEmail(empData.emp_email);
@@ -1109,32 +1192,40 @@ function Add_employee({ darkMode }) {
                 setEmpDOB(empData.emp_dob);
                 setGroupId(empData.grp_id);
 
-                // Set editing mode first
+                // Keep existing passwords if they exist, don't reset to empty
+                setPassword(empData.password || '');
+                setPassword2(empData.password2 || '');
+
+                // Set editing flags
                 setIsEditing(true);
                 setEditingEmployeeId(empData.emp_id);
-                setEditSelectedRowId(emp_id);
-                // Then set location IDs in sequence to trigger dependent loading
-                setSelectedStateId(empData.state_id);
+                setEditSelectedRowId(empData.emp_id);
 
-
-                // Use setTimeout to ensure state is set before setting district
-                setTimeout(() => {
+                // Set location data directly - make sure the context has this data loaded
+                if (empData.state_id) {
+                  setSelectedStateId(empData.state_id);
+                }
+                if (empData.dist_id) {
                   setSelectedDistrictId(empData.dist_id);
-                }, 100);
-
-                setTimeout(() => {
+                }
+                if (empData.tahsil_id) {
                   setSelectedTehsilId(empData.tahsil_id);
-                }, 200);
-
-                setTimeout(() => {
+                }
+                if (empData.city_id) {
                   setSelectedCityId(empData.city_id);
-                }, 300);
+                }
+                if (empData.ward_id) {
+                  setSelectedWardId(empData.ward_id);
+                }
+
+                handleClose();
               }
-              handleClose();
             }}
+
           >
             Edit
           </Button>
+
         </Popover>
 
         <Grid item xs={12} md={4.9}>
@@ -1584,10 +1675,11 @@ function Add_employee({ darkMode }) {
                 />
               </Grid>
 
-                <Grid item xs={12} sm={6}>
+              <Grid item xs={12} sm={6}>
                 <TextField
                   fullWidth
-                  // value={password}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
                   placeholder="Password"
                   error={!!formErrors.empName}
                   helperText={formErrors.empName}
@@ -1596,11 +1688,12 @@ function Add_employee({ darkMode }) {
                 />
               </Grid>
 
-               <Grid item xs={12} sm={6}>
+              <Grid item xs={12} sm={6}>
                 <TextField
                   fullWidth
-                  // value={password}
-                  placeholder="Password 1"
+                  value={password2}
+                  onChange={(e) => setPassword2(e.target.value)}
+                  placeholder="Confirm Password"
                   error={!!formErrors.empName}
                   helperText={formErrors.empName}
                   InputLabelProps={{ shrink: false }}

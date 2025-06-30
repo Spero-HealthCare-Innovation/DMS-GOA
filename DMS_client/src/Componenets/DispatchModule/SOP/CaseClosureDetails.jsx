@@ -41,6 +41,15 @@ const CaseClosureDetails = ({
     disasterIdFromSop
   );
 
+  window.addEventListener('storage', (e) => {
+    if (e.key === 'logout') {
+      location.href = '/login';
+    }
+  });
+
+
+  console.log("selectedIncidentselectedIncident", selectedIncident);
+
   const [isDataCleared, setIsDataCleared] = useState(false);
   const [validationErrors, setValidationErrors] = useState({});
 
@@ -259,18 +268,19 @@ const CaseClosureDetails = ({
     const payload = {
       incident_id: incidentId,
       inc_id: numericIncId,
-      responder: selectedDepartments.length > 0 ? selectedDepartments[0] : "", // Add responder
-      responder_name: formData.responderName || "", // Add responder_name if you have it
+      // responder: selectedDepartments.length > 0 ? selectedDepartments[0] : "", 
+      responder: selectedDepartments,
+      closure_responder_name: formData.responderName || "",
       vehicle_no: formData.vehicleNumber,
       closure_acknowledge: formData.acknowledge ? formatDate(formData.acknowledge) : "",
       closure_start_base_location: formData.startBaseLocation ? formatDate(formData.startBaseLocation) : "",
       closure_at_scene: formData.atScene ? formatDate(formData.atScene) : "",
       closure_from_scene: formData.fromScene ? formatDate(formData.fromScene) : "",
       closure_back_to_base: formData.backToBase ? formatDate(formData.backToBase) : "",
-      incident_responder_by: "PDA officer", // Add this field
+      // incident_responder_by: selectedDepartments,
       closure_added_by: userName,
       closure_modified_by: userName,
-      closure_modified_date: new Date().toISOString(), // Add current timestamp
+      closure_modified_date: new Date().toISOString(),
       closure_remark: formData.closureRemark,
     };
 
@@ -303,12 +313,8 @@ const CaseClosureDetails = ({
       const remainingDepartments = res.data.Departments || [];
 
       // Update selectedDepartments with remaining departments from API response
-      setSelectedDepartments(remainingDepartments);
-
-
-      // Only clear form and reset data if no more departments are pending (empty array)
+      // setSelectedDepartments(remainingDepartments);
       if (remainingDepartments.length === 0) {
-        // Clear ALL form fields and reset everything when no departments are left
         setFormData({
           vehicleNumber: "",
           responderName: "",
@@ -319,12 +325,11 @@ const CaseClosureDetails = ({
           backToBase: "",
           closureRemark: "",
         });
+        setSelectedDepartments([]);
         setSelectedIncidentFromSop(null);
         setIsDataCleared(true);
         fetchDispatchList();
-        await fetchResponderList();
-      } else {
-        // If departments are still pending, only clear vehicle and responder specific fields
+        await fetchResponderList(numericIncId);
         setFormData(prev => ({
           ...prev,
           vehicleNumber: "",
@@ -335,10 +340,9 @@ const CaseClosureDetails = ({
           atScene: "",
           fromScene: "",
           backToBase: "",
-          // Keep the datetime fields as they are likely same for all responders
         }));
-        await fetchResponderList();
-
+        setSelectedDepartments([]);
+        await fetchResponderList(numericIncId);
       }
 
     } catch (error) {
@@ -814,7 +818,6 @@ const CaseClosureDetails = ({
               <Grid container spacing={2} sx={{ mt: 0.6 }}>
                 <Grid item xs={6}>
                   <Select
-                    multiple
                     displayEmpty
                     value={selectedDepartments}
                     onChange={(event) => {
@@ -827,14 +830,14 @@ const CaseClosureDetails = ({
                       }
                     }}
                     renderValue={(selected) => {
-                      if (selected.length === 0) {
+                      if (!selected) {
                         return (
                           <span style={{ color: "#888", fontStyle: "normal" }}>
                             {responderLoading ? "Loading..." : "Responder Scope"}
                           </span>
                         );
                       }
-                      return selected.join(", ");
+                      return selected;
                     }}
                     size="small"
                     fullWidth
@@ -848,7 +851,7 @@ const CaseClosureDetails = ({
                         },
                       },
                     }}
-                    error={!!validationErrors.selectedDepartments} // <-- Add this for red border
+                    error={!!validationErrors.selectedDepartments}
                     sx={validationErrors.selectedDepartments ? { border: '1px solid #d32f2f', borderRadius: 1 } : {}}
                   >
                     <MenuItem disabled value="">
@@ -867,13 +870,11 @@ const CaseClosureDetails = ({
                         key={responder.responder_id || index}
                         value={responder.responder_name || responder.name}
                       >
-                        {/* Only show text, no checkbox */}
                         {responder.responder_name || responder.name}
                       </MenuItem>
                     ))}
                   </Select>
 
-                  {/* Show validation error below the Select */}
                   {(validationErrors.selectedDepartments || responderError) && (
                     <Typography
                       variant="caption"
@@ -1019,7 +1020,7 @@ const CaseClosureDetails = ({
                     />
                   </Grid>
 
-                  <Grid item xs={6}>
+                  {/* <Grid item xs={6}>
                     <DateTimePicker
                       label="Start Location"
                       value={formData.startBaseLocation || null}
@@ -1176,6 +1177,168 @@ const CaseClosureDetails = ({
                           ? new Date(selectedIncidentFromSop.incident_details[0].inc_datetime)
                           : new Date())
                       }
+                      inputFormat="yyyy-MM-dd | HH:mm"
+                      slotProps={{
+                        textField: {
+                          size: 'small',
+                          required: true,
+                          error: !!validationErrors.backToBase,
+                          helperText: validationErrors.backToBase,
+                          fullWidth: true,
+                          placeholder: "yyyy-MM-dd | hh:mm",
+                          InputLabelProps: { shrink: true },
+                          InputProps: {
+                            sx: {
+                              color: textColor,
+                              height: "35px",
+                              fontSize: "0.85rem",
+                              "& .MuiSvgIcon-root": {
+                                color: "white",
+                              },
+                            },
+                          },
+                          sx: textFieldStyle,
+                        }
+                      }}
+                    />
+                  </Grid> */}
+                  <Grid item xs={6}>
+                    <DateTimePicker
+                      label="Start Location"
+                      value={formData.startBaseLocation || null}
+                      onChange={(newValue) => {
+                        handleChange("startBaseLocation", newValue);
+                        if (validationErrors.startBaseLocation) {
+                          setValidationErrors((prev) => ({
+                            ...prev,
+                            startBaseLocation: null,
+                          }));
+                        }
+                      }}
+                      ampm={false}
+                      minDateTime={formData.acknowledge || null}
+                      inputFormat="yyyy-MM-dd | HH:mm"
+                      slotProps={{
+                        textField: {
+                          size: 'small',
+                          required: true,
+                          error: !!validationErrors.startBaseLocation,
+                          helperText: validationErrors.startBaseLocation,
+                          fullWidth: true,
+                          placeholder: "yyyy-MM-dd | hh:mm",
+                          InputLabelProps: { shrink: true },
+                          InputProps: {
+                            sx: {
+                              color: textColor,
+                              height: "35px",
+                              "& .MuiSvgIcon-root": {
+                                color: "white",
+                              },
+                            },
+                          },
+                          sx: textFieldStyle,
+                        }
+                      }}
+                    />
+                  </Grid>
+
+                  <Grid item xs={6}>
+                    <DateTimePicker
+                      label="At Scene"
+                      value={formData.atScene || null}
+                      onChange={(newValue) => {
+                        handleChange("atScene", newValue);
+                        if (validationErrors.atScene) {
+                          setValidationErrors((prev) => ({
+                            ...prev,
+                            atScene: null,
+                          }));
+                        }
+                      }}
+                      ampm={false}
+                      minDateTime={formData.startBaseLocation || null}
+                      inputFormat="yyyy-MM-dd | HH:mm"
+                      slotProps={{
+                        textField: {
+                          size: 'small',
+                          required: true,
+                          error: !!validationErrors.atScene,
+                          helperText: validationErrors.atScene,
+                          fullWidth: true,
+                          placeholder: "yyyy-MM-dd | hh:mm",
+                          InputLabelProps: { shrink: true },
+                          InputProps: {
+                            sx: {
+                              color: textColor,
+                              height: "35px",
+                              fontSize: "0.85rem",
+                              "& .MuiSvgIcon-root": {
+                                color: "white",
+                              },
+                            },
+                          },
+                          sx: textFieldStyle,
+                        }
+                      }}
+                    />
+                  </Grid>
+
+                  <Grid item xs={6}>
+                    <DateTimePicker
+                      label="From Scene"
+                      value={formData.fromScene || null}
+                      onChange={(newValue) => {
+                        handleChange("fromScene", newValue);
+                        if (validationErrors.fromScene) {
+                          setValidationErrors((prev) => ({
+                            ...prev,
+                            fromScene: null,
+                          }));
+                        }
+                      }}
+                      ampm={false}
+                      minDateTime={formData.atScene || null}
+                      inputFormat="yyyy-MM-dd | HH:mm"
+                      slotProps={{
+                        textField: {
+                          size: 'small',
+                          required: true,
+                          error: !!validationErrors.fromScene,
+                          helperText: validationErrors.fromScene,
+                          fullWidth: true,
+                          placeholder: "yyyy-MM-dd | hh:mm",
+                          InputLabelProps: { shrink: true },
+                          InputProps: {
+                            sx: {
+                              color: textColor,
+                              height: "35px",
+                              fontSize: "0.85rem",
+                              "& .MuiSvgIcon-root": {
+                                color: "white",
+                              },
+                            },
+                          },
+                          sx: textFieldStyle,
+                        }
+                      }}
+                    />
+                  </Grid>
+
+                  <Grid item xs={6}>
+                    <DateTimePicker
+                      label="Back to Base"
+                      value={formData.backToBase || null}
+                      onChange={(newValue) => {
+                        handleChange("backToBase", newValue);
+                        if (validationErrors.backToBase) {
+                          setValidationErrors((prev) => ({
+                            ...prev,
+                            backToBase: null,
+                          }));
+                        }
+                      }}
+                      ampm={false}
+                      minDateTime={formData.fromScene || null}
                       inputFormat="yyyy-MM-dd | HH:mm"
                       slotProps={{
                         textField: {

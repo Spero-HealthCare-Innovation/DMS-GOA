@@ -362,7 +362,7 @@ export const AuthProvider = ({ children }) => {
   // ✅ useEffect for selectedTehsilId change (fetch cities)
   useEffect(() => {
     if (selectedTehsilId) {
-      fetchCitysByTehshil(selectedTehsilId);
+      fetchCitysByTehshil(selectedTehsilId);fetchDistrictsByState 
       fetchWardsByTehshil(selectedTehsilId);
       setSelectedCityId("");
     } else {
