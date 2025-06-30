@@ -41,6 +41,15 @@ const CaseClosureDetails = ({
     disasterIdFromSop
   );
 
+  window.addEventListener('storage', (e) => {
+    if (e.key === 'logout') {
+      location.href = '/login';
+    }
+  });
+
+
+  console.log("selectedIncidentselectedIncident", selectedIncident);
+
   const [isDataCleared, setIsDataCleared] = useState(false);
   const [validationErrors, setValidationErrors] = useState({});
 
@@ -259,18 +268,19 @@ const CaseClosureDetails = ({
     const payload = {
       incident_id: incidentId,
       inc_id: numericIncId,
-      responder: selectedDepartments.length > 0 ? selectedDepartments[0] : "", // Add responder
-      responder_name: formData.responderName || "", // Add responder_name if you have it
+      // responder: selectedDepartments.length > 0 ? selectedDepartments[0] : "", 
+      responder: selectedDepartments, 
+      closure_responder_name: formData.responderName || "", 
       vehicle_no: formData.vehicleNumber,
       closure_acknowledge: formData.acknowledge ? formatDate(formData.acknowledge) : "",
       closure_start_base_location: formData.startBaseLocation ? formatDate(formData.startBaseLocation) : "",
       closure_at_scene: formData.atScene ? formatDate(formData.atScene) : "",
       closure_from_scene: formData.fromScene ? formatDate(formData.fromScene) : "",
       closure_back_to_base: formData.backToBase ? formatDate(formData.backToBase) : "",
-      incident_responder_by: "PDA officer", // Add this field
+      // incident_responder_by: selectedDepartments,
       closure_added_by: userName,
       closure_modified_by: userName,
-      closure_modified_date: new Date().toISOString(), // Add current timestamp
+      closure_modified_date: new Date().toISOString(), 
       closure_remark: formData.closureRemark,
     };
 
@@ -810,7 +820,6 @@ const CaseClosureDetails = ({
               <Grid container spacing={2} sx={{ mt: 0.6 }}>
                 <Grid item xs={6}>
                   <Select
-                    multiple
                     displayEmpty
                     value={selectedDepartments}
                     onChange={(event) => {
@@ -823,14 +832,14 @@ const CaseClosureDetails = ({
                       }
                     }}
                     renderValue={(selected) => {
-                      if (selected.length === 0) {
+                      if (!selected) {
                         return (
                           <span style={{ color: "#888", fontStyle: "normal" }}>
                             {responderLoading ? "Loading..." : "Responder Scope"}
                           </span>
                         );
                       }
-                      return selected.join(", ");
+                      return selected;
                     }}
                     size="small"
                     fullWidth
@@ -844,7 +853,7 @@ const CaseClosureDetails = ({
                         },
                       },
                     }}
-                    error={!!validationErrors.selectedDepartments} // <-- Add this for red border
+                    error={!!validationErrors.selectedDepartments}
                     sx={validationErrors.selectedDepartments ? { border: '1px solid #d32f2f', borderRadius: 1 } : {}}
                   >
                     <MenuItem disabled value="">
@@ -863,13 +872,11 @@ const CaseClosureDetails = ({
                         key={responder.responder_id || index}
                         value={responder.responder_name || responder.name}
                       >
-                        {/* Only show text, no checkbox */}
                         {responder.responder_name || responder.name}
                       </MenuItem>
                     ))}
                   </Select>
 
-                  {/* Show validation error below the Select */}
                   {(validationErrors.selectedDepartments || responderError) && (
                     <Typography
                       variant="caption"

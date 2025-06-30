@@ -121,6 +121,8 @@ function SopTask({
   flag,
   setFlag,
   setSelectedIncident,
+  setIncidentIdClosure,
+  incidentIdClosure,
   setViewmode,
   dispatchList,
   loading = false,
@@ -129,6 +131,7 @@ function SopTask({
   fetchDispatchList,
   highlightedId,
   setHighlightedId,
+  fetchIncidentDetails
 }) {
   const port = import.meta.env.VITE_APP_API_KEY;
   const socketUrl = import.meta.env.VITE_SOCKET_API_KEY;
@@ -156,31 +159,31 @@ function SopTask({
 
 
 
-const dataList = flag === 1 ? alerts : dispatchList;
+  const dataList = flag === 1 ? alerts : dispatchList;
 
 
-const filteredDispatchList = dataList.filter((item) => {
-  const searchLower = searchTerm.trim().toLowerCase();
-  return (
-    item.incident_id?.toString().toLowerCase().includes(searchLower) ||
-    item.disaster_name?.toLowerCase().includes(searchLower) ||
-    item.inc_added_by?.toLowerCase().includes(searchLower) ||
-    item.inc_type?.toString().toLowerCase().includes(searchLower)
-  );
-});
-useEffect(() => {
-  setPage(1);
-}, [searchTerm]);
+  const filteredDispatchList = dataList.filter((item) => {
+    const searchLower = searchTerm.trim().toLowerCase();
+    return (
+      item.incident_id?.toString().toLowerCase().includes(searchLower) ||
+      item.disaster_name?.toLowerCase().includes(searchLower) ||
+      item.inc_added_by?.toLowerCase().includes(searchLower) ||
+      item.inc_type?.toString().toLowerCase().includes(searchLower)
+    );
+  });
+  useEffect(() => {
+    setPage(1);
+  }, [searchTerm]);
 
-// 3. Pagination ke liye start/end indexes
-const startIndex = (page - 1) * rowsPerPage;
-const endIndex = startIndex + rowsPerPage;
+  // 3. Pagination ke liye start/end indexes
+  const startIndex = (page - 1) * rowsPerPage;
+  const endIndex = startIndex + rowsPerPage;
 
-// 4. Slice filtered data
-const paginatedDispatchList = filteredDispatchList.slice(startIndex, endIndex);
+  // 4. Slice filtered data
+  const paginatedDispatchList = filteredDispatchList.slice(startIndex, endIndex);
 
-// 5. Total pages filter ke according
-const totalPages = Math.ceil(filteredDispatchList.length / rowsPerPage) || 1;
+  // 5. Total pages filter ke according
+  const totalPages = Math.ceil(filteredDispatchList.length / rowsPerPage) || 1;
 
 
   const { setSelectedIncidentFromSop, setDisasterIdFromSop, setCommentText } =
@@ -195,8 +198,7 @@ const totalPages = Math.ceil(filteredDispatchList.length / rowsPerPage) || 1;
     let socket;
     const timer = setTimeout(() => {
       socket = new WebSocket(
-        `${socketUrl}/ws/weather_alerts_trigger2?token=${
-          AccessToken || newToken
+        `${socketUrl}/ws/weather_alerts_trigger2?token=${AccessToken || newToken
         }`
       );
 
@@ -245,7 +247,7 @@ const totalPages = Math.ceil(filteredDispatchList.length / rowsPerPage) || 1;
     setViewmode("incident"); // Reset view mode to incident
   };
 
-  
+
   // const handleForward = () => {
   //   setFlag(1);
   //   setSelectedIncident(); // Clear selected incident
@@ -550,16 +552,16 @@ const totalPages = Math.ceil(filteredDispatchList.length / rowsPerPage) || 1;
                     >
                       {item.alert_datetime
                         ? new Date(item.alert_datetime).toLocaleString(
-                            "en-US",
-                            {
-                              day: "2-digit",
-                              month: "long",
-                              year: "numeric",
-                              hour: "numeric",
-                              minute: "2-digit",
-                              hour12: true,
-                            }
-                          )
+                          "en-US",
+                          {
+                            day: "2-digit",
+                            month: "long",
+                            year: "numeric",
+                            hour: "numeric",
+                            minute: "2-digit",
+                            hour12: true,
+                          }
+                        )
                         : "N/A"}
                     </Typography>
                   </StyledCardContent>
@@ -634,7 +636,7 @@ const totalPages = Math.ceil(filteredDispatchList.length / rowsPerPage) || 1;
                         width: "6px",
                       },
                       "&::-webkit-scrollbar-thumb": {
-                         backgroundColor: darkMode ? "#5FC8EC" : "#888",
+                        backgroundColor: darkMode ? "#5FC8EC" : "#888",
                         borderRadius: 3,
                       },
                       "&::-webkit-scrollbar-thumb:hover": {
@@ -675,16 +677,16 @@ const totalPages = Math.ceil(filteredDispatchList.length / rowsPerPage) || 1;
                             >
                               {item.inc_added_date
                                 ? new Date(item.inc_added_date).toLocaleString(
-                                    "en-US",
-                                    {
-                                      day: "2-digit",
-                                      month: "long",
-                                      year: "numeric",
-                                      hour: "numeric",
-                                      minute: "2-digit",
-                                      hour12: true,
-                                    }
-                                  )
+                                  "en-US",
+                                  {
+                                    day: "2-digit",
+                                    month: "long",
+                                    year: "numeric",
+                                    hour: "numeric",
+                                    minute: "2-digit",
+                                    hour12: true,
+                                  }
+                                )
                                 : "N/A"}
                             </Typography>
                           </StyledCardContent>
@@ -738,7 +740,7 @@ const totalPages = Math.ceil(filteredDispatchList.length / rowsPerPage) || 1;
                                   setSelectedIncidentFromSop(item);
                                   setDisasterIdFromSop(item.disaster_name);
                                   setHighlightedId(item.incident_id);
-                                  console.log("Incident idd", setIncidentId);
+                                  console.log("Incident idd", incidentId);
                                   setFlag(0);
                                   setViewmode("incident");
                                 }}
@@ -753,19 +755,21 @@ const totalPages = Math.ceil(filteredDispatchList.length / rowsPerPage) || 1;
                               <IconButton
                                 onClick={() => {
                                   setSelectedIncident(item);
-                                  setIncidentId(item.inc_id);
+                                  // setIncidentId(item.inc_id);
+                                  setIncidentIdClosure(item.inc_id);
                                   setSelectedIncidentFromSop(item);
                                   setDisasterIdFromSop(item.disaster_name);
                                   setHighlightedId(item.incident_id);
-                                  console.log("Incident idd", setIncidentId);
+                                  console.log("Closure idd", incidentIdClosure);
                                   setFlag(0);
                                   setViewmode("closure");
+                                  fetchIncidentDetails();
                                 }}
                                 size="large"
                               >
                                 <TextSnippetIcon
                                   // sx={{ color: "#ffccf2", fontSize: 20 }}
-                                  sx={{ color: "rgb(122 255 242)", fontSize: 20 }}
+                                  sx={{ color: "rgb(122 255 242)", fontSize: 20, ml: 2 }}
                                 />
                               </IconButton>
                             </Tooltip>
