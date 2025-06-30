@@ -519,7 +519,7 @@ class DMS_incident_closure(models.Model):
     image = models.FileField(upload_to='media_files/', null=True, blank=True)
     closure_inc_id = models.CharField(max_length=255, null=True, blank=True)
     closure_amb_no = models.CharField(max_length=255, null=True, blank=True)
-    incident_responder_by = models.CharField(max_length=100, null=True, blank=True)
+    closure_responder_name = models.CharField(max_length=100, null=True, blank=True)
     closure_added_by = models.CharField(max_length=255, null=True, blank=True)
     closure_added_date = models.DateTimeField(auto_now=True,null=True, blank=True)
     closure_modified_by = models.CharField(max_length=255, null=True, blank=True)
