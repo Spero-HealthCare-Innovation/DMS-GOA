@@ -33,7 +33,7 @@ import { useAuth } from "./../../../Context/ContextAPI";
 function ClosureDetail({ darkMode, fromDate, toDate, onChange, onDownload }) {
   const textColor = darkMode ? "#ffffff" : "#000000";
   const bgColor = "linear-gradient(to bottom, #53bce1, rgb(173, 207, 216))";
-  const paper = darkMode ? "202328":"#FFFFFF";
+  const paper = darkMode ? "202328" : "#FFFFFF";
   const tableRow = "rgb(53 53 53)";
   const labelColor = darkMode ? "#5FECC8" : "#1976d2";
   const fontFamily = "Roboto, sans-serif";
@@ -353,82 +353,82 @@ function ClosureDetail({ darkMode, fromDate, toDate, onChange, onDownload }) {
 
           {/* From Date */}
 
-          
 
 
-           <Grid item md={4}>
-  <DatePicker
-    label="From Date *"
-    format="yyyy-MM-dd"
-    slotProps={{ textField: { size: 'small' } }}
-    value={formData.fromDate || null}
-    onChange={(newValue) => handleChange("fromDate", newValue)}
-    renderInput={(params) => (
-      <TextField
-        {...params}
-        fullWidth
-        placeholder="yyyy-MM-dd"
-        variant="outlined"
-        size="small"
-        required
-        error={!!validationErrors.fromdate}
-        helperText={validationErrors.fromdate}
-        InputLabelProps={{ shrink: true }}
-        InputProps={{
-          ...params.InputProps,
-          sx: {
-            color: textColor,
-            height: "35px",
-            fontSize: "0.45rem",
-            "& .MuiSvgIcon-root": {
-              color: "white",
-            },
-          },
-        }}
-        sx={textFieldStyle}
-      />
-    )}
-  />
-</Grid>
 
-        
+          <Grid item md={4}>
+            <DatePicker
+              label="From Date *"
+              format="yyyy-MM-dd"
+              slotProps={{ textField: { size: 'small' } }}
+              value={formData.fromDate || null}
+              onChange={(newValue) => handleChange("fromDate", newValue)}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  fullWidth
+                  placeholder="yyyy-MM-dd"
+                  variant="outlined"
+                  size="small"
+                  required
+                  error={!!validationErrors.fromdate}
+                  helperText={validationErrors.fromdate}
+                  InputLabelProps={{ shrink: true }}
+                  InputProps={{
+                    ...params.InputProps,
+                    sx: {
+                      color: textColor,
+                      height: "35px",
+                      fontSize: "0.45rem",
+                      "& .MuiSvgIcon-root": {
+                        color: "white",
+                      },
+                    },
+                  }}
+                  sx={textFieldStyle}
+                />
+              )}
+            />
+          </Grid>
 
 
-            {/* To Date */}
-         <Grid item>
-  <DatePicker
-    label="To Date *"
-    format="yyyy-MM-dd"
-    slotProps={{ textField: { size: 'small' } }}
-    value={formData.toDate || null}
-    onChange={(newValue) => handleChange("toDate", newValue)}
-    renderInput={(params) => (
-      <TextField
-        {...params}
-        fullWidth
-        placeholder="yyyy-MM-dd"
-        variant="outlined"
-        size="small"
-        required
-        error={!!validationErrors.startBaseLocation}
-        helperText={validationErrors.startBaseLocation}
-        InputLabelProps={{ shrink: true }}
-        InputProps={{
-          ...params.InputProps,
-          sx: {
-            color: textColor,
-            height: "35px",
-            fontSize: "0.45rem",
-            "& .MuiSvgIcon-root": {
-              color: "white",
-            },
-          },
-        }}
-        sx={textFieldStyle}
-      />
-    )}
-  />
-</Grid>
+
+
+          {/* To Date */}
+          <Grid item>
+            <DatePicker
+              label="To Date *"
+              format="yyyy-MM-dd"
+              slotProps={{ textField: { size: 'small' } }}
+              value={formData.toDate || null}
+              onChange={(newValue) => handleChange("toDate", newValue)}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  fullWidth
+                  placeholder="yyyy-MM-dd"
+                  variant="outlined"
+                  size="small"
+                  required
+                  error={!!validationErrors.startBaseLocation}
+                  helperText={validationErrors.startBaseLocation}
+                  InputLabelProps={{ shrink: true }}
+                  InputProps={{
+                    ...params.InputProps,
+                    sx: {
+                      color: textColor,
+                      height: "35px",
+                      fontSize: "0.45rem",
+                      "& .MuiSvgIcon-root": {
+                        color: "white",
+                      },
+                    },
+                  }}
+                  sx={textFieldStyle}
+                />
+              )}
+            />
+          </Grid>
 
 
           {/* Submit Button */}
@@ -437,12 +437,11 @@ function ClosureDetail({ darkMode, fromDate, toDate, onChange, onDownload }) {
             size="small"
             sx={{
               backgroundColor: "rgb(18,166,95,0.8)",
-              color: "#fff",
               "&:hover": { backgroundColor: "rgb(18,166,95,0.8)" },
               height: 35,
               minWidth: 100,
               color: darkMode ? "#fff" : "#fff",
-                 textTransform: 'none'
+              textTransform: 'none'
             }}
             onClick={onSubmit}
           >
@@ -485,7 +484,7 @@ function ClosureDetail({ darkMode, fromDate, toDate, onChange, onDownload }) {
       )}
 
       <Grid item xs={12} md={7}>
-        <Paper elevation={3} sx={{ padding: 3, borderRadius: 3, backgroundColor:paper, mt: 1, mb: 5 }}>
+        <Paper elevation={3} sx={{ padding: 3, borderRadius: 3, backgroundColor: paper, mt: 1, mb: 5 }}>
           <TableContainer>
             <Table>
               <TableHead>
@@ -496,7 +495,7 @@ function ClosureDetail({ darkMode, fromDate, toDate, onChange, onDownload }) {
                     display: "flex",
                     width: "100%",
                     borderRadius: 2,
-                      position: "sticky",
+                    position: "sticky",
                     p: 3,
                   }}>
                     <StyledCardContent
@@ -624,22 +623,22 @@ function ClosureDetail({ darkMode, fromDate, toDate, onChange, onDownload }) {
 
               <TableBody
                 sx={{
-                    display: "block",
-                    maxHeight: "50vh",
-                    overflowY: "auto",
-                    scrollBehavior: "smooth",
-                    width: "100%",
-                    "&::-webkit-scrollbar": {
-                      width: "6px",
-                    },
-                    "&::-webkit-scrollbar-thumb": {
-                      backgroundColor: darkMode ? "#5FC8EC" : "#888",
-                      borderRadius: 3,
-                    },
-                    "&::-webkit-scrollbar-thumb:hover": {
-                      backgroundColor: darkMode ? "#5FC8EC" : "#555",
-                    },
-                  }}
+                  display: "block",
+                  maxHeight: "50vh",
+                  overflowY: "auto",
+                  scrollBehavior: "smooth",
+                  width: "100%",
+                  "&::-webkit-scrollbar": {
+                    width: "6px",
+                  },
+                  "&::-webkit-scrollbar-thumb": {
+                    backgroundColor: darkMode ? "#5FC8EC" : "#888",
+                    borderRadius: 3,
+                  },
+                  "&::-webkit-scrollbar-thumb:hover": {
+                    backgroundColor: darkMode ? "#5FC8EC" : "#555",
+                  },
+                }}
               >
                 {loading ? (
                   <Box p={4} display="flex" justifyContent="center">
@@ -662,7 +661,7 @@ function ClosureDetail({ darkMode, fromDate, toDate, onChange, onDownload }) {
                     <EnquiryCardBody
                       key={index}
                       sx={{
-                       backgroundColor: tableRow,
+                        backgroundColor: tableRow,
                         p: 2,
                         borderRadius: 2,
                         color: textColor,
@@ -733,7 +732,7 @@ function ClosureDetail({ darkMode, fromDate, toDate, onChange, onDownload }) {
                   borderColor: borderColor,
                   height: "30px",
                   minWidth: "70px",
-                backgroundColor:darkMode ? "#202328":"#FFFFFF",
+                  backgroundColor: darkMode ? "#202328" : "#FFFFFF",
                   "& .MuiOutlinedInput-notchedOutline": {
                     borderColor: borderColor,
                   },
@@ -761,7 +760,7 @@ function ClosureDetail({ darkMode, fromDate, toDate, onChange, onDownload }) {
                 gap: 2,
                 color: textColor,
                 fontSize: "13px",
-               backgroundColor:darkMode ? "#202328":"#FFFFFF",
+                backgroundColor: darkMode ? "#202328" : "#FFFFFF",
               }}
             >
               <Box

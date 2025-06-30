@@ -40,7 +40,7 @@ function Sop({ darkMode, setDarkMode, comments }) {
   const [incidentId, setIncidentId] = useState(null);
   // const [disasterIdFromSop, setDisasterIdFromSop] = useState(null);
   const { setSelectedIncidentFromSop } = useAuth();
-    const [highlightedId, setHighlightedId] = useState(null);
+  const [highlightedId, setHighlightedId] = useState(null);
 
 
 
@@ -199,7 +199,7 @@ function Sop({ darkMode, setDarkMode, comments }) {
       setDisasterIdFromSop(incidentData.incident_details[0]?.disaster_type);
       setIncidentDetails(incidentData);
       setSelectedIncident(enhancedIncident);
-      setSelectedIncidentFromSop(enhancedIncident); // Set with enhanced data
+      setSelectedIncidentFromSop(enhancedIncident,incidentData); 
     } catch (error) {
       console.error("Error fetching incident details:", error);
       setSnackbarMessage("Failed to load incident details");
@@ -265,9 +265,9 @@ function Sop({ darkMode, setDarkMode, comments }) {
               dispatchList={dispatchList}
               fetchDispatchList={fetchDispatchList}
               incidentDetails={incidentDetails}
-                   highlightedId={highlightedId}
-                   setHighlightedId={setHighlightedId}
-                   fetchIncidentDetails={fetchIncidentDetails}
+              highlightedId={highlightedId}
+              setHighlightedId={setHighlightedId}
+              fetchIncidentDetails={fetchIncidentDetails}
             />
           </Grid>
         ) : (
@@ -280,8 +280,9 @@ function Sop({ darkMode, setDarkMode, comments }) {
               responderScope={responderScope}
               fetchResponderScope={fetchResponderScope}
               fetchDispatchList={fetchDispatchList}
-                   highlightedId={highlightedId}
-                   setHighlightedId={setHighlightedId}
+              highlightedId={highlightedId}
+              setHighlightedId={setHighlightedId}
+              
             />
           </Grid>
         )}

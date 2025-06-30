@@ -26,6 +26,22 @@ function CommentsPanel({
   fetchIncidentDetails,
   highlightedId,
   setHighlightedId,
+  selectedDistrictId,
+  selectedTehsilId,
+  selectedWard,
+  selectedWardOfficer,
+  selectedSummary,
+  query,
+
+  setSelectedDistrictId,
+  setSelectedTehsilId,
+  setSelectedWard,
+  setSelectedWardOfficer,
+  setSelectedSummary,
+  setQuery,
+  validateFields,
+  fieldErrors,
+  setFieldErrors,
 }) {
   const port = import.meta.env.VITE_APP_API_KEY;
   const userName = localStorage.getItem("userId");
@@ -94,7 +110,29 @@ function CommentsPanel({
   }, [fetchIncidentDetails]);
 
   const handlealertSaveClick = async () => {
-    if (!commentText.trim()) return;
+    // Prepare error object
+    const errors = {};
+
+    if (!commentText.trim()) errors.comment = "Comment is required";
+    if (!selectedDistrictId) errors.district = "District is required";
+    if (!selectedTehsilId) errors.tehsil = "Tehsil is required";
+    if (!selectedWard) errors.ward = "Ward is required";
+    if (!selectedWardOfficer || selectedWardOfficer.length === 0) errors.wardOfficer = "Ward Officer is required";
+    if (!selectedSummary) errors.summary = "Summary is required";
+    if (!query) errors.location = "Location is required";
+
+    // If any errors, set them and show snackbar
+    if (Object.keys(errors).length > 0) {
+      setFieldErrors(errors);
+      setSnackbar({
+        open: true,
+        message: "Please fill all required fields.",
+        severity: "error",
+      });
+      return;
+    } else {
+      setFieldErrors({});
+    }
 
     const payload = {
       responder_scope: selectedResponders.map(String),
@@ -107,6 +145,12 @@ function CommentsPanel({
       longitude: selectedIncident?.longitude,
       alert_type: selectedIncident?.alert_type,
       mode: "2",
+      district: selectedDistrictId,
+      tahsil: selectedTehsilId,
+      ward: selectedWard,
+      ward_officer: selectedWardOfficer.map(Number),
+      summary: selectedSummary,
+      location: query,
     };
 
     try {
@@ -130,6 +174,14 @@ function CommentsPanel({
         setFlag(0);
 
         setHighlightedId(null);
+
+        setSelectedDistrictId("");
+        setSelectedTehsilId("");
+        setSelectedWard("");
+        setSelectedWardOfficer("");
+        setSelectedSummary("");
+        setQuery("");
+        setFieldErrors({});
         await fetchDispatchList();
       } else {
         throw new Error("API Error");
@@ -143,6 +195,70 @@ function CommentsPanel({
       });
     }
   };
+  //   const handlealertSaveClick = async () => {
+  //     if (!commentText.trim()) return;
+
+  //     const payload = {
+  //       responder_scope: selectedResponders.map(String),
+  //       alert_id: selectedIncident?.pk_id,
+  //       disaster_type: selectedIncident?.disaster_id_id,
+  //       comments: commentText,
+  //       comm_added_by: userName,
+  //       inc_added_by: userName,
+  //       latitude: selectedIncident?.latitude,
+  //       longitude: selectedIncident?.longitude,
+  //       alert_type: selectedIncident?.alert_type,
+  //       mode: "2",
+  //       district: selectedDistrictId,
+  //       tahsil: selectedTehsilId,
+  //       ward: selectedWard,
+  // ward_officer: selectedWardOfficer.map(Number),
+  //       summary: selectedSummary,
+  //      location: query,
+  //     };
+
+  //     console.log(location)
+  //     try {
+  //       const response = await fetch(`${port}/admin_web/DMS_Incident_Post/`, {
+  //         method: "POST",
+  //         headers: {
+  //           "Content-Type": "application/json",
+  //           Authorization: `Bearer ${Token || newToken}`,
+  //         },
+  //         body: JSON.stringify(payload),
+  //       });
+
+  //       if (response.ok) {
+  //         setSnackbar({
+  //           open: true,
+  //           message: "Dispatch alert sent successfully!",
+  //           severity: "success",
+  //         });
+  //         setCommentText("");
+  //         setSelectedResponders([]);
+  //         setFlag(0);
+
+  //         setHighlightedId(null);
+
+  //         setSelectedDistrictId("");
+  //         setSelectedTehsilId("");
+  //         setSelectedWard("");
+  //         setSelectedWardOfficer("");
+  //         setSelectedSummary("");
+  //         setQuery("");
+  //         await fetchDispatchList();
+  //       } else {
+  //         throw new Error("API Error");
+  //       }
+  //     } catch (err) {
+  //       console.error(err);
+  //       setSnackbar({
+  //         open: true,
+  //         message: "Failed to send dispatch alert.",
+  //         severity: "error",
+  //       });
+  //     }
+  //   };
 
   // const handleCommentSendClick = async () => {
   //   if (!commentText.trim()) return;
@@ -348,8 +464,7 @@ function CommentsPanel({
                 comm_id,
                 comments: commentMsg,
                 comm_added_by,
-                comm_added_date ,
-          
+                comm_added_date,
               }) => {
                 const isOwnComment = comm_added_by === userName;
                 return (
@@ -398,15 +513,18 @@ function CommentsPanel({
                           variant="caption"
                           sx={{ fontSize: "0.7rem", opacity: 0.7 }}
                         >
-                            {comm_added_date
-    ? new Date(comm_added_date).toLocaleString("en-IN", {
-        day: "2-digit",
-        month: "short",
-        year: "numeric",
-        hour: "2-digit",
-        minute: "2-digit",
-      })
-    : "N/A"}
+                          {comm_added_date
+                            ? new Date(comm_added_date).toLocaleString(
+                              "en-IN",
+                              {
+                                day: "2-digit",
+                                month: "short",
+                                year: "numeric",
+                                hour: "2-digit",
+                                minute: "2-digit",
+                              }
+                            )
+                            : "N/A"}
                         </Typography>
                       </Box>
                     </Stack>
@@ -458,7 +576,7 @@ function CommentsPanel({
             color="primary"
             onClick={handlealertSaveClick}
             disabled={!commentText.trim()}
-            sx={{ alignSelf: "flex-end", px: 4 ,textTransform: 'none'}}
+            sx={{ alignSelf: "flex-end", px: 4, textTransform: "none" }}
           >
             Save
           </Button>
@@ -501,27 +619,25 @@ function CommentsPanel({
             sx={{ backgroundColor: "transparent" }}
           />
 
- <Button
-  variant="contained"
-  onClick={handleCommentSendClick}
-  disabled={!commentText.trim()}
-  sx={{
-    backgroundColor: "#0F4D0F",
-    color: "#fff",
-    borderRadius: 2,
-    px: 3,
-    whiteSpace: "nowrap",
-    height: "100%",
-    textTransform: "none", 
-    '&:hover': {
-      backgroundColor: "#006400",
-    },
-  }}
->
-  Send
-</Button>
-
-
+          <Button
+            variant="contained"
+            onClick={handleCommentSendClick}
+            disabled={!commentText.trim()}
+            sx={{
+              backgroundColor: "#0F4D0F",
+              color: "#fff",
+              borderRadius: 2,
+              px: 3,
+              whiteSpace: "nowrap",
+              height: "100%",
+              textTransform: "none",
+              "&:hover": {
+                backgroundColor: "#006400",
+              },
+            }}
+          >
+            Send
+          </Button>
         </Box>
       ) : (
         // No Incident Selected UI

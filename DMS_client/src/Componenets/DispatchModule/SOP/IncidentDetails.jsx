@@ -25,6 +25,7 @@ import DialogTitle from "@mui/material/DialogTitle";
 import DialogContent from "@mui/material/DialogContent";
 import CloseIcon from "@mui/icons-material/Close";
 import { ArrowDropDownCircleOutlined } from "@mui/icons-material";
+import * as turf from "@turf/turf";
 
 function IncidentDetails({
   darkMode,
@@ -56,28 +57,52 @@ function IncidentDetails({
     // // borderBottom: `1px solid ${borderColor}`,
   };
 
+  const inputStyle = {
+    mb: 0.5,
+    color: "white",
+  };
+
+  // =================== STORAGE LISTENER FOR AUTO-LOGOUT ===================
   window.addEventListener("storage", (e) => {
     if (e.key === "logout") {
       location.href = "/login";
     }
   });
-
+  // =================== ENVIRONMENT & LOCALSTORAGE VALUES ==================
   const port = import.meta.env.VITE_APP_API_KEY;
   const token = localStorage.getItem("access_token");
-
   const userName = localStorage.getItem("userId");
 
+  // ================================ STATES ================================
   const [selectedWard, setSelectedWard] = useState("");
   const [wardList, setWardList] = useState([]);
   const [selectedSummary, setSelectedSummary] = useState("");
   const [summaryList, setSummaryList] = useState([]);
-  // const [location, setLocation] = useState("");
-  const [selectedWardOfficer, setSelectedWardOfficer] = useState("");
+  const [selectedWardOfficer, setSelectedWardOfficer] = useState([]);
   const [wardOfficerList, setWardOfficerList] = useState([]);
   const [selectedResponders, setSelectedResponders] = useState([]);
-  const [Lattitude, setLattitude] = useState("");
+  const [Latitude, setLatitude] = useState("");
   const [Longitude, setLongitude] = useState("");
+  const [openDialog, setOpenDialog] = useState(false);
 
+  const [stateData, setStateData] = useState(null);
+
+  // =========== FLAGS FOR MANUAL FIELD OVERRIDE ============================
+  const [districtManual, setDistrictManual] = useState(false);
+  const [tehsilManual, setTehsilManual] = useState(false);
+  const [wardManual, setWardManual] = useState(false);
+
+  // =================== CONTEXT (useAuth) VARIABLES ========================
+
+  const {
+    wardName,
+    setWardName,
+    tehsilName,
+
+    districtName,
+  } = useAuth();
+
+  // ======= MORE CONTEXT FROM AUTH (FOR LOCATION / DROPDOWNS / API) ========
   const {
     newToken,
     disaterid,
@@ -86,6 +111,8 @@ function IncidentDetails({
     districts,
     fetchDistrictsByState,
     Tehsils,
+    setTehsilName,
+    setDistrictName,
     selectedDistrictId,
     selectedTehsilId,
     selectedCityID,
@@ -99,19 +126,24 @@ function IncidentDetails({
     suggestions,
     handleSelectSuggestion,
     location,
-    lattitude,
+    latitude,
     longitude,
+    setQuery,
   } = useAuth();
 
+  // ==================== INCIDENT HANDLING ===============================
   let incident = {};
 
   if (selectedIncident?.inc_id) {
     incident = incidentDetails?.incident_details?.[0] || {};
   }
 
+  // ============ FETCH DISTRICTS ON LOAD =============================
   useEffect(() => {
     fetchDistrictsByState();
   }, []);
+
+  // ============ FETCH WARDS ON TEHSIL CHANGE ==========================
 
   useEffect(() => {
     if (selectedTehsilId) {
@@ -131,6 +163,8 @@ function IncidentDetails({
     }
   }, [selectedTehsilId]);
 
+  // ============ FETCH WARD OFFICERS ON WARD CHANGE =====================
+
   useEffect(() => {
     if (selectedWard) {
       const fetchWardOfficerList = async () => {
@@ -149,15 +183,7 @@ function IncidentDetails({
     }
   }, [selectedWard]);
 
-  useEffect(() => {
-    if (selectedIncident) {
-      setLattitude(selectedIncident.latitude || "");
-      setLongitude(selectedIncident.longitude || "");
-    }
-  }, [selectedIncident]);
-
-  console.log(`Latitude: ${Lattitude}, Longitude: ${Longitude}`);
-
+  // =================== FETCH SUMMARY DATA =============================
   const fetchSummary = async () => {
     const res = await fetch(`${port}/admin_web/DMS_Summary_Get/1/`, {
       headers: {
@@ -171,6 +197,123 @@ function IncidentDetails({
     fetchSummary();
   }, []);
 
+  // ============ SET LATITUDE/LONGITUDE FROM SELECTED INCIDENT ===========
+
+  useEffect(() => {
+    if (selectedIncident) {
+      setLatitude(selectedIncident.latitude || "");
+      setLongitude(selectedIncident.longitude || "");
+    }
+  }, [selectedIncident]);
+
+  console.log(`Latitude: ${Latitude}, Longitude: ${Longitude}`);
+
+  // ==================== GIS CODE START ================================
+
+  // === Load GeoJSON for boundary matching ===
+  useEffect(() => {
+    fetch("/Boundaries/PUNEWARDS.geojson") // Your GeoJSON with ward, tehsil, district
+      .then((res) => res.json())
+      .then((data) => setStateData(data))
+      .catch((err) => console.error("GeoJSON Load Error:", err));
+  }, []);
+
+  // === Load GeoJSON for boundary matching ===
+  const getAdministrativeNames = (lat, lng, geojson) => {
+    if (!geojson || !lat || !lng) return { ward: "", tehsil: "", district: "" };
+
+    const latNum = parseFloat(lat);
+    const lngNum = parseFloat(lng);
+    if (isNaN(latNum) || isNaN(lngNum)) {
+      console.log("❌ Invalid coordinates – skipping boundary match.");
+      return { ward: "", tehsil: "", district: "" };
+    }
+
+    const point = turf.point([lngNum, latNum]);
+
+    const matchedFeature = geojson.features.find((feature) =>
+      turf.booleanPointInPolygon(point, feature)
+    );
+
+    if (matchedFeature) {
+      const { Name1, Teshil, District } = matchedFeature.properties;
+      return {
+        ward: Name1 || "",
+        tehsil: Teshil || "",
+        //district: Name || ""
+        district: District || "",
+      };
+    }
+
+    return { ward: "", tehsil: "", district: "" };
+  };
+
+  // === Auto-set dropdowns based on matched boundaries ===
+  useEffect(() => {
+    if (!selectedIncident || !stateData || !stateData.features?.length) return;
+
+    const { latitude, longitude } = selectedIncident;
+    const { ward, tehsil, district } = getAdministrativeNames(
+      latitude,
+      longitude,
+      stateData
+    );
+
+    if (!ward && !tehsil && !district) {
+      console.log("⚠️ No match");
+      return;
+    }
+
+    const matchedDistrict = districts?.find((d) => d.dis_name === district);
+    const matchedTehsil = Tehsils?.find((t) => t.tah_name === tehsil);
+    const matchedWard = wardList?.find((w) => w.ward_name === ward);
+
+    if (matchedDistrict && !districtManual) {
+      setSelectedDistrictId(matchedDistrict.dis_id);
+    }
+    if (matchedTehsil && !tehsilManual) {
+      setSelectedTehsilId(matchedTehsil.tah_id);
+    }
+    if (matchedWard && !wardManual) {
+      setSelectedWard(matchedWard.pk_id);
+    }
+
+    setWardName(ward);
+    setTehsilName(tehsil);
+    setDistrictName(district);
+  }, [selectedIncident, stateData, districts, Tehsils, wardList]);
+
+  // === Reset manual flags when incident changes ===
+
+  useEffect(() => {
+    if (selectedIncident) {
+      setDistrictManual(false);
+      setTehsilManual(false);
+      setWardManual(false);
+    }
+  }, [selectedIncident]);
+  // ==================== GIS CODE END ================================
+
+  // ============ SET LOCATION INPUT FIELD BASED ON INCIDENT ============
+  useEffect(() => {
+    if (selectedIncident?.location) {
+      setQuery(selectedIncident.location); // update input field via context
+      handleSearchChange({ target: { value: selectedIncident.location } }); // trigger suggestions
+    }
+  }, [selectedIncident]);
+
+  // ======== RESET FORM FIELDS WHEN NEW INCIDENT SELECTED =============
+
+  useEffect(() => {
+    if (selectedIncident) {
+      setSelectedDistrictId("");
+      setSelectedTehsilId("");
+      setSelectedWard("");
+      setSelectedWardOfficer([]);
+      setSelectedSummary("");
+    }
+  }, [selectedIncident]);
+
   const respondersList = incidentDetails?.responders || [];
 
   const comments = incidentDetails?.comments || [];
@@ -179,29 +322,9 @@ function IncidentDetails({
   // This can be customized further based on your design requirements
 
   // Function to render text with label and value
-  const renderText = (label, value) => (
-    <Box sx={boxStyle}>
-      <Typography
-        sx={{
-          color: labelColor,
-          fontWeight: 500,
-          fontFamily,
-          fontSize: "14px",
-          mt: 1,
-        }}
-      >
-        {label}
-      </Typography>
-      {selectedIncident ? (
-        <Typography variant="subtitle2" sx={{ fontFamily }}>
-          {value || "N/A"}
-        </Typography>
-      ) : (
-        <Skeleton variant="text" width={100} height={24} />
-      )}
-    </Box>
-  );
 
+  // ================== RESPONDER & COMMENT DATA ========================
+  // ============ SET DEFAULT RESPONDERS ===============================
   useEffect(() => {
     if (Array.isArray(responderScope?.responder_scope)) {
       const defaultSelected = responderScope.responder_scope.map(
@@ -211,19 +334,19 @@ function IncidentDetails({
     }
   }, [responderScope]);
 
-  const [openDialog, setOpenDialog] = useState(false);
+  // ================== FIELD VALIDATION LOGIC ==========================
 
-  // Get the response procedure text
-  const responseProcedure =
-    responderScope?.sop_responses?.[0]?.sop_description ||
-    incidentDetails?.sop_responses?.[0]?.sop_description ||
-    "";
-
-  // Helper to get first 2 lines (or less)
-  const getFirstTwoLines = (text) => {
-    if (!text) return "";
-    const lines = text.split("\n");
-    return lines.slice(0, 2).join("\n") + (lines.length > 2 ? "..." : "");
+  const [fieldErrors, setFieldErrors] = useState({});
+  const validateFields = () => {
+    const errors = {};
+    if (!selectedDistrictId) errors.district = "District is required";
+    if (!selectedTehsilId) errors.tehsil = "Tahsil is required";
+    if (!selectedWard) errors.ward = "Ward is required";
+    if (!selectedWardOfficer.length) errors.wardOfficer = "Ward Officer is required";
+    if (!query) errors.location = "Location is required";
+    if (!selectedSummary) errors.summary = "Summary is required";
+    setFieldErrors(errors);
+    return Object.keys(errors).length === 0;
   };
 
   return (
@@ -287,30 +410,34 @@ function IncidentDetails({
                           fontSize: "13.5px",
                         }}
                       >
-                        District
+                        District *
                       </Typography>
                       <TextField
                         select
                         fullWidth
                         size="small"
                         value={selectedDistrictId}
-                        onChange={(e) => setSelectedDistrictId(e.target.value)}
+                        onChange={(e) => {
+                          setDistrictManual(true); // Only this field is now manually controlled
+                          setSelectedDistrictId(e.target.value);
+                        }}
                         placeholder="Select District"
                         sx={{ mt: 0.5, fontFamily }}
+                        error={!!fieldErrors.district}
+                        helperText={fieldErrors.district}
                       >
                         <MenuItem value="" disabled>
                           Select District
                         </MenuItem>
-                        {districts?.map((item, index) => (
+                        {districts?.map((item) => (
                           <MenuItem key={item.dis_id} value={item.dis_id}>
                             {item.dis_name}
                           </MenuItem>
                         ))}
-                        {/* <MenuItem value="pune">Pune</MenuItem>
-                        <MenuItem value="mumbai">Mumbai</MenuItem> */}
                       </TextField>
                     </Box>
                   </Grid>
+
                   {/* TAHSIL */}
                   <Grid item xs={12} md={6}>
                     <Box sx={Style}>
@@ -322,21 +449,27 @@ function IncidentDetails({
                           fontSize: "13.5px",
                         }}
                       >
-                        Tahsil
+                        Tahsil *
                       </Typography>
                       <TextField
                         select
                         fullWidth
                         size="small"
                         value={selectedTehsilId}
-                        onChange={(e) => setSelectedTehsilId(e.target.value)}
+                        onChange={(e) => {
+                          setTehsilManual(true);
+                          setSelectedTehsilId(e.target.value);
+                        }}
                         placeholder="Select Tahsil"
+                        disabled={!selectedDistrictId}
                         sx={{ mt: 0.5, fontFamily }}
+                        error={!!fieldErrors.tehsil}
+                        helperText={fieldErrors.tehsil}
                       >
                         <MenuItem value="" disabled>
                           Select Tahsil
                         </MenuItem>
-                        {Tehsils?.map((item, index) => (
+                        {Tehsils?.map((item) => (
                           <MenuItem key={item.tah_id} value={item.tah_id}>
                             {item.tah_name}
                           </MenuItem>
@@ -344,6 +477,7 @@ function IncidentDetails({
                       </TextField>
                     </Box>
                   </Grid>
+
                   {/* WARD */}
                   <Grid item xs={12} md={6}>
                     <Box sx={Style}>
@@ -355,21 +489,54 @@ function IncidentDetails({
                           fontSize: "13.5px",
                         }}
                       >
-                        Ward
+                        Ward *
                       </Typography>
                       <TextField
                         select
                         fullWidth
                         size="small"
                         value={selectedWard}
-                        onChange={(e) => setSelectedWard(e.target.value)}
+                        onChange={(e) => {
+                          setWardManual(true);
+                          setSelectedWard(e.target.value);
+                        }}
                         placeholder="Select Ward"
-                        sx={{ mt: 0.5, fontFamily }}
+                        sx={{
+                          mt: 0.5,
+                          ...inputStyle,
+                          "& .MuiSelect-select": {
+                            overflowY: "auto",
+                            "&::-webkit-scrollbar": { width: "6px" },
+                            "&::-webkit-scrollbar-track": {
+                              background: darkMode ? "#2e2e2e" : "#f1f1f1",
+                              borderRadius: "3px",
+                            },
+                            "&::-webkit-scrollbar-thumb": {
+                              background: darkMode ? "#555" : "#888",
+                              borderRadius: "3px",
+                            },
+                            "&::-webkit-scrollbar-thumb:hover": {
+                              background: darkMode ? "#777" : "#555",
+                            },
+                          },
+                        }}
+                        SelectProps={{
+                          MenuProps: {
+                            PaperProps: {
+                              style: {
+                                maxHeight: 200,
+                                maxWidth: 400,
+                              },
+                            },
+                          },
+                        }}
+                        error={!!fieldErrors.ward}
+                        helperText={fieldErrors.ward}
                       >
                         <MenuItem value="" disabled>
                           Select Ward
                         </MenuItem>
-                        {wardList?.map((item, index) => (
+                        {wardList?.map((item) => (
                           <MenuItem key={item.pk_id} value={item.pk_id}>
                             {item.ward_name}
                           </MenuItem>
@@ -377,6 +544,7 @@ function IncidentDetails({
                       </TextField>
                     </Box>
                   </Grid>
+
                   {/* WARD OFFICER */}
                   <Grid item xs={12} md={6}>
                     <Box sx={Style}>
@@ -388,22 +556,39 @@ function IncidentDetails({
                           fontSize: "13.5px",
                         }}
                       >
-                        Ward Officer
+                        Ward Officer *
                       </Typography>
                       <TextField
                         select
                         fullWidth
                         size="small"
+                        SelectProps={{
+                          multiple: true, renderValue: (selected) => selected.map(id => {
+                            const officer = wardOfficerList.find(item => item.emp_id === id);
+                            return officer ? officer.emp_name : id;
+                          }).join(', ')
+                        }}
                         value={selectedWardOfficer}
                         onChange={(e) => setSelectedWardOfficer(e.target.value)}
-                        placeholder="Select Ward Officer"
+                        disabled={!selectedWard}
                         sx={{ mt: 0.5, fontFamily }}
+                        error={!!fieldErrors.wardOfficer}
+                        helperText={fieldErrors.wardOfficer}
                       >
-                        <MenuItem value="" disabled>
-                          Select Ward Officer
+                        <MenuItem
+                          value="all"
+                          onClick={() => {
+                            if (selectedWardOfficer.length === wardOfficerList.length) {
+                              setSelectedWardOfficer([]);
+                            } else {
+                              setSelectedWardOfficer(wardOfficerList.map(item => item.emp_id));
+                            }
+                          }}
+                        >
                         </MenuItem>
-                        {wardOfficerList?.map((item, index) => (
+                        {wardOfficerList?.map((item) => (
                           <MenuItem key={item.emp_id} value={item.emp_id}>
+                            <Checkbox checked={selectedWardOfficer.indexOf(item.emp_id) > -1} />
                             {item.emp_name}
                           </MenuItem>
                         ))}
@@ -412,9 +597,8 @@ function IncidentDetails({
                   </Grid>
 
                   {/* LOCATION */}
-
-                  <Grid item xs={12} md={6}>
-                    <Box sx={Style}>
+                  <Grid item xs={12}>
+                    <Box sx={{}}>
                       <Typography
                         sx={{
                           color: labelColor,
@@ -423,7 +607,7 @@ function IncidentDetails({
                           fontSize: "13.5px",
                         }}
                       >
-                        Location
+                        Location *
                       </Typography>
 
                       <Autocomplete
@@ -431,12 +615,16 @@ function IncidentDetails({
                         freeSolo
                         size="small"
                         options={suggestions.map((item) => item.address.label)}
-                        inputValue={query}
+                        inputValue={query || ""}
                         onInputChange={(event, newValue) => {
+                          setQuery(newValue);
+                          setFieldErrors((prev) => ({ ...prev, location: undefined }));
                           if (event)
                             handleSearchChange({ target: { value: newValue } });
                         }}
                         onChange={(event, newValue) => {
+                          setQuery(newValue || "");
+                          setFieldErrors((prev) => ({ ...prev, location: undefined }));
                           const selected = suggestions.find(
                             (s) => s.address.label === newValue
                           );
@@ -446,10 +634,9 @@ function IncidentDetails({
                           <TextField
                             {...params}
                             placeholder="Enter Location"
-                            sx={{
-                              mt: 0.5,
-                              fontFamily,
-                            }}
+                            sx={{ mt: 0.5, fontFamily }}
+                            error={!!fieldErrors.location}
+                            helperText={fieldErrors.location}
                           />
                         )}
                         PaperComponent={({ children }) => (
@@ -485,7 +672,7 @@ function IncidentDetails({
                   </Grid>
 
                   {/* SUMMARY */}
-                  <Grid item xs={12} md={6}>
+                  <Grid item xs={12}>
                     <Box sx={Style}>
                       <Typography
                         sx={{
@@ -495,7 +682,7 @@ function IncidentDetails({
                           fontSize: "13.5px",
                         }}
                       >
-                        Summary
+                        Summary *
                       </Typography>
                       <TextField
                         select
@@ -505,11 +692,13 @@ function IncidentDetails({
                         onChange={(e) => setSelectedSummary(e.target.value)}
                         placeholder="Select Summary"
                         sx={{ mt: 0.5, fontFamily }}
+                        error={!!fieldErrors.summary}
+                        helperText={fieldErrors.summary}
                       >
                         <MenuItem value="" disabled>
                           Select Summary
                         </MenuItem>
-                        {summaryList?.map((item, index) => (
+                        {summaryList?.map((item) => (
                           <MenuItem key={item.sum_id} value={item.sum_id}>
                             {item.summary}
                           </MenuItem>
@@ -524,28 +713,284 @@ function IncidentDetails({
                 <>
                   {incident?.mode === 2 ? (
                     <>
-                      {renderText("Incident Id", incident?.incident_id)}
-                      {renderText(
-                        "Incident Type",
-                        incident?.inc_type === 1
-                          ? "Emergency"
-                          : incident?.inc_type === 2
-                          ? "Non-Emergency"
-                          : "N/A"
-                      )}
-                      {renderText(
-                        "Alert Type",
-                        incident?.alert_type === 1
-                          ? "High"
-                          : incident?.alert_type === 2
-                          ? "Medium"
-                          : incident?.alert_type === 3
-                          ? "Low"
-                          : incident?.alert_type === 4
-                          ? "very Low"
-                          : "N/A"
-                      )}
-                      {renderText("Disaster Type", incident?.disaster_name)}
+                      <Box
+                        sx={{
+                          // maxHeight: '250px', overflowY: 'auto',
+                          scrollBehavior: "smooth",
+                          "&::-webkit-scrollbar": {
+                            width: "6px",
+                          },
+                          "&::-webkit-scrollbar-thumb": {
+                            backgroundColor: darkMode ? "#0288d1" : "#888",
+                            borderRadius: 3,
+                          },
+                          "&::-webkit-scrollbar-thumb:hover": {
+                            backgroundColor: darkMode ? "#5FC8EC" : "#555",
+                          },
+                        }}
+                      >
+                        <Grid container spacing={2}>
+                          {/* <Grid item xs={12} md={12}>
+                          <Typography
+                            variant="body2"
+                            sx={{ color: labelColor, fontWeight: 500, fontFamily, fontSize: '18px', borderBottom: '1px solid #ccc' }}
+                          >
+                            Incident Details
+                          </Typography>
+                        </Grid> */}
+                          {/* 
+                        <Grid item xs={12} md={6}>
+                          <Box>
+                            <Typography
+                              variant="body2"
+                              sx={{
+                                color: labelColor,
+                                fontWeight: 500,
+                                fontFamily,
+                              }}
+                            >
+                              Caller Name
+                            </Typography>
+                            <Typography
+                              variant="subtitle2"
+                              sx={{
+                                fontFamily,
+                                color: textColor,
+                                wordBreak: "break-word",
+                              }}
+                            >
+                              {incident?.caller_name || "N/A"}
+                            </Typography>
+                          </Box>
+                        </Grid> */}
+
+                          {/* <Grid item xs={12} md={6}>
+                          <Box>
+                            <Typography
+                              variant="body2"
+                              sx={{
+                                color: labelColor,
+                                fontWeight: 500,
+                                fontFamily,
+                              }}
+                            >
+                              Caller Number
+                            </Typography>
+                            <Typography
+                              variant="subtitle2"
+                              sx={{
+                                fontFamily,
+                                color: textColor,
+                                wordBreak: "break-word",
+                              }}
+                            >
+                              {incident?.caller_no || "N/A"}
+                            </Typography>
+                          </Box>
+                        </Grid> */}
+
+                          <Grid item xs={12} md={6}>
+                            <Box>
+                              <Typography
+                                variant="body2"
+                                sx={{
+                                  color: labelColor,
+                                  fontWeight: 500,
+                                  fontFamily,
+                                }}
+                              >
+                                Ward
+                              </Typography>
+                              <Typography
+                                variant="subtitle2"
+                                sx={{
+                                  fontFamily,
+                                  color: textColor,
+                                  wordBreak: "break-word",
+                                }}
+                              >
+                                {incident?.ward_name || "N/A"}
+                              </Typography>
+                            </Box>
+                          </Grid>
+
+                          <Grid item xs={12} md={6}>
+                            <Box>
+                              <Typography
+                                variant="body2"
+                                sx={{
+                                  color: labelColor,
+                                  fontWeight: 500,
+                                  fontFamily,
+                                }}
+                              >
+                                Tehsil
+                              </Typography>
+                              <Typography
+                                variant="subtitle2"
+                                sx={{
+                                  fontFamily,
+                                  color: textColor,
+                                  wordBreak: "break-word",
+                                }}
+                              >
+                                {incident?.tahsil_name || "N/A"}
+                              </Typography>
+                            </Box>
+                          </Grid>
+
+                          <Grid item xs={12} md={6}>
+                            <Box>
+                              <Typography
+                                variant="body2"
+                                sx={{
+                                  color: labelColor,
+                                  fontWeight: 500,
+                                  fontFamily,
+                                }}
+                              >
+                                District
+                              </Typography>
+                              <Typography
+                                variant="subtitle2"
+                                sx={{
+                                  fontFamily,
+                                  color: textColor,
+                                  wordBreak: "break-word",
+                                }}
+                              >
+                                {incident?.district_name || "N/A"}
+                              </Typography>
+                            </Box>
+                          </Grid>
+
+                          <Grid item xs={12} md={6}>
+                            <Box>
+                              <Typography
+                                variant="body2"
+                                sx={{
+                                  color: labelColor,
+                                  fontWeight: 500,
+                                  fontFamily,
+                                }}
+                              >
+                                Location
+                              </Typography>
+
+                              {incident?.location &&
+                                incident.location.length > 20 ? (
+                                <Tooltip title={incident.location} arrow>
+                                  <Typography
+                                    variant="subtitle2"
+                                    sx={{
+                                      fontFamily,
+                                      color: textColor,
+                                      wordBreak: "break-word",
+                                      cursor: "pointer",
+                                    }}
+                                  >
+                                    {incident.location.slice(0, 20)}...
+                                  </Typography>
+                                </Tooltip>
+                              ) : (
+                                <Typography
+                                  variant="subtitle2"
+                                  sx={{
+                                    fontFamily,
+                                    color: textColor,
+                                    wordBreak: "break-word",
+                                  }}
+                                >
+                                  {incident?.location || "N/A"}
+                                </Typography>
+                              )}
+                            </Box>
+                          </Grid>
+                          <Grid item xs={12} md={6}>
+                            <Box>
+                              <Typography
+                                variant="body2"
+                                sx={{
+                                  color: labelColor,
+                                  fontWeight: 500,
+                                  fontFamily,
+                                }}
+                              >
+                                Ward Officer
+                              </Typography>
+                              {Array.isArray(incident?.ward_officer_name) &&
+                                incident.ward_officer_name.length > 0 ? (
+                                <Typography
+                                  variant="subtitle2"
+                                  sx={{
+                                    fontFamily,
+                                    color: textColor,
+                                    wordBreak: "break-word",
+                                  }}
+                                >
+                                  {incident.ward_officer_name
+                                    .map((officer) => officer.ward_officer_name)
+                                    .join(", ")}
+                                </Typography>
+                              ) : (
+                                <Typography
+                                  variant="subtitle2"
+                                  sx={{
+                                    fontFamily,
+                                    color: textColor,
+                                    wordBreak: "break-word",
+                                  }}
+                                >
+                                  N/A
+                                </Typography>
+                              )}
+                            </Box>
+                          </Grid>
+
+                          <Grid item xs={12} md={12}>
+                            <Box>
+                              <Typography
+                                variant="body2"
+                                sx={{
+                                  color: labelColor,
+                                  fontWeight: 500,
+                                  fontFamily,
+                                }}
+                              >
+                                Summary
+                              </Typography>
+
+                              {incident?.summary_name &&
+                                incident.summary_name.length > 40 ? (
+                                <Tooltip title={incident.summary_name} arrow>
+                                  <Typography
+                                    variant="subtitle2"
+                                    sx={{
+                                      fontFamily,
+                                      color: textColor,
+                                      wordBreak: "break-word",
+                                      cursor: "pointer",
+                                    }}
+                                  >
+                                    {incident.summary_name.slice(0, 40)}...
+                                  </Typography>
+                                </Tooltip>
+                              ) : (
+                                <Typography
+                                  variant="subtitle2"
+                                  sx={{
+                                    fontFamily,
+                                    color: textColor,
+                                    wordBreak: "break-word",
+                                  }}
+                                >
+                                  {incident?.summary_name || "N/A"}
+                                </Typography>
+                              )}
+                            </Box>
+                          </Grid>
+                        </Grid>
+                      </Box>
                     </>
                   ) : (
                     <Box
@@ -565,15 +1010,6 @@ function IncidentDetails({
                       }}
                     >
                       <Grid container spacing={2}>
-                        {/* <Grid item xs={12} md={12}>
-                          <Typography
-                            variant="body2"
-                            sx={{ color: labelColor, fontWeight: 500, fontFamily, fontSize: '18px', borderBottom: '1px solid #ccc' }}
-                          >
-                            Incident Details
-                          </Typography>
-                        </Grid> */}
-
                         <Grid item xs={12} md={6}>
                           <Box>
                             <Typography
@@ -713,7 +1149,7 @@ function IncidentDetails({
                             </Typography>
 
                             {incident?.location &&
-                            incident.location.length > 20 ? (
+                              incident.location.length > 20 ? (
                               <Tooltip title={incident.location} arrow>
                                 <Typography
                                   variant="subtitle2"
@@ -741,6 +1177,7 @@ function IncidentDetails({
                             )}
                           </Box>
                         </Grid>
+
                         <Grid item xs={12} md={6}>
                           <Box>
                             <Typography
@@ -754,7 +1191,7 @@ function IncidentDetails({
                               Ward Officer
                             </Typography>
                             {Array.isArray(incident?.ward_officer_name) &&
-                            incident.ward_officer_name.length > 0 ? (
+                              incident.ward_officer_name.length > 0 ? (
                               <Typography
                                 variant="subtitle2"
                                 sx={{
@@ -796,7 +1233,7 @@ function IncidentDetails({
                             </Typography>
 
                             {incident?.summary_name &&
-                            incident.summary_name.length > 40 ? (
+                              incident.summary_name.length > 40 ? (
                               <Tooltip title={incident.summary_name} arrow>
                                 <Typography
                                   variant="subtitle2"
@@ -833,7 +1270,6 @@ function IncidentDetails({
           </Grid>
 
           {/* Middle Column */}
-
           <Grid
             item
             xs={12}
@@ -1100,7 +1536,7 @@ function IncidentDetails({
                   </Typography>
 
                   {Array.isArray(incidentDetails?.["responders scope"]) &&
-                  incidentDetails["responders scope"].length > 0 ? (
+                    incidentDetails["responders scope"].length > 0 ? (
                     <Stack spacing={1} mt={1}>
                       <Box display="flex" flexWrap="wrap" gap={1}>
                         {incidentDetails["responders scope"].map(
@@ -1178,6 +1614,21 @@ function IncidentDetails({
                 fetchIncidentDetails={fetchIncidentDetails}
                 highlightedId={highlightedId}
                 setHighlightedId={setHighlightedId}
+                selectedDistrictId={selectedDistrictId}
+                setSelectedDistrictId={setSelectedDistrictId}
+                selectedTehsilId={selectedTehsilId}
+                setSelectedTehsilId={setSelectedTehsilId}
+                selectedWard={selectedWard}
+                setSelectedWard={setSelectedWard}
+                selectedWardOfficer={selectedWardOfficer}
+                setSelectedWardOfficer={setSelectedWardOfficer}
+                selectedSummary={selectedSummary}
+                setSelectedSummary={setSelectedSummary}
+                query={query}
+                setQuery={setQuery}
+                validateFields={validateFields}
+                fieldErrors={fieldErrors}
+                setFieldErrors={setFieldErrors}
               />
             ) : (
               <Typography

@@ -40,7 +40,7 @@ const screenConfig = {
   //   screens: [],
   // },
 
-   "Reports": {
+  "Reports": {
     icon: <TextSnippetOutlinedIcon />,
     screens: [
       { id: 1, text: "Closure Report", path: "/Closure Report" },
@@ -102,7 +102,7 @@ const Departmentsidebar = ({ darkMode }) => {
               height: "auto",
               // maxHeight: "90vh",
               svg: {
-                fill: "#000000",
+                fill: "#fff",
               },
               pt: 2,
               pb: 2,
@@ -156,9 +156,9 @@ const Departmentsidebar = ({ darkMode }) => {
                             </Typography>
                             {hasSubmenus &&
                               (dropdowns[sectionName] ? (
-                                <ArrowDropUpIcon fontSize="small" />
+                                <ArrowDropUpIcon fontSize="small" sx={{ color: "white" }} />
                               ) : (
-                                <ArrowDropDownIcon fontSize="small" />
+                                <ArrowDropDownIcon fontSize="small" sx={{ color: "white" }} />
                               ))}
                           </Box>
                         )}

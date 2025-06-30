@@ -28,13 +28,13 @@ const disasterImages = [
   { text: "Landslide", img: landslide },
   { text: "Mass Casualty", img: masscasualty },
   { text: "Heavy Rainfall", img: heavyrainfall },
-  { text: "Thunderstorm ", img: thunderstorm }, 
+  { text: "Thunderstorm ", img: thunderstorm },
 ];
 
 const Sidebar = ({ darkMode }) => {
   const [open, setOpen] = useState(false);
   const [menuItems, setMenuItems] = useState([]);
-  const { disaster } = useAuth();
+  const { disaster, selectedDisasterId, setSelectedDisasterId, setSelectedDisasterName } = useAuth();
 
   useEffect(() => {
     if (disaster && disaster.length > 0) {
@@ -43,10 +43,17 @@ const Sidebar = ({ darkMode }) => {
         return {
           id: item.disaster_id,
           text: item.disaster_name,
-          img: imageObj ? imageObj.img : "", // fallback empty string if not found
+          img: imageObj ? imageObj.img : "",
         };
       });
-      setMenuItems(dynamicMenuItems);
+      setMenuItems([
+        {
+          id: 0,
+          text: "All",
+          img: "",
+        },
+        ...dynamicMenuItems,
+      ]);
     }
   }, [disaster]);
 
@@ -96,7 +103,10 @@ const Sidebar = ({ darkMode }) => {
                 color: "black",
                 "&:hover": { background: "rgb(95, 200, 236)" },
               }}
-              onClick={() => console.log("Clicked:", item.text)}
+              onClick={() => {
+                setSelectedDisasterId(item.id);
+                setSelectedDisasterName(item.text);
+              }}
             >
               <ListItemIcon sx={{ minWidth: 40 }}>
                 <img

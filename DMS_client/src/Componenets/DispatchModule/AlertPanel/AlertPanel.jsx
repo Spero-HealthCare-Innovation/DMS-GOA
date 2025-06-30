@@ -51,7 +51,15 @@ const StyledCardContent = styled(CardContent)({
 });
 
 const AlertPanel = ({ darkMode }) => {
-    const { newToken } = useAuth();
+    const { newToken, selectedDisasterId, selectedDisasterName } = useAuth();
+    console.log(selectedDisasterId, selectedDisasterName, 'mmmmmmm');
+
+    useEffect(() => {
+        if (selectedDisasterName) {
+            console.log("Clicked disaster type name:", selectedDisasterName);
+        }
+    }, [selectedDisasterName]);
+
     const navigate = useNavigate();
     console.log(newToken, 'newToken');
 
@@ -140,6 +148,40 @@ const AlertPanel = ({ darkMode }) => {
             })
             .catch(err => console.error("Initial fetch failed:", err));
     }, []);
+
+
+    useEffect(() => {
+        if (!selectedDisasterId) return;
+
+        const socket = new WebSocket(`ws://192.168.1.116:7777/ws/disaster_alerts?disaster_id=${selectedDisasterId}`);
+
+        socket.onopen = () => {
+            console.log('Disaster WebSocket connected');
+        };
+
+        socket.onmessage = (event) => {
+            try {
+                const data = JSON.parse(event.data);
+                console.log('Disaster alert data:', data);
+            } catch (error) {
+                console.error('Invalid JSON from disaster WebSocket:', event.data);
+            }
+        };
+
+        socket.onerror = (error) => {
+            console.error('Disaster WebSocket error:', error);
+        };
+
+        socket.onclose = () => {
+            console.log('Disaster WebSocket closed');
+        };
+
+        // Cleanup on unmount or disasterId change
+        return () => {
+            socket.close();
+        };
+    }, [selectedDisasterId]);
+
 
 
     useEffect(() => {

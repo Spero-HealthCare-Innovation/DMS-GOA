@@ -19,6 +19,7 @@ import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { DateTimePicker } from "@mui/x-date-pickers/DateTimePicker";
 import { useAuth } from "../../../Context/ContextAPI";
+import { Tooltip } from "@mui/material";
 
 const CaseClosureDetails = ({
   darkMode,
@@ -101,15 +102,38 @@ const CaseClosureDetails = ({
   const validateForm = () => {
     const errors = {};
 
+    // Responder Scope
+    if (!selectedDepartments || selectedDepartments.length === 0) {
+      errors.selectedDepartments = "Responder Scope is required";
+    }
+
+    // Vehicle Number
+    if (!formData.vehicleNumber) {
+      errors.vehicleNumber = "Vehicle Number is required";
+    } else {
+      const value = formData.vehicleNumber.replace(/-/g, '');
+      const vehicleRegex = /^[A-Z]{2}[0-9]{2}[A-Z]{1,2}[0-9]{4}$/;
+      if (value && !vehicleRegex.test(value)) {
+        errors.vehicleNumber = "Invalid format";
+      }
+    }
+
+    // Responder Name
+    if (!formData.responderName || !formData.responderName.trim()) {
+      errors.responderName = "Responder Name is required";
+    }
+
+    // Date fields
     if (!formData.acknowledge) errors.acknowledge = "Acknowledge is required";
     if (!formData.startBaseLocation) errors.startBaseLocation = "Start Base Location is required";
     if (!formData.atScene) errors.atScene = "At Scene is required";
     if (!formData.fromScene) errors.fromScene = "From Scene is required";
     if (!formData.backToBase) errors.backToBase = "Back to Base is required";
-    if (!formData.closureRemark.trim()) errors.closureRemark = "Remark is required";
 
-    // Add vehicle number validation if needed
-    if (!formData.vehicleNumber) errors.vehicleNumber = "Vehicle Number is required";
+    // Closure Remark
+    if (!formData.closureRemark || !formData.closureRemark.trim()) {
+      errors.closureRemark = "Remark is required";
+    }
 
     setValidationErrors(errors);
     return Object.keys(errors).length === 0;
@@ -212,142 +236,6 @@ const CaseClosureDetails = ({
     );
   };
 
-  //   const handleSubmit = async () => {
-  //     if (!selectedIncident?.IncidentId) return;
-
-  //    const payload = {
-  //   Incident_ID: selectedIncidentFromSop?.incident_id || selectedIncident?.IncidentId,
-  //   Disaster_Type: selectedIncidentFromSop?.disaster_name || selectedIncident?.disasterId,
-  //   Alert_Type: "High", // set this statically as required
-  //   inc_id: selectedIncident?.IncidentId,
-  //   closure_acknowledge: formData.acknowledge ? formatDate(formData.acknowledge) : "",
-  //   closure_start_base_location: formData.startBaseLocation ? formatDate(formData.startBaseLocation) : "",
-  //   closure_at_scene: formData.atScene ? formatDate(formData.atScene) : "",
-  //   closure_from_scene: formData.fromScene ? formatDate(formData.fromScene) : "",
-  //   closure_back_to_base: formData.backToBase ? formatDate(formData.backToBase) : "",
-  //   closure_added_by: userName,
-  //   closure_modified_by: userName,
-  //   closure_remark: formData.closureRemark,
-  // };
-
-  //     try {
-  //       setLoading(true);
-  //       const res = await axios.post(
-  //         `${port}/admin_web/closure_post_api/`,
-  //         payload
-  //       );
-  //       setSubmitStatus({ type: "success", message: "Closure details saved successfully!" });
-  //     } catch (error) {
-  //       setSubmitStatus({ type: "error", message: "Failed to save closure details." });
-  //       console.error(error);
-  //     } finally {
-  //       setLoading(false);
-  //     }
-  //   };
-
-  // const handleSubmit = async () => {
-  //   if (!validateForm()) {
-  //     setSubmitStatus({
-  //       type: "error",
-  //       message: "Please fill all required fields",
-  //     });
-  //     return;
-
-  //   }
-  //   // Check if we have incident data
-  //   const incidentId =
-  //     selectedIncidentFromSop?.incident_id || selectedIncident?.incident_id;
-  //   const numericIncId =
-  //     selectedIncidentFromSop?.inc_id || selectedIncident?.inc_id;
-
-  //   if (!incidentId || !numericIncId) {
-  //     setSubmitStatus({ type: "error", message: "No incident ID found!" });
-  //     return;
-  //   }
-
-  //   const payload = {
-  //     incident_id: numericIncId, // Pass numeric inc_id (292) instead of string incident_id
-  //     Disaster_Type:
-  //       selectedIncidentFromSop?.disaster_name ||
-  //       selectedIncident?.disaster_name,
-  //     Alert_Type: getAlertTypeName(
-  //       selectedIncidentFromSop?.alert_type || selectedIncident?.alert_type
-  //     ),
-  //     inc_id: numericIncId, // Same numeric ID
-  //     vehicle_no:formData.vehicleNumber,
-  //     closure_acknowledge: formData.acknowledge
-  //       ? formatDate(formData.acknowledge)
-  //       : "",
-  //     closure_start_base_location: formData.startBaseLocation
-  //       ? formatDate(formData.startBaseLocation)
-  //       : "",
-  //     closure_at_scene: formData.atScene ? formatDate(formData.atScene) : "",
-  //     closure_from_scene: formData.fromScene
-  //       ? formatDate(formData.fromScene)
-  //       : "",
-  //     closure_back_to_base: formData.backToBase
-  //       ? formatDate(formData.backToBase)
-  //       : "",
-  //     closure_added_by: userName,
-  //     closure_modified_by: userName,
-  //     closure_remark: formData.closureRemark,
-  //   };
-
-  //   console.log("Payload being sent:", payload); // Debug log
-
-  //   try {
-  //     setLoading(true);
-  //     setSubmitStatus(null); // Clear previous status
-
-  //     // Get the correct token
-  //     const authToken = localStorage.getItem("access_token") || token;
-
-  //     const res = await axios.post(
-  //       `${port}/admin_web/closure_post_api/`,
-  //       payload,
-  //       {
-  //         headers: {
-  //           Authorization: `Bearer ${authToken}`,
-  //           "Content-Type": "application/json",
-  //         },
-  //       }
-  //     );
-
-  //     console.log("API Response:", res.data); // Debug log
-  //     setSubmitStatus({
-  //       type: "success",
-  //       message: "Closure details saved successfully!",
-  //     });
-
-  //     // Clear form fields after successful submit
-  //     setFormData({
-  //       vehicleNumber:"",
-  //       acknowledge: "",
-  //       startBaseLocation: "",
-  //       atScene: "",
-  //       fromScene: "",
-  //       backToBase: "",
-  //       closureRemark: "",
-  //     });
-  //     setSelectedIncidentFromSop(null);
-  //     setIsDataCleared(true);
-  //     fetchDispatchList();
-  //   } catch (error) {
-  //     console.error("API Error:", error); // Debug log
-  //     console.error("Error response:", error.response?.data); // Debug log
-
-  //     const errorMessage =
-  //       error.response?.data?.message ||
-  //       error.response?.data?.error ||
-  //       "Failed to save closure details.";
-
-  //     setSubmitStatus({ type: "error", message: errorMessage });
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
-
-
   const handleSubmit = async () => {
     if (!validateForm()) {
       setSubmitStatus({
@@ -416,11 +304,7 @@ const CaseClosureDetails = ({
 
       // Update selectedDepartments with remaining departments from API response
       setSelectedDepartments(remainingDepartments);
-
-
-      // Only clear form and reset data if no more departments are pending (empty array)
       if (remainingDepartments.length === 0) {
-        // Clear ALL form fields and reset everything when no departments are left
         setFormData({
           vehicleNumber: "",
           responderName: "",
@@ -472,11 +356,9 @@ const CaseClosureDetails = ({
   useEffect(() => {
     if (submitStatus) {
       const timer = setTimeout(() => {
-        // Clear the submitStatus after 5 seconds
         setSubmitStatus(null);
       }, 3000);
 
-      // Cleanup the timer if component unmounts or submitStatus changes before timeout
       return () => clearTimeout(timer);
     }
   }, [submitStatus]);
@@ -555,7 +437,7 @@ const CaseClosureDetails = ({
       <Paper
         elevation={3}
         sx={{
-          p: 3,
+          p: 2,
           mb: 5,
           borderRadius: 2,
           backgroundColor: darkMode ? "#121212" : "#FFFFFF",
@@ -563,7 +445,7 @@ const CaseClosureDetails = ({
           transition: "all 0.3s ease",
         }}
       >
-        <Grid container spacing={3} sx={{ height: "300px" }}>
+        <Grid container spacing={1} sx={{ height: "300px" }}>
           {/* Left Column - Incident Info (Reduced width) */}
           <Grid
             item
@@ -582,7 +464,7 @@ const CaseClosureDetails = ({
                 fontWeight: 500,
                 color: labelColor,
                 fontFamily,
-                // mb: 2,
+                mb: 2,
                 textAlign: "left",
                 // borderBottom: `2px solid ${labelColor}`,
                 // pb: 1
@@ -594,7 +476,7 @@ const CaseClosureDetails = ({
             <Box
               sx={{
                 height: "250px",
-                // overflowY: "auto",
+                overflowY: "auto",
                 "&::-webkit-scrollbar": {
                   width: "6px",
                 },
@@ -613,20 +495,258 @@ const CaseClosureDetails = ({
               }}
             >
               {flag === 0 ? (
-                <Box>
-                  <Grid container spacing={2} sx={{ mb: 2, mt: 0.6 }}>
-                    <Grid item xs={6}>
-                      {renderText("Caller Name", selectedIncidentFromSop?.incident_details?.[0]?.caller_name || "N/A")}
+                <Box
+                  sx={{
+                    scrollBehavior: "smooth",
+                    "&::-webkit-scrollbar": {
+                      width: "6px",
+                    },
+                    "&::-webkit-scrollbar-thumb": {
+                      backgroundColor: darkMode ? "#0288d1" : "#888",
+                      borderRadius: 3,
+                    },
+                    "&::-webkit-scrollbar-thumb:hover": {
+                      backgroundColor: darkMode ? "#5FC8EC" : "#555",
+                    },
+                  }}
+                >
+                  <Grid container spacing={2}>
+                    <Grid item xs={12} md={6}>
+                      <Box>
+                        <Typography
+                          variant="body2"
+                          sx={{
+                            color: labelColor,
+                            fontWeight: 500,
+                            fontFamily,
+                          }}
+                        >
+                          Caller Name
+                        </Typography>
+                        <Typography
+                          variant="subtitle2"
+                          sx={{
+                            fontFamily,
+                            color: textColor,
+                            wordBreak: "break-word",
+                          }}
+                        >
+                          {selectedIncidentFromSop?.incident_details?.[0]?.caller_name || "N/A"}
+                        </Typography>
+                      </Box>
                     </Grid>
-                    <Grid item xs={6}>
-                      {renderText("Caller Number", selectedIncidentFromSop?.incident_details?.[0]?.caller_no || "N/A")}
+
+                    <Grid item xs={12} md={6}>
+                      <Box>
+                        <Typography
+                          variant="body2"
+                          sx={{
+                            color: labelColor,
+                            fontWeight: 500,
+                            fontFamily,
+                          }}
+                        >
+                          Caller Number
+                        </Typography>
+                        <Typography
+                          variant="subtitle2"
+                          sx={{
+                            fontFamily,
+                            color: textColor,
+                            wordBreak: "break-word",
+                          }}
+                        >
+                          {selectedIncidentFromSop?.incident_details?.[0]?.caller_no || "N/A"}
+                        </Typography>
+                      </Box>
+                    </Grid>
+
+                    <Grid item xs={12} md={6}>
+                      <Box>
+                        <Typography
+                          variant="body2"
+                          sx={{
+                            color: labelColor,
+                            fontWeight: 500,
+                            fontFamily,
+                          }}
+                        >
+                          District
+                        </Typography>
+                        <Typography
+                          variant="subtitle2"
+                          sx={{
+                            fontFamily,
+                            color: textColor,
+                            wordBreak: "break-word",
+                          }}
+                        >
+                          {selectedIncidentFromSop?.incident_details?.[0]?.district_name || "N/A"}
+                        </Typography>
+                      </Box>
+                    </Grid>
+
+                    <Grid item xs={12} md={6}>
+                      <Box>
+                        <Typography
+                          variant="body2"
+                          sx={{
+                            color: labelColor,
+                            fontWeight: 500,
+                            fontFamily,
+                          }}
+                        >
+                          Tehsil
+                        </Typography>
+                        <Typography
+                          variant="subtitle2"
+                          sx={{
+                            fontFamily,
+                            color: textColor,
+                            wordBreak: "break-word",
+                          }}
+                        >
+                          {selectedIncidentFromSop?.incident_details?.[0]?.tahsil_name || "N/A"}
+                        </Typography>
+                      </Box>
+                    </Grid>
+
+                    <Grid item xs={12} md={6}>
+                      <Box>
+                        <Typography
+                          variant="body2"
+                          sx={{
+                            color: labelColor,
+                            fontWeight: 500,
+                            fontFamily,
+                          }}
+                        >
+                          Ward
+                        </Typography>
+                        <Typography
+                          variant="subtitle2"
+                          sx={{
+                            fontFamily,
+                            color: textColor,
+                            wordBreak: "break-word",
+                          }}
+                        >
+                          {selectedIncidentFromSop?.incident_details?.[0]?.ward_name || "N/A"}
+                        </Typography>
+                      </Box>
+                    </Grid>
+
+                    <Grid item xs={12} md={6}>
+                      <Box>
+                        <Typography
+                          variant="body2"
+                          sx={{
+                            color: labelColor,
+                            fontWeight: 500,
+                            fontFamily,
+                          }}
+                        >
+                          Ward Officer
+                        </Typography>
+                        <Typography
+                          variant="subtitle2"
+                          sx={{
+                            fontFamily,
+                            color: textColor,
+                            wordBreak: "break-word",
+                          }}
+                        >
+                          {selectedIncidentFromSop?.incident_details?.[0]?.ward_officer_name &&
+                            selectedIncidentFromSop.incident_details[0].ward_officer_name.length > 0
+                            ? selectedIncidentFromSop.incident_details[0].ward_officer_name.map((officer, idx) => {
+                              const name = officer.ward_officer_name;
+                              const displayName = name.length > 15 ? name.slice(0, 15) + "..." : name;
+                              return (
+                                <Tooltip key={officer.emp_id} title={name.length > 15 ? name : ""} arrow>
+                                  <span>
+                                    {displayName}
+                                    {idx !== selectedIncidentFromSop.incident_details[0].ward_officer_name.length - 1 ? ", " : ""}
+                                  </span>
+                                </Tooltip>
+                              );
+                            })
+                            : "N/A"}
+                        </Typography>
+                      </Box>
+                    </Grid>
+
+                    <Grid item xs={12} md={12}>
+                      <Box>
+                        <Typography
+                          variant="body2"
+                          sx={{
+                            color: labelColor,
+                            fontWeight: 500,
+                            fontFamily,
+                          }}
+                        >
+                          Location
+                        </Typography>
+                        <Typography
+                          variant="subtitle2"
+                          sx={{
+                            fontFamily,
+                            color: textColor,
+                            wordBreak: "break-word",
+                          }}
+                        >
+                          {(() => {
+                            const location = selectedIncidentFromSop?.incident_details?.[0]?.location || "N/A";
+                            const showTooltip = location !== "N/A" && location.length > 40;
+                            const displayLocation = showTooltip ? location.slice(0, 40) + "..." : location;
+                            return showTooltip ? (
+                              <Tooltip title={location} arrow>
+                                <span>{displayLocation}</span>
+                              </Tooltip>
+                            ) : (
+                              location
+                            );
+                          })()}
+                        </Typography>
+                      </Box>
+                    </Grid>
+
+                    <Grid item xs={12} md={12}>
+                      <Box>
+                        <Typography
+                          variant="body2"
+                          sx={{
+                            color: labelColor,
+                            fontWeight: 500,
+                            fontFamily,
+                          }}
+                        >
+                          Summary
+                        </Typography>
+                        <Typography
+                          variant="subtitle2"
+                          sx={{
+                            fontFamily,
+                            color: textColor,
+                            wordBreak: "break-word",
+                          }}
+                        >
+                          {(() => {
+                            const summary = selectedIncidentFromSop?.incident_details?.[0]?.summary_name || "N/A";
+                            const showTooltip = summary !== "N/A" && summary.length > 50;
+                            const displaySummary = showTooltip ? summary.slice(0, 50) + "..." : summary;
+                            return showTooltip ? (
+                              <Tooltip title={summary} arrow>
+                                <span>{displaySummary}</span>
+                              </Tooltip>
+                            ) : (
+                              summary
+                            );
+                          })()}
+                        </Typography>
+                      </Box>
                     </Grid>
                   </Grid>
-                  {renderText("Location", selectedIncidentFromSop?.incident_details?.[0]?.location || "N/A")}
-                  {renderText(
-                    "Summary",
-                    selectedIncidentFromSop?.incident_details?.[0]?.summary_name || "N/A"
-                  )}
                 </Box>
               ) : (
                 <Typography
@@ -669,7 +789,7 @@ const CaseClosureDetails = ({
             <Box
               sx={{
                 height: "250px",
-                // overflowY: "auto",
+                overflowY: "auto",
                 "&::-webkit-scrollbar": {
                   width: "6px",
                 },
@@ -693,7 +813,15 @@ const CaseClosureDetails = ({
                     multiple
                     displayEmpty
                     value={selectedDepartments}
-                    onChange={handleChange1}
+                    onChange={(event) => {
+                      setSelectedDepartments(event.target.value);
+                      if (validationErrors.selectedDepartments) {
+                        setValidationErrors((prev) => ({
+                          ...prev,
+                          selectedDepartments: null,
+                        }));
+                      }
+                    }}
                     renderValue={(selected) => {
                       if (selected.length === 0) {
                         return (
@@ -716,6 +844,8 @@ const CaseClosureDetails = ({
                         },
                       },
                     }}
+                    error={!!validationErrors.selectedDepartments} // <-- Add this for red border
+                    sx={validationErrors.selectedDepartments ? { border: '1px solid #d32f2f', borderRadius: 1 } : {}}
                   >
                     <MenuItem disabled value="">
                       <em>
@@ -739,17 +869,19 @@ const CaseClosureDetails = ({
                     ))}
                   </Select>
 
-                  {responderError && (
-                    <Typography variant="caption" color="error" sx={{ mt: 0.5, display: 'block' }}>
-                      {responderError}
+                  {/* Show validation error below the Select */}
+                  {(validationErrors.selectedDepartments || responderError) && (
+                    <Typography
+                      variant="caption"
+                      color="error"
+                      sx={{ mt: 0.5, display: 'block' }}
+                    >
+                      {validationErrors.selectedDepartments || responderError}
                     </Typography>
                   )}
                 </Grid>
 
-
                 <Grid item xs={6}>
-
-                  {/* <TextField id="outlined-basic" label="Vehical Number" variant="outlined"  size="small"  placeholder="Eg.MH-12-AB-1234"/> */}
                   <TextField
                     id="outlined-basic"
                     label="Vehicle Number"
@@ -794,8 +926,8 @@ const CaseClosureDetails = ({
                   // sx={textFieldStyle}
                   />
                 </Grid>
+
                 <Grid item xs={6}>
-                  {/* <TextField id="outlined-basic" label="Vehical Number" variant="outlined"  size="small"  placeholder="Eg.MH-12-AB-1234"/> */}
                   <TextField
                     id="responder-name-field"
                     label="Responder Name"
@@ -804,14 +936,10 @@ const CaseClosureDetails = ({
                     value={formData.responderName || ''}
                     onChange={(e) => {
                       const value = e.target.value;
-                      // Direct state update method
                       setFormData(prev => ({
                         ...prev,
                         responderName: value
                       }));
-
-                      // OR if you have handleChange function, use this:
-                      // handleChange("responderName", value);
 
                       // Clear validation error if exists
                       if (validationErrors.responderName) {
@@ -821,7 +949,18 @@ const CaseClosureDetails = ({
                         }));
                       }
                     }}
+                    onBlur={(e) => {
+                      // Show error if left empty on blur
+                      if (!e.target.value.trim()) {
+                        setValidationErrors((prev) => ({
+                          ...prev,
+                          responderName: "Responder Name is required",
+                        }));
+                      }
+                    }}
                     placeholder="Enter responder name"
+                    error={!!validationErrors.responderName}
+                    helperText={validationErrors.responderName}
                     InputProps={{
                       sx: {
                         color: textColor,
@@ -834,8 +973,7 @@ const CaseClosureDetails = ({
                 <LocalizationProvider dateAdapter={AdapterDateFns}>
                   <Grid item xs={6}>
                     <DateTimePicker
-                      label="Acknowledge *"
-                      slotProps={{ textField: { size: 'small' } }}
+                      label="Acknowledge"
                       value={formData.acknowledge || null}
                       onChange={(newValue) => {
                         handleChange("acknowledge", newValue);
@@ -853,19 +991,16 @@ const CaseClosureDetails = ({
                       }
                       inputFormat="yyyy-MM-dd | HH:mm"
                       views={["year", "month", "day", "hours", "minutes"]}
-                      renderInput={(params) => (
-                        <TextField
-                          {...params}
-                          fullWidth
-                          placeholder="yyyy-MM-dd | hh:mm"
-                          variant="outlined"
-                          size="small"
-                          required
-                          error={!!validationErrors.acknowledge}
-                          helperText={validationErrors.acknowledge}
-                          InputLabelProps={{ shrink: true }}
-                          InputProps={{
-                            ...params.InputProps,
+                      slotProps={{
+                        textField: {
+                          size: 'small',
+                          required: true,
+                          error: !!validationErrors.acknowledge,
+                          helperText: validationErrors.acknowledge,
+                          fullWidth: true,
+                          placeholder: "yyyy-MM-dd | hh:mm",
+                          InputLabelProps: { shrink: true },
+                          InputProps: {
                             sx: {
                               color: textColor,
                               height: "35px",
@@ -873,17 +1008,16 @@ const CaseClosureDetails = ({
                                 color: "white",
                               },
                             },
-                          }}
-                          sx={textFieldStyle}
-                        />
-                      )}
+                          },
+                          sx: textFieldStyle,
+                        }
+                      }}
                     />
                   </Grid>
 
                   <Grid item xs={6}>
                     <DateTimePicker
-                      label="Start Location *"
-                      slotProps={{ textField: { size: 'small' } }}
+                      label="Start Location"
                       value={formData.startBaseLocation || null}
                       onChange={(newValue) => {
                         handleChange("startBaseLocation", newValue);
@@ -895,44 +1029,40 @@ const CaseClosureDetails = ({
                         }
                       }}
                       ampm={false}
-                      minDateTime={formData.acknowledge ||
-                        (selectedIncidentFromSop?.incident_details?.[0]?.inc_datetime ?
-                          new Date(selectedIncidentFromSop.incident_details[0].inc_datetime) :
-                          new Date())
+                      minDateTime={
+                        formData.acknowledge ||
+                        (selectedIncidentFromSop?.incident_details?.[0]?.inc_datetime
+                          ? new Date(selectedIncidentFromSop.incident_details[0].inc_datetime)
+                          : new Date())
                       }
                       inputFormat="yyyy-MM-dd | HH:mm"
-                      renderInput={(params) => (
-                        <TextField
-                          {...params}
-                          fullWidth
-                          placeholder="yyyy-MM-dd | hh:mm"
-                          variant="outlined"
-                          size="small"
-                          required
-                          error={!!validationErrors.startBaseLocation}
-                          helperText={validationErrors.startBaseLocation}
-                          InputLabelProps={{ shrink: true }}
-                          InputProps={{
-                            ...params.InputProps,
+                      slotProps={{
+                        textField: {
+                          size: 'small',
+                          required: true,
+                          error: !!validationErrors.startBaseLocation,
+                          helperText: validationErrors.startBaseLocation,
+                          fullWidth: true,
+                          placeholder: "yyyy-MM-dd | hh:mm",
+                          InputLabelProps: { shrink: true },
+                          InputProps: {
                             sx: {
                               color: textColor,
                               height: "35px",
-                              fontSize: "0.45rem",
                               "& .MuiSvgIcon-root": {
                                 color: "white",
                               },
                             },
-                          }}
-                          sx={textFieldStyle}
-                        />
-                      )}
+                          },
+                          sx: textFieldStyle,
+                        }
+                      }}
                     />
                   </Grid>
 
                   <Grid item xs={6}>
                     <DateTimePicker
-                      label="At Scene *"
-                      slotProps={{ textField: { size: 'small' } }}
+                      label="At Scene"
                       value={formData.atScene || null}
                       onChange={(newValue) => {
                         handleChange("atScene", newValue);
@@ -944,25 +1074,23 @@ const CaseClosureDetails = ({
                         }
                       }}
                       ampm={false}
-                      minDateTime={formData.acknowledge ||
-                        (selectedIncidentFromSop?.incident_details?.[0]?.inc_datetime ?
-                          new Date(selectedIncidentFromSop.incident_details[0].inc_datetime) :
-                          new Date())
+                      minDateTime={
+                        formData.acknowledge ||
+                        (selectedIncidentFromSop?.incident_details?.[0]?.inc_datetime
+                          ? new Date(selectedIncidentFromSop.incident_details[0].inc_datetime)
+                          : new Date())
                       }
                       inputFormat="yyyy-MM-dd | HH:mm"
-                      renderInput={(params) => (
-                        <TextField
-                          {...params}
-                          fullWidth
-                          placeholder="yyyy-MM-dd | hh:mm"
-                          variant="outlined"
-                          size="small"
-                          required
-                          error={!!validationErrors.atScene}
-                          helperText={validationErrors.atScene}
-                          InputLabelProps={{ shrink: true }}
-                          InputProps={{
-                            ...params.InputProps,
+                      slotProps={{
+                        textField: {
+                          size: 'small',
+                          required: true,
+                          error: !!validationErrors.atScene,
+                          helperText: validationErrors.atScene,
+                          fullWidth: true,
+                          placeholder: "yyyy-MM-dd | hh:mm",
+                          InputLabelProps: { shrink: true },
+                          InputProps: {
                             sx: {
                               color: textColor,
                               height: "35px",
@@ -971,17 +1099,16 @@ const CaseClosureDetails = ({
                                 color: "white",
                               },
                             },
-                          }}
-                          sx={textFieldStyle}
-                        />
-                      )}
+                          },
+                          sx: textFieldStyle,
+                        }
+                      }}
                     />
                   </Grid>
 
                   <Grid item xs={6}>
                     <DateTimePicker
-                      label="From Scene *"
-                      slotProps={{ textField: { size: 'small' } }}
+                      label="From Scene"
                       value={formData.fromScene || null}
                       onChange={(newValue) => {
                         handleChange("fromScene", newValue);
@@ -993,25 +1120,23 @@ const CaseClosureDetails = ({
                         }
                       }}
                       ampm={false}
-                      minDateTime={formData.acknowledge ||
-                        (selectedIncidentFromSop?.incident_details?.[0]?.inc_datetime ?
-                          new Date(selectedIncidentFromSop.incident_details[0].inc_datetime) :
-                          new Date())
+                      minDateTime={
+                        formData.acknowledge ||
+                        (selectedIncidentFromSop?.incident_details?.[0]?.inc_datetime
+                          ? new Date(selectedIncidentFromSop.incident_details[0].inc_datetime)
+                          : new Date())
                       }
                       inputFormat="yyyy-MM-dd | HH:mm"
-                      renderInput={(params) => (
-                        <TextField
-                          {...params}
-                          fullWidth
-                          placeholder="yyyy-MM-dd | hh:mm"
-                          variant="outlined"
-                          size="small"
-                          required
-                          error={!!validationErrors.fromScene}
-                          helperText={validationErrors.fromScene}
-                          InputLabelProps={{ shrink: true }}
-                          InputProps={{
-                            ...params.InputProps,
+                      slotProps={{
+                        textField: {
+                          size: 'small',
+                          required: true,
+                          error: !!validationErrors.fromScene,
+                          helperText: validationErrors.fromScene,
+                          fullWidth: true,
+                          placeholder: "yyyy-MM-dd | hh:mm",
+                          InputLabelProps: { shrink: true },
+                          InputProps: {
                             sx: {
                               color: textColor,
                               height: "35px",
@@ -1020,17 +1145,16 @@ const CaseClosureDetails = ({
                                 color: "white",
                               },
                             },
-                          }}
-                          sx={textFieldStyle}
-                        />
-                      )}
+                          },
+                          sx: textFieldStyle,
+                        }
+                      }}
                     />
                   </Grid>
 
                   <Grid item xs={6}>
                     <DateTimePicker
-                      label="Back to Base *"
-                      slotProps={{ textField: { size: 'small' } }}
+                      label="Back to Base"
                       value={formData.backToBase || null}
                       onChange={(newValue) => {
                         handleChange("backToBase", newValue);
@@ -1042,38 +1166,35 @@ const CaseClosureDetails = ({
                         }
                       }}
                       ampm={false}
-                      minDateTime={formData.acknowledge ||
-                        (selectedIncidentFromSop?.incident_details?.[0]?.inc_datetime ?
-                          new Date(selectedIncidentFromSop.incident_details[0].inc_datetime) :
-                          new Date())
+                      minDateTime={
+                        formData.acknowledge ||
+                        (selectedIncidentFromSop?.incident_details?.[0]?.inc_datetime
+                          ? new Date(selectedIncidentFromSop.incident_details[0].inc_datetime)
+                          : new Date())
                       }
                       inputFormat="yyyy-MM-dd | HH:mm"
-                      renderInput={(params) => (
-                        <TextField
-                          {...params}
-                          fullWidth
-                          placeholder="yyyy-MM-dd | hh:mm"
-                          variant="outlined"
-                          size="small"
-                          required
-                          error={!!validationErrors.backToBase}
-                          helperText={validationErrors.backToBase}
-                          InputLabelProps={{ shrink: true }}
-                          InputProps={{
-                            ...params.InputProps,
+                      slotProps={{
+                        textField: {
+                          size: 'small',
+                          required: true,
+                          error: !!validationErrors.backToBase,
+                          helperText: validationErrors.backToBase,
+                          fullWidth: true,
+                          placeholder: "yyyy-MM-dd | hh:mm",
+                          InputLabelProps: { shrink: true },
+                          InputProps: {
                             sx: {
                               color: textColor,
                               height: "35px",
                               fontSize: "0.85rem",
                               "& .MuiSvgIcon-root": {
                                 color: "white",
-                                fontSize: "0.8rem",
                               },
                             },
-                          }}
-                          sx={textFieldStyle}
-                        />
-                      )}
+                          },
+                          sx: textFieldStyle,
+                        }
+                      }}
                     />
                   </Grid>
                 </LocalizationProvider>
@@ -1128,7 +1249,7 @@ const CaseClosureDetails = ({
                 }}
               >
                 <TextField
-                  label="Remark *"
+                  label="Remark"
                   variant="outlined"
                   fullWidth
                   multiline
