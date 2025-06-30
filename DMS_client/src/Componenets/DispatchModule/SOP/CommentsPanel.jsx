@@ -55,6 +55,11 @@ function CommentsPanel({
   });
 
   console.log(selectedIncident, "selectedIncident in Comment");
+ window.addEventListener('storage', (e) => {
+        if (e.key === 'logout') {
+            location.href = '/login';
+        }
+    });
 
   // const [commentText, setCommentText] = useState("");
 
