@@ -848,7 +848,7 @@ const CaseClosureDetails = ({
                     MenuProps={{
                       PaperProps: {
                         style: {
-                          maxHeight: 250,
+                          maxHeight: 250,n
                           width: 200,
                         },
                       },
