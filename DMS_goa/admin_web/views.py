@@ -512,12 +512,13 @@ class DMS_ChangePassword_api(APIView):
 
 
 class DMS_ForgotPassword_api(APIView):
-    
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
+        user_id = request.data['user_id']
+        user = DMS_Employee.objects.get(emp_id=user_id)
+        print("User_______________________---", user)
         serializer = ForgotPasswordSerializer(data=request.data)
-        user = request.user
 
         if serializer.is_valid():
             new_password = serializer.validated_data['new_password']
