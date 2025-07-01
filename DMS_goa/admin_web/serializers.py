@@ -20,6 +20,7 @@ class ChangePasswordSerializer(serializers.Serializer):
     
 class ForgotPasswordSerializer(serializers.Serializer):
     new_password = serializers.CharField(required=True)
+    confirm_password = serializers.CharField(required=True)
 
     def validate_new_password(self, value):
         # Optional: add Django's password validation
