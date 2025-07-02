@@ -142,71 +142,71 @@ class DMS_Group_delete_api(APIView):
         instance.save()
         return Response({"message": "Group soft deleted successfully."}, status=status.HTTP_200_OK)
 
-class DMS_Employee_get_api(APIView):
+class DMS_User_get_api(APIView):
     def get(self,request):
-        snippet = DMS_Employee.objects.filter(emp_is_deleted=False).order_by('-emp_added_date')
-        serializers = DMS_Employee_GET_serializer(snippet,many=True)
+        snippet = DMS_User.objects.filter(user_is_deleted=False).order_by('-user_added_date')
+        serializers = DMS_User_GET_serializer(snippet,many=True)
         return Response(serializers.data,status=status.HTTP_200_OK)
 
-class DMS_Employee_post_api(APIView):
+class DMS_User_post_api(APIView):
     def post(self,request):
         data = request.data
-        emp_name = data.get('emp_name')
+        user_name = data.get('user_name')
 
 
-        if DMS_Employee.objects.filter(emp_name=emp_name).exists():
+        if DMS_User.objects.filter(user_name=user_name).exists():
             return Response(
                 {"detail": "Employee with this emp_name already exists."},
                 status=status.HTTP_409_CONFLICT
             )
-        serializers=DMS_Employee_serializer(data=request.data)
+        serializers=DMS_User_serializer(data=request.data)
         if serializers.is_valid():
             serializers.save()
             return Response(serializers.data,status=status.HTTP_201_CREATED)
         return Response(serializers.errors,status=status.HTTP_400_BAD_REQUEST) 
     
 
-class DMS_Employee_Idwise_get_api(APIView):
-    def get(self,request,emp_id):
-        snippet = DMS_Employee.objects.filter(emp_is_deleted=False,emp_id=emp_id).order_by('-emp_added_date')
-        serializers = DMS_Employee_GET_serializer(snippet,many=True)
+class DMS_User_Idwise_get_api(APIView):
+    def get(self,request,user_id):
+        snippet = DMS_User.objects.filter(user_is_deleted=False,user_id=user_id).order_by('-emp_added_date')
+        serializers = DMS_User_GET_serializer(snippet,many=True)
         return Response(serializers.data,status=status.HTTP_200_OK)
 
-class DMS_Employee_put_api(APIView):
-    def get(self, request, emp_id):
-        snippet = DMS_Employee.objects.filter(emp_id=emp_id,emp_is_deleted=False)
-        serializers = DMS_Employee_GET_serializer(snippet, many=True)
+class DMS_User_put_api(APIView):
+    def get(self, request, user_id):
+        snippet = DMS_User.objects.filter(user_id=user_id,user_is_deleted=False)
+        serializers = DMS_User_GET_serializer(snippet, many=True)
         return Response(serializers.data)
 
-    def put(self, request, emp_id):
+    def put(self, request, user_id):
         try:
-            instance = DMS_Employee.objects.get(emp_id=emp_id)
-        except DMS_Employee.DoesNotExist:
+            instance = DMS_User.objects.get(user_id=user_id)
+        except DMS_User.DoesNotExist:
             return Response({"error": "Group not found."}, status=status.HTTP_404_NOT_FOUND)
 
-        serializer = DMS_Employee_serializer(instance, data=request.data, partial=True)  # partial=True allows partial updates
+        serializer = DMS_User_serializer(instance, data=request.data, partial=True)  # partial=True allows partial updates
 
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-class DMS_Employee_delete_api(APIView):
-    def get(self, request, emp_id):
+class DMS_User_delete_api(APIView):
+    def get(self, request, user_id):
         try:
-            instance = DMS_Employee.objects.get(emp_id=emp_id, emp_is_deleted=False)
-        except DMS_Employee.DoesNotExist:
+            instance = DMS_User.objects.get(user_id=user_id, user_is_deleted=False)
+        except DMS_User.DoesNotExist:
             return Response({"error": "Employee not found or already deleted."}, status=status.HTTP_404_NOT_FOUND)
-        serializer = DMS_Employee_serializer(instance)
+        serializer = DMS_User_serializer(instance)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-    def delete(self, request, emp_id):
+    def delete(self, request, user_id):
         try:
-            instance = DMS_Employee.objects.get(emp_id=emp_id, emp_is_deleted=False)
-        except DMS_Employee.DoesNotExist:
+            instance = DMS_User.objects.get(user_id=user_id, user_is_deleted=False)
+        except DMS_User.DoesNotExist:
             return Response({"error": "Employee not found or already deleted."}, status=status.HTTP_404_NOT_FOUND)
 
-        instance.emp_is_deleted = True
+        instance.user_is_deleted = True
         instance.save()
         return Response({"message": "Employee soft deleted successfully."}, status=status.HTTP_200_OK)
 
@@ -313,8 +313,9 @@ class CaptchaAPIView(APIView):
 
 
 
-def get_tokens_for_user(user):
+def get_tokens_for_user(user, log_id):
     refresh = RefreshToken.for_user(user)
+    emp_obj = DMS_Employee.objects.get(user_id=user.user_id)
     group = str(user.grp_id.grp_id)
     print("user---123", user)
     print("group---123", user.grp_id.grp_id)
@@ -341,11 +342,12 @@ def get_tokens_for_user(user):
         "access" : str(refresh.access_token),
         # "permissions": permissions_data,
         "colleague": {
-                'id': user.emp_id,
-                'emp_name': user.emp_name,
-                'email': user.emp_email,
-                'phone_no': user.emp_contact_no,
+                'id': user.user_id,
+                'emp_name': user.user_username,
+                'email': emp_obj.emp_email,
+                'phone_no': emp_obj.emp_contact_no,
                 'user_group': group,
+                'log_id': log_id
             },
         "user_group" :group,
     } 
@@ -361,19 +363,22 @@ class UserLoginView(APIView):
 
         serializer = UserLoginSerializer(data=request.data)
         if serializer.is_valid(raise_exception=True):
-            emp_username = serializer.data.get('emp_username')
+            user_username = serializer.data.get('user_username')
             password = serializer.data.get('password')
-            print("=========", emp_username, password)
-            user = authenticate(emp_username=emp_username, password=password)
+            print("=========", user_username, password)
+            user = authenticate(user_username=user_username, password=password)
             print("user--", user)
             if user is not None:
-                emp = DMS_Employee.objects.get(emp_username=user.emp_username)
-                if emp.emp_is_deleted != False:
+                user = DMS_User.objects.get(user_username=user.user_username)
+                if user.user_is_deleted != False:
                     return Response({'msg':'Login access denied. Please check your permissions or reach out to support for help.'},status=status.HTTP_401_UNAUTHORIZED)
-                if emp.emp_is_login is False: 
-                    emp.emp_is_login = True
-                    emp.save()
-                    token = get_tokens_for_user(user)
+                if user.user_is_login is False: 
+                    user.user_is_login = True
+                    user.save()
+                    print("Login entry")
+                    login_entry_obj = DMS_WebLogin.objects.create(user_id=user, log_status=1, log_added_by=user.user_username)
+                    print("login entry added--", login_entry_obj)
+                    token = get_tokens_for_user(user , login_entry_obj.log_id)
                     return Response({'token':token,'msg':'Logged in Successfully'},status=status.HTTP_200_OK)
                 else:
                     return Response({'msg':'User Already Logged In. Please check.'},status=status.HTTP_200_OK)
@@ -387,10 +392,10 @@ class LogoutView(APIView):
     def post(self, request):
         try:
             print("1", request.user)
-            emp_obj = DMS_Employee.objects.get(emp_username=request.user)
-            if emp_obj.emp_is_login is True: 
-                emp_obj.emp_is_login = False
-                emp_obj.save()
+            user_obj = DMS_User.objects.get(user_username=request.user)
+            if user_obj.user_is_login is True: 
+                user_obj.user_is_login = False
+                user_obj.save()
                 
             refresh_token = request.data.get("refresh_token")
             if refresh_token:
@@ -462,15 +467,15 @@ class DMS_Group_put_api(APIView):
 
 
 class DMS_ChangePassword_put_api(APIView):
-    def get(self, request, emp_id):
-        snippet = DMS_Employee.objects.filter(emp_id=emp_id,emp_is_deleted=False)
+    def get(self, request, user_id):
+        snippet = DMS_User.objects.filter(user_id=user_id,user_is_deleted=False)
         serializers = ChangePasswordGetSerializer(snippet, many=True)
         return Response(serializers.data)
 
-    def put(self, request, emp_id):
+    def put(self, request, user_id):
         try:
-            instance = DMS_Employee.objects.get(emp_id=emp_id)
-        except DMS_Employee.DoesNotExist:
+            instance = DMS_User.objects.get(user_id=user_id)
+        except DMS_User.DoesNotExist:
             return Response({"error": "Group not found."}, status=status.HTTP_404_NOT_FOUND)
 
         serializer = ChangePasswordputSerializer(instance, data=request.data, partial=True)  # partial=True allows partial updates
@@ -511,40 +516,12 @@ class DMS_ChangePassword_api(APIView):
     
 
 
-class DMS_ForgotPassword_api(APIView):
-    permission_classes = [IsAuthenticated]
-
-    def post(self, request):
-        user_id = request.data['user_id']
-        new_password = request.data['new_password']
-        confirm_password = request.data['confirm_password']
-
-        if new_password != confirm_password:
-            return Response({"detail": "Passwords do not match."}, status=status.HTTP_200_OK)
-        
-        user = DMS_Employee.objects.get(emp_id=user_id)
-        print("User_______________________---", user)
-
-        serializer = ForgotPasswordSerializer(data=request.data)
-
-        if serializer.is_valid():
-            newpassword = serializer.validated_data['new_password']
-            confirmpassword = serializer.validated_data['confirm_password']
-            
-            user.set_password(confirmpassword)
-            user.save()
-            return Response({"detail": "Password updated successfully."}, status=status.HTTP_200_OK)
-
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
-
 class PasswordResetRequestView(APIView):
     def post(self, request):
         serializer = PasswordResetRequestSerializer(data=request.data)
         if serializer.is_valid():
             email = serializer.validated_data['email']
-            user = DMS_Employee.objects.get(email=email)
+            user = DMS_User.objects.get(user_email=email)
             uid = urlsafe_base64_encode(force_bytes(user.pk))
             token = default_token_generator.make_token(user)
 
@@ -1266,8 +1243,7 @@ class closure_Post_api(APIView):
                     closure_at_scene=request.data.get('closure_at_scene'),
                     closure_from_scene=request.data.get('closure_from_scene'),
                     closure_back_to_base=request.data.get('closure_back_to_base'),
-                    # incident_responder_by=request.data.get('incident_responder_by'),
-                    closure_responder_name=request.data.get('closure_responder_name'),
+                    incident_responder_by=request.data.get('incident_responder_by'),
                     closure_is_deleted=False,
                     closure_added_by=request.data.get('closure_added_by'),
                     closure_modified_by=request.data.get('closure_modified_by'),
@@ -1530,7 +1506,7 @@ class Ward_get_API(APIView):
 
 class Ward_Officer_get_API(APIView):
     def get(self,request,ward_id):
-        ward = DMS_Employee.objects.filter(ward_id=ward_id,grp_id_id__grp_name='Ward Officer')
+        ward = DMS_Employee2.objects.filter(ward_id=ward_id,grp_id_id__grp_name='Ward Officer')
         serializer = Ward_officer_get_Serializer(ward,many=True)
         return Response(serializer.data,status=status.HTTP_200_OK)
     

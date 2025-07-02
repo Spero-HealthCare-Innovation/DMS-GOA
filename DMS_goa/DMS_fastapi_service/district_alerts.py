@@ -22,8 +22,7 @@ def load_ward_centroids(filepath="pune-2022-wa.geojson"):
         centroid = polygon.centroid
         lat, lon = centroid.y, centroid.x
         ward_name = properties.get("Name2") or properties.get("Name1") or f"Ward {properties.get('wardnum')}"
-        ward_no = properties.get('wardnum')
-        centroids.append((ward_name, ward_no, lat, lon))
+        centroids.append((ward_name, lat, lon))
 
     return centroids
 
@@ -187,8 +186,7 @@ zone_district_points = {
 #             }
 #         }]
 
-
-async def fetch_alert_and_weather(lat: float, lon: float, name: str, ward_no: str):
+async def fetch_alert_and_weather(lat: float, lon: float, name: str):
     ist = pytz.timezone("Asia/Kolkata")
     try:
         async with httpx.AsyncClient() as client:
@@ -234,7 +232,6 @@ async def fetch_alert_and_weather(lat: float, lon: float, name: str, ward_no: st
 
             return [{
                 "location": name,
-                "ward_id": ward_no,
                 "lat": lat,
                 "lon": lon,
                 "current_weather_time": weather_time,
@@ -310,8 +307,8 @@ async def get_ward_wise_alerts() -> dict:
     
     # Prepare async tasks for each ward
     tasks = [
-        fetch_alert_and_weather(lat, lon, ward_name, ward_no)
-        for ward_name, ward_no, lat, lon in wards
+        fetch_alert_and_weather(lat, lon, ward_name)
+        for ward_name, lat, lon in wards
     ]
 
     # Run all tasks concurrently

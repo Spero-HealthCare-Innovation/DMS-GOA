@@ -57,7 +57,7 @@ from apscheduler.schedulers.background import BackgroundScheduler
 # ----------------------Authentication for websockets---------------------------------------------------
 from rest_framework_simplejwt.tokens import UntypedToken
 from rest_framework_simplejwt.exceptions import InvalidToken, TokenError
-from admin_web.models import DMS_Employee
+from admin_web.models import DMS_User
 from rest_framework_simplejwt.tokens import AccessToken
 from rest_framework_simplejwt.exceptions import TokenError
 from reports import router as my_get_router
@@ -87,7 +87,7 @@ def get_user_from_token(token: str):
             return user_id
         else:
             pass
-    except (TokenError, DMS_Employee.DoesNotExist):
+    except (TokenError, DMS_User.DoesNotExist):
         return None
 
 
@@ -456,7 +456,7 @@ async def startup_event():
 # ----------------------------------------------------weather_alerts_utils.py------------------------------------------------
 # ------------------------------Nikita---------------------------------------
 from asgiref.sync import sync_to_async
-from admin_web.models import Weather_alerts, DMS_Disaster_Type, DMS_Employee
+from admin_web.models import Weather_alerts, DMS_Disaster_Type, DMS_User
 from asgiref.sync import sync_to_async
 import logging
 import asyncio
@@ -576,9 +576,9 @@ def get_disaster_name(disaster_id):
 def get_user_id(user_id):
     try:
         print("******************************GOT THE EMP ID *****************************")
-        user_obj = DMS_Employee.objects.get(emp_id=user_id)
-        return user_obj.emp_username
-    except DMS_Employee.DoesNotExist:
+        user_obj = DMS_User.objects.get(user_id=user_id)
+        return user_obj.user_username
+    except DMS_User.DoesNotExist:
         return None
 
 
@@ -759,8 +759,8 @@ from asgiref.sync import sync_to_async
 
 # Wrap ORM in async-safe way
 @sync_to_async
-def get_user_by_emp_id(emp_id):
-    return DMS_Employee.objects.get(emp_id=emp_id)
+def get_user_by_emp_id(user_id):
+    return DMS_User.objects.get(user_id=user_id)
 
 
 
@@ -920,14 +920,11 @@ async def send_weather_to_kafka_periodically():
             print("✅ Sent to Kafka (new)")
         except Exception as e:
             print(f"❌ Kafka error (new): {e}")
-        await asyncio.sleep(900)  # 5 minutes
+        await asyncio.sleep(300)  # 5 minutes
 
 @app.on_event("startup")
 async def start_background_task():
     asyncio.create_task(send_weather_to_kafka_periodically())
-    
-    
-    
 
 
 
