@@ -17,6 +17,13 @@ class division_enum(enum.Enum):
     North=2
     Central=3
 
+class media_enum(enum.Enum):
+    Twitter=0
+    FB=1
+    News=2
+    RSS=3 
+    Reddit=4
+
 class DMS_State(models.Model):
     state_id = models.AutoField(primary_key=True)
     state_name = models.CharField(max_length=255)
@@ -603,3 +610,17 @@ class DMS_open_weather_alerts(models.Model):
  
     def __str__(self):
         return f"{self.alert_id } @ {self.current_weather_time}"
+class TwitterDMS(models.Model):
+    tweet_id = models.CharField(max_length=100, unique=True)
+    tweet_original_text = models.TextField()
+    tweet_translated_text = models.TextField()
+    tweet_user_id = models.CharField(max_length=100)
+    tweet_language = models.CharField(max_length=10, blank=True, null=True)
+    tweet_region = models.CharField(max_length=50)
+    tweet_link = models.CharField(max_length=100)
+    tweet_media_status = enum.EnumField(media_enum,null=True,blank=True)
+    tweet_created_at = models.DateTimeField()
+    tweet_added_date = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return self.tweet_id

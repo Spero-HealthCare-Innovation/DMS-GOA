@@ -27,6 +27,14 @@ from django.core.mail import send_mail
 from rest_framework_simplejwt.tokens import AccessToken
 from geopy.geocoders import Nominatim
 import ast
+import tweepy
+import json
+from datetime import datetime
+from langdetect import detect
+from deep_translator import GoogleTranslator
+import re
+from .constants import LOCATION_KEYWORDS, BLOCKLIST, EMS_KEYWORDS
+
 
 class DMS_department_post_api(APIView):
     def post(self,request):
@@ -1506,3 +1514,79 @@ class Ward_Officer_get_API(APIView):
     
     
     
+bearer_token = "AAAAAAAAAAAAAAAAAAAAAK2AxwEAAAAALAjV%2F%2B4QGmYpv4cCHARHMfCo1tE%3DeqlcnINOO7Y7OA2sBo3zgIpEyBhPXCVv7TO1ok6xAMEMzwn4B8"
+client = tweepy.Client(bearer_token=bearer_token)
+class twitter_post_api(APIView):
+
+    def detect_region(text):
+        text = text.lower()
+        for loc in LOCATION_KEYWORDS:
+            if loc in text:
+                if "goa" in loc or loc in ["panaji", "margao", "vasco", "mapusa", "calangute"]:
+                    return "Goa"
+                elif "pune" in loc or loc in ["pcmc", "pmc", "baner", "kothrud", "shivajinagar"]:
+                    return "Pune"
+                elif "mumbai" in loc or "thane" in loc:
+                    return "Mumbai"
+        return "Unknown"
+
+    def is_ems_related(text):
+        text = text.lower()
+        if any(block in text for block in BLOCKLIST):
+            return False
+        return any(re.search(rf"\b{kw}\b", text) for kw in EMS_KEYWORDS)
+
+    # ------------------- MAIN SCRAPER -------------------
+
+    def scrape_twitter_dms():
+        query = "(" + " OR ".join(EMS_KEYWORDS) + ") (" + " OR ".join(LOCATION_KEYWORDS) + ") lang:en -is:retweet"
+
+        try:
+            response = client.search_recent_tweets(
+                query=query,
+                max_results=50,
+                tweet_fields=["created_at", "author_id", "text", "id"]
+            )
+        except Exception as e:
+            print(f" Twitter API Error: {e}")
+            return
+
+        final_results = []
+        obj=twitter_post_api()
+        if response.data:
+            for tweet in response.data:
+                original_text = tweet.text
+                translated_text, lang = obj.translate_if_needed(original_text)
+
+                if obj.is_ems_related(translated_text):
+                    region = obj.detect_region(translated_text)
+                    tweet_data = {
+                        "tweet_original_text": original_text,
+                        "tweet_translated_text": translated_text,
+                        "tweet_user_id": tweet.author_id,
+                        "tweet_language": lang,
+                        "tweet_region": region,
+                        "tweet_link": f"https://twitter.com/user/status/{tweet.id}",
+                        "tweet_created_at": tweet.created_at.strftime("%Y-%m-%d %H:%M:%S"),
+                        "tweet_media_status": "0"
+                    }
+                    final_results.append(tweet_data)
+                    print(f" Match: {original_text[:80]}")
+                else:
+                    print(f" Skipped: {original_text[:80]}")
+
+            # Save to JSON
+            with open("twitter_dms.json", "w", encoding="utf-8") as f:
+                json.dump(final_results, f, indent=2, ensure_ascii=False)
+                
+            for data in final_results:
+                data["tweet_id"] = data.pop("id")  # match model field name
+                serializer = TwitterDMSSerializer(data=data)
+                if serializer.is_valid():
+                    serializer.save()
+                else:
+                    print(serializer.errors)  # optionally log invalid data
+                    
+            print(f"\n Total relevant tweets saved: {len(final_results)}")
+        else:
+            print(" No tweets found.")
