@@ -70,3 +70,6 @@ pyhive
 thrift
 thrift-sasl
 geopy 
+feedparser
+shapely
+APScheduler

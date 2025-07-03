@@ -7,7 +7,7 @@ from django.utils.http import urlsafe_base64_decode
 from django.contrib.auth.tokens import default_token_generator
 from django.contrib.auth.password_validation import validate_password
 from django.contrib.auth import password_validation
-from admin_web.models import DMS_Employee
+from admin_web.models import DMS_User
 
 class ChangePasswordSerializer(serializers.Serializer):
     old_password = serializers.CharField(required=True)
@@ -22,7 +22,7 @@ class PasswordResetRequestSerializer(serializers.Serializer):
     emp_email = serializers.EmailField()
 
     def validate_email(self, value):
-        if not DMS_Employee.objects.filter(emp_email=value).exists():
+        if not DMS_User.objects.filter(emp_email=value).exists():
             raise serializers.ValidationError("No user with this email.")
         return value
     
@@ -36,8 +36,8 @@ class PasswordResetConfirmSerializer(serializers.Serializer):
     def validate(self, attrs):
         try:
             uid = urlsafe_base64_decode(attrs['uid']).decode()
-            user = DMS_Employee.objects.get(pk=uid)
-        except (DMS_Employee.DoesNotExist, ValueError, TypeError, OverflowError):
+            user = DMS_User.objects.get(pk=uid)
+        except (DMS_User.DoesNotExist, ValueError, TypeError, OverflowError):
             raise serializers.ValidationError({"uid": "Invalid UID"})
 
         if not default_token_generator.check_token(user, attrs['token']):
@@ -60,12 +60,12 @@ class DMS_Group_serializer(serializers.ModelSerializer):
         model=DMS_Group
         fields='__all__'
 
-class DMS_Employee_serializer(serializers.ModelSerializer):
+class DMS_User_serializer(serializers.ModelSerializer):
     password2 = serializers.CharField(style={'input_type':'password'}, write_only=True)
     # grp_id = serializers.PrimaryKeyRelatedField(queryset=DMS_Group.objects.all(),many=False)
     
     class Meta:
-        model  = DMS_Employee
+        model  = DMS_User
         fields = ['emp_id', 'emp_username', 'grp_id', 'emp_name', 'emp_email', 'emp_contact_no', 'emp_dob', 'emp_doj', 'emp_is_login', 'state_id', 'dist_id', 'tahsil_id', 'city_id', 'emp_is_deleted', 'emp_added_by', 'emp_modified_by', 'password','password2','ward_id' ]
 
         extra_kwargs = {
@@ -86,14 +86,14 @@ class DMS_Employee_serializer(serializers.ModelSerializer):
 
         # Hash the password before creating the user
         password = validated_data.pop('password')
-        user = DMS_Employee.objects.create_user(**validated_data)
+        user = DMS_User.objects.create_user(**validated_data)
         user.set_password(password)  # hashes and sets it correctly
         user.save()
         return user
     
     
 
-class DMS_Employee_GET_serializer(serializers.ModelSerializer):
+class DMS_User_GET_serializer(serializers.ModelSerializer):
     
     dis_name = serializers.CharField(source='dist_id.dis_name', read_only=True)
     tah_name = serializers.CharField(source='tahsil_id.tah_name', read_only=True)
@@ -104,7 +104,7 @@ class DMS_Employee_GET_serializer(serializers.ModelSerializer):
     
 
     class Meta:
-        model = DMS_Employee
+        model = DMS_User
         fields = [
             'emp_id', 'emp_username', 'grp_id', 'emp_name', 'emp_email',
             'emp_contact_no', 'emp_dob', 'emp_doj', 'emp_is_login',
@@ -137,7 +137,7 @@ class DMS_Group_Serializer(serializers.ModelSerializer):
     dep_name = serializers.CharField(source='dep_id.dep_name', read_only=True)
     class Meta:
         model = DMS_Group
-        fields = '__all__'
+        fields = ['grp_id','grp_code','permission_status','grp_name','grp_is_deleted','grp_added_date','grp_added_by','grp_modified_date','grp_modified_by','dep_id','dep_name']
         
 class DMS_Department_Serializer(serializers.ModelSerializer):
     dst_name = serializers.CharField(source='dis_id.dis_name', read_only=True)
@@ -203,21 +203,21 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
     
 
 class UserLoginSerializer(serializers.ModelSerializer):
-    emp_username = serializers.CharField(required=False, allow_blank=True)
+    user_username = serializers.CharField(required=False, allow_blank=True)
     password = serializers.CharField(style={'input_type': 'password'})
     class Meta:
-        model = DMS_Employee
-        fields = ['emp_username', 'password']
+        model = DMS_User
+        fields = ['user_username', 'password']
 
 
 class ChangePasswordGetSerializer(serializers.ModelSerializer):
     class Meta:
-        model = DMS_Employee
-        fields = [ 'emp_id','emp_username','password']
+        model = DMS_User
+        fields = [ 'user_id','user_username','password']
 
 class ChangePasswordputSerializer(serializers.ModelSerializer):
     class Meta:
-        model = DMS_Employee
+        model = DMS_User
         fields = ['password']
 
 class SopSerializer(serializers.ModelSerializer):
@@ -310,6 +310,13 @@ class Comments_Serializer(serializers.ModelSerializer):
         model = DMS_Comments
         fields = '__all__' 
         
+
+class Weather_alerts_Serializer(serializers.ModelSerializer):
+    class Meta:
+        model = Weather_alerts
+        fields = ['pk_id']
+        
+
 class Sop_Response_Procedure_Serializer(serializers.ModelSerializer):
     class Meta:
         model = DMS_SOP
@@ -461,8 +468,8 @@ class incident_get_serializer(serializers.ModelSerializer):
     def get_ward_officer_name(self, obj):
         try:
             officer_ids = obj.ward_officer if isinstance(obj.ward_officer, list) else []
-            officers = DMS_Employee.objects.filter(emp_id__in=officer_ids)
-            return [{"emp_id": officer.emp_id, "ward_officer_name": officer.emp_name} for officer in officers]
+            officers = DMS_User.objects.filter(user_id__in=officer_ids)
+            return [{"emp_id": officer.user_id, "ward_officer_name": officer.user_username} for officer in officers]
         except Exception:
             return []
         

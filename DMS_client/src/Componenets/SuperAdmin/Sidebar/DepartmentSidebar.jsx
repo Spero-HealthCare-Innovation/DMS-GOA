@@ -35,9 +35,17 @@ const screenConfig = {
     icon: <AddCircleOutlineOutlinedIcon />,
     screens: [],
   },
-  "Closure Report": {
+  // "Closure Report": {
+  //   icon: <TextSnippetOutlinedIcon />,
+  //   screens: [],
+  // },
+
+  "Reports": {
     icon: <TextSnippetOutlinedIcon />,
-    screens: [],
+    screens: [
+      { id: 1, text: "Closure Report", path: "/Closure Report" },
+      { id: 2, text: "Incident Report", path: "/Incident Report" },
+    ],
   },
   Permission: {
     icon: <LockIcon />,
@@ -73,24 +81,41 @@ const Departmentsidebar = ({ darkMode }) => {
           sx={{
             width: open ? 200 : 60,
             "& .MuiDrawer-paper": {
-              width: open ? 200 : 50,
+              width: open ? 200 : 45,
               position: "absolute",
               top: "50%",
-
               transform: "translateY(-50%)",
               background: darkMode
-                ? "linear-gradient(to bottom, #5FECC8, rgba(32, 43, 40, 0.05))"
-                : "radial-gradient(6035.71% 72.44% at 0% 50%, #00BFA6 0%, #292D45 100%)",
+                ? open
+                  ? "linear-gradient(to bottom, #5FC8EC,rgb(19, 26, 28))" // top to bottom gradient when open
+                  : "linear-gradient(to bottom, #5FC8EC,rgb(19, 26, 28))" // solid background when closed
+                : open
+                  ? "linear-gradient(to bottom, #5FC8EC,rgb(18, 24, 26))" // light gradient when open in light mode
+                  : "radial-gradient(6035.71% 72.44% at 0% 50%, #5FC8EC 0%, #5FC8EC 100%)",
+
               borderRadius: "30px",
-              transition: "width 0.5s ease-in-out",
+              // transition: "width 0.5s ease-in-out",
               display: "flex",
               alignItems: open ? "flex-start" : "center",
               justifyContent: "center",
               overflow: "hidden",
-              height: "50vh",
-              maxHeight: "90vh",
-              // marginLeft: "0.2em",
+              height: "auto",
+              // maxHeight: "90vh",
+              svg: {
+                fill: "#fff",
+              },
+              pt: 2,
+              pb: 2,
+              marginLeft: "0.5em",
+              fontSize: "18px",
+              color: "white",
+              boxShadow: "0 0 10px rgba(0, 0, 0, 0.1)",
               alignContent: "left",
+              "&:hover": {
+                background: open
+                  ? "linear-gradient(to bottom, #5FC8EC, #2F4D54)"
+                  : "radial-gradient(6035.71% 72.44% at 0% 50%, #5FC8EC 0%, #5FC8EC 100%)",
+              },
             },
           }}
         >
@@ -106,16 +131,17 @@ const Departmentsidebar = ({ darkMode }) => {
                         onClick={() =>
                           hasSubmenus
                             ? toggleDropdown(sectionName)
-                            : navigate("/" + sectionName)
+                            : navigate(sectionName)
                         }
                         sx={{
                           flexDirection: open ? "row" : "column",
                           justifyContent: "left",
                           py: 1,
                           gap: 1,
+                          color: 'white'
                         }}
                       >
-                        <ListItemIcon sx={{ minWidth: 0 }}>{icon}</ListItemIcon>
+                        <ListItemIcon sx={{ minWidth: 0, color: 'white' }}>{icon}</ListItemIcon>
 
                         {open && (
                           <Box
@@ -130,9 +156,9 @@ const Departmentsidebar = ({ darkMode }) => {
                             </Typography>
                             {hasSubmenus &&
                               (dropdowns[sectionName] ? (
-                                <ArrowDropUpIcon fontSize="small" />
+                                <ArrowDropUpIcon fontSize="small" sx={{ color: "white" }} />
                               ) : (
-                                <ArrowDropDownIcon fontSize="small" />
+                                <ArrowDropDownIcon fontSize="small" sx={{ color: "white" }} />
                               ))}
                           </Box>
                         )}

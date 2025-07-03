@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import {
     Box, CardContent, Typography, Table, TableBody, TableContainer,
-    TableHead, TableRow, Grid, Button, Select, MenuItem, InputAdornment, TextField
+    TableHead, TableRow, Grid, Button, Select, MenuItem, InputAdornment, TextField,
+    TableCell
 } from '@mui/material';
 import { styled } from '@mui/system';
 import { useNavigate } from 'react-router-dom';
@@ -10,13 +11,16 @@ import { useAuth } from './../../../Context/ContextAPI';
 import Sidebar from '../Sidebar/Sidebar';
 import { Search } from "@mui/icons-material";
 import { IconButton } from "@mui/material";
+import { Tooltip } from '@mui/material';
+import { red } from '@mui/material/colors';
 
 const EnquiryCard = styled('div')({
     display: 'flex',
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    background: "#5FECC8",
+    background: "linear-gradient(to bottom, #53bce1, rgb(173, 207, 216))",
+    // background: "rgb(95, 200, 236)",
     color: 'black',
     borderRadius: '8px 10px 0 0',
     fontWeight: '600',
@@ -47,7 +51,15 @@ const StyledCardContent = styled(CardContent)({
 });
 
 const AlertPanel = ({ darkMode }) => {
-    const { newToken } = useAuth();
+    const { newToken, selectedDisasterId, selectedDisasterName } = useAuth();
+    console.log(selectedDisasterId, selectedDisasterName, 'mmmmmmm');
+
+    useEffect(() => {
+        if (selectedDisasterName) {
+            console.log("Clicked disaster type name:", selectedDisasterName);
+        }
+    }, [selectedDisasterName]);
+
     const navigate = useNavigate();
     console.log(newToken, 'newToken');
 
@@ -63,7 +75,7 @@ const AlertPanel = ({ darkMode }) => {
     const bgColor = darkMode ? "#0a1929" : "#ffffff";
     const borderColor = darkMode ? "#7F7F7F" : "#ccc";
     const [page, setPage] = useState(1);
-    const [rowsPerPage, setRowsPerPage] = useState(5);
+    const [rowsPerPage, setRowsPerPage] = useState(10);
     const [alertData, setAlertData] = useState([]);
     const socketRef = useRef(null);
     const [triggeredData, setTriggeredData] = useState([]);
@@ -84,7 +96,7 @@ const AlertPanel = ({ darkMode }) => {
     });
 
     useEffect(() => {
-        document.title = "DMS-AlertPanel";
+        document.title = "Dms|alertpanel";
     }, []);
 
     useEffect(() => {
@@ -112,30 +124,120 @@ const AlertPanel = ({ darkMode }) => {
         };
     }, []);
 
+    const [initialData, setInitialData] = useState([]);
+    const [liveData, setLiveData] = useState([]);
+    const [lastTriggeredId, setLastTriggeredId] = useState(null);
+
+    // useEffect(() => {
+    //     fetch(`${socketUrl}/api/weather_alerts`)
+    //         .then(res => res.json())
+    //         .then(data => setInitialData(data.slice(0, 10)))
+    //         .catch(err => console.error("Initial fetch failed:", err));
+    // }, []);
 
     useEffect(() => {
+        fetch(`${socketUrl}/api/weather_alerts`)
+            .then(res => res.json())
+            .then(data => {
+                const sorted = data
+                    .sort((a, b) => b.pk_id - a.pk_id)
+                    .slice(0, 10);
+                setInitialData(sorted);
+                console.log(sorted, 'sorted Data in descending order');
+
+            })
+            .catch(err => console.error("Initial fetch failed:", err));
+    }, []);
+
+
+    useEffect(() => {
+        if (!selectedDisasterId) return;
+
+        const socket = new WebSocket(`ws://192.168.1.116:7777/ws/disaster_alerts?disaster_id=${selectedDisasterId}`);
+
+        socket.onopen = () => {
+            console.log('Disaster WebSocket connected');
+        };
+
+        socket.onmessage = (event) => {
+            try {
+                const data = JSON.parse(event.data);
+                console.log('Disaster alert data:', data);
+            } catch (error) {
+                console.error('Invalid JSON from disaster WebSocket:', event.data);
+            }
+        };
+
+        socket.onerror = (error) => {
+            console.error('Disaster WebSocket error:', error);
+        };
+
+        socket.onclose = () => {
+            console.log('Disaster WebSocket closed');
+        };
+
+        // Cleanup on unmount or disasterId change
+        return () => {
+            socket.close();
+        };
+    }, [selectedDisasterId]);
+
+
+
+    useEffect(() => {
+        // const socket = new WebSocket(`ws://192.168.1.116:7777/ws/weather_alerts`);
         const socket = new WebSocket(`${socketUrl}/ws/weather_alerts`);
 
         socket.onmessage = (event) => {
             try {
                 const newData = JSON.parse(event.data);
-                console.log('Received:', newData);
-                setAlertData(prevData => {
-                    const incoming = Array.isArray(newData) ? newData[0] : newData;
-                    const filteredData = prevData.filter(item => item.pk_id !== incoming.pk_id);
-                    return [incoming, ...filteredData];
+                const incoming = Array.isArray(newData) ? newData[0] : newData;
+
+                setLiveData(prev => {
+                    const isDuplicate = prev.some(item => item.pk_id === incoming.pk_id) ||
+                        initialData.some(item => item.pk_id === incoming.pk_id);
+                    if (isDuplicate) return prev;
+
+                    return [...prev, incoming];
                 });
             } catch (error) {
                 console.error('Invalid JSON:', event.data);
             }
         };
+
         socket.onerror = (error) => {
             console.error('WebSocket error:', error);
         };
+
         socket.onclose = () => {
             console.log('WebSocket closed');
         };
-    }, []);
+    }, [initialData]);
+
+    // useEffect(() => {
+    //     const socket = new WebSocket(`${socketUrl}/ws/weather_alerts`);
+
+    //     socket.onmessage = (event) => {
+    //         try {
+    //             const newData = JSON.parse(event.data);
+    //             console.log('Received:', newData);
+    //             setAlertData(prevData => {
+    //                 const incoming = Array.isArray(newData) ? newData[0] : newData;
+    //                 const filteredData = prevData.filter(item => item.pk_id !== incoming.pk_id);
+    //                 return [...filteredData, incoming]
+    //                 // return [incoming, ...filteredData];
+    //             });
+    //         } catch (error) {
+    //             console.error('Invalid JSON:', event.data);
+    //         }
+    //     };
+    //     socket.onerror = (error) => {
+    //         console.error('WebSocket error:', error);
+    //     };
+    //     socket.onclose = () => {
+    //         console.log('WebSocket closed');
+    //     };
+    // }, []);
 
     const handleTriggerClick = async (id, triggerStatus) => {
         try {
@@ -146,19 +248,19 @@ const AlertPanel = ({ darkMode }) => {
                     'Content-Type': 'application/json',
                 },
             });
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
-            const data = await response.json();
-            setTriggeredData(data);
-            // window.location.reload();
-            // if (group === "2") {
-            //     navigate('/Sop', {
-            //         state: {
-            //             triggerStatus: triggerStatus
-            //         }
-            //     });
-            // }
+
+            if (!response.ok) throw new Error('Network response was not ok');
+
+            const updatedItem = await response.json();
+
+            // Update initialData: remove old item and insert updated one at the top
+            setInitialData(prev => {
+                const filtered = prev.filter(item => item.pk_id !== updatedItem.pk_id);
+                return [updatedItem, ...filtered];
+            });
+            setTriggeredData(updatedItem);
+            setLastTriggeredId(updatedItem.pk_id); // 🔹 Set the triggered alert's ID
+
         } catch (error) {
             console.error('Error fetching alert details:', error);
         }
@@ -215,21 +317,56 @@ const AlertPanel = ({ darkMode }) => {
 
     const [searchText, setSearchText] = useState("");
 
-    const filteredData = alertData.filter(item =>
+    // const filteredData = alertData.filter(item =>
+    //     item.pk_id.toString().toLowerCase().includes(searchText.toLowerCase())
+    // );
+
+    // const combinedData = [...initialData, ...liveData];
+
+    // const filteredData = combinedData.filter(item =>
+    //     item.pk_id.toString().toLowerCase().includes(searchText.toLowerCase())
+    // );
+
+    const combinedRaw = [...initialData, ...liveData];
+
+    const uniqueCombined = combinedRaw.filter(
+        (item, index, self) =>
+            index === self.findIndex(i => i.pk_id === item.pk_id)
+    );
+
+    const sortedCombined = uniqueCombined.sort((a, b) => b.pk_id - a.pk_id);
+
+    // 🔹 Place the last triggered alert at the top
+    const combinedData = lastTriggeredId
+        ? [
+            ...uniqueCombined.filter(i => i.pk_id === lastTriggeredId),
+            ...sortedCombined.filter(i => i.pk_id !== lastTriggeredId)
+        ]
+        : sortedCombined;
+
+    const statusFilteredData = combinedData.filter(item => item.triger_status !== 3);
+
+    const filteredData = statusFilteredData.filter(item =>
         item.pk_id.toString().toLowerCase().includes(searchText.toLowerCase())
     );
+    // const filteredData = combinedData.filter(item =>
+    //     item.pk_id.toString().toLowerCase().includes(searchText.toLowerCase())
+    // );
 
     const startIndex = (page - 1) * rowsPerPage;
     const endIndex = startIndex + rowsPerPage;
     const paginatedData = filteredData.slice(startIndex, endIndex);
     const totalPages = Math.ceil(filteredData.length / rowsPerPage);
 
+    useEffect(() => {
+        setPage(1);
+    }, [searchText])
 
     return (
-        <Box sx={{ flexGrow: 1, mt: 1, ml: '6em', mr: 1, mb: 2 }}>
+        <Box sx={{ flexGrow: 1, mt: 1, ml: '5em', mr: 1, mb: 2 }}>
             <Sidebar darkMode={darkMode} />
             <Grid container spacing={2}>
-                <Grid item xs={12} md={8}>
+                <Grid item xs={12} md={7}>
                     <Grid container spacing={2} alignItems="center">
                         <Grid item xs={12} md={12} display="flex" alignItems="center">
                             <TextField
@@ -249,7 +386,7 @@ const AlertPanel = ({ darkMode }) => {
                                     width: "200px",
                                     "& .MuiOutlinedInput-root": {
                                         borderRadius: "25px",
-                                        backgroundColor: darkMode ? "#1e293b" : "#fff",
+                                        backgroundColor: darkMode ? "#202328" : "#fff",
                                         color: darkMode ? "#fff" : "#000",
                                         px: 1,
                                         py: 0.2,
@@ -258,7 +395,7 @@ const AlertPanel = ({ darkMode }) => {
                                         borderColor: darkMode ? "#444" : "#ccc",
                                     },
                                     "& input": {
-                                        color: darkMode ? "#fff" : "#000",
+                                        color: darkMode ? "white" : "#000",
                                         padding: "6px 8px",
                                         fontSize: "13px",
                                     },
@@ -279,108 +416,171 @@ const AlertPanel = ({ darkMode }) => {
                                             <Typography variant="subtitle2">Alert Id</Typography>
                                         </StyledCardContent>
                                         <StyledCardContent style={{ flex: 1.5, borderRight: "1px solid black" }}>
-                                            <Typography variant="subtitle2">Time</Typography>
+                                            <Typography variant="subtitle2">Date & Time</Typography>
                                         </StyledCardContent>
                                         <StyledCardContent style={{ flex: 1, borderRight: "1px solid black" }}>
-                                            <Typography variant="subtitle2">Temps (°C)</Typography>
+                                            <Typography variant="subtitle2">Disaster Name</Typography>
                                         </StyledCardContent>
-                                        <StyledCardContent style={{ flex: 1, borderRight: "1px solid black" }}>
-                                            <Typography variant="subtitle2">Rain (mm)</Typography>
-                                        </StyledCardContent>
-                                        <StyledCardContent style={{ flex: 1, borderRight: "1px solid black" }}>
-                                            <Typography variant="subtitle2">Alert Type</Typography>
+                                        <StyledCardContent style={{ flex: 0.5, borderRight: "1px solid black" }}>
+                                            <Typography variant="subtitle2">Severity</Typography>
                                         </StyledCardContent>
                                         <StyledCardContent style={{ flex: 1, marginTop: '15px' }}>
-                                            <Typography variant="subtitle2">Trigger</Typography>
+                                            <Typography variant="subtitle2">Status</Typography>
                                         </StyledCardContent>
                                     </EnquiryCard>
                                 </TableRow>
                             </TableHead>
-
-                            <TableBody>
-                                {paginatedData.length === 0 ? (
-                                    <TableRow>
-                                        <StyledCardContent style={{ flex: 1, textAlign: 'center' }} colSpan={5}>
-                                            <Typography variant="subtitle2" sx={{ color: textColor }}>
-                                                No alerts available.
-                                            </Typography>
-                                        </StyledCardContent>
-                                    </TableRow>
-                                ) : (
-                                    paginatedData.map((item, index) => (
-                                        <EnquiryCardBody
-                                            key={startIndex + index}
-                                            // onClick={() => handleTriggeredData(item.pk_id, item.triger_status)}
-                                            sx={{
-                                                backgroundColor: darkMode ? "#1C223C" : "#FFFFFF",
-                                                color: darkMode ? "white" : "black",
-                                                cursor: "pointer",
-                                            }}
-                                        >
-                                            <StyledCardContent style={{ flex: 0.3 }}>
-                                                <Typography variant="subtitle2">{index + 1}</Typography>
-                                            </StyledCardContent>
-                                            <StyledCardContent style={{ flex: 0.5 }}>
-                                                <Typography variant="subtitle2">{item.pk_id}</Typography>
-                                            </StyledCardContent>
-                                            <StyledCardContent style={{ flex: 1.5 }}>
-                                                <Typography variant="subtitle2">{new Date(item.alert_datetime).toLocaleString()}</Typography>
-                                            </StyledCardContent>
-                                            <StyledCardContent style={{ flex: 1 }}>
-                                                <Typography variant="subtitle2">{item.temperature_2m}°C</Typography>
-                                            </StyledCardContent>
-                                            <StyledCardContent style={{ flex: 1 }}>
-                                                <Typography variant="subtitle2">{item.rain} mm</Typography>
-                                            </StyledCardContent>
-                                            <StyledCardContent style={{ flex: 1 }}>
-                                                <Typography variant="subtitle2">
-                                                    {
-                                                        item.alert_type === 1 ? (
-                                                            <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                                                <span style={{ width: 15, height: 15, borderRadius: '50%', backgroundColor: '#FF3B30' }}></span>
-                                                            </span>
-                                                        ) : item.alert_type === 2 ? (
-                                                            <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                                                <span style={{ width: 15, height: 15, borderRadius: '50%', backgroundColor: '#FF9500' }}></span>
-                                                            </span>
-                                                        ) : item.alert_type === 3 ? (
-                                                            <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                                                <span style={{ width: 15, height: 15, borderRadius: '50%', backgroundColor: '#FFD60A' }}></span>
-                                                            </span>
-                                                        ) : item.alert_type === 4 ? (
-                                                            <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                                                <span style={{ width: 15, height: 15, borderRadius: '50%', backgroundColor: '#5AC8FA' }}></span>
-                                                            </span>
-                                                        ) : (
-                                                            'N/A'
-                                                        )
-                                                    }
-                                                </Typography>
-                                            </StyledCardContent>
-                                            <StyledCardContent style={{ flex: 1 }}>
-                                                <Button
-                                                    onClick={(e) => {
-                                                        e.stopPropagation();
-                                                        handleTriggerClick(item.pk_id, item.triger_status);
-                                                    }}
-                                                    style={{
-                                                        width: '70%',
-                                                        backgroundColor: item.triger_status === 1 ? '#FF4C4C' : '#00BFA6',
-                                                        color: darkMode ? 'white' : 'black',
-                                                        borderRadius: '10px',
-                                                        height: '30px',
-                                                        marginTop: '15px',
-                                                        fontSize: '11px',
-                                                    }}
-                                                >
-                                                    {item.triger_status === 1 ? "Trigger" : "Triggered"}
-                                                </Button>
-                                            </StyledCardContent>
-                                        </EnquiryCardBody>
-                                    ))
-                                )}
-                            </TableBody>
                         </Table>
+
+                        <Box sx={{
+                            maxHeight: 500,
+                            overflowY: 'auto',
+                            scrollBehavior: "smooth",
+                            "&::-webkit-scrollbar": {
+                                width: "6px",
+                            },
+                            "&::-webkit-scrollbar-thumb": {
+                                backgroundColor: darkMode ? "#0288d1" : "#888",
+                                borderRadius: 3,
+                            },
+                            "&::-webkit-scrollbar-thumb:hover": {
+                                backgroundColor: darkMode ? "#5FC8EC" : "#555",
+                            },
+                        }}>
+                            <Table>
+                                <TableBody>
+                                    {paginatedData.length === 0 ? (
+                                        <TableRow>
+                                            <TableCell colSpan={5} align="center">
+                                                <Typography variant="subtitle2" sx={{ color: textColor }}>
+                                                    No alerts available.
+                                                </Typography>
+                                            </TableCell>
+                                        </TableRow>
+                                    ) : (
+                                        paginatedData.map((item, index) => (
+                                            <EnquiryCardBody
+                                                key={startIndex + index}
+                                                sx={{
+                                                    backgroundColor: darkMode ? "rgb(53 53 53)" : "#FFFFFF",
+                                                    // backgroundColor: darkMode ? "rgb(88,92,99)" : "#FFFFFF",
+                                                    color: "white",
+                                                    cursor: "pointer",
+                                                }}
+                                            >
+                                                <StyledCardContent style={{ flex: 0.3 }}>
+                                                    <Typography variant="subtitle2">{index + 1}</Typography>
+                                                </StyledCardContent>
+                                                <StyledCardContent style={{ flex: 0.5 }}>
+                                                    <Typography variant="subtitle2">{item.pk_id}</Typography>
+                                                </StyledCardContent>
+                                                <StyledCardContent style={{ flex: 1.5 }}>
+                                                    <Typography variant="subtitle2">
+                                                        {new Date(item.alert_datetime).toLocaleString('en-GB', {
+                                                            hour12: false,
+                                                            year: 'numeric',
+                                                            month: '2-digit',
+                                                            day: '2-digit',
+                                                            hour: '2-digit',
+                                                            minute: '2-digit',
+                                                            second: '2-digit'
+                                                        })}
+                                                    </Typography>
+                                                </StyledCardContent>
+                                                <StyledCardContent style={{ flex: 1 }}>
+                                                    <Typography variant="subtitle2">
+                                                        {item.disaster_name || 'N/A'}
+                                                    </Typography>
+                                                </StyledCardContent>
+                                                <StyledCardContent style={{ flex: 0.5 }}>
+                                                    <Typography variant="subtitle2">
+                                                        {(() => {
+                                                            const config = {
+                                                                1: { color: '#FF3B30', label: 'High' },
+                                                                2: { color: '#FF9500', label: 'Medium' },
+                                                                3: { color: '#FFD60A', label: 'Low' },
+                                                                4: { color: 'green', label: 'Very Low' },
+                                                            };
+                                                            const severity = config[item.alert_type];
+                                                            return severity ? (
+                                                                <Tooltip
+                                                                    title={severity.label}
+                                                                    arrow
+                                                                    componentsProps={{
+                                                                        tooltip: {
+                                                                            sx: {
+                                                                                backgroundColor: 'black',
+                                                                                color: 'white',
+                                                                                fontSize: '12px',
+                                                                            },
+                                                                            arrow: {
+                                                                                color: 'black',
+                                                                            },
+                                                                        },
+                                                                    }}
+                                                                >
+                                                                    <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                                                        <span style={{
+                                                                            width: 15,
+                                                                            height: 15,
+                                                                            borderRadius: '50%',
+                                                                            backgroundColor: severity.color,
+                                                                        }} />
+                                                                    </span>
+                                                                </Tooltip>
+                                                            ) : 'N/A';
+                                                        })()}
+                                                    </Typography>
+                                                </StyledCardContent>
+                                                {/* <StyledCardContent style={{ flex: 1 }}>
+                                                    <Button
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            handleTriggerClick(item.pk_id, item.triger_status);
+                                                        }}
+                                                        style={{
+                                                            width: '70%',
+                                                            backgroundColor: item.triger_status === 1 ? 'rgb(223,76,76)' : "rgb(18,166,95)",
+                                                            color: 'black',
+                                                            borderRadius: '10px',
+                                                            height: '30px',
+                                                            marginTop: '15px',
+                                                            fontSize: '11px',
+                                                        }}
+                                                    >
+                                                        {(item.triger_status === 1 ? "trigger" : "triggered")
+                                                            .charAt(0).toUpperCase() + (item.triger_status === 1 ? "trigger" : "triggered").slice(1).toLowerCase()}
+                                                    </Button>
+                                                </StyledCardContent> */}
+                                                <StyledCardContent style={{ flex: 1 }}>
+                                                    <Button
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            handleTriggerClick(item.pk_id, item.triger_status);
+                                                        }}
+                                                        style={{
+                                                            width: '70%',
+                                                            backgroundColor: item.triger_status === 1 ? 'rgb(223,76,76)' : "rgb(18,166,95)",
+                                                            color: 'white',
+                                                            borderRadius: '10px',
+                                                            height: '30px',
+                                                            marginTop: '15px',
+                                                            fontSize: '13px',
+                                                            textTransform: 'none'
+                                                        }}
+                                                    >
+                                                        {(() => {
+                                                            const label = item.triger_status === 1 ? "trigger" : "triggered";
+                                                            return label.charAt(0).toUpperCase() + label.slice(1).toLowerCase();
+                                                        })()}
+                                                    </Button>
+                                                </StyledCardContent>
+                                            </EnquiryCardBody>
+                                        ))
+                                    )}
+                                </TableBody>
+                            </Table>
+                        </Box>
                     </TableContainer>
 
                     <Box
@@ -393,7 +593,7 @@ const AlertPanel = ({ darkMode }) => {
                     >
                         <Box display="flex" alignItems="center" gap={1}>
                             <Typography variant="body2" sx={{ color: textColor }}>
-                                Records per page:
+                                Records Per Page:
                             </Typography>
                             <Select
                                 value={rowsPerPage}
@@ -409,14 +609,15 @@ const AlertPanel = ({ darkMode }) => {
                                     borderColor: borderColor,
                                     height: "30px",
                                     minWidth: "70px",
-                                    backgroundColor: bgColor,
+                                    // backgroundColor: bgColor,
+                                    backgroundColor: darkMode ? "#202328" : "#fff",
                                     "& .MuiOutlinedInput-notchedOutline": {
                                         borderColor: borderColor,
                                     },
                                     "& .MuiSvgIcon-root": { color: textColor },
                                 }}
                             >
-                                {[5, 10, 25, 50].map((option) => (
+                                {[10, 25, 50, 100].map((option) => (
                                     <MenuItem key={option} value={option}>
                                         {option}
                                     </MenuItem>
@@ -427,6 +628,7 @@ const AlertPanel = ({ darkMode }) => {
                         <Box
                             sx={{
                                 border: "1px solid #ffffff",
+                                backgroundColor: darkMode ? "#202328" : "#fff",
                                 borderRadius: "6px",
                                 px: 2,
                                 py: 0.5,
@@ -467,7 +669,7 @@ const AlertPanel = ({ darkMode }) => {
                     </Box>
                 </Grid>
 
-                <Grid item xs={12} md={4}>
+                <Grid item xs={12} md={5}>
                     <MapView data={triggeredData} />
                 </Grid>
             </Grid>

@@ -1,7 +1,7 @@
 from django.contrib import admin
 from .models import *
 
-from admin_web.models import DMS_Employee
+from admin_web.models import DMS_User
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django import forms
 from django.contrib.auth.forms import ReadOnlyPasswordHashField
@@ -14,9 +14,10 @@ from django.contrib.auth.forms import ReadOnlyPasswordHashField
 #     password1 = forms.CharField(label='Password', widget=forms.PasswordInput)
 #     password2 = forms.CharField(label='Password confirmation', widget=forms.PasswordInput)
 
-#     class Meta:
-#         model = DMS_Employee
-#         fields = ('emp_username', 'grp_id', 'emp_name', 'emp_email', 'emp_contact_no', 'emp_dob', 'emp_doj', 'emp_is_login', 'state_id', 'dist_id', 'tahsil_id', 'city_id', 'emp_is_deleted', 'emp_added_by', 'emp_modified_by')
+    class Meta:
+        model = DMS_User
+        # fields = ('user_username', 'grp_id', 'user_name', 'user_email', 'user_contact_no', 'user_is_login', 'user_is_deleted', 'user_added_by', 'user_modified_by')
+        fields = ('user_username', 'grp_id', 'user_is_login', 'user_is_deleted', 'user_added_by', 'user_modified_by')
 
 #     def clean_password2(self):
 #         # Check that the two password entries match
@@ -43,10 +44,10 @@ from django.contrib.auth.forms import ReadOnlyPasswordHashField
 #     """
 #     # password = ReadOnlyPasswordHashField()
 
-#     class Meta:
-#         model = DMS_Employee
-#         fields = '__all__'
-#         # fields = ('email', 'password','group', 'name','tc', 'is_active', 'is_admin')
+    class Meta:
+        model = DMS_User
+        fields = '__all__'
+        # fields = ('email', 'password','group', 'name','tc', 'is_active', 'is_admin')
 
 #     def clean_password(self):
 #         # Regardless of what the user provides, return the initial value.
@@ -55,30 +56,41 @@ from django.contrib.auth.forms import ReadOnlyPasswordHashField
 #         return self.initial["password"]
 
 
-# class UserModelAdmin(BaseUserAdmin):
-#   # The fields to be used in displaying the User model.
-#   # These override the definitions on the base UserModelAdmin
-#   # that reference specific fields on auth.User.
-#   list_display = ('emp_id', 'is_admin', 'emp_username', 'grp_id', 'emp_name', 'emp_email', 'emp_contact_no', 'emp_dob', 'emp_doj', 'emp_is_login', 'state_id', 'dist_id', 'tahsil_id', 'city_id', 'emp_is_deleted', 'emp_added_by', 'emp_modified_by')
+class UserModelAdmin(BaseUserAdmin):
+  # The fields to be used in displaying the User model.
+  # These override the definitions on the base UserModelAdmin
+  # that reference specific fields on auth.User.
+#   list_display = ('user_id', 'is_admin', 'user_username', 'grp_id', 'user_name', 'user_email', 'user_contact_no', 'user_is_login', 'user_is_deleted', 'user_added_by', 'user_modified_by')
+  list_display = ('user_id', 'is_admin', 'user_username', 'grp_id', 'user_is_login', 'user_is_deleted', 'user_added_by', 'user_modified_by')
 
 #   list_filter = ('is_admin',)
 
 #   fieldsets = (
-#       ('User Credentials', {'fields': ('emp_username', 'password')}),
-#       ('Personal info', {'fields': ('grp_id', 'emp_name', 'emp_email', 'emp_contact_no', 'emp_dob', 'emp_doj', 'emp_is_login', 'state_id', 'dist_id', 'tahsil_id', 'city_id', 'emp_is_deleted', 'emp_added_by', 'emp_modified_by')}),
+#       ('User Credentials', {'fields': ('user_username', 'password')}),
+#       ('Personal info', {'fields': ('grp_id', 'user_name', 'user_email', 'user_contact_no', 'user_is_login', 'user_is_deleted', 'user_added_by', 'user_modified_by')}),
 #       ('Permissions', {'fields': ('is_admin',)}),
 #   )
-#   # add_fieldsets is not a standard ModelAdmin attribute. UserModelAdmin
-#   # overrides get_fieldsets to use this attribute when creating a user.
+  fieldsets = (
+      ('User Credentials', {'fields': ('user_username', 'password')}),
+      ('Personal info', {'fields': ('grp_id', 'user_is_login', 'user_is_deleted', 'user_added_by', 'user_modified_by')}),
+      ('Permissions', {'fields': ('is_admin',)}),
+  )
+  # add_fieldsets is not a standard ModelAdmin attribute. UserModelAdmin
+  # overrides get_fieldsets to use this attribute when creating a user.
 #   add_fieldsets = (
 #       (None, {
 #           'classes': ('wide',),
-#           'fields': ('emp_username', 'grp_id', 'emp_name', 'emp_email', 'emp_contact_no', 'emp_dob', 'emp_doj', 'emp_is_login', 'state_id', 'dist_id', 'tahsil_id', 'city_id', 'emp_is_deleted', 'emp_added_by', 'emp_modified_by', 'password1', 'password2'),
+#           'fields': ('user_username', 'grp_id', 'user_name', 'user_email', 'user_contact_no', 'user_is_login', 'user_is_deleted', 'user_added_by', 'user_modified_by', 'password1', 'password2'),
 #       }),
-#   )
-#   search_fields = ('emp_username',)
-#   ordering = ('emp_username', 'id')
-#   filter_horizontal = ()
+  add_fieldsets = (
+      (None, {
+          'classes': ('wide',),
+          'fields': ('user_username', 'grp_id', 'user_is_login', 'user_is_deleted', 'user_added_by', 'user_modified_by', 'password1', 'password2'),
+      }),
+  )
+  search_fields = ('user_username',)
+  ordering = ('user_username', 'id')
+  filter_horizontal = ()
 
 
 
@@ -98,7 +110,7 @@ admin.site.register(DMS_Module)
 admin.site.register(DMS_SubModule)
 admin.site.register(DMS_Action)
 admin.site.register(DMS_Permission)
-# admin.site.register(DMS_Employee)
+admin.site.register(DMS_User)
 admin.site.register(DMS_WebLogin)
 admin.site.register(DMS_Disaster_Type)
 admin.site.register(DMS_Incident)
@@ -112,4 +124,5 @@ admin.site.register(DMS_Responder)
 admin.site.register(DMS_Summary)
 admin.site.register(DMS_Comments)
 admin.site.register(DMS_Ward)
-
+admin.site.register(DMS_open_weather_alerts)
+admin.site.register(DMS_Employee)

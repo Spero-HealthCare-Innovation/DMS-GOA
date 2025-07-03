@@ -140,11 +140,15 @@ class DMS_Disaster_Type(models.Model):
     disaster_added_by = models.CharField(max_length=255, null=True, blank=True)
     disaster_modified_by = models.CharField(max_length=255, null=True, blank=True)
     disaster_modified_date = models.DateTimeField(null=True, blank=True)
+    
+
+
+# Custom User Manager
 class DMS_User_Manager(BaseUserManager):
- 
+
     # def create_user(self, user_username, grp_id, user_name, user_email, user_contact_no, user_is_login, user_is_deleted, user_added_by, user_modified_by,password=None, password2=None):
     def create_user(self, user_username, grp_id, user_is_login, user_is_deleted, user_added_by, user_modified_by,password=None, password2=None):
- 
+
         """
         Creates and saves a User with the given email, name, tc and password.
         """
@@ -166,10 +170,10 @@ class DMS_User_Manager(BaseUserManager):
         user.set_password(password)
         user.save(using=self._db)
         return user
- 
+
     # def create_superuser(self, user_username, grp_id, user_name, user_email, user_contact_no, user_is_login, user_is_deleted, user_added_by, user_modified_by, password=None,):
     def create_superuser(self, user_username, grp_id, user_is_login, user_is_deleted, user_added_by, user_modified_by, password=None,):
- 
+
         """Creates and saves a superuser with the given email, name, tc and password."""
         user = self.create_user(
             password=password,
@@ -301,39 +305,91 @@ class DMS_User(AbstractBaseUser):
 #         return user
 
 
+class DMS_User(AbstractBaseUser):
+    user_id = models.AutoField(primary_key=True, auto_created=True)
+    user_username = models.CharField(max_length=100,unique=True, null=True, blank=True)
+    # user_name = models.CharField(max_length=255, null=True, blank=True)
+    # user_contact_no = models.CharField(max_length=15, null=True, blank=True)
+    # user_email = models.EmailField(max_length=255,unique=True,null= True,blank=True)
+    # grp_id = models.CharField(max_length=255, null=True, blank=True)
+    grp_id = models.ForeignKey(DMS_Group,on_delete=models.CASCADE,null=True, blank=True)
+    user_is_login = models.BooleanField(default=False, null=True, blank=True)
+    is_admin = models.BooleanField(default=False, blank=True)
+    user_is_deleted = models.BooleanField(default=False)
+    user_added_by = models.CharField(max_length=255, null=True, blank=True)
+    user_added_date = models.DateTimeField(auto_now_add=True,null=True)
+    user_modified_by = models.CharField(max_length=255, null=True, blank=True)
+    user_modified_date = models.DateTimeField(auto_now=True,null=True, blank=True)
+ 
+
+    username = None
+    email = None
+
+    objects = DMS_User_Manager()
+
+    # EMAIL_FIELD = 'user_email'
+    GROUP_FIELD = 'grp_id'
+
+
+    USERNAME_FIELD = 'user_username'
+
+
+    REQUIRED_FIELDS = ['grp_id', 'user_name']
+
+    def __str__(self):
+        return str(self.user_username)
+
+    def has_perm(self, perm, obj=None):
+        "Does the user have a specific permission?"
+        # Simplest possible answer: Yes, always
+        return self.is_admin
+
+    def has_module_perms(self, app_label):
+        "Does the user have permissions to view the app `app_label`?"
+        # Simplest possible answer: Yes, always
+        return True
+
+    @property
+    def is_staff(self):
+        "Is the user a member of staff?"
+        # Simplest possible answer: All admins are staff
+        return self.is_admin
+
+
 
 class DMS_Employee(models.Model):
     emp_id = models.AutoField(primary_key=True, auto_created=True)
-    emp_username = models.CharField(max_length=100,unique=True, null=True, blank=True)
     emp_name = models.CharField(max_length=255, null=True, blank=True)
     emp_contact_no = models.CharField(max_length=15, null=True, blank=True)
     emp_email = models.EmailField(max_length=255,unique=True,null= True,blank=True)
     emp_dob = models.DateField(null=True, blank=True)
     emp_doj = models.DateField(null=True, blank=True)
-    emp_is_login = models.BooleanField(default=False, null=True, blank=True)
-    grp_id = models.ForeignKey(DMS_Group,on_delete=models.CASCADE,null=True, blank=True)
+    user_id = models.ForeignKey(DMS_User,on_delete=models.CASCADE,null=True, blank=True)
     state_id = models.ForeignKey(DMS_State, on_delete=models.CASCADE,null=True, blank=True)
     dist_id = models.ForeignKey(DMS_District, on_delete=models.CASCADE,null=True, blank=True)
     tahsil_id = models.ForeignKey(DMS_Tahsil, on_delete=models.CASCADE,null=True, blank=True)
     city_id = models.ForeignKey(DMS_City, on_delete=models.CASCADE,null=True, blank=True)
     ward_id = models.ForeignKey('DMS_Ward', on_delete=models.CASCADE,null=True, blank=True)
+    # emp_username = models.CharField(max_length=100,unique=True, null=True, blank=True)
+    # emp_is_login = models.BooleanField(default=False, null=True, blank=True)
+    # grp_id = models.ForeignKey(DMS_Group,on_delete=models.CASCADE,null=True, blank=True)
     # grp_id = models.CharField(max_length=255, null=True, blank=True)
     # state_id = models.CharField(max_length=255, null=True, blank=True)
     # dist_id = models.CharField(max_length=255, null=True, blank=True)
     # tahsil_id = models.CharField(max_length=255, null=True, blank=True)
     # city_id = models.CharField(max_length=255, null=True, blank=True)
-    is_admin = models.BooleanField(default=False, blank=True)
+    # is_admin = models.BooleanField(default=False, blank=True)
     emp_is_deleted = models.BooleanField(default=False)
     emp_added_by = models.CharField(max_length=255, null=True, blank=True)
     emp_added_date = models.DateTimeField(auto_now_add=True,null=True)
     emp_modified_by = models.CharField(max_length=255, null=True, blank=True)
     emp_modified_date = models.DateTimeField(auto_now=True,null=True, blank=True)
- 
+
 
     
 class DMS_WebLogin(models.Model):
     log_id = models.AutoField(primary_key=True)
-    emp_id = models.ForeignKey(DMS_Employee, on_delete=models.CASCADE)
+    user_id = models.ForeignKey(DMS_User, on_delete=models.CASCADE)
     emp_login_time = models.DateTimeField(auto_now=True)
     emp_logout_time = models.DateTimeField(null=True, blank=True)
     log_status = models.CharField(max_length=50) 
@@ -358,7 +414,6 @@ class Weather_alerts(models.Model):
     pk_id = models.AutoField(primary_key=True)
     alert_code = models.CharField(max_length=255, null=True, blank=True, unique=True)
     latitude = models.FloatField(null=True,blank=True)
-    # latitude = models.FloatField(null=True,blank=True)
     longitude = models.FloatField(null=True,blank=True)
     elevation = models.FloatField(null=True,blank=True)
     timezone = models.TextField(null=True,blank=True)
@@ -581,7 +636,7 @@ class DMS_incident_closure(models.Model):
     image = models.FileField(upload_to='media_files/', null=True, blank=True)
     closure_inc_id = models.CharField(max_length=255, null=True, blank=True)
     closure_amb_no = models.CharField(max_length=255, null=True, blank=True)
-    incident_responder_by = models.CharField(max_length=100, null=True, blank=True)
+    closure_responder_name = models.CharField(max_length=100, null=True, blank=True)
     closure_added_by = models.CharField(max_length=255, null=True, blank=True)
     closure_added_date = models.DateTimeField(auto_now=True,null=True, blank=True)
     closure_modified_by = models.CharField(max_length=255, null=True, blank=True)
@@ -625,3 +680,59 @@ class DMS_Ward(models.Model):
     ward_modified_by = models.CharField(max_length=255, null=True, blank=True)
     ward_modified_date = models.DateTimeField(auto_now=True,null=True, blank=True)
     
+
+
+class DMS_open_weather_alerts(models.Model):
+    alert_id = models.AutoField(primary_key=True)
+    alert_code = models.CharField(max_length=255, null=True, blank=True, unique=True)
+    location_ward = models.TextField()
+    ward_id = models.IntegerField(null=True, blank=True)
+    latitude = models.FloatField()
+    longitude = models.FloatField()
+    current_weather_time = models.DateTimeField()
+    forecast_time = models.DateTimeField()
+    last_updated = models.DateTimeField()
+    temperature = models.FloatField(null=True, blank=True)
+    feels_like = models.FloatField(null=True, blank=True)
+    temp_min = models.FloatField(null=True, blank=True)
+    temp_max = models.FloatField(null=True, blank=True)
+    humidity = models.FloatField(null=True, blank=True)
+    pressure = models.FloatField(null=True, blank=True)
+    sea_level = models.FloatField(null=True, blank=True)
+    grnd_level = models.FloatField(null=True, blank=True)
+    visibility = models.FloatField(null=True, blank=True)
+    wind_speed = models.FloatField(null=True, blank=True)
+    wind_deg = models.FloatField(null=True, blank=True)
+    wind_gust = models.FloatField(null=True, blank=True)
+    cloud_coverage = models.FloatField(null=True, blank=True)
+    weather_main = models.CharField(max_length=100, null=True, blank=True)
+    weather_desc = models.CharField(max_length=200, null=True, blank=True)
+    rain_past_1h = models.FloatField(null=True, blank=True)
+    snow_past_1h = models.FloatField(null=True, blank=True)
+    rain_forecast_3h = models.FloatField(null=True, blank=True)
+    alerts = models.JSONField(null=True, blank=True)
+    triger_status = models.IntegerField(null=True,blank=True)
+    disaster_id = models.ForeignKey(DMS_Disaster_Type,on_delete=models.CASCADE,null=True,blank=True)
+    alert_type = models.CharField(max_length=255, null=True, blank=True)
+    added_by = models.CharField(max_length=255, null=True, blank=True)
+    added_date = models.DateTimeField(auto_now_add=True)  # Only once at creation
+    modified_by = models.CharField(max_length=255, null=True, blank=True)
+    modified_date = models.DateTimeField(auto_now=True)   # Every time on update
+ 
+    def __str__(self):
+        return f"{self.alert_id } @ {self.current_weather_time}"
+    
+    
+    
+class DMS_Disaster_Severity2(models.Model):
+    pk_id = models.AutoField(primary_key=True)
+    hazard_types = models.CharField(max_length=255,null=True,blank=True)
+    hazard_rng_low = models.CharField(max_length=255,null=True, blank=True)
+    hazard_rng_medium = models.CharField(max_length=255,null=True, blank=True)
+    hazard_rng_high = models.CharField(max_length=255,null=True, blank=True)
+    unit = models.CharField(max_length=255,null=True,blank=True)
+    is_deleted = models.BooleanField(default=False)
+    added_date = models.DateTimeField(auto_now=True,null=True, blank=True)
+    added_by = models.CharField(max_length=255, null=True, blank=True)
+    modified_by = models.CharField(max_length=255, null=True, blank=True)
+    modified_date = models.DateTimeField(null=True, blank=True)
