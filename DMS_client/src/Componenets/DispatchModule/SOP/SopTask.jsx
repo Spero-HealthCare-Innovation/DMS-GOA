@@ -195,52 +195,87 @@ function SopTask({
       location.href = "/login";
     }
   });
+
   useEffect(() => {
-    let socket;
-    const timer = setTimeout(() => {
-      socket = new WebSocket(
-        `${socketUrl}/ws/weather_alerts_trigger2?token=${AccessToken || newToken
-        }`
-      );
+    const socket = new WebSocket(
+      `${socketUrl}/ws/weather_alerts_trigger2?token=${AccessToken || newToken}`
+    );
 
-      socket.onopen = () => {
-        console.log("WebSocket connected");
-      };
+    socket.onopen = () => {
+      console.log("WebSocket connected");
+    };
 
-      socket.onmessage = (event) => {
-        try {
-          const data = JSON.parse(event.data);
-          console.log(data, "latest alert");
-          setAlerts([data]);
-          setSelectedIncident(data);
-          setFlag(1);
-          setViewmode("incident"); // Set view mode to incident when new data is received
-          // Show snackbar when data is received
-          setSnackbarMsg(data.message || "⚠️ New  alert triggered!");
-          setOpenSnackbar(true);
-          setCommentText("");
-        } catch (error) {
-          console.error("Invalid JSON:", event.data);
-        }
-      };
-
-      socket.onerror = (error) => {
-        console.error("WebSocket error:", error);
-      };
-
-      socket.onclose = () => {
-        console.log("WebSocket closed");
-      };
-    }, 1000);
-
-    return () => {
-      console.log("Cleaning up timeout and socket");
-      clearTimeout(timer);
-      if (socket) {
-        socket.close();
+    socket.onmessage = (event) => {
+      try {
+        const data = JSON.parse(event.data);
+        console.log(data, "latest alert");
+        setAlerts([data]);
+        setSelectedIncident(data);
+        setFlag(1);
+        setViewmode("incident"); // Set view mode to incident when new data is received
+        // Show snackbar when data is received
+        setSnackbarMsg(data.message || "⚠️ New  alert triggered!");
+        setOpenSnackbar(true);
+        setCommentText("");
+      } catch (error) {
+        console.error("Invalid JSON:", event.data);
       }
     };
-  }, []);
+
+    socket.onerror = (error) => {
+      console.error("WebSocket error:", error);
+    };
+
+    socket.onclose = () => {
+      console.log("WebSocket closed");
+    };
+  });
+  
+  // useEffect(() => {
+  //   let socket;
+  //   // const timer = setTimeout(() => {
+  //     socket = new WebSocket(
+  //       `${socketUrl}/ws/weather_alerts_trigger2?token=${AccessToken || newToken}`
+  //     );
+
+  //     socket.onopen = () => {
+  //       console.log("WebSocket connected");
+  //     };
+
+  //     socket.onmessage = (event) => {
+  //       try {
+  //         const data = JSON.parse(event.data);
+  //         console.log(data, "latest alert");
+  //         setAlerts([data]);
+  //         setSelectedIncident(data);
+  //         setFlag(1);
+  //         setViewmode("incident"); // Set view mode to incident when new data is received
+  //         // Show snackbar when data is received
+  //         setSnackbarMsg(data.message || "⚠️ New  alert triggered!");
+  //         setOpenSnackbar(true);
+  //         setCommentText("");
+  //       } catch (error) {
+  //         console.error("Invalid JSON:", event.data);
+  //       }
+  //     };
+
+  //     socket.onerror = (error) => {
+  //       console.error("WebSocket error:", error);
+  //     };
+
+  //     socket.onclose = () => {
+  //       console.log("WebSocket closed");
+  //     };
+  //   // }, 1000);
+
+  //   return () => {
+  //     console.log("Cleaning up timeout and socket");
+  //     // clearTimeout(timer);
+  //     if (socket) {
+  //       socket.close();
+  //     }
+  //   };
+  // }, []);
 
   const handleBack = () => {
     setFlag(0);
