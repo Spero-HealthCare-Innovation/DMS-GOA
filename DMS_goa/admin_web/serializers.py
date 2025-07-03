@@ -503,3 +503,8 @@ class Ward_officer_get_Serializer(serializers.ModelSerializer):
         model = DMS_Employee
         # fields = '__all__'
         fields = ['emp_id','emp_name']
+        
+class TwitterDMSSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TwitterDMS
+        fields = '__all__'
