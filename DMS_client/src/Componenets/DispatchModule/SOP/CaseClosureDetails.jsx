@@ -309,11 +309,17 @@ const CaseClosureDetails = ({
         message: "Closure details saved successfully!",
       });
 
-      // Check if API response has remaining departments
       const remainingDepartments = res.data.Departments || [];
-
-      // Update selectedDepartments with remaining departments from API response
-      // setSelectedDepartments(remainingDepartments);
+      setFormData({
+        responderName: "",
+        vehicleNumber: "",
+        acknowledge: "",
+        startBaseLocation: "",
+        atScene: "",
+        fromScene: "",
+        backToBase: "",
+        closureRemark: "",
+      });
       if (remainingDepartments.length === 0) {
         setFormData({
           vehicleNumber: "",
