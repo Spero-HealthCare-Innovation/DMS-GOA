@@ -33,6 +33,7 @@ class Vehical_base_location(models.Model):
 # Create your models here.
 class Vehical(models.Model):
     veh_id = models.AutoField(primary_key=True)
+    user_id = models.ForeignKey(DMS_User, on_delete=models.CASCADE )
     veh_number = models.CharField(max_length=50, null=True,blank=True)
     veh_default_mobile = models.CharField(max_length=15, null=True,blank=True)
     veh_base_location = models.ForeignKey(Vehical_base_location, on_delete=models.CASCADE, null=True,blank=True)
@@ -55,7 +56,7 @@ class Vehical(models.Model):
     veh_modify_date = models.DateTimeField(auto_now=True)
      
     def save(self, *args, **kwargs):
-        self.veh_hash = make_password(self.veh_default_mobile)
+        self.emp_id.password = make_password(self.veh_default_mobile)
         return super().save(*args, **kwargs)
     
 class Device_version(models.Model):

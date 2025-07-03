@@ -106,7 +106,7 @@ DATABASES = {
     # }
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'DMS_MDT',
+        'NAME': 'DMS_MDT_New',
         'USER': 'postgres',
         'PASSWORD': 'postgres',
         'HOST': '192.168.1.109',
@@ -178,7 +178,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
 
-AUTH_USER_MODEL = 'admin_web.DMS_Employee'
+AUTH_USER_MODEL = 'admin_web.DMS_User'
 
 SIMPLE_JWT = {
     # "ACCESS_TOKEN_LIFETIME": timedelta(minutes=5),
