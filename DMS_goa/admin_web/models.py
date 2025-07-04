@@ -612,7 +612,7 @@ class DMS_open_weather_alerts(models.Model):
         return f"{self.alert_id } @ {self.current_weather_time}"
     
 class TwitterDMS(models.Model):
-    id = models.CharField(max_length=100, unique=True)
+    id = models.CharField(max_length=100, primary_key=True)
     text = models.TextField()
     translated_text = models.TextField()
     user = models.CharField(max_length=100)
