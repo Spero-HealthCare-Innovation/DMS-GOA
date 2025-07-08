@@ -3,5 +3,7 @@ from .views import *
 
 
 urlpatterns = [
-    path('login_veh/', login_veh.as_view())
+    path('Register_veh/', Register_veh.as_view()),
+    path('VehicleLogin/', VehicleLogin.as_view()),
+    path('VehicleLogout/', VehicleLogout.as_view()),
 ]

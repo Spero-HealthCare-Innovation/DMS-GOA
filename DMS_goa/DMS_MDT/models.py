@@ -47,6 +47,7 @@ class Vehical(models.Model):
     veh_gps_log = models.DecimalField(max_digits=9, decimal_places=6, null=True)
     veh_address = models.TextField(null=True)
     veh_ward_id = models.ForeignKey(DMS_Ward, on_delete=models.CASCADE, null=True)
+    user = models.ForeignKey(DMS_User, on_delete=models.CASCADE, null=True)
     status = enum.EnumField(status_enum, null=True)
     vehis_login = models.BooleanField(default=False)
     veh_added_by = models.CharField(max_length=100, null=True)
@@ -55,7 +56,9 @@ class Vehical(models.Model):
     veh_modify_date = models.DateTimeField(auto_now=True)
      
     def save(self, *args, **kwargs):
-        self.veh_number = make_password(self.veh_default_mobile)
+        user = DMS_User.objects.filter(user_username=self.veh_number).last()
+        if user:
+            user.password = make_password(self.veh_default_mobile)
         return super().save(*args, **kwargs)
     
 class Device_version(models.Model):
@@ -79,4 +82,18 @@ class Device_version_info(models.Model):
     status = enum.EnumField(status_enum)
     added_date = models.DateTimeField(auto_now_add=True)
     modified_date = models.DateTimeField(auto_now=True)
+    
+class vehicle_login_info(models.Model):
+    veh_login_id = models.AutoField(primary_key=True)
+    veh_login_time = models.DateTimeField(null=True)
+    veh_logout_time = models.DateTimeField(null=True)
+    status = enum.EnumField(status_enum, null=True)
+    veh_id = models.ForeignKey(DMS_User, on_delete=models.CASCADE, null=True)
+    
+class employee_clockin_info(models.Model):
+    emp_clockin_id = models.AutoField(primary_key=True)
+    emp_clockin_time = models.DateTimeField(null=True)
+    emp_clockout_time = models.DateTimeField(null=True)
+    status = enum.EnumField(status_enum, null=True)
+    user_id = models.ForeignKey(DMS_User, on_delete=models.CASCADE, null=True)
     

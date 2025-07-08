@@ -146,8 +146,54 @@ class DMS_Disaster_Type(models.Model):
 # Custom User Manager
 class DMS_User_Manager(BaseUserManager):
 
-    # def create_user(self, user_username, grp_id, user_name, user_email, user_contact_no, user_is_login, user_is_deleted, user_added_by, user_modified_by,password=None, password2=None):
-    def create_user(self, user_username, grp_id, user_is_login, user_is_deleted, user_added_by, user_modified_by,password=None, password2=None):
+    # # def create_user(self, user_username, grp_id, user_name, user_email, user_contact_no, user_is_login, user_is_deleted, user_added_by, user_modified_by,password=None, password2=None):
+    # def create_user(self, user_username, grp_id, user_is_login, user_is_deleted, user_added_by, user_modified_by,password=None, password2=None):
+
+    #     """
+    #     Creates and saves a User with the given email, name, tc and password.
+    #     """
+    #     if not user_username:
+    #         raise ValueError('User must have an user id')
+
+    #     user = self.model(
+    #         # user_email=self.normalize_email(user_email),
+    #         user_username = user_username,
+    #         # user_name = user_name,
+    #         # user_contact_no = user_contact_no,
+    #         user_is_login = user_is_login,
+    #         grp_id = grp_id,
+    #         user_is_deleted = user_is_deleted,
+    #         user_added_by = user_added_by,
+    #         user_modified_by = user_modified_by,
+    #     )
+
+    #     user.set_password(password)
+    #     user.save(using=self._db)
+    #     return user
+
+    # # def create_superuser(self, user_username, grp_id, user_name, user_email, user_contact_no, user_is_login, user_is_deleted, user_added_by, user_modified_by, password=None,):
+    # def create_superuser(self, user_username, grp_id, user_is_login, user_is_deleted, user_added_by, user_modified_by, password=None,):
+
+    #     """Creates and saves a superuser with the given email, name, tc and password."""
+    #     user = self.create_user(
+    #         password=password,
+    #         # user_email=user_email,
+    #         grp_id=grp_id,
+    #         user_username = user_username,
+    #         # user_name = user_name,
+    #         # user_contact_no = user_contact_no,
+    #         user_is_login = user_is_login,
+    #         user_is_deleted = user_is_deleted,
+    #         user_added_by = user_added_by,
+    #         user_modified_by = user_modified_by,
+    #     )
+
+    #     user.is_admin = True
+    #     user.save(using=self._db)
+    #     return user
+    
+# ==========================================================================================================
+    def create_user(self, user_username, grp_id,password=None, password2=None):
 
         """
         Creates and saves a User with the given email, name, tc and password.
@@ -160,11 +206,11 @@ class DMS_User_Manager(BaseUserManager):
             user_username = user_username,
             # user_name = user_name,
             # user_contact_no = user_contact_no,
-            user_is_login = user_is_login,
+            # user_is_login = user_is_login,
             grp_id = grp_id,
-            user_is_deleted = user_is_deleted,
-            user_added_by = user_added_by,
-            user_modified_by = user_modified_by,
+            # user_is_deleted = user_is_deleted,
+            # user_added_by = user_added_by,
+            # user_modified_by = user_modified_by,
         )
 
         user.set_password(password)
@@ -172,7 +218,7 @@ class DMS_User_Manager(BaseUserManager):
         return user
 
     # def create_superuser(self, user_username, grp_id, user_name, user_email, user_contact_no, user_is_login, user_is_deleted, user_added_by, user_modified_by, password=None,):
-    def create_superuser(self, user_username, grp_id, user_is_login, user_is_deleted, user_added_by, user_modified_by, password=None,):
+    def create_superuser(self, user_username, grp_id, password=None):
 
         """Creates and saves a superuser with the given email, name, tc and password."""
         user = self.create_user(
@@ -182,15 +228,16 @@ class DMS_User_Manager(BaseUserManager):
             user_username = user_username,
             # user_name = user_name,
             # user_contact_no = user_contact_no,
-            user_is_login = user_is_login,
-            user_is_deleted = user_is_deleted,
-            user_added_by = user_added_by,
-            user_modified_by = user_modified_by,
+            # user_is_login = user_is_login,
+            # user_is_deleted = user_is_deleted,
+            # user_added_by = user_added_by,
+            # user_modified_by = user_modified_by,
         )
 
         user.is_admin = True
         user.save(using=self._db)
         return user
+# ==========================================================================================================
 
 
 class DMS_User(AbstractBaseUser):
@@ -222,7 +269,7 @@ class DMS_User(AbstractBaseUser):
     USERNAME_FIELD = 'user_username'
 
 
-    REQUIRED_FIELDS = ['grp_id', 'user_name']
+    REQUIRED_FIELDS = []
 
     def __str__(self):
         return str(self.user_username)
