@@ -612,13 +612,13 @@ class DMS_open_weather_alerts(models.Model):
         return f"{self.alert_id } @ {self.current_weather_time}"
     
 class TwitterDMS(models.Model):
-    id = models.CharField(max_length=100, primary_key=True)
+    id = models.AutoField(primary_key=True)
     text = models.TextField()
     translated_text = models.TextField()
-    user = models.CharField(max_length=100)
-    language = models.CharField(max_length=10, blank=True, null=True)
-    region = models.CharField(max_length=50)
-    link = models.CharField(max_length=100)
+    user = models.CharField(max_length=1000)
+    language = models.CharField(max_length=1000, blank=True, null=True)
+    region = models.CharField(max_length=500)
+    link = models.CharField(max_length=10000)
     media_status = enum.EnumField(media_enum,null=True,blank=True)
     date_time = models.DateTimeField()
     added_date = models.DateTimeField(auto_now=True)
