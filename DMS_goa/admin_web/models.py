@@ -613,15 +613,15 @@ class DMS_open_weather_alerts(models.Model):
     
 class TwitterDMS(models.Model):
     id = models.AutoField(primary_key=True)
-    text = models.TextField()
-    translated_text = models.TextField()
-    user = models.CharField(max_length=1000)
+    text = models.TextField(null=True, blank=True)
+    translated_text = models.TextField(null=True, blank=True)
+    user = models.CharField(max_length=1000,null=True, blank=True)
     language = models.CharField(max_length=1000, blank=True, null=True)
-    region = models.CharField(max_length=500)
-    link = models.CharField(max_length=10000)
+    region = models.CharField(max_length=500,null=True, blank=True)
+    link = models.CharField(max_length=10000,null=True, blank=True)
     media_status = enum.EnumField(media_enum,null=True,blank=True)
-    date_time = models.DateTimeField()
-    added_date = models.DateTimeField(auto_now=True)
+    date_time = models.DateTimeField(null=True, blank=True)
+    added_date = models.DateTimeField(auto_now=True,null=True, blank=True)
 
     def __str__(self):
         return self.tweet_id
