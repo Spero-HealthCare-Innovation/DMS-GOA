@@ -138,5 +138,7 @@ urlpatterns = [
     
     #=================================  Varsha =====================================================
     path('post_twitter_api/',twitter_post_api.as_view(),name='twitter_post_api'),
+    path('post_scrape_facebook_api/',FacebookPostScrapeAPIView.as_view(),name='post_scrape_facebook_api'),
+    path("scrape-news/", NewsScraperAPIView.as_view(), name="scrape-news"),
     #=================================  Varsha =====================================================
 ]

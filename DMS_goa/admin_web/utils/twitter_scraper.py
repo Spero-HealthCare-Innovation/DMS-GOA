@@ -4,11 +4,11 @@ from deep_translator import GoogleTranslator
 from langdetect import detect
 from admin_web.constants import KEYWORDS, PUNE_LOCATIONS, query
 
-def is_ems_related(text, KEYWORDS):
+def is_ems_related(text):
     lower = text.lower()
     return any(re.search(rf'\b{k}\b', lower) for k in KEYWORDS)
 
-def detect_region(text, PUNE_LOCATIONS):
+def detect_region(text):
     lower = text.lower()
     for loc in PUNE_LOCATIONS:
         if loc in lower:
