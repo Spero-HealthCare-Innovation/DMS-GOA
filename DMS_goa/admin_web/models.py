@@ -383,7 +383,7 @@ class DMS_Incident(models.Model):
     comment_id = models.ForeignKey('DMS_Comments',on_delete=models.CASCADE,null=True,blank=True)
     alert_code = models.CharField(max_length=255,null=True,blank=True)
     alert_division=enum.EnumField(division_enum,null=True,blank=True)
-    inc_datetime = models.DateTimeField(auto_now=True)
+    # inc_datetime = models.DateTimeField(auto_now=True)
     mode = models.IntegerField(null=True,blank=True)
     time = models.CharField(max_length=255,null=True,blank=True)
     ward = models.ForeignKey('DMS_Ward',on_delete=models.CASCADE,null=True,blank=True)
@@ -534,6 +534,7 @@ class DMS_incident_closure(models.Model):
     closure_remark=models.CharField(max_length=255, null=True, blank=True)
 
 
+
 class DMS_Summary(models.Model):
     sum_id = models.AutoField(primary_key=True)
     summary = models.CharField(max_length=5555, null=True, blank=True)
@@ -625,3 +626,59 @@ class TwitterDMS(models.Model):
 
     def __str__(self):
         return self.tweet_id
+
+
+class Permission_module(models.Model):
+    module_id = models.AutoField(primary_key=True)
+    name = models.CharField(max_length=250, null=True)
+    # Source_id = models.ForeignKey("agg_source", on_delete=models.CASCADE,null = True)
+    added_date = models.DateTimeField(auto_now_add=True)
+    added_by = models.IntegerField(blank=True, null=True)
+    modify_by =	models.IntegerField(null=True, blank=True)
+    modify_date = models.DateTimeField(auto_now=True, null=True, blank=True)
+
+    def __str__(self):
+        return self.name
+
+class permission(models.Model):
+    Permission_id = models.AutoField(primary_key=True)
+    name = models.CharField(max_length=255)
+    module = models.ForeignKey("Permission_module", on_delete=models.CASCADE,null = True)
+    # source =models.ForeignKey('agg_source',on_delete=models.CASCADE,null=True)
+    # guard_name = models.CharField(max_length=255)
+    added_by =	models.IntegerField(null=True, blank=True)
+    added_date = models.DateTimeField(auto_now_add=True, blank=True)
+    modify_by =	models.IntegerField(null=True, blank=True)
+    modify_date = models.DateTimeField(auto_now=True, null=True, blank=True)
+
+    def __str__(self):
+        return self.name     
+
+class role(models.Model):
+    role_id = models.AutoField(primary_key=True)
+    # permission_name = models.ForeignKey('permission',on_delete=models.CASCADE,null=True)
+    Group_id = models.ForeignKey('agg_mas_group',on_delete=models.CASCADE,null=True)
+    # source =models.ForeignKey('agg_source',on_delete=models.CASCADE,null=True)
+    # modules = models.ForeignKey('Permission_module',on_delete=models.CASCADE,null=True)
+    # guard_name = models.CharField(max_length=255)
+    permission_status =enum.EnumField(status, default = status.NO)
+    role_is_deleted = models.BooleanField(default=False)
+    is_deleted = models.BooleanField(default=False)
+    added_by =	models.IntegerField(null=True, blank=True)
+    added_date = models.DateTimeField(auto_now_add=True, blank=True)
+    modify_by =	models.IntegerField(null=True, blank=True)
+    modify_date = models.DateTimeField(auto_now=True, null=True, blank=True) 
+
+
+class agg_save_permissions(models.Model):
+    id = models.AutoField(primary_key=True)
+    # source =models.ForeignKey('agg_source',on_delete=models.CASCADE,null=False)
+    role = models.ForeignKey('agg_mas_group',on_delete=models.CASCADE,null=False)
+    modules_submodule = models.JSONField(null=True)
+    # modules = models.ForeignKey('Permission_module',on_delete=models.CASCADE,null=True)
+    # sub_module = models.ManyToManyField('Permission', related_name='roles', blank=True)
+    permission_status =enum.EnumField(status, default = status.NO)
+    added_date = models.DateTimeField(auto_now_add=True)
+    added_by = models.IntegerField(blank=True, null=True)
+    modify_by =	models.IntegerField(null=True, blank=True)
+    modify_date = models.DateTimeField(auto_now=True)
