@@ -383,40 +383,40 @@ class LogoutView(APIView):
             return Response({"error": "Invalid token"}, status=400)
         
         
-class CombinedAPIView(APIView):
-    # renderer_classes = [UserRenderer]
-    # permission_classes = [IsAuthenticated]
-    def get(self, request, format=None):
-        permission_modules = DMS_Module.objects.filter()
-        modules_serializer = Mmoduleserializer(permission_modules, many=True)
+# class CombinedAPIView(APIView):
+#     # renderer_classes = [UserRenderer]
+#     # permission_classes = [IsAuthenticated]
+#     def get(self, request, format=None):
+#         permission_modules = DMS_Module.objects.filter()
+#         modules_serializer = Mmoduleserializer(permission_modules, many=True)
 
-        permission_objects = DMS_SubModule.objects.filter()
-        permission_serializer = permission_sub_Serializer(permission_objects, many=True)
+#         permission_objects = DMS_SubModule.objects.filter()
+#         permission_serializer = permission_sub_Serializer(permission_objects, many=True)
 
         
-        combined_data = []
-        for module_data in modules_serializer.data:
-            module_id = module_data["mod_id"]
-            module_name = module_data["mod_name"]
-            group_id = module_data["mod_group_id"]
-            group_name = module_data["grp_name"]
+#         combined_data = []
+#         for module_data in modules_serializer.data:
+#             module_id = module_data["mod_id"]
+#             module_name = module_data["mod_name"]
+#             group_id = module_data["mod_group_id"]
+#             group_name = module_data["grp_name"]
             
 
-            submodules = [submodule for submodule in permission_serializer.data if submodule["mod_id"] == module_id]
+#             submodules = [submodule for submodule in permission_serializer.data if submodule["mod_id"] == module_id]
 
-            formatted_data = {
-                "group_id": group_id,
-                "group_name": group_name,
-                "module_id": module_id,
-                "name": module_name,
-                "submodules": submodules
-            }
+#             formatted_data = {
+#                 "group_id": group_id,
+#                 "group_name": group_name,
+#                 "module_id": module_id,
+#                 "name": module_name,
+#                 "submodules": submodules
+#             }
 
-            combined_data.append(formatted_data)
+#             combined_data.append(formatted_data)
 
-        final_data = combined_data
+#         final_data = combined_data
 
-        return Response(final_data)
+#         return Response(final_data)
 
 
     
@@ -1597,3 +1597,76 @@ class NewsScraperAPIView(APIView):
             },
             status=status.HTTP_200_OK
         )
+#===================permission Module (mayank)===========================================
+
+class CombinedAPIView(APIView):
+    renderer_classes = [UserRenderer]
+    permission_classes = [IsAuthenticated]
+    def get(self, request, format=None):
+        permission_modules = Permission_module.objects.filter()
+        modules_serializer = Moduleserializer(permission_modules, many=True)
+
+        permission_objects = permission.objects.filter()
+        permission_serializer = permission_sub_Serializer(permission_objects, many=True)
+
+        combined_data = []
+        for module_data in modules_serializer.data:
+            module_id = module_data["module_id"]
+            module_name = module_data["name"]
+            source_id = module_data["Source_id"]
+
+            submodules = [submodule for submodule in permission_serializer.data if submodule["module"] == module_id]
+
+            formatted_data = {
+                "module_id": module_id,
+                "name": module_name,
+                "Source_id": source_id,
+                "submodules": submodules
+            }
+
+            combined_data.append(formatted_data)
+
+        final_data = combined_data
+
+        return Response(final_data)
+    
+
+class GetPermissionAPIView(APIView):
+    renderer_classes = [UserRenderer]
+    permission_classes = [IsAuthenticated]
+    serializer_class = SavePermissionSerializer
+
+    def get(self, request, source, role, *args, **kwargs):
+        permissions = agg_save_permissions.objects.filter(source=source, role=role)
+        serializer = self.serializer_class(permissions, many=True)
+        return Response(serializer.data)
+
+class CreatePermissionAPIView(APIView):
+    renderer_classes = [UserRenderer]
+    permission_classes = [IsAuthenticated]
+    serializer_class = SavePermissionSerializer
+
+    def post(self, request):
+        serializer = self.serializer_class(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class UpdatePermissionAPIView(APIView):
+    renderer_classes = [UserRenderer]
+    permission_classes = [IsAuthenticated]
+    serializer_class = SavePermissionSerializer
+
+    def put(self, request, id):
+        try:
+            permission = agg_save_permissions.objects.get(id=id)
+        except agg_save_permissions.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
+        serializer = self.serializer_class(permission, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    

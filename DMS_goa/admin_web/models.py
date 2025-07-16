@@ -1,4 +1,16 @@
 from django.db import models
+
+from django_enumfield import enum
+from django.utils import timezone
+from django.core.validators import RegexValidator
+# from joinfield.joinfield import JoinField
+import datetime
+
+from django.db import models, IntegrityError
+
+
+from django.utils import timezone
+
 from django.contrib.auth.models import(
 	BaseUserManager,AbstractBaseUser
 )
@@ -628,10 +640,63 @@ class TwitterDMS(models.Model):
         return self.tweet_id
 
 
+
+    
+    
+# ___________ Source ___________________________
+class agg_source(models.Model): 
+    source_pk_id = models.AutoField(primary_key=True)
+    source_code = models.CharField(max_length=255, editable=False, unique=True)
+    created_date = models.DateField(default=timezone.now, editable=False)
+
+    source = models.CharField(max_length=255,unique=True)
+    # Group_id = models.ForeignKey('agg_mas_group',on_delete=models.CASCADE,null=True)
+
+    is_deleted = models.BooleanField(default=False)
+    added_by =	models.IntegerField(null=True, blank=True)
+    added_date = models.DateTimeField(auto_now_add=True, blank=True)
+    modify_by =	models.IntegerField(null=True, blank=True)
+    modify_date = models.DateTimeField(auto_now=True, null=True, blank=True)
+
+    def generate_id(self):
+        last_id = agg_source.objects.filter(created_date=self.created_date).order_by('-source_code').first()
+        if last_id and '-' in last_id.source_code:
+            last_id_parts = last_id.source_code.split('-')
+            if len(last_id_parts) >= 2:
+                last_id_value = int(last_id_parts[1][-5:])
+                new_id_value = last_id_value + 1   
+                
+                return int(str(self.created_date.strftime('%d%m%Y')) + str(new_id_value).zfill(5))
+        
+        return int(str(self.created_date.strftime('%d%m%Y')) + '00001')
+
+    def save(self, *args, **kwargs):
+        if not self.source_code:
+            generated_id = self.generate_id()
+            self.source_code = f"SOURCE-{generated_id}"
+            super(agg_source, self).save(*args, **kwargs)
+            
+            
+            
+class role(models.Model):
+    role_id = models.AutoField(primary_key=True)
+    # permission_name = models.ForeignKey('permission',on_delete=models.CASCADE,null=True)
+    Group_id = models.ForeignKey('DMS_Group',on_delete=models.CASCADE,null=True)
+    source =models.ForeignKey('agg_source',on_delete=models.CASCADE,null=True)
+    # modules = models.ForeignKey('Permission_module',on_delete=models.CASCADE,null=True)
+    # guard_name = models.CharField(max_length=255)
+    role_is_deleted = models.BooleanField(default=False)
+    is_deleted = models.BooleanField(default=False)
+    added_by =	models.IntegerField(null=True, blank=True)
+    added_date = models.DateTimeField(auto_now_add=True, blank=True)
+    modify_by =	models.IntegerField(null=True, blank=True)
+    modify_date = models.DateTimeField(auto_now=True, null=True, blank=True)
+    
+    
 class Permission_module(models.Model):
     module_id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=250, null=True)
-    # Source_id = models.ForeignKey("agg_source", on_delete=models.CASCADE,null = True)
+    Source_id = models.ForeignKey("agg_source", on_delete=models.CASCADE,null = True)
     added_date = models.DateTimeField(auto_now_add=True)
     added_by = models.IntegerField(blank=True, null=True)
     modify_by =	models.IntegerField(null=True, blank=True)
@@ -640,11 +705,13 @@ class Permission_module(models.Model):
     def __str__(self):
         return self.name
 
+    
 class permission(models.Model):
     Permission_id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=255)
     module = models.ForeignKey("Permission_module", on_delete=models.CASCADE,null = True)
     # source =models.ForeignKey('agg_source',on_delete=models.CASCADE,null=True)
+    source =models.ForeignKey('agg_source',on_delete=models.CASCADE,null=True)
     # guard_name = models.CharField(max_length=255)
     added_by =	models.IntegerField(null=True, blank=True)
     added_date = models.DateTimeField(auto_now_add=True, blank=True)
@@ -654,30 +721,16 @@ class permission(models.Model):
     def __str__(self):
         return self.name     
 
-class role(models.Model):
-    role_id = models.AutoField(primary_key=True)
-    # permission_name = models.ForeignKey('permission',on_delete=models.CASCADE,null=True)
-    Group_id = models.ForeignKey('agg_mas_group',on_delete=models.CASCADE,null=True)
-    # source =models.ForeignKey('agg_source',on_delete=models.CASCADE,null=True)
-    # modules = models.ForeignKey('Permission_module',on_delete=models.CASCADE,null=True)
-    # guard_name = models.CharField(max_length=255)
-    permission_status =enum.EnumField(status, default = status.NO)
-    role_is_deleted = models.BooleanField(default=False)
-    is_deleted = models.BooleanField(default=False)
-    added_by =	models.IntegerField(null=True, blank=True)
-    added_date = models.DateTimeField(auto_now_add=True, blank=True)
-    modify_by =	models.IntegerField(null=True, blank=True)
-    modify_date = models.DateTimeField(auto_now=True, null=True, blank=True) 
+      
 
 
 class agg_save_permissions(models.Model):
     id = models.AutoField(primary_key=True)
     # source =models.ForeignKey('agg_source',on_delete=models.CASCADE,null=False)
-    role = models.ForeignKey('agg_mas_group',on_delete=models.CASCADE,null=False)
+    role = models.ForeignKey('DMS_Group',on_delete=models.CASCADE,null=False)
     modules_submodule = models.JSONField(null=True)
     # modules = models.ForeignKey('Permission_module',on_delete=models.CASCADE,null=True)
     # sub_module = models.ManyToManyField('Permission', related_name='roles', blank=True)
-    permission_status =enum.EnumField(status, default = status.NO)
     added_date = models.DateTimeField(auto_now_add=True)
     added_by = models.IntegerField(blank=True, null=True)
     modify_by =	models.IntegerField(null=True, blank=True)

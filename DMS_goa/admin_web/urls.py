@@ -116,8 +116,13 @@ urlpatterns = [
 
 
     #=============================== Mayank =========================================================
-    path('combined/', CombinedAPIView.as_view(), name='combined-api'),
+    # path('combined/', CombinedAPIView.as_view(), name='combined-api'),
     path('cancel-trigger/', UpdateTriggerStatusAPIView.as_view()),
+    
+    path('combined/', CombinedAPIView.as_view(), name='combined-api'),#Added Authuntication & Authorization Token
+    path('permissions/<source>/<role>/', GetPermissionAPIView.as_view(), name='get_permissions'),#Added Authuntication & Authorization Token
+    path('permissions/', CreatePermissionAPIView.as_view(), name='create_permission'),#Added Authuntication & Authorization Token
+    path('permissions/<int:id>/', UpdatePermissionAPIView.as_view(), name='update_permission'),#Added Authuntication & Authorization Token
     #=============================== Mayank =========================================================
 
 
