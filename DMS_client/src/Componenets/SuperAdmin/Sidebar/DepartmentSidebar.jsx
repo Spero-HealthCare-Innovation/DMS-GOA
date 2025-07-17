@@ -46,6 +46,7 @@ const screenConfig = {
       { id: 1, text: "Closure Report", path: "/Closure Report" },
       { id: 2, text: "Incident Report", path: "/Incident Report" },
     ],
+    
   },
   Permission: {
     icon: <LockIcon />,
