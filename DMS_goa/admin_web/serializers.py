@@ -508,3 +508,61 @@ class TwitterDMSSerializer(serializers.ModelSerializer):
     class Meta:
         model = TwitterDMS
         fields = '__all__'
+        
+        
+#-------------------Permission ==================
+
+class roleSerializer(serializers.ModelSerializer):
+        grp_name = serializers.SerializerMethodField()
+
+        class Meta:
+            model = role
+            fields = ['role_id', 'Group_id', 'source', 'role_is_deleted', 'is_deleted', 'grp_name']
+        
+        def get_grp_name(self, instance):
+            group = instance.Group_id
+            return group.grp_name if group else None
+        
+        def to_representation(self, instance):
+            data = super().to_representation(instance)
+            data['grp_name'] = self.get_grp_name(instance)
+            return data
+                
+# class BMISerializer(serializers.ModelSerializer):
+#    class Meta:
+#       model = GrowthMonitoring
+#       fields = '__all__'
+
+
+from django.contrib.auth.models import Permission
+
+class PermissionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Permission
+        fields = '__all__'
+
+class Moduleserializer(serializers.ModelSerializer):
+     class Meta:
+          model = Permission_module
+          fields = ['module_id', 'name', 'Source_id']
+
+
+class permission_sub_Serializer(serializers.ModelSerializer):
+    class Meta:
+        model = permission
+        fields = '__all__'
+
+class SubmoduleSerializer(serializers.Serializer):  
+    submoduleId = serializers.IntegerField()
+    submoduleName = serializers.CharField()
+
+class ModuleSerializer(serializers.Serializer):
+    moduleId = serializers.IntegerField()
+    moduleName = serializers.CharField()
+    selectedSubmodules = SubmoduleSerializer(many=True)
+class SavePermissionSerializer(serializers.ModelSerializer):
+    modules_submodule = serializers.ListField(child=ModuleSerializer())
+
+    class Meta:
+        model = agg_save_permissions
+        fields = ['id', 'source', 'role', 'modules_submodule', 'permission_status']

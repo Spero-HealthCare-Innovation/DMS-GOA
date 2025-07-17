@@ -33,7 +33,11 @@ from datetime import datetime
 from langdetect import detect
 from deep_translator import GoogleTranslator
 import re
-from .constants import LOCATION_KEYWORDS, BLOCKLIST, EMS_KEYWORDS
+# from .constants import LOCATION_KEYWORDS, BLOCKLIST, EMS_KEYWORDS
+from admin_web.utils.facebook_scraper import scrape_facebook_posts
+from admin_web.utils.twitter_scraper import scrape_pune_ems_tweets
+from admin_web.constants import KEYWORDS, PUNE_LOCATIONS, query
+from admin_web.utils.news_scraper import news_dms_scraper
 
 
 class DMS_department_post_api(APIView):
@@ -410,40 +414,40 @@ class LogoutView(APIView):
             return Response({"error": "Invalid token"}, status=400)
         
         
-class CombinedAPIView(APIView):
-    # renderer_classes = [UserRenderer]
-    # permission_classes = [IsAuthenticated]
-    def get(self, request, format=None):
-        permission_modules = DMS_Module.objects.filter()
-        modules_serializer = Mmoduleserializer(permission_modules, many=True)
+# class CombinedAPIView(APIView):
+#     # renderer_classes = [UserRenderer]
+#     # permission_classes = [IsAuthenticated]
+#     def get(self, request, format=None):
+#         permission_modules = DMS_Module.objects.filter()
+#         modules_serializer = Mmoduleserializer(permission_modules, many=True)
 
-        permission_objects = DMS_SubModule.objects.filter()
-        permission_serializer = permission_sub_Serializer(permission_objects, many=True)
+#         permission_objects = DMS_SubModule.objects.filter()
+#         permission_serializer = permission_sub_Serializer(permission_objects, many=True)
 
         
-        combined_data = []
-        for module_data in modules_serializer.data:
-            module_id = module_data["mod_id"]
-            module_name = module_data["mod_name"]
-            group_id = module_data["mod_group_id"]
-            group_name = module_data["grp_name"]
+#         combined_data = []
+#         for module_data in modules_serializer.data:
+#             module_id = module_data["mod_id"]
+#             module_name = module_data["mod_name"]
+#             group_id = module_data["mod_group_id"]
+#             group_name = module_data["grp_name"]
             
 
-            submodules = [submodule for submodule in permission_serializer.data if submodule["mod_id"] == module_id]
+#             submodules = [submodule for submodule in permission_serializer.data if submodule["mod_id"] == module_id]
 
-            formatted_data = {
-                "group_id": group_id,
-                "group_name": group_name,
-                "module_id": module_id,
-                "name": module_name,
-                "submodules": submodules
-            }
+#             formatted_data = {
+#                 "group_id": group_id,
+#                 "group_name": group_name,
+#                 "module_id": module_id,
+#                 "name": module_name,
+#                 "submodules": submodules
+#             }
 
-            combined_data.append(formatted_data)
+#             combined_data.append(formatted_data)
 
-        final_data = combined_data
+#         final_data = combined_data
 
-        return Response(final_data)
+#         return Response(final_data)
 
 
     
@@ -1544,79 +1548,155 @@ class Ward_Officer_get_API(APIView):
     
     
     
-bearer_token = "AAAAAAAAAAAAAAAAAAAAAK2AxwEAAAAALAjV%2F%2B4QGmYpv4cCHARHMfCo1tE%3DeqlcnINOO7Y7OA2sBo3zgIpEyBhPXCVv7TO1ok6xAMEMzwn4B8"
+bearer_token = "AAAAAAAAAAAAAAAAAAAAAH8RxwEAAAAADjjrmkM1ZPBPnjoHuBAtqlh6Mac%3DqqBg9lR831CiXLU7t8J1lpHBGgG8ZXU1CoD8fIMUGyX0SwXarN"
 client = tweepy.Client(bearer_token=bearer_token)
 class twitter_post_api(APIView):
 
-    def detect_region(text):
-        text = text.lower()
-        for loc in LOCATION_KEYWORDS:
-            if loc in text:
-                if "goa" in loc or loc in ["panaji", "margao", "vasco", "mapusa", "calangute"]:
-                    return "Goa"
-                elif "pune" in loc or loc in ["pcmc", "pmc", "baner", "kothrud", "shivajinagar"]:
-                    return "Pune"
-                elif "mumbai" in loc or "thane" in loc:
-                    return "Mumbai"
-        return "Unknown"
+    def post(self, request):
+        results, error = scrape_pune_ems_tweets(client, query, KEYWORDS, PUNE_LOCATIONS)
 
-    def is_ems_related(text):
-        text = text.lower()
-        if any(block in text for block in BLOCKLIST):
-            return False
-        return any(re.search(rf"\b{kw}\b", text) for kw in EMS_KEYWORDS)
+        if error:
+            return Response({"error": error}, status=status.HTTP_400_BAD_REQUEST)
 
-    # ------------------- MAIN SCRAPER -------------------
+        saved = 0
+        for data in results:
+            serializer = TwitterDMSSerializer(data=data)
+            if serializer.is_valid():
+                serializer.save()
+                saved += 1
+            else:
+                print(serializer.errors)
 
-    def scrape_twitter_dms():
-        query = "(" + " OR ".join(EMS_KEYWORDS) + ") (" + " OR ".join(LOCATION_KEYWORDS) + ") lang:en -is:retweet"
+        return Response({
+            "message": "Tweets saved",
+            "saved_count": saved
+        }, status=status.HTTP_201_CREATED)
+            
+class FacebookPostScrapeAPIView(APIView):
+    def post(self, request):
+        posts = scrape_facebook_posts()
 
-        try:
-            response = client.search_recent_tweets(
-                query=query,
-                max_results=50,
-                tweet_fields=["created_at", "author_id", "text", "id"]
+        saved = 0
+        for data in posts:
+            serializer = TwitterDMSSerializer(data=data)
+            if serializer.is_valid():
+                serializer.save()
+                saved += 1
+            else:
+                print(serializer.errors)
+
+        return Response({
+            "message": f"{saved} posts saved to the database.",
+            "total_scraped": len(posts)
+        }, status=status.HTTP_200_OK)
+
+class NewsScraperAPIView(APIView):
+    def post(self, request):
+        api_key = "6def2a5e5f1b470eb186cf10a7a3bc73"  # OR read from settings
+
+        final_data, error = news_dms_scraper(api_key)
+        print(final_data)
+        if error:
+            return Response({"error": error}, status=status.HTTP_400_BAD_REQUEST)
+
+        saved_count = 0
+        for item in final_data:
+            print(item['user'])
+            TwitterDMS.objects.create(
+                media_status=int(item['media_status']),
+                text=item['text'],
+                translated_text=item['translated_text'],
+                user=item['user'],
+                language=item['language'],
+                region=item['region'],
+                date_time=item['date_time'],
+                link=item['link']
             )
-        except Exception as e:
-            print(f" Twitter API Error: {e}")
-            return
+            saved_count += 1
+            # if not TwitterDMS.objects.filter(link=item["link"]).exists():
+            #     serializer = TwitterDMSSerializer(data=item)
+            #     if serializer.is_valid():
+            #         serializer.save()
+            #         saved_count += 1
+            #     else:
+            #         print(serializer.errors)
 
-        final_results = []
-        obj=twitter_post_api()
-        if response.data:
-            for tweet in response.data:
-                original_text = tweet.text
-                translated_text, lang = obj.translate_if_needed(original_text)
+        return Response(
+            {
+                "message": f"Scraped {len(final_data)} posts, saved {saved_count} new items."
+            },
+            status=status.HTTP_200_OK
+        )
+#===================permission Module (mayank)===========================================
 
-                if obj.is_ems_related(translated_text):
-                    region = obj.detect_region(translated_text)
-                    tweet_data = {
-                        "tweet_original_text": original_text,
-                        "tweet_translated_text": translated_text,
-                        "tweet_user_id": tweet.author_id,
-                        "tweet_language": lang,
-                        "tweet_region": region,
-                        "tweet_link": f"https://twitter.com/user/status/{tweet.id}",
-                        "tweet_created_at": tweet.created_at.strftime("%Y-%m-%d %H:%M:%S"),
-                        "tweet_media_status": "0"
-                    }
-                    final_results.append(tweet_data)
-                    print(f" Match: {original_text[:80]}")
-                else:
-                    print(f" Skipped: {original_text[:80]}")
+class CombinedAPIView(APIView):
+    renderer_classes = [UserRenderer]
+    permission_classes = [IsAuthenticated]
+    def get(self, request, format=None):
+        permission_modules = Permission_module.objects.filter()
+        modules_serializer = Moduleserializer(permission_modules, many=True)
 
-            # Save to JSON
-            with open("twitter_dms.json", "w", encoding="utf-8") as f:
-                json.dump(final_results, f, indent=2, ensure_ascii=False)
-                
-            for data in final_results:
-                data["tweet_id"] = data.pop("id")  # match model field name
-                serializer = TwitterDMSSerializer(data=data)
-                if serializer.is_valid():
-                    serializer.save()
-                else:
-                    print(serializer.errors)  # optionally log invalid data
-                    
-            print(f"\n Total relevant tweets saved: {len(final_results)}")
-        else:
-            print(" No tweets found.")
+        permission_objects = permission.objects.filter()
+        permission_serializer = permission_sub_Serializer(permission_objects, many=True)
+
+        combined_data = []
+        for module_data in modules_serializer.data:
+            module_id = module_data["module_id"]
+            module_name = module_data["name"]
+            source_id = module_data["Source_id"]
+
+            submodules = [submodule for submodule in permission_serializer.data if submodule["module"] == module_id]
+
+            formatted_data = {
+                "module_id": module_id,
+                "name": module_name,
+                "Source_id": source_id,
+                "submodules": submodules
+            }
+
+            combined_data.append(formatted_data)
+
+        final_data = combined_data
+
+        return Response(final_data)
+    
+
+class GetPermissionAPIView(APIView):
+    renderer_classes = [UserRenderer]
+    permission_classes = [IsAuthenticated]
+    serializer_class = SavePermissionSerializer
+
+    def get(self, request, source, role, *args, **kwargs):
+        permissions = agg_save_permissions.objects.filter(source=source, role=role)
+        serializer = self.serializer_class(permissions, many=True)
+        return Response(serializer.data)
+
+class CreatePermissionAPIView(APIView):
+    renderer_classes = [UserRenderer]
+    permission_classes = [IsAuthenticated]
+    serializer_class = SavePermissionSerializer
+
+    def post(self, request):
+        serializer = self.serializer_class(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class UpdatePermissionAPIView(APIView):
+    renderer_classes = [UserRenderer]
+    permission_classes = [IsAuthenticated]
+    serializer_class = SavePermissionSerializer
+
+    def put(self, request, id):
+        try:
+            permission = agg_save_permissions.objects.get(id=id)
+        except agg_save_permissions.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
+        serializer = self.serializer_class(permission, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
