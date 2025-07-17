@@ -1,6 +1,6 @@
 import re
 from deep_translator import GoogleTranslator
-from admin_web.constants import KEYWORDS, PUNE_LOCATIONS, query, pages, fb_keywords, fb_location_keywords
+from admin_web.constants import pages, fb_keywords, fb_location_keywords
 import hashlib
 from selenium import webdriver
 from selenium.webdriver.common.by import By
@@ -16,8 +16,8 @@ import time
 def extract_hashtags(text):
     return re.findall(r"#(\w+)", text)
 
-def match_any(text, keywords):
-    return any(kw.lower() in text for kw in keywords)
+def match_any(text, fb_keywords):
+    return any(kw.lower() in text for kw in fb_keywords)
 
 def is_relevant_post(post_text):
     try:
@@ -203,3 +203,5 @@ def scrape_facebook_posts():
 
     print(f"\n Saved {len(final_posts)} relevant posts to filtered_fb_posts_dms.json")
     return final_posts
+
+
