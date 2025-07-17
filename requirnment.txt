@@ -73,3 +73,7 @@ geopy
 feedparser
 shapely
 APScheduler
+selenium
+deep-translator
+tweepy
+langdetect
