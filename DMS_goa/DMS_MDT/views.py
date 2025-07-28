@@ -2,7 +2,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from .serializers import *  
 from django.contrib.auth import authenticate
-from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.tokens import RefreshToken, TokenError
 from rest_framework import status
 
 class Register_veh(APIView):
@@ -15,58 +15,154 @@ class Register_veh(APIView):
     
 class VehicleLogin(APIView):
     def post(self, request):
-        vehicle = vehicleserializer(data = request.data)
-        if vehicle.is_valid():
-            user = request.data.get('veh_number')
-            password = request.data.get('veh_default_mobile')
-            data=authenticate(user_username=user, password=password)
-            if data is not None:
-                vehi = DMS_User.objects.filter(user_username=user,user_is_deleted=False).last()
-                if vehi:
-                    if vehi.user_is_login == False:
-                        vehi.user_is_login = True
-                        vehi.save()
-                        token = RefreshToken.for_user(data)
-                        print('12')
-                        pre = vehicle_login_info.objects.filter(veh_id=vehi.user_id, status=1)
-                        print('13')
-                        for p in pre:
-                            p.status=2
-                            p.veh_logout_time = now()
-                            p.save()
-                        seria = vehi_login_info_serializer(data = {'veh_login_time':now(), 'veh_id':vehi.user_id})
-                        if seria.is_valid():
-                            # print(seria.data)
-                            seria.save()
-                            return Response({'refresh':str(token), 'access':str(token.access_token)})
-                        else: return Response(seria.errors, status=status.HTTP_400_BAD_REQUEST)
-                    else:return Response({"status":'user already login'}, status=status.HTTP_200_OK)
-                else:return Response({"status":'user not found'}, status=status.HTTP_404_NOT_FOUND)
-        return Response(vehicle.errors, status=status.HTTP_400_BAD_REQUEST)
+        print('one')
+        vehiseri={
+            "veh_number" : request.data.get('vehicleNumber'),
+            "veh_default_mobile" : request.data.get('password')
+        }
+        print('on2e')
+        lat = request.data.get('lat')
+        long = request.data.get('lng')
+        
+        # vehicle_serializer = vehicleserializer(data=vehiseri)
+        # if not vehicle_serializer.is_valid():
+        #     return Response(vehicle_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        print('12')
+        veh_number = request.data.get('vehicleNumber')
+        password = request.data.get('password')
+        employee_ids = list(request.data.get('pilotid').replace('[','').replace(']','').replace(',',''))
+        # print(employee_ids, 'ids')
+        employee_photo = request.FILES.getlist('photo')
+        # print(employee_photo, 'photos')
+        user = authenticate(user_username=veh_number, password=password)
+        if not user:
+            return Response({'status': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
+        user_obj = DMS_User.objects.filter(user_username=veh_number, user_is_deleted=False).last()
+        if not user_obj:
+            return Response({'status': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
+        if user_obj.user_is_login:
+            return Response({'status': 'User already logged in'}, status=status.HTTP_200_OK)
+        vehicle_obj = Vehical.objects.filter(user=user_obj).last()
+        if not vehicle_obj:
+            return Response({'status': 'Vehicle not found'}, status=status.HTTP_404_NOT_FOUND)
+        active_employees = employee_clockin_info.objects.filter(emp_id__in=employee_ids, clock_out_in_status =1,status=1)
+        if active_employees.exists():
+            conflict_messages = [
+                f"Employee '{e.emp_id.emp_name}' is already logged in on vehicle '{e.veh_id.veh_number}'"
+                for e in active_employees
+            ]
+            return Response(conflict_messages, status=status.HTTP_400_BAD_REQUEST)
+        # emp_data = [{'emp_clockin_time': now(),'emp_id': emp_id,'veh_id': vehicle_obj.veh_id} for emp_id in employee_ids]
+        emp_data = [{'emp_clockin_time': now(),'emp_id': emp_id,'veh_id': vehicle_obj.veh_id, 'emp_image':emp_image} for emp_id, emp_image in zip(employee_ids,employee_photo)]
+        # print(emp_data, 'datas')
+        emp_serializer = emp_clockin_serializer(data=emp_data, many=True)
+        if not emp_serializer.is_valid():
+            return Response(emp_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        emp_serializer.save()
+        user_obj.user_is_login = True
+        user_obj.save()
+        previous_sessions = vehicle_login_info.objects.filter(veh_id=vehicle_obj.veh_id, status=1)
+        for session in previous_sessions:
+            session.status = 2
+            session.veh_logout_time = now()
+            session.save()
+        login_data = {
+            'veh_login_time': now(),
+            'veh_id': vehicle_obj.veh_id,
+            'latitude':lat,
+            'longitude':long,
+        }
+        print(login_data)
+        login_serializer = vehi_login_info_serializer(data=login_data)
+        if not login_serializer.is_valid():
+            return Response(login_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        login_serializer.save()
+        token = RefreshToken.for_user(user)
+        return Response({'refresh': str(token),'access': str(token.access_token)}, status=status.HTTP_200_OK)
     
 class VehicleLogout(APIView):
     def post(self, request):
-        token = request.data.get('refresh_token')
-        user=request.data.get('veh_number')
-        users = DMS_User.objects.filter(user_username=user).last()
-        if users:
-            if users.user_is_login:
-                users.user_is_login=False
-                users.save()
-                token = RefreshToken(token)
-                token.blacklist()
-                pre = vehicle_login_info.objects.filter(veh_id=users.user_id, status=1)
-                print('13')
-                for p in pre:
-                    p.status=2
-                    p.veh_logout_time = now()
-                    p.save()
-                return Response({'status' : 'user logout sucessfully'})
-            else:
-                return Response({'status':'user already logout'})
-        else:return Response({'status': 'user is not exist'})
+        refresh_token = request.data.get('refresh_token')
+        veh_number = request.data.get('veh_number')
+        user_obj = DMS_User.objects.filter(user_username=veh_number).last()
+        if not user_obj:
+            return Response({'status': 'User does not exist'}, status=404)
+        if not user_obj.user_is_login:
+            return Response({'status': 'User already logged out'}, status=200)
+        try:
+            token_obj = RefreshToken(refresh_token)
+            token_obj.blacklist()
+        except TokenError:
+            return Response({'status': 'Invalid or expired refresh token'}, status=400)
+        vehicle_obj = Vehical.objects.filter(veh_number=veh_number).last()
+        if not vehicle_obj:
+            return Response({'status': 'Vehicle not found'}, status=404)
+        active_vehicle_sessions = vehicle_login_info.objects.filter(veh_id=vehicle_obj.veh_id, status=1)
+        for session in active_vehicle_sessions:
+            session.clock_out_in_status = 2
+            session.veh_logout_time = now()
+            session.save()
+        active_employee_sessions = employee_clockin_info.objects.filter(veh_id=vehicle_obj.veh_id, clock_out_in_status=1, status=1)
+        for emp in active_employee_sessions:
+            emp.clock_out_in_status = 2
+            emp.emp_clockout_time = now()
+            emp.save()
+        user_obj.user_is_login = False
+        user_obj.save()
+
+        return Response({'status': 'User logged out successfully'}, status=200)
         
 class employee_list(APIView):
     def get(self,request):
-        # user = DMS_User.objects.filter(user_is_deleted=False, grp_id=)
-        pass
+        user = DMS_Employee.objects.filter(emp_is_deleted=False)
+        return Response('done')
+    
+class add_device(APIView):
+    def post(self,request):
+        device = add_device_serializer(data=request.data)
+        if device.is_valid():
+            return Response(device.data, status=status.HTTP_201_CREATED)
+        else:
+            return Response (device.errors, status=status.HTTP_400_BAD_REQUEST)
+        
+class get_incident_wise_vehicle(APIView):
+    def get(self, request):
+        inc_veh = incident_vehicle.objects.filter(status=1)
+        inc_veh_serialiZers = inc_veh_serialiZers(inc_veh, many=True)
+        return Response(inc_veh_serialiZers.data, status=status.HTTP_200_OK)
+    
+class emp_clockinout(APIView):
+    def post(self, request):
+        data={}
+        # request.data['latitude']=request.data.pop('lat')
+        # request.data['longitude']=request.data.pop('lng')
+        # data['veh_login_time']=request.data.get('veh_login_time')
+        # data['veh_logout_time']=request.data.get('veh_logout_time')
+        # data['veh_login_time']=request.data.get('clockTime') if request.data.get('clockTime')=='in' else data['veh_logout_time']=request.data.get('veh_logout_time') if request.data.get('clock_out_in_status') else None
+        if request.data.get('clockTime') == 'in':
+            data['veh_login_time'] = request.data.get('clockTime')
+        elif request.data.get('clock_out_in_status'):
+            data['veh_logout_time'] = request.data.get('veh_logout_time')
+        else:
+            data['veh_logout_time'] = None
+ 
+        data['veh_id']=Vehical.objects.filter(veh_number=request.data.get('vehicleNumber')).last().veh_id if request.data.get('vehicleNumber') else None
+        data['latitude']=request.data.get('lat')
+        data['longitude']=request.data.get('lng')
+        data['device_id']=request.data.get('device_id')
+        employee = emp_clockin_serializer(data=data)
+        if employee.is_valid():
+            employee.save()
+            return Response(employee.data, status=status.HTTP_201_CREATED)
+        return Response(employee.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+# vehicleNumber:MH-14-CL-0463
+# userId:297
+# lat:18.595993
+# lng:73.7587962
+# clockTime:2025-05-22 14:32:19
+# clock_out_in_status:in
+
+
+

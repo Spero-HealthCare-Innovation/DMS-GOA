@@ -13,6 +13,13 @@ class device_platform(enum.Enum):
     Androind = 1
     IOS = 2
     
+class check_in_out_status(enum.Enum):
+    check_in = 1
+    check_out = 2
+    
+    __default__ = check_in
+    
+    
 class Vehical_base_location(models.Model):
     bs_id = models.AutoField(primary_key=True)
     bs_name = models.CharField(max_length=100)
@@ -33,7 +40,7 @@ class Vehical_base_location(models.Model):
 # Create your models here.
 class Vehical(models.Model):
     veh_id = models.AutoField(primary_key=True)
-    veh_number = models.CharField(max_length=50, null=True)
+    veh_number = models.CharField(max_length=50, null=True, unique=True)
     veh_default_mobile = models.CharField(max_length=15, null=True)
     veh_base_location = models.ForeignKey(Vehical_base_location, on_delete=models.CASCADE, null=True)
     veh_hash = models.TextField(null=True)
@@ -88,12 +95,31 @@ class vehicle_login_info(models.Model):
     veh_login_time = models.DateTimeField(null=True)
     veh_logout_time = models.DateTimeField(null=True)
     status = enum.EnumField(status_enum, null=True)
-    veh_id = models.ForeignKey(DMS_User, on_delete=models.CASCADE, null=True)
+    veh_id = models.ForeignKey(Vehical, on_delete=models.CASCADE, null=True)
+    clock_out_in_status = enum.EnumField(check_in_out_status, null=True)
+    latitude = models.FloatField(null = True)
+    longitude = models.FloatField(null = True)
+    device_id = models.IntegerField(null = True)
     
 class employee_clockin_info(models.Model):
     emp_clockin_id = models.AutoField(primary_key=True)
     emp_clockin_time = models.DateTimeField(null=True)
     emp_clockout_time = models.DateTimeField(null=True)
     status = enum.EnumField(status_enum, null=True)
-    user_id = models.ForeignKey(DMS_User, on_delete=models.CASCADE, null=True)
+    latitude = models.FloatField(null = True)
+    longitude = models.FloatField(null = True)
+    clock_out_in_status = enum.EnumField(check_in_out_status, null=True)
+    emp_id = models.ForeignKey(DMS_Employee, on_delete=models.CASCADE, null=True)
+    veh_id = models.ForeignKey(Vehical, on_delete=models.CASCADE, null=True)
+    emp_image = models.FileField(upload_to='media_files/Mdt_employee/', null=True)
     
+class incident_vehicle(models.Model):
+    inc_veh_id = models.AutoField(primary_key=True)
+    incident_id=models.ForeignKey(DMS_Incident,on_delete=models.CASCADE,null=True,blank=True)
+    veh_id = models.ForeignKey(Vehical, on_delete=models.CASCADE, to_field='veh_number', null=True)
+    dep_id = models.ForeignKey(DMS_Department, on_delete=models.CASCADE,null=True, blank=True)
+    status = enum.EnumField(status_enum, null=True)
+    added_by = models.CharField(max_length=100, null=True)
+    added_date = models.DateTimeField(auto_now_add=True)
+    modify_by = models.CharField(max_length=100, null=True)
+    modify_date = models.DateTimeField(auto_now=True)
