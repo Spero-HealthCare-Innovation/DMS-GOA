@@ -115,7 +115,7 @@ DATABASES = {
     # }
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'DMS_MDT_New',
+        'NAME': 'DMS_TEMP_NEW_LOGIN_SYSTEM2',
         'USER': 'postgres',
         'PASSWORD': 'postgres',
         'HOST': '192.168.1.109',

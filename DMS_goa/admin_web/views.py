@@ -26,6 +26,7 @@ from django.utils.encoding import force_bytes
 from django.core.mail import send_mail
 from rest_framework_simplejwt.tokens import AccessToken
 from geopy.geocoders import Nominatim
+from datetime import datetime
 import ast
 
 class DMS_department_post_api(APIView):
@@ -398,9 +399,14 @@ class LogoutView(APIView):
                 user_obj.save()
                 
             refresh_token = request.data.get("refresh_token")
+            log_id = request.data.get("log_id")
             if refresh_token:
                 token = RefreshToken(refresh_token)
                 token.blacklist()  # Blacklist the token
+                login_entry_obj = DMS_WebLogin.objects.get(log_id=log_id)
+                login_entry_obj.logout_time = datetime.now()
+                login_entry_obj.log_status = 2
+                login_entry_obj.save()
                 return Response({"message": "Logged out successfully"}, status=200)
             return Response({"error": "Refresh token is required"}, status=400)
         except Exception as e:
