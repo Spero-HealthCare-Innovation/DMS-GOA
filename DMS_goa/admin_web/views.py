@@ -1700,3 +1700,10 @@ class UpdatePermissionAPIView(APIView):
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
+
+
+# class AggSourceListAPIView(APIView):
+#     def get(self, request):
+#         sources = agg_source.objects.filter(is_deleted=False).only('source_pk_id', 'source').order_by('source')
+#         serializer = AggSourceSerializer(sources, many=True)
+#         return Response(serializer.data)

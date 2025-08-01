@@ -682,7 +682,7 @@ class role(models.Model):
     role_id = models.AutoField(primary_key=True)
     # permission_name = models.ForeignKey('permission',on_delete=models.CASCADE,null=True)
     Group_id = models.ForeignKey('DMS_Group',on_delete=models.CASCADE,null=True)
-    source =models.ForeignKey('agg_source',on_delete=models.CASCADE,null=True)
+    source =models.ForeignKey('DMS_Department',on_delete=models.CASCADE,null=True)
     # modules = models.ForeignKey('Permission_module',on_delete=models.CASCADE,null=True)
     # guard_name = models.CharField(max_length=255)
     role_is_deleted = models.BooleanField(default=False)
@@ -696,7 +696,7 @@ class role(models.Model):
 class Permission_module(models.Model):
     module_id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=250, null=True)
-    Source_id = models.ForeignKey("agg_source", on_delete=models.CASCADE,null = True)
+    Source_id = models.ForeignKey("DMS_Department", on_delete=models.CASCADE,null = True)
     added_date = models.DateTimeField(auto_now_add=True)
     added_by = models.IntegerField(blank=True, null=True)
     modify_by =	models.IntegerField(null=True, blank=True)
@@ -711,7 +711,7 @@ class permission(models.Model):
     name = models.CharField(max_length=255)
     module = models.ForeignKey("Permission_module", on_delete=models.CASCADE,null = True)
     # source =models.ForeignKey('agg_source',on_delete=models.CASCADE,null=True)
-    source =models.ForeignKey('agg_source',on_delete=models.CASCADE,null=True)
+    source =models.ForeignKey('DMS_Department',on_delete=models.CASCADE,null=True)
     # guard_name = models.CharField(max_length=255)
     added_by =	models.IntegerField(null=True, blank=True)
     added_date = models.DateTimeField(auto_now_add=True, blank=True)
@@ -726,7 +726,7 @@ class permission(models.Model):
 
 class agg_save_permissions(models.Model):
     id = models.AutoField(primary_key=True)
-    # source =models.ForeignKey('agg_source',on_delete=models.CASCADE,null=False)
+    source =models.ForeignKey('DMS_Department',on_delete=models.CASCADE,null=True)
     role = models.ForeignKey('DMS_Group',on_delete=models.CASCADE,null=False)
     modules_submodule = models.JSONField(null=True)
     # modules = models.ForeignKey('Permission_module',on_delete=models.CASCADE,null=True)
