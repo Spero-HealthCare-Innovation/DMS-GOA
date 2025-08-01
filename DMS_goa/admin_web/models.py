@@ -726,7 +726,7 @@ class permission(models.Model):
 
 class agg_save_permissions(models.Model):
     id = models.AutoField(primary_key=True)
-    # source =models.ForeignKey('DMS_Department',on_delete=models.CASCADE,null=True)
+    source =models.ForeignKey('DMS_Department',on_delete=models.CASCADE,null=True)
     role = models.ForeignKey('DMS_Group',on_delete=models.CASCADE,null=False)
     modules_submodule = models.JSONField(null=True)
     # modules = models.ForeignKey('Permission_module',on_delete=models.CASCADE,null=True)
