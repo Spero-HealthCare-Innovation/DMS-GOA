@@ -563,5 +563,5 @@ class SavePermissionSerializer(serializers.ModelSerializer):
 
 class AggSourceSerializer(serializers.ModelSerializer):
     class Meta:
-        model = agg_source
-        fields = ['source_pk_id', 'source']
+        model = DMS_Department
+        fields = ['dep_id', 'dep_name']

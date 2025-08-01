@@ -123,7 +123,7 @@ urlpatterns = [
     path('permissions/<source>/<role>/', GetPermissionAPIView.as_view(), name='get_permissions'),#Added Authuntication & Authorization Token
     path('permissions/', CreatePermissionAPIView.as_view(), name='create_permission'),#Added Authuntication & Authorization Token
     path('permissions/<int:id>/', UpdatePermissionAPIView.as_view(), name='update_permission'),#Added Authuntication & Authorization Token
-    path('sources/', AggSourceListAPIView.as_view(), name='agg-source-list'),
+    # path('sources/', AggSourceListAPIView.as_view(), name='agg-source-list'),
 
     #=============================== Mayank =========================================================
 
