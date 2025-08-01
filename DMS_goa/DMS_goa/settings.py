@@ -106,6 +106,27 @@ DATABASES = {
     }
 }
 
+
+
+
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.postgresql',
+#         'NAME': 'postgres', 
+#         'USER': 'postgres',
+#         'PASSWORD': 'Spero@123',
+#         'HOST': '192.168.1.210',  
+#         'PORT': '5432',
+#         'OPTIONS': {
+#             'options': '-c timezone=Asia/Kolkata',
+#         },
+#     },
+#     'hive': {
+#         'ENGINE': '', 
+#         'NAME': 'processed_dms',
+#     }
+# }
+
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
