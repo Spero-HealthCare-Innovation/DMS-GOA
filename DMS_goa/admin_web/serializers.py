@@ -558,7 +558,7 @@ class SavePermissionSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = agg_save_permissions
-        fields = ['id', 'source', 'role', 'modules_submodule', 'permission_status']
+        fields = ['id', 'source', 'role', 'modules_submodule']
 
 
 class AggSourceSerializer(serializers.ModelSerializer):
