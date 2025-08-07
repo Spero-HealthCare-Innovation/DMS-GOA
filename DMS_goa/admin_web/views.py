@@ -309,9 +309,9 @@ def get_tokens_for_user(user):
             permission_info = {
                 'modules_submodule': permission.modules_submodule,
                 # 'permission_status': permission.permission_status,
-                'source_id': permission.source.dep_id,
-                'source_name': permission.source.dep_name,  
-                'role_id': permission.role.grp_id,  
+                'Department_id': permission.source.dep_id,
+                'Department_name': permission.source.dep_name,  
+                'Group_id': permission.role.grp_id,  
     }
             permissions_data.append(permission_info)
     else:
