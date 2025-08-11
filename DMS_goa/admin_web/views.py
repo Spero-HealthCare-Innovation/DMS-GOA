@@ -467,7 +467,7 @@ class UserLoginView(APIView):
  
         serializer = UserLoginSerializer(data=request.data)
         if serializer.is_valid(raise_exception=True):
-            user_username = serializer.data.get('user_username')
+            user_username = serializer.data.get('emp_username')
             password = serializer.data.get('password')
             print("=========", user_username, password)
             user = authenticate(user_username=user_username, password=password)
