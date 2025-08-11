@@ -104,11 +104,11 @@ class DMS_Employee_serializer(serializers.ModelSerializer):
 
 class DMS_User_serializer(serializers.ModelSerializer):
     password2 = serializers.CharField(style={'input_type':'password'}, write_only=True)
-    # grp_id = serializers.PrimaryKeyRelatedField(queryset=DMS_Group.objects.all(),many=False)
+    grp_id = serializers.PrimaryKeyRelatedField(queryset=DMS_Group.objects.all(),many=False)
    
     class Meta:
         model  = DMS_User
-        fields = ['emp_id', 'emp_username', 'grp_id', 'emp_name', 'emp_email', 'emp_contact_no', 'emp_dob', 'emp_doj', 'emp_is_login', 'state_id', 'dist_id', 'tahsil_id', 'city_id', 'emp_is_deleted', 'emp_added_by', 'emp_modified_by', 'password','password2','ward_id' ]
+        fields = ['user_id', 'user_username', 'grp_id', 'user_is_login', 'is_admin', 'user_is_deleted', 'user_added_by', 'user_modified_by', 'password','password2' ]
  
         extra_kwargs = {
             'password':{'write_only':True}
@@ -246,11 +246,11 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
     
 
 class UserLoginSerializer(serializers.ModelSerializer):
-    emp_username = serializers.CharField(required=False, allow_blank=True)
+    user_username = serializers.CharField(required=False, allow_blank=True)
     password = serializers.CharField(style={'input_type': 'password'})
     class Meta:
-        model = DMS_Employee
-        fields = ['emp_username', 'password']
+        model = DMS_User
+        fields = ['user_username', 'password']
 
 
 class ChangePasswordGetSerializer(serializers.ModelSerializer):

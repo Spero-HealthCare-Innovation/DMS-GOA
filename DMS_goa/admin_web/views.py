@@ -460,10 +460,11 @@ def get_tokens_for_user(user, log_id):
 class UserLoginView(APIView):
     renderer_classes = [UserRenderer]
     def post(self, request, format=None):
+        request.data['user_username'] = request.data.get('emp_username')
         # Validate using the CAPTCHA + credential serializer
         serializer1 = CaptchaTokenObtainPairSerializer(data=request.data)
         serializer1.is_valid(raise_exception=True)
- 
+        print("request.data--", request.data)
  
         serializer = UserLoginSerializer(data=request.data)
         if serializer.is_valid(raise_exception=True):
