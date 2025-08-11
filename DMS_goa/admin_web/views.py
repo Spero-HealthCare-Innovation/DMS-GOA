@@ -294,90 +294,191 @@ class CaptchaAPIView(APIView):
 
 
 
-def get_tokens_for_user(user):
+# def get_tokens_for_user(user):
+#     refresh = RefreshToken.for_user(user)
+#     group = str(user.grp_id.grp_id)
+#     print("user---123", user)
+#     print("group---123", user.grp_id.grp_id)
+#     permissions_data = []
+#     if group:
+#         incs = DMS_Group.objects.get(grp_id=group)
+#         pers = agg_save_permissions.objects.filter(role=group)
+#         group_name = incs.grp_name
+        
+#         for permission in pers:
+#             permission_info = {
+#                 'modules_submodule': permission.modules_submodule,
+#                 # 'permission_status': permission.permission_status,
+#                 'Department_id': permission.source.dep_id,
+#                 'Department_name': permission.source.dep_name,  
+#                 'Group_id': permission.role.grp_id,  
+#     }
+#             permissions_data.append(permission_info)
+#     else:
+#         group_name = None
+            
+#     return {
+#         "refresh" : str(refresh),
+#         "access" : str(refresh.access_token),
+#         # "permissions": permissions_data,
+#         "colleague": {
+#                 'id': user.emp_id,
+#                 'emp_name': user.emp_name,
+#                 'email': user.emp_email,
+#                 'phone_no': user.emp_contact_no,
+#                 'user_group': group,
+#             },
+#         "user_group" :group,
+#         "permissions": permissions_data,
+#     } 
+
+
+# class UserLoginView(APIView):
+#     renderer_classes = [UserRenderer]
+#     def post(self, request, format=None):
+#         # Validate using the CAPTCHA + credential serializer
+#         serializer1 = CaptchaTokenObtainPairSerializer(data=request.data)
+#         serializer1.is_valid(raise_exception=True)
+
+
+#         serializer = UserLoginSerializer(data=request.data)
+#         if serializer.is_valid(raise_exception=True):
+#             emp_username = serializer.data.get('emp_username')
+#             password = serializer.data.get('password')
+#             print("=========", emp_username, password)
+#             user = authenticate(emp_username=emp_username, password=password)
+#             print("user--", user)
+#             if user is not None:
+#                 emp = DMS_Employee.objects.get(emp_username=user.emp_username)
+#                 if emp.emp_is_deleted != False:
+#                     return Response({'msg':'Login access denied. Please check your permissions or reach out to support for help.'},status=status.HTTP_401_UNAUTHORIZED)
+#                 if emp.emp_is_login is False: 
+#                     emp.emp_is_login = True
+#                     emp.save()
+#                     token = get_tokens_for_user(user)
+#                     return Response({'token':token,'msg':'Logged in Successfully'},status=status.HTTP_200_OK)
+#                 else:
+#                     return Response({'msg':'User Already Logged In. Please check.'},status=status.HTTP_200_OK)
+#             else:
+#                 return Response({'errors':{'non_field_errors':['UserId or Password is not valid']}},status=status.HTTP_404_NOT_FOUND)
+#         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+# class LogoutView(APIView):
+#     permission_classes = [IsAuthenticated]  # Only logged-in users can log out
+
+#     def post(self, request):
+#         try:
+#             print("1", request.user)
+#             emp_obj = DMS_Employee.objects.get(emp_username=request.user)
+#             if emp_obj.emp_is_login is True: 
+#                 emp_obj.emp_is_login = False
+#                 emp_obj.save()
+                
+#             refresh_token = request.data.get("refresh_token")
+#             if refresh_token:
+#                 token = RefreshToken(refresh_token)
+#                 token.blacklist()  # Blacklist the token
+#                 return Response({"message": "Logged out successfully"}, status=200)
+#             return Response({"error": "Refresh token is required"}, status=400)
+#         except Exception as e:
+#             return Response({"error": "Invalid token"}, status=400)
+
+
+
+
+def get_tokens_for_user(user, log_id):
     refresh = RefreshToken.for_user(user)
+    emp_obj = DMS_Employee.objects.get(user_id=user.user_id)
     group = str(user.grp_id.grp_id)
     print("user---123", user)
     print("group---123", user.grp_id.grp_id)
-    permissions_data = []
-    if group:
-        incs = DMS_Group.objects.get(grp_id=group)
-        pers = agg_save_permissions.objects.filter(role=group)
-        group_name = incs.grp_name
-        
-        for permission in pers:
-            permission_info = {
-                'modules_submodule': permission.modules_submodule,
-                # 'permission_status': permission.permission_status,
-                'source_id': permission.source.dep_id,
-                'source_name': permission.source.dep_name,  
-                'role_id': permission.role.grp_id,  
-    }
-            permissions_data.append(permission_info)
-    else:
-        group_name = None
-            
+    # permissions_data = []
+    # if group:
+    #     incs= DMS_Group.objects.get(grp_id=group)
+    #     pers = DMS_Permission.objects.filter(grp_id=group)
+    #     group_id = incs.grp_id
+    #     for permission in pers:
+    #         permission_info = {
+    #             'modules_submodule': permission.mod_submod_per,
+    #             'permission_status': permission.per_is_deleted,
+    #             # 'source_id': permission.source.source_pk_id,
+    #             # 'source_name': permission.source.source,  
+    #             'group_id': permission.grp_id.grp_id,
+    #             'group_name': permission.grp_id.grp_name,  
+    #         }  
+    #         permissions_data.append(permission_info)
+    # else:
+    #     group = None
+           
     return {
         "refresh" : str(refresh),
         "access" : str(refresh.access_token),
         # "permissions": permissions_data,
         "colleague": {
-                'id': user.emp_id,
-                'emp_name': user.emp_name,
-                'email': user.emp_email,
-                'phone_no': user.emp_contact_no,
+                'id': user.user_id,
+                'emp_name': user.user_username,
+                'email': emp_obj.emp_email,
+                'phone_no': emp_obj.emp_contact_no,
                 'user_group': group,
+                'log_id': log_id
             },
         "user_group" :group,
-        "permissions": permissions_data,
-    } 
-
-
+    }
+ 
+ 
 class UserLoginView(APIView):
     renderer_classes = [UserRenderer]
     def post(self, request, format=None):
         # Validate using the CAPTCHA + credential serializer
         serializer1 = CaptchaTokenObtainPairSerializer(data=request.data)
         serializer1.is_valid(raise_exception=True)
-
-
+ 
+ 
         serializer = UserLoginSerializer(data=request.data)
         if serializer.is_valid(raise_exception=True):
-            emp_username = serializer.data.get('emp_username')
+            user_username = serializer.data.get('user_username')
             password = serializer.data.get('password')
-            print("=========", emp_username, password)
-            user = authenticate(emp_username=emp_username, password=password)
+            print("=========", user_username, password)
+            user = authenticate(user_username=user_username, password=password)
             print("user--", user)
             if user is not None:
-                emp = DMS_Employee.objects.get(emp_username=user.emp_username)
-                if emp.emp_is_deleted != False:
+                user = DMS_User.objects.get(user_username=user.user_username)
+                if user.user_is_deleted != False:
                     return Response({'msg':'Login access denied. Please check your permissions or reach out to support for help.'},status=status.HTTP_401_UNAUTHORIZED)
-                if emp.emp_is_login is False: 
-                    emp.emp_is_login = True
-                    emp.save()
-                    token = get_tokens_for_user(user)
+                if user.user_is_login is False:
+                    user.user_is_login = True
+                    user.save()
+                    print("Login entry")
+                    login_entry_obj = DMS_WebLogin.objects.create(user_id=user, log_status=1, log_added_by=user.user_username)
+                    print("login entry added--", login_entry_obj)
+                    token = get_tokens_for_user(user , login_entry_obj.log_id)
                     return Response({'token':token,'msg':'Logged in Successfully'},status=status.HTTP_200_OK)
                 else:
                     return Response({'msg':'User Already Logged In. Please check.'},status=status.HTTP_200_OK)
             else:
                 return Response({'errors':{'non_field_errors':['UserId or Password is not valid']}},status=status.HTTP_404_NOT_FOUND)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
+ 
 class LogoutView(APIView):
     permission_classes = [IsAuthenticated]  # Only logged-in users can log out
-
+ 
     def post(self, request):
         try:
             print("1", request.user)
-            emp_obj = DMS_Employee.objects.get(emp_username=request.user)
-            if emp_obj.emp_is_login is True: 
-                emp_obj.emp_is_login = False
-                emp_obj.save()
-                
+            user_obj = DMS_User.objects.get(user_username=request.user)
+            if user_obj.user_is_login is True:
+                user_obj.user_is_login = False
+                user_obj.save()
+               
             refresh_token = request.data.get("refresh_token")
+            log_id = request.data.get("log_id")
             if refresh_token:
                 token = RefreshToken(refresh_token)
                 token.blacklist()  # Blacklist the token
+                login_entry_obj = DMS_WebLogin.objects.get(log_id=log_id)
+                login_entry_obj.logout_time = datetime.now()
+                login_entry_obj.log_status = 2
+                login_entry_obj.save()
                 return Response({"message": "Logged out successfully"}, status=200)
             return Response({"error": "Refresh token is required"}, status=400)
         except Exception as e:
