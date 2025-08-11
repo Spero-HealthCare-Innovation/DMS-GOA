@@ -91,7 +91,7 @@ WSGI_APPLICATION = 'DMS_goa.wsgi.application'
 DATABASES = {
        'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'DMS_GOA_DB_2025',
+        'NAME': 'DMS_GOA_DB_NEW_2025',
         'USER': 'postgres',
         'PASSWORD': 'spero@123#2025$', 
         'HOST': '122.176.232.35',
@@ -188,7 +188,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
 
-AUTH_USER_MODEL = 'admin_web.DMS_Employee'
+AUTH_USER_MODEL = 'admin_web.DMS_User'
 
 SIMPLE_JWT = {
     # "ACCESS_TOKEN_LIFETIME": timedelta(minutes=5),
