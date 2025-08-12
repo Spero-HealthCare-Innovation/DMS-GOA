@@ -89,13 +89,29 @@ WSGI_APPLICATION = 'DMS_goa.wsgi.application'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
 DATABASES = {
-       'default': {
+    #    'default': {
+    #     'ENGINE': 'django.db.backends.postgresql',
+    #     'NAME': 'DMS_GOA_DB_NEW_2025',
+    #     'USER': 'postgres',
+    #     'PASSWORD': 'spero@123#2025$', 
+    #     'HOST': '122.176.232.35',
+    #     'PORT': '5433', 
+    #     'OPTIONS': {
+    #         'options': '-c timezone=Asia/Kolkata',
+    #     },
+    # },
+    #     'hive': {
+    #         'ENGINE': '', 
+    #         'NAME': 'processed_dms',  
+    # }
+
+    'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'DMS_GOA_DB_2025',
+        'NAME': 'DMS_GOA_DB_NEW_2025',
         'USER': 'postgres',
         'PASSWORD': 'spero@123#2025$', 
-        'HOST': '122.176.232.35',
-        'PORT': '5433', 
+        'HOST': '192.168.1.133',
+        'PORT': '5432', 
         'OPTIONS': {
             'options': '-c timezone=Asia/Kolkata',
         },
@@ -188,7 +204,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
 
-AUTH_USER_MODEL = 'admin_web.DMS_Employee'
+AUTH_USER_MODEL = 'admin_web.DMS_User'
 
 SIMPLE_JWT = {
     # "ACCESS_TOKEN_LIFETIME": timedelta(minutes=5),
@@ -198,7 +214,7 @@ SIMPLE_JWT = {
 
     "AUTH_HEADER_TYPES": ("Bearer",),
     "AUTH_HEADER_NAME": "HTTP_AUTHORIZATION",
-    "USER_ID_FIELD": "emp_id",
+    "USER_ID_FIELD": "user_id",
     "USER_ID_CLAIM": "user_id",
     "USER_AUTHENTICATION_RULE": "rest_framework_simplejwt.authentication.default_user_authentication_rule",
 

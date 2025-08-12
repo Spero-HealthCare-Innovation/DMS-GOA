@@ -100,6 +100,40 @@ class DMS_Employee_serializer(serializers.ModelSerializer):
         user.save()
         return user
     
+
+
+class DMS_User_serializer(serializers.ModelSerializer):
+    password2 = serializers.CharField(style={'input_type':'password'}, write_only=True)
+    grp_id = serializers.PrimaryKeyRelatedField(queryset=DMS_Group.objects.all(),many=False)
+   
+    class Meta:
+        model  = DMS_User
+        fields = ['user_id', 'user_username', 'grp_id', 'user_is_login', 'is_admin', 'user_is_deleted', 'user_added_by', 'user_modified_by', 'password','password2' ]
+ 
+        extra_kwargs = {
+            'password':{'write_only':True}
+        }
+       
+    def validate(self, data):
+        password = data.get('password')
+        password2 = data.get('password2')
+        if password != password2:
+            raise serializers.ValidationError('Password and Confirm Password does not match')
+ 
+        return data
+   
+    def create(self, validated_data):
+        group_data = validated_data.pop('grp_id')
+        validated_data['grp_id'] = group_data
+ 
+        # Hash the password before creating the user
+        password = validated_data.pop('password')
+        user = DMS_User.objects.create_user(**validated_data)
+        user.set_password(password)  # hashes and sets it correctly
+        user.save()
+        return user
+    
+
     
 
 class DMS_Employee_GET_serializer(serializers.ModelSerializer):
@@ -146,7 +180,7 @@ class DMS_Group_Serializer(serializers.ModelSerializer):
     dep_name = serializers.CharField(source='dep_id.dep_name', read_only=True)
     class Meta:
         model = DMS_Group
-        fields = '__all__'
+        fields = ['grp_id','grp_code','permission_status','grp_name','grp_is_deleted','grp_added_date','grp_added_by','grp_modified_date','grp_modified_by','dep_id','dep_name']
         
 class DMS_Department_Serializer(serializers.ModelSerializer):
     dst_name = serializers.CharField(source='dis_id.dis_name', read_only=True)
@@ -212,11 +246,11 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
     
 
 class UserLoginSerializer(serializers.ModelSerializer):
-    emp_username = serializers.CharField(required=False, allow_blank=True)
+    user_username = serializers.CharField(required=False, allow_blank=True)
     password = serializers.CharField(style={'input_type': 'password'})
     class Meta:
-        model = DMS_Employee
-        fields = ['emp_username', 'password']
+        model = DMS_User
+        fields = ['user_username', 'password']
 
 
 class ChangePasswordGetSerializer(serializers.ModelSerializer):
@@ -319,6 +353,13 @@ class Comments_Serializer(serializers.ModelSerializer):
         model = DMS_Comments
         fields = '__all__' 
         
+
+class Weather_alerts_Serializer(serializers.ModelSerializer):
+    class Meta:
+        model = Weather_alerts
+        fields = ['pk_id']
+        
+
 class Sop_Response_Procedure_Serializer(serializers.ModelSerializer):
     class Meta:
         model = DMS_SOP
