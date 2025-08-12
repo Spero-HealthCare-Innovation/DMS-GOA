@@ -316,7 +316,7 @@ def get_tokens_for_user(user):
             permissions_data.append(permission_info)
     else:
         group_name = None
-            
+              
     return {
         "refresh" : str(refresh),
         "access" : str(refresh.access_token),
