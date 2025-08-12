@@ -413,7 +413,7 @@ def get_tokens_for_user(user, log_id):
     return {
         "refresh" : str(refresh),
         "access" : str(refresh.access_token),
-        # "permissions": permissions_data,
+        "permissions": permissions_data,
         "colleague": {
                 'id': user.user_id,
                 'emp_name': user.user_username,
