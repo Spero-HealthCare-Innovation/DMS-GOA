@@ -1796,7 +1796,7 @@ class CombinedAPIView(APIView):
             submodules = [submodule for submodule in permission_serializer.data if submodule["module"] == module_id]
 
             # Get IDs of those submodules
-            submodule_ids = [sub["id"] for sub in submodules]
+            submodule_ids = [sub["Permission_id"] for sub in submodules]
 
             # Filter actions belonging to these submodules
             actions = [action for action in action_serializer.data if action["sub_module"] in submodule_ids]
