@@ -1784,6 +1784,17 @@ class CombinedAPIView(APIView):
         return Response(combined_data)
     
 
+# class GetPermissionAPIView(APIView):
+#     renderer_classes = [UserRenderer]
+#     permission_classes = [IsAuthenticated]
+#     serializer_class = SavePermissionSerializer
+
+#     def get(self, request, source, role, *args, **kwargs):
+#         permissions = agg_save_permissions.objects.filter(source=source, role=role)
+#         serializer = self.serializer_class(permissions, many=True)
+#         return Response(serializer.data)
+
+
 class GetPermissionAPIView(APIView):
     renderer_classes = [UserRenderer]
     permission_classes = [IsAuthenticated]
@@ -1791,8 +1802,21 @@ class GetPermissionAPIView(APIView):
 
     def get(self, request, source, role, *args, **kwargs):
         permissions = agg_save_permissions.objects.filter(source=source, role=role)
-        serializer = self.serializer_class(permissions, many=True)
+        data = []
+        for perm in permissions:
+            record = {
+                "id": perm.id,
+                "source": perm.source,
+                "role": perm.role,
+                "modules_submodule": json.loads(perm.modules_submodule)  # parse JSON string to Python dict/list
+            }
+            data.append(record)
+        serializer = self.serializer_class(data, many=True)
         return Response(serializer.data)
+
+
+
+
 
 class CreatePermissionAPIView(APIView):
     renderer_classes = [UserRenderer]
@@ -1830,3 +1854,15 @@ class UpdatePermissionAPIView(APIView):
 #         sources = agg_source.objects.filter(is_deleted=False).only('source_pk_id', 'source').order_by('source')
 #         serializer = AggSourceSerializer(sources, many=True)
 #         return Response(serializer.data)
+
+# from admin_web.sms_utils import send_bulk_sms
+# from django.http import JsonResponse
+# from django.views.decorators.csrf import csrf_exempt
+
+# @csrf_exempt
+# def send_sms_view(request):
+#     mobile_numbers = "918551995260,918551995260"  
+#     message_content = "Dear RAJ, Ambulance dispatched : 52754, Ambulance contact : 00000000, Unm Lifecare- Spero CAD"
+
+#     response = send_bulk_sms(mobile_numbers, message_content)
+#     return JsonResponse({"status": "success", "api_response": response})
