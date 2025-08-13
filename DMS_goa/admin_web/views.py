@@ -1703,15 +1703,58 @@ class NewsScraperAPIView(APIView):
         )
 #===================permission Module (mayank)===========================================
 
+# class CombinedAPIView(APIView):
+#     renderer_classes = [UserRenderer]
+#     permission_classes = [IsAuthenticated]
+#     def get(self, request, format=None):
+#         permission_modules = Permission_module.objects.filter()
+#         modules_serializer = Moduleserializer(permission_modules, many=True)
+
+#         permission_objects = permission.objects.filter()
+#         permission_serializer = permission_sub_Serializer(permission_objects, many=True)
+        
+#         action_objects = permission_action.objects.filter()
+#         action_serializer = action_sub_Serializer(action_objects, many=True)
+
+        
+
+
+#         combined_data = []
+#         for module_data in modules_serializer.data:
+#             module_id = module_data["module_id"]
+#             module_name = module_data["name"]
+#             source_id = module_data["Source_id"]
+
+#             submodules = [submodule for submodule in permission_serializer.data if submodule["module"] == module_id]
+#             actions = [action for action in action_serializer.data if action["sub_module"]]
+
+#             formatted_data = {
+#                 "module_id": module_id,
+#                 "name": module_name,
+#                 "Source_id": source_id,
+#                 "submodules": submodules,
+#                 "actions": actions
+#             }
+
+#             combined_data.append(formatted_data)
+
+#         final_data = combined_data
+
+#         return Response(final_data)
+
 class CombinedAPIView(APIView):
     renderer_classes = [UserRenderer]
     permission_classes = [IsAuthenticated]
+
     def get(self, request, format=None):
-        permission_modules = Permission_module.objects.filter()
+        permission_modules = Permission_module.objects.all()
         modules_serializer = Moduleserializer(permission_modules, many=True)
 
-        permission_objects = permission.objects.filter()
+        permission_objects = permission.objects.all()
         permission_serializer = permission_sub_Serializer(permission_objects, many=True)
+
+        action_objects = permission_action.objects.all()
+        action_serializer = action_sub_Serializer(action_objects, many=True)
 
         combined_data = []
         for module_data in modules_serializer.data:
@@ -1719,20 +1762,26 @@ class CombinedAPIView(APIView):
             module_name = module_data["name"]
             source_id = module_data["Source_id"]
 
+            # Filter submodules for the current module
             submodules = [submodule for submodule in permission_serializer.data if submodule["module"] == module_id]
+
+            # Get IDs of those submodules
+            submodule_ids = [sub["id"] for sub in submodules]
+
+            # Filter actions belonging to these submodules
+            actions = [action for action in action_serializer.data if action["sub_module"] in submodule_ids]
 
             formatted_data = {
                 "module_id": module_id,
                 "name": module_name,
                 "Source_id": source_id,
-                "submodules": submodules
+                "submodules": submodules,
+                "actions": actions
             }
 
             combined_data.append(formatted_data)
 
-        final_data = combined_data
-
-        return Response(final_data)
+        return Response(combined_data)
     
 
 class GetPermissionAPIView(APIView):

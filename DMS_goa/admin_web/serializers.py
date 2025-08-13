@@ -585,10 +585,16 @@ class permission_sub_Serializer(serializers.ModelSerializer):
     class Meta:
         model = permission
         fields = '__all__'
+        
+class ActionSerializer(serializers.Serializer):
+    actionId = serializers.IntegerField()
+    actionName = serializers.CharField()
 
 class SubmoduleSerializer(serializers.Serializer):  
     submoduleId = serializers.IntegerField()
     submoduleName = serializers.CharField()
+    selectedActions = ActionSerializer(many=True)  
+
 
 class ModuleSerializer(serializers.Serializer):
     moduleId = serializers.IntegerField()
@@ -606,3 +612,8 @@ class AggSourceSerializer(serializers.ModelSerializer):
     class Meta:
         model = DMS_Department
         fields = ['dep_id', 'dep_name']
+        
+class action_sub_Serializer(serializers.ModelSerializer):
+    class Meta:
+        model = permission_action
+        fields = '__all__'
