@@ -26,6 +26,8 @@ from django.utils.encoding import force_bytes
 from django.core.mail import send_mail
 from rest_framework_simplejwt.tokens import AccessToken
 from geopy.geocoders import Nominatim
+from django.http import JsonResponse
+
 import ast
 import tweepy
 import json
@@ -1796,23 +1798,22 @@ class CombinedAPIView(APIView):
 
 
 class GetPermissionAPIView(APIView):
-    renderer_classes = [UserRenderer]
-    permission_classes = [IsAuthenticated]
-    serializer_class = SavePermissionSerializer
+    # renderer_classes = [UserRenderer]
+    # permission_classes = [IsAuthenticated]
 
     def get(self, request, source, role, *args, **kwargs):
         permissions = agg_save_permissions.objects.filter(source=source, role=role)
+        
         data = []
         for perm in permissions:
-            record = {
+            data.append({
                 "id": perm.id,
-                "source": perm.source,
-                "role": perm.role,
-                "modules_submodule": json.loads(perm.modules_submodule)  # parse JSON string to Python dict/list
-            }
-            data.append(record)
-        serializer = self.serializer_class(data, many=True)
-        return Response(serializer.data)
+                "source": perm.source.dep_id if perm.source else None,  
+                "role": perm.role.grp_id if perm.role else None,
+                "modules_submodule": perm.modules_submodule
+            })
+        
+        return JsonResponse(data, safe=False)
 
 
 
