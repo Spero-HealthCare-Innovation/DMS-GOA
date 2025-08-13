@@ -853,6 +853,21 @@ class permission(models.Model):
 
     def __str__(self):
         return self.name     
+    
+    
+class permission_action(models.Model):
+    action_id = models.AutoField(primary_key=True)
+    name = models.CharField(max_length=255)
+    sub_module = models.ForeignKey("permission", on_delete=models.CASCADE,null = True)
+    # source =models.ForeignKey('agg_source',on_delete=models.CASCADE,null=True)
+    # guard_name = models.CharField(max_length=255)
+    added_by =	models.IntegerField(null=True, blank=True)
+    added_date = models.DateTimeField(auto_now_add=True, blank=True)
+    modify_by =	models.IntegerField(null=True, blank=True)
+    modify_date = models.DateTimeField(auto_now=True, null=True, blank=True)
+
+    def __str__(self):
+        return self.name     
 
       
 
