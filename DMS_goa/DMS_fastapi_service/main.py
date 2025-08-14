@@ -187,8 +187,8 @@ app.add_middleware(
 
 
 producer = KafkaProducer(
-    # bootstrap_servers='192.168.1.133:9092',
-    bootstrap_servers='122.176.232.35:9092',
+    bootstrap_servers='192.168.1.133:9092',
+    # bootstrap_servers='122.176.232.35:9092',
 
     value_serializer=lambda v: json.dumps(v).encode('utf-8')
 )
