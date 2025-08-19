@@ -89,6 +89,9 @@ def get_user_from_token(token: str):
             pass
     except (TokenError, DMS_Employee.DoesNotExist):
         return None
+    # except Exception as e:
+    #     print(f"Error in get_user_from_token: {e}")
+    #     return None
 
 
 
@@ -577,7 +580,7 @@ def get_user_id(user_id):
     try:
         print("******************************GOT THE EMP ID *****************************")
         user_obj = DMS_Employee.objects.get(emp_id=user_id)
-        return user_obj.emp_username
+        return user_obj.emp_name
     except DMS_Employee.DoesNotExist:
         return None
 
