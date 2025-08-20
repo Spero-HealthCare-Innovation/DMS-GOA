@@ -536,31 +536,31 @@ class DMS_ChangePassword_api(APIView):
     
 
 
-class DMS_ForgotPassword_api(APIView):
-    permission_classes = [IsAuthenticated]
+# class DMS_ForgotPassword_api(APIView):
+#     permission_classes = [IsAuthenticated]
 
-    def post(self, request):
-        user_id = request.data['user_id']
-        new_password = request.data['new_password']
-        confirm_password = request.data['confirm_password']
+#     def post(self, request):
+#         user_id = request.data['user_id']
+#         new_password = request.data['new_password']
+#         confirm_password = request.data['confirm_password']
 
-        if new_password != confirm_password:
-            return Response({"detail": "Passwords do not match."}, status=status.HTTP_200_OK)
+#         if new_password != confirm_password:
+#             return Response({"detail": "Passwords do not match."}, status=status.HTTP_200_OK)
         
-        user = DMS_User.objects.get(user_id=user_id)
-        print("User_______________________---", user)
+#         user = DMS_User.objects.get(user_id=user_id)
+#         print("User_______________________---", user)
 
-        serializer = ForgotPasswordSerializer(data=request.data)
+#         serializer = ForgotPasswordSerializer(data=request.data)
 
-        if serializer.is_valid():
-            newpassword = serializer.validated_data['new_password']
-            confirmpassword = serializer.validated_data['confirm_password']
+#         if serializer.is_valid():
+#             newpassword = serializer.validated_data['new_password']
+#             confirmpassword = serializer.validated_data['confirm_password']
             
-            user.set_password(confirmpassword)
-            user.save()
-            return Response({"detail": "Password updated successfully."}, status=status.HTTP_200_OK)
+#             user.set_password(confirmpassword)
+#             user.save()
+#             return Response({"detail": "Password updated successfully."}, status=status.HTTP_200_OK)
 
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+#         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 
