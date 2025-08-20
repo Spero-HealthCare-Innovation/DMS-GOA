@@ -61,15 +61,6 @@ class DMS_Group_serializer(serializers.ModelSerializer):
         model=DMS_Group
         fields='__all__'
 
-<<<<<<< Updated upstream
-class DMS_User_serializer(serializers.ModelSerializer):
-    password2 = serializers.CharField(style={'input_type':'password'}, write_only=True)
-    # grp_id = serializers.PrimaryKeyRelatedField(queryset=DMS_Group.objects.all(),many=False)
-    
-    class Meta:
-        model  = DMS_User
-        fields = ['emp_id', 'emp_username', 'grp_id', 'emp_name', 'emp_email', 'emp_contact_no', 'emp_dob', 'emp_doj', 'emp_is_login', 'state_id', 'dist_id', 'tahsil_id', 'city_id', 'emp_is_deleted', 'emp_added_by', 'emp_modified_by', 'password','password2','ward_id' ]
-=======
 # class DMS_Employee_serializer(serializers.ModelSerializer):
 #     password2 = serializers.CharField(style={'input_type':'password'}, write_only=True)
 #     # grp_id = serializers.PrimaryKeyRelatedField(queryset=DMS_Group.objects.all(),many=False)
@@ -78,7 +69,6 @@ class DMS_User_serializer(serializers.ModelSerializer):
 #         model  = DMS_Employee
 #         # fields = ['emp_id', 'emp_username', 'grp_id', 'emp_name', 'emp_email', 'emp_contact_no', 'emp_dob', 'emp_doj', 'emp_is_login', 'state_id', 'dist_id', 'tahsil_id', 'city_id', 'emp_is_deleted', 'emp_added_by', 'emp_modified_by', 'password','password2','ward_id' ]
 #         fields='__all__'
->>>>>>> Stashed changes
 
 #         extra_kwargs = {
 #             'password':{'write_only':True}
@@ -128,13 +118,6 @@ class DMS_Employee_serializer(serializers.ModelSerializer):
         user_username = validated_data.pop('user_username')
         grp_id = validated_data.pop('grp_id')
         password = validated_data.pop('password')
-<<<<<<< Updated upstream
-        user = DMS_User.objects.create_user(**validated_data)
-        user.set_password(password)  # hashes and sets it correctly
-        user.save()
-        return user
-    
-=======
         validated_data.pop('password2')
 
         with transaction.atomic():
@@ -153,7 +136,6 @@ class DMS_Employee_serializer(serializers.ModelSerializer):
             )
 
         return emp
->>>>>>> Stashed changes
 
 
 class DMS_User_serializer(serializers.ModelSerializer):
@@ -201,15 +183,6 @@ class DMS_User_GET_serializer(serializers.ModelSerializer):
     
 
     class Meta:
-<<<<<<< Updated upstream
-        model = DMS_User
-        fields = [
-            'emp_id', 'emp_username', 'grp_id', 'emp_name', 'emp_email',
-            'emp_contact_no', 'emp_dob', 'emp_doj', 'emp_is_login',
-            'state_id', 'state_name', 'dist_id','dis_name','tahsil_id','tah_name','city_id','cit_name','grp_name',
-            'emp_is_deleted', 'emp_added_by', 'emp_modified_by', 'password','ward_id','ward_name'
-        ]
-=======
         model = DMS_Employee
         # fields = [
         #     'emp_id', 'emp_username', 'grp_id', 'emp_name', 'emp_email',
@@ -218,7 +191,6 @@ class DMS_User_GET_serializer(serializers.ModelSerializer):
         #     'emp_is_deleted', 'emp_added_by', 'emp_modified_by', 'password','ward_id','ward_name'
         # ]
         fields = '__all__'
->>>>>>> Stashed changes
         
     
 class DMS_District_Serializer(serializers.ModelSerializer):
