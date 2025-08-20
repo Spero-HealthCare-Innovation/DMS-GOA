@@ -164,6 +164,7 @@ class DMS_User_get_api(APIView):
 
 class DMS_User_post_api(APIView):
     def post(self,request):
+<<<<<<< Updated upstream
         data = request.data
         user_name = data.get('user_name')
 
@@ -174,6 +175,12 @@ class DMS_User_post_api(APIView):
                 status=status.HTTP_409_CONFLICT
             )
         serializers=DMS_User_serializer(data=request.data)
+=======
+        print("entry point")
+        print("request.data--", request.data)
+        serializers=DMS_Employee_serializer(data=request.data)
+        print("serializers--", serializers.data)
+>>>>>>> Stashed changes
         if serializers.is_valid():
             serializers.save()
             return Response(serializers.data,status=status.HTTP_201_CREATED)
@@ -216,11 +223,22 @@ class DMS_User_delete_api(APIView):
 
     def delete(self, request, user_id):
         try:
+<<<<<<< Updated upstream
             instance = DMS_User.objects.get(user_id=user_id, user_is_deleted=False)
         except DMS_User.DoesNotExist:
             return Response({"error": "Employee not found or already deleted."}, status=status.HTTP_404_NOT_FOUND)
 
         instance.user_is_deleted = True
+=======
+            instance = DMS_Employee.objects.get(emp_id=emp_id, emp_is_deleted=False)
+            user_instance = DMS_User.objects.get(user_id=instance.user_id, user_is_deleted=False)
+        except DMS_Employee.DoesNotExist:
+            return Response({"error": "Employee not found or already deleted."}, status=status.HTTP_404_NOT_FOUND)
+
+        user_instance.user_is_deleted = True
+        user_instance.save()
+        instance.emp_is_deleted = True
+>>>>>>> Stashed changes
         instance.save()
         return Response({"message": "Employee soft deleted successfully."}, status=status.HTTP_200_OK)
 
@@ -487,14 +505,23 @@ class DMS_Group_put_api(APIView):
 
 
 class DMS_ChangePassword_put_api(APIView):
+<<<<<<< Updated upstream
     def get(self, request, user_id):
         snippet = DMS_User.objects.filter(user_id=user_id,user_is_deleted=False)
+=======
+    def get(self, request, emp_id):
+        snippet = DMS_User.objects.filter(user_id=emp_id,user_is_deleted=False)
+>>>>>>> Stashed changes
         serializers = ChangePasswordGetSerializer(snippet, many=True)
         return Response(serializers.data)
 
     def put(self, request, user_id):
         try:
+<<<<<<< Updated upstream
             instance = DMS_User.objects.get(user_id=user_id)
+=======
+            instance = DMS_User.objects.get(user_id=emp_id)
+>>>>>>> Stashed changes
         except DMS_User.DoesNotExist:
             return Response({"error": "Group not found."}, status=status.HTTP_404_NOT_FOUND)
 
@@ -536,6 +563,37 @@ class DMS_ChangePassword_api(APIView):
     
 
 
+<<<<<<< Updated upstream
+=======
+class DMS_ForgotPassword_api(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        user_id = request.data['user_id']
+        new_password = request.data['new_password']
+        confirm_password = request.data['confirm_password']
+
+        if new_password != confirm_password:
+            return Response({"detail": "Passwords do not match."}, status=status.HTTP_200_OK)
+        
+        user = DMS_User.objects.get(user_id=user_id)
+        print("User_______________________---", user)
+
+        serializer = ForgotPasswordSerializer(data=request.data)
+
+        if serializer.is_valid():
+            newpassword = serializer.validated_data['new_password']
+            confirmpassword = serializer.validated_data['confirm_password']
+            
+            user.set_password(confirmpassword)
+            user.save()
+            return Response({"detail": "Password updated successfully."}, status=status.HTTP_200_OK)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+>>>>>>> Stashed changes
 class PasswordResetRequestView(APIView):
     def post(self, request):
         serializer = PasswordResetRequestSerializer(data=request.data)
