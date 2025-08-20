@@ -49,7 +49,7 @@ const EnquiryCard = styled("div")(() => ({
   display: "flex",
   alignItems: "center",
   justifyContent: "space-between",
-  background: "#5FECC8",
+  background: "linear-gradient(to bottom, #53bce1, rgb(173, 207, 216))",
   borderRadius: "8px 10px 0 0",
   padding: "6px 12px",
   color: "black",
@@ -63,13 +63,15 @@ const EnquiryCardBody = styled("tr")(({ theme, alertType, isHighlighted }) => {
   };
 
   const glowColor = alertColors[alertType] || "transparent";
-  const highlightBorder = isHighlighted ? "5px solid #00f0c0" : "5px solid transparent";
+  const highlightBorder = isHighlighted
+    ? "2px solid #5FC8EC"
+    : "1px solid transparent";
 
   return {
     display: "flex",
     alignItems: "center",
     justifyContent: "space-between",
-    background: theme.palette.mode === "dark" ? "#112240" : "#fff",
+    background: theme.palette.mode === "dark" ? "rgb(53 53 53)" : "#fff",
     color: theme.palette.mode === "dark" ? "#fff" : "#000",
     marginTop: "0.5em",
     borderRadius: "8px",
@@ -77,9 +79,9 @@ const EnquiryCardBody = styled("tr")(({ theme, alertType, isHighlighted }) => {
     transition: "box-shadow 0.3s ease, border-color 0.3s ease",
     cursor: "pointer",
     height: "45px",
-    border: `1px solid transparent`,
-    borderLeft: highlightBorder,
-    borderRight: highlightBorder, // ⭐ Right border added
+    // border: `1px solid transparent`,
+    border: highlightBorder,
+    // border: highlightBorder, // ⭐ Right border added
     // "&:hover": {
     //   boxShadow: `0 0 8px 3px ${glowColor}88`,
     // },
@@ -99,7 +101,7 @@ const Alerts = [
   "Longitude",
   "Temperature",
   "Rain",
-  "Alert Type",
+  "Severity ",
   "Time",
   "Added By",
   "Actions",
@@ -109,7 +111,7 @@ const DispatchHeaders = [
   "Incident ID",
   "Date & Time",
   "Disaster Type",
-  "Alert Type",
+  "Severity ",
   "Initiated By",
   "Actions",
 ];
@@ -119,6 +121,8 @@ function SopTask({
   flag,
   setFlag,
   setSelectedIncident,
+  setIncidentIdClosure,
+  incidentIdClosure,
   setViewmode,
   dispatchList,
   loading = false,
@@ -126,8 +130,8 @@ function SopTask({
   incidentId,
   fetchDispatchList,
   highlightedId,
-  setHighlightedId
-
+  setHighlightedId,
+  fetchIncidentDetails
 }) {
   const port = import.meta.env.VITE_APP_API_KEY;
   const socketUrl = import.meta.env.VITE_SOCKET_API_KEY;
@@ -154,16 +158,37 @@ function SopTask({
 
   const navigate = useNavigate();
 
-  // Decide current list based on flag
+
+
   const dataList = flag === 1 ? alerts : dispatchList;
-  // Calculate total pages
-  const totalPages = Math.ceil(dataList.length / rowsPerPage) || 1;
-  // Calculate start and end indexes for slice
+
+
+  const filteredDispatchList = dataList.filter((item) => {
+    const searchLower = searchTerm.trim().toLowerCase();
+    return (
+      item.incident_id?.toString().toLowerCase().includes(searchLower) ||
+      item.disaster_name?.toLowerCase().includes(searchLower) ||
+      item.inc_added_by?.toLowerCase().includes(searchLower) ||
+      item.inc_type?.toString().toLowerCase().includes(searchLower)
+    );
+  });
+  useEffect(() => {
+    setPage(1);
+  }, [searchTerm]);
+
+  // 3. Pagination ke liye start/end indexes
   const startIndex = (page - 1) * rowsPerPage;
   const endIndex = startIndex + rowsPerPage;
-  // Get sliced data for current page
-  const dispatchListdata = dataList.slice(startIndex, endIndex);
-  const { setSelectedIncidentFromSop, setDisasterIdFromSop, setCommentText } = useAuth();
+
+  // 4. Slice filtered data
+  const paginatedDispatchList = filteredDispatchList.slice(startIndex, endIndex);
+
+  // 5. Total pages filter ke according
+  const totalPages = Math.ceil(filteredDispatchList.length / rowsPerPage) || 1;
+
+
+  const { setSelectedIncidentFromSop, setDisasterIdFromSop, setCommentText } =
+    useAuth();
 
   window.addEventListener("storage", (e) => {
     if (e.key === "logout") {
@@ -223,15 +248,7 @@ function SopTask({
     setViewmode("incident"); // Reset view mode to incident
   };
 
-  const filteredDispatchList = dispatchListdata.filter((item) => {
-    const searchLower = searchTerm.toLowerCase();
-    return (
-      item.incident_id?.toString().toLowerCase().includes(searchLower) ||
-      item.disaster_name?.toLowerCase().includes(searchLower) ||
-      item.inc_added_by?.toLowerCase().includes(searchLower) ||
-      item.inc_type?.toString().includes(searchLower)
-    );
-  });
+
   // const handleForward = () => {
   //   setFlag(1);
   //   setSelectedIncident(); // Clear selected incident
@@ -239,13 +256,16 @@ function SopTask({
   // };
 
   const textColor = darkMode ? "#ffffff" : "#000000";
-  const bgColor = darkMode ? "#0a1929" : "#ffffff";
+  const bgColor = darkMode ? "202328" : "#ffffff";
   const borderColor = darkMode ? "#7F7F7F" : "#ccc";
+  const fontFamily = "Roboto, sans-serif";
 
   const handleClick = () => {
     navigate("/create-incident", { state: { startData: "start" } });
   };
 
+
+  // api for cancel trigger 
   const handleCancelTrigger = async () => {
     const payload = {
       id: selectedAlert,
@@ -289,7 +309,6 @@ function SopTask({
   //     setFlag(0);
   //   }
   // }, [openCancelDialog]);
-
 
   // brouswer and tab close logout functionality
   //   let isPageReloaded = false;
@@ -362,12 +381,7 @@ function SopTask({
         {/* Title */}
         <Typography
           variant="h6"
-          sx={{
-            color: textColor,
-            fontSize: "20px",
-            fontWeight: 500,
-            lineHeight: "32px",
-          }}
+          sx={{ color: textColor, fontWeight: 500, fontFamily }}
         >
           {flag === 1 ? "Alert Task" : "Dispatch List"}
         </Typography>
@@ -390,7 +404,7 @@ function SopTask({
             width: "200px",
             "& .MuiOutlinedInput-root": {
               borderRadius: "25px",
-              backgroundColor: darkMode ? "#1e293b" : "#fff",
+              backgroundColor: darkMode ? "#202328" : "#fff",
               color: darkMode ? "#fff" : "#000",
               px: 1,
               py: 0.2,
@@ -413,11 +427,12 @@ function SopTask({
           size="small"
           sx={{
             ml: "auto",
-            backgroundColor: "#5FECC8",
+            backgroundColor: "rgb(223, 76, 76)",
             color: "black",
             borderRadius: "18px",
             "&:hover": {
-              backgroundColor: "#5FECC8",
+              backgroundColor: "rgb(223, 76, 76)",
+              border: `1px solid ${darkMode ? "#fff" : "#000"}`,
             },
             // width: isHovered ? 140 : 36,
             height: 36,
@@ -429,13 +444,13 @@ function SopTask({
             // paddingRight: isHovered ? 1 : 1,
           }}
         >
-          <Add sx={{ color: darkMode ? "#000000" : "#000000" }} />
+          <Add sx={{ color: darkMode ? "#fff" : "#000000" }} />
           {/* {isHovered && ( */}
           <Typography
             variant="body2"
             sx={{
               marginLeft: 1,
-              color: "black",
+              color: "#fff",
               whiteSpace: "nowrap",
             }}
           >
@@ -453,7 +468,7 @@ function SopTask({
               sx={{
                 display: "flex",
                 flexDirection: "row",
-                backgroundColor: "#5FECC8",
+                // backgroundColor: "#5FECC8",
               }}
             >
               {Alerts.map((label, idx) => (
@@ -533,7 +548,7 @@ function SopTask({
                   <StyledCardContent sx={{ flex: 1, justifyContent: "center" }}>
                     <Typography
                       variant="subtitle2"
-                      sx={{ fontSize: "12px" }}
+                      // sx={{ fontSize: "12px" }}
                       textAlign="center"
                     >
                       {item.alert_datetime
@@ -611,132 +626,159 @@ function SopTask({
                     ))}
                   </EnquiryCard>
 
-                  {/* Body Rows */}
-                  {filteredDispatchList.length === 0 ? (
-                    <Box p={2} width="100%">
-                      <Typography align="center" color="textSecondary">
-                        No tasks available.
-                      </Typography>
-                    </Box>
-                  ) : (
-                    filteredDispatchList.map((item) => (
-                      <EnquiryCardBody
-                        key={item.incident_id}
-                        alertType={item.inc_type}
-                        isHighlighted={item.incident_id === highlightedId}
-                      >
-                        {/* Incident ID */}
-                        <StyledCardContent
-                          sx={{ flex: 1, justifyContent: "center" }}
+                  {/* Scrollable Body */}
+                  <Box
+                    sx={{
+                      maxHeight: 170,
+                      overflowY: "auto",
+                      mt: 1,
+                      pr: 1,
+                      "&::-webkit-scrollbar": {
+                        width: "6px",
+                      },
+                      "&::-webkit-scrollbar-thumb": {
+                        backgroundColor: darkMode ? "#5FC8EC" : "#888",
+                        borderRadius: 3,
+                      },
+                      "&::-webkit-scrollbar-thumb:hover": {
+                        backgroundColor: darkMode ? "#888" : "#555",
+                      },
+                    }}
+                  >
+                    {/* Body Rows */}
+                    {paginatedDispatchList.length === 0 ? (
+                      <Box p={2} width="100%">
+                        <Typography align="center" color="textSecondary">
+                          No tasks available.
+                        </Typography>
+                      </Box>
+                    ) : (
+                      paginatedDispatchList.map((item) => (
+                        <EnquiryCardBody
+                          key={item.incident_id}
+                          alertType={item.inc_type}
+                          isHighlighted={item.incident_id === highlightedId}
                         >
-                          <Typography variant="subtitle2">
-                            {item.incident_id || "N/A"}
-                          </Typography>
-                        </StyledCardContent>
-
-                        {/* Date & Time */}
-                        <StyledCardContent
-                          sx={{ flex: 1, justifyContent: "center" }}
-                        >
-                          <Typography
-                            variant="subtitle2"
-                            sx={{ textAlign: "center", fontSize: "12px" }}
+                          {/* Incident ID */}
+                          <StyledCardContent
+                            sx={{ flex: 1, justifyContent: "center" }}
                           >
-                            {item.inc_added_date
-                              ? new Date(item.inc_added_date).toLocaleString(
-                                "en-US",
-                                {
-                                  day: "2-digit",
-                                  month: "long",
-                                  year: "numeric",
-                                  hour: "numeric",
-                                  minute: "2-digit",
-                                  hour12: true,
-                                }
-                              )
-                              : "N/A"}
-                          </Typography>
-                        </StyledCardContent>
+                            <Typography variant="subtitle2">
+                              {item.incident_id || "N/A"}
+                            </Typography>
+                          </StyledCardContent>
 
-                        {/* Disaster Type */}
-                        <StyledCardContent
-                          sx={{ flex: 1, justifyContent: "center" }}
-                        >
-                          <Typography variant="subtitle2">
-                            {item.disaster_name || "N/A"}
-                          </Typography>
-                        </StyledCardContent>
-
-                        {/* Alert Type */}
-                        <StyledCardContent
-                          sx={{ flex: 1, justifyContent: "center" }}
-                        >
-                          <Typography variant="subtitle2">
-                            {{
-                              1: "High",
-                              2: "Medium",
-                              3: "Low",
-                              4: "Very Low",
-                            }[item.alert_type] || "Unknown"}
-                          </Typography>
-                        </StyledCardContent>
-
-                        {/* Initiated By */}
-                        <StyledCardContent
-                          sx={{ flex: 1, justifyContent: "center" }}
-                        >
-                          <Typography variant="subtitle2">
-                            {item.inc_added_by || "N/A"}
-                          </Typography>
-                        </StyledCardContent>
-
-                        {/* Actions */}
-                        <StyledCardContent
-                          sx={{
-                            flex: 1,
-                            justifyContent: "center",
-                            gap: 1,
-                            display: "flex",
-                          }}
-                        >
-                          <Tooltip title="View Details">
-                            <IconButton
-                              onClick={() => {
-                                setSelectedIncident(item);
-                                setIncidentId(item.inc_id);
-                                setSelectedIncidentFromSop(item);
-                                setDisasterIdFromSop(item.disaster_name);
-                                setHighlightedId(item.incident_id);
-                                console.log("Incident idd", setIncidentId);
-                                setFlag(0);
-                                setViewmode("incident");
-                              }}
+                          {/* Date & Time */}
+                          <StyledCardContent
+                            sx={{ flex: 1, justifyContent: "center" }}
+                          >
+                            <Typography
+                              variant="subtitle2"
+                              sx={{ textAlign: "center", fontSize: "12px" }}
                             >
-                              <Visibility
-                                sx={{ color: "#00f0c0", fontSize: 28 }}
-                              />
-                            </IconButton>
-                          </Tooltip>
+                              {item.inc_added_date
+                                ? new Date(item.inc_added_date).toLocaleString(
+                                  "en-US",
+                                  {
+                                    day: "2-digit",
+                                    month: "long",
+                                    year: "numeric",
+                                    hour: "numeric",
+                                    minute: "2-digit",
+                                    hour12: true,
+                                  }
+                                )
+                                : "N/A"}
+                            </Typography>
+                          </StyledCardContent>
 
-                          <Tooltip title="Closure Details">
-                            <IconButton
-                              onClick={() => {
-                                setSelectedIncident(item);
-                                setFlag(0);
-                                setViewmode("closure");
-                                setHighlightedId(item.incident_id);
-                              }}
-                              size="large"
-                            >
-                              <TextSnippetIcon
-                                sx={{ color: "#4caf50", fontSize: 20 }}
-                              />
-                            </IconButton>
-                          </Tooltip>
-                        </StyledCardContent>
-                      </EnquiryCardBody>
-                    ))
-                  )}
+                          {/* Disaster Type */}
+                          <StyledCardContent
+                            sx={{ flex: 1, justifyContent: "center" }}
+                          >
+                            <Typography variant="subtitle2">
+                              {item.disaster_name || "N/A"}
+                            </Typography>
+                          </StyledCardContent>
+
+                          {/* Alert Type */}
+                          <StyledCardContent
+                            sx={{ flex: 1, justifyContent: "center" }}
+                          >
+                            <Typography variant="subtitle2">
+                              {{
+                                1: "High",
+                                2: "Medium",
+                                3: "Low",
+                                4: "Very Low",
+                              }[item.alert_type] || "Unknown"}
+                            </Typography>
+                          </StyledCardContent>
+
+                          {/* Initiated By */}
+                          <StyledCardContent
+                            sx={{ flex: 1, justifyContent: "center" }}
+                          >
+                            <Typography variant="subtitle2">
+                              {item.inc_added_by || "N/A"}
+                            </Typography>
+                          </StyledCardContent>
+
+                          {/* Actions */}
+                          <StyledCardContent
+                            sx={{
+                              flex: 1,
+                              justifyContent: "center",
+                              gap: 1,
+                              display: "flex",
+                            }}
+                          >
+                            <Tooltip title="View Details">
+                              <IconButton
+                                onClick={() => {
+                                  setSelectedIncident(item);
+                                  setIncidentId(item.inc_id);
+                                  setSelectedIncidentFromSop(item);
+                                  setDisasterIdFromSop(item.disaster_name);
+                                  setHighlightedId(item.incident_id);
+                                  console.log("Incident idd", incidentId);
+                                  setFlag(0);
+                                  setViewmode("incident");
+                                }}
+                              >
+                                <Visibility
+                                  sx={{ color: "orange", fontSize: 28 }}
+                                />
+                              </IconButton>
+                            </Tooltip>
+
+                            <Tooltip title="Closure Details">
+                              <IconButton
+                                onClick={() => {
+                                  setSelectedIncident(item);
+                                  // setIncidentId(item.inc_id);
+                                  setIncidentIdClosure(item.inc_id);
+                                  setSelectedIncidentFromSop(item);
+                                  setDisasterIdFromSop(item.disaster_name);
+                                  setHighlightedId(item.incident_id);
+                                  console.log("Closure idd", incidentIdClosure);
+                                  setFlag(0);
+                                  setViewmode("closure");
+                                  fetchIncidentDetails();
+                                }}
+                                size="large"
+                              >
+                                <TextSnippetIcon
+                                  // sx={{ color: "#ffccf2", fontSize: 20 }}
+                                  sx={{ color: "rgb(122 255 242)", fontSize: 20 }}
+                                />
+                              </IconButton>
+                            </Tooltip>
+                          </StyledCardContent>
+                        </EnquiryCardBody>
+                      ))
+                    )}
+                  </Box>
                 </TableBody>
               </Table>
             </TableContainer>
@@ -767,7 +809,7 @@ function SopTask({
         open={openSnackbar}
         autoHideDuration={5000}
         onClose={() => setOpenSnackbar(false)}
-        anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
       >
         <Alert
           onClose={() => setOpenSnackbar(false)}
@@ -830,4 +872,3 @@ function SopTask({
 }
 
 export default SopTask;
-

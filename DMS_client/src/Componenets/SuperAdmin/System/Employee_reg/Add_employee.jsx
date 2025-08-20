@@ -42,21 +42,26 @@ function Add_employee({ darkMode }) {
     districts,
     Tehsils,
     Citys,
+    Wards,
     selectedStateId,
     selectedDistrictId,
     selectedTehsilId,
     selectedCityID,
+    selectedWardId,
     setSelectedStateId,
     setSelectedDistrictId,
     setSelectedTehsilId,
     setSelectedCityId,
+    setSelectedWardId,
     loading,
     error,
   } = useAuth();
 
 
   const textColor = darkMode ? "#ffffff" : "#000000";
-  const bgColor = darkMode ? "#0a1929" : "#ffffff";
+  const bgColor = "linear-gradient(to bottom, #53bce1, rgb(173, 207, 216))";
+  const paper = darkMode ? "202328" : "#FFFFFF";
+  const tableRow = "rgb(53 53 53)";
   const labelColor = darkMode ? "#5FECC8" : "#1976d2";
   const fontFamily = "Roboto, sans-serif";
   const borderColor = darkMode ? "#7F7F7F" : "#ccc";
@@ -89,12 +94,15 @@ function Add_employee({ darkMode }) {
   const [loading1, setLoading1] = useState(false);
   const [groupList, setGroupList] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
-
+  const [editSelectedRowId, setEditSelectedRowId] = useState(null);
   const [anchorEl, setAnchorEl] = useState(null);
   const [selectedEmployee, setSelectedEmployee] = useState(null);
   const [showAlert, setShowAlert] = useState(false);
   const [alertMessage, setAlertMessage] = useState('');
   const [alertType, setAlertType] = useState('success'); // or 'error'
+  const [password, setPassword] = useState('');
+  const [password2, setPassword2] = useState('');
+
 
   const userName = localStorage.getItem("userId");
   console.log(userName, "userName");
@@ -131,6 +139,14 @@ function Add_employee({ darkMode }) {
   const handleCityChange = (e) => {
     setSelectedCityId(e.target.value);
   };
+
+  const handleWardChange = (e) => {
+    setSelectedWardId(e.target.value);
+    if (formErrors.selectedWardId) {
+      setFormErrors(prev => ({ ...prev, selectedWardId: '' }));
+    }
+  };
+
 
 
   const open = Boolean(anchorEl);
@@ -190,6 +206,28 @@ function Add_employee({ darkMode }) {
       return;
     }
 
+    if (password !== password2) {
+      setFormErrors(prev => ({
+        ...prev,
+        password: "Passwords do not match",
+        password2: "Passwords do not match",
+      }));
+      showAlertMessage("Passwords do not match", 'error');
+      return;
+    }
+
+    if (!validatePassword(password)) {
+      setFormErrors(prev => ({
+        ...prev,
+        password: "Weak password",
+      }));
+      showAlertMessage(
+        "Password must be at least 8 characters and include 1 uppercase, 1 lowercase, 1 number, and 1 special character.",
+        'error'
+      );
+      return;
+    }
+
     // Generate a unique username based on name and timestamp
     const timestamp = new Date().getTime();
     const uniqueUsername = `${empName.replace(/\s+/g, '_').toLowerCase()}`;
@@ -207,11 +245,12 @@ function Add_employee({ darkMode }) {
       dist_id: selectedDistrictId,
       tahsil_id: selectedTehsilId,
       city_id: selectedCityID,
+      ward_id: selectedWardId,
       emp_is_deleted: "0",
       emp_added_by: userName,
       emp_modified_by: userName,
-      password: "DMS@Spero",
-      password2: "DMS@Spero"
+      password: password,
+      password2: password2
     };
 
     try {
@@ -239,6 +278,7 @@ function Add_employee({ darkMode }) {
       setSelectedDistrictId('');
       setSelectedTehsilId('');
       setSelectedCityId('');
+      setSelectedWardId('');
 
     } catch (err) {
       console.error("Error creating employee:", err.response?.data || err.message);
@@ -372,6 +412,10 @@ function Add_employee({ darkMode }) {
     if (!selectedCityID) {
       errors.selectedCityID = 'Please select a city';
     }
+    //ward validation
+    if (!selectedWardId) {
+      errors.selectedWardId = 'Please select a ward';
+    }
 
     // Group validation
     if (!groupId) {
@@ -404,6 +448,8 @@ function Add_employee({ darkMode }) {
         errors.empDOB = 'Employee must be at least 18 years old';
       }
     }
+
+
 
     setFormErrors(errors);
     return Object.keys(errors).length === 0;
@@ -451,6 +497,31 @@ function Add_employee({ darkMode }) {
       return;
     }
 
+    if (password || password2) {
+      if (password !== password2) {
+        setFormErrors(prev => ({
+          ...prev,
+          password: "Passwords do not match",
+          password2: "Passwords do not match",
+        }));
+        showAlertMessage("Passwords do not match", 'error');
+        return;
+      }
+
+      if (!validatePassword(password)) {
+        setFormErrors(prev => ({
+          ...prev,
+          password: "Weak password",
+        }));
+        showAlertMessage(
+          "Password must be at least 8 characters and include 1 uppercase, 1 lowercase, 1 number, and 1 special character.",
+          'error'
+        );
+        return;
+      }
+    }
+
+
     // Create payload with only fields that have values
     const payload = {};
 
@@ -464,6 +535,9 @@ function Add_employee({ darkMode }) {
     if (selectedDistrictId) payload.dist_id = selectedDistrictId;
     if (selectedTehsilId) payload.tahsil_id = selectedTehsilId;
     if (selectedCityID) payload.city_id = selectedCityID;
+    if (selectedWardId) payload.ward_id = selectedWardId;
+    if (password) payload.password = password;
+    if (password2) payload.password2 = password2;
 
     payload.emp_modified_by = userName;
 
@@ -506,10 +580,13 @@ function Add_employee({ darkMode }) {
     setEmpDOJ('');
     setEmpDOB('');
     setGroupId('');
+    setPassword('');
+    setPassword2('');
     setSelectedStateId('');
     setSelectedDistrictId('');
     setSelectedTehsilId('');
     setSelectedCityId('');
+    setSelectedWardId(''); // Add this line
 
     // Reset editing state
     setIsEditing(false);
@@ -521,7 +598,6 @@ function Add_employee({ darkMode }) {
       empEmail: ''
     });
   };
-
 
 
   // 1. Add this useEffect after your existing useEffects to handle dependent dropdowns in edit mode
@@ -620,6 +696,31 @@ function Add_employee({ darkMode }) {
   // };
 
 
+  const validatePassword = (password) => {
+    return /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?#&])[A-Za-z\d@$!%*?#&]{8,}$/.test(password);
+  };
+
+  const fetchDistrictsByState = async (stateId) => {
+    // This function should already exist in your context, if not add it
+    setSelectedStateId(stateId);
+  };
+
+  const fetchTehsilsByDistrict = async (districtId) => {
+    // This function should already exist in your context, if not add it  
+    setSelectedDistrictId(districtId);
+  };
+
+  const fetchCitiesByTehsil = async (tehsilId) => {
+    // This function should already exist in your context, if not add it
+    setSelectedTehsilId(tehsilId);
+  };
+
+  const fetchWardsByCity = async (cityId) => {
+    // This function should already exist in your context, if not add it
+    setSelectedCityId(cityId);
+  };
+
+
   return (
     <div style={{ marginLeft: "3.5rem" }}>
       <Snackbar
@@ -639,10 +740,10 @@ function Add_employee({ darkMode }) {
       </Snackbar>
 
 
-      <Box sx={{ display: "flex", alignItems: "center", gap: 2, pb: 2, mt: 3 }}>
+      <Box sx={{ display: "flex", alignItems: "center", gap: 2, pb: 1, mt: 2 }}>
 
         {/* Back Arrow */}
-        <IconButton size="small" onClick={() => {/* handle back action here */ }} sx={{
+        {/* <IconButton size="small" sx={{
           backgroundColor: "#00f0c0",
           color: "#fff",
           "&:hover": {
@@ -652,16 +753,17 @@ function Add_employee({ darkMode }) {
           height: 30,
         }}>
           <ArrowBackIosIcon sx={{ fontSize: 20, color: darkMode ? "#fff" : "#000", }} />
-        </IconButton>
+        </IconButton> */}
 
         {/* Label */}
 
         <Typography
           sx={{
-            color: labelColor,
+            color: "#5FC8EC",
             fontWeight: 600,
-            fontSize: 16,
+            fontSize: 18,
             fontFamily,
+            marginLeft: "2em",
           }}
         >
           {isEditing ? "Edit Employee" : "Add Employee"}
@@ -703,17 +805,18 @@ function Add_employee({ darkMode }) {
 
       <Grid container spacing={2}>
         <Grid item xs={12} md={7}>
-          <Paper elevation={3} sx={{ padding: 3, borderRadius: 3, backgroundColor: bgColor, mt: 1, mb: 1 }}>
-            <TableContainer>
-              <Table>
+          <Paper elevation={3} sx={{ padding: 3, borderRadius: 3, backgroundColor: paper, mt: 1, mb: 1, height: "89%" }}>
+            <TableContainer >
+              <Table >
                 <TableHead>
                   <TableRow>
                     <EnquiryCard sx={{
-                      backgroundColor: "#5FECC8",
+                      backgroundColor: bgColor,
                       color: "#000",
                       display: "flex",
                       width: "100%",
                       borderRadius: 2,
+                      position: "sticky",
                       p: 3,
                     }}>
                       <StyledCardContent
@@ -784,11 +887,29 @@ function Add_employee({ darkMode }) {
                 </TableHead>
 
 
-                <TableBody>
+                <TableBody
+                  sx={{
+                    display: "block",
+                    // height:"90%",
+                    maxHeight: "50vh",
+                    overflowY: "auto",
+                    scrollBehavior: "smooth",
+                    width: "100%",
+                    "&::-webkit-scrollbar": {
+                      width: "6px",
+                    },
+                    "&::-webkit-scrollbar-thumb": {
+                      backgroundColor: darkMode ? "#5FC8EC" : "#888",
+                      borderRadius: 3,
+                    },
+                    "&::-webkit-scrollbar-thumb:hover": {
+                      backgroundColor: darkMode ? "#5FC8EC" : "#555",
+                    },
+                  }}>
                   {loading1 ? (
                     <TableRow>
                       <TableCell colSpan={6} align="center">
-                        <CircularProgress size={30} sx={{ color: "#5FECC8" }} />
+                        <CircularProgress size={30} sx={{ color: "rgb(95,200,236)" }} />
                       </TableCell>
                     </TableRow>
                   ) :
@@ -806,13 +927,18 @@ function Add_employee({ darkMode }) {
                           <EnquiryCardBody
                             key={index}
                             sx={{
-                              backgroundColor: inputBgColor,
+                              backgroundColor: tableRow,
                               p: 2,
                               borderRadius: 2,
                               color: textColor,
                               display: "flex",
                               width: "100%",
                               mb: 1,
+                              border:
+                                item.emp_id === editSelectedRowId
+                                  ? "2px solid #5FC8EC"
+                                  : "1px solid transparent",
+
                             }}
                           >
                             <StyledCardContent
@@ -891,7 +1017,7 @@ function Add_employee({ darkMode }) {
                               <MoreHorizIcon
                                 onClick={(e) => handleOpen(e, item)}
                                 sx={{
-                                  color: "#00f0c0",
+                                  color: "rgb(95,200,236)",
                                   cursor: "pointer",
                                   fontSize: 28,
                                   justifyContent: "center",
@@ -934,7 +1060,7 @@ function Add_employee({ darkMode }) {
                     borderColor: borderColor,
                     height: "30px",
                     minWidth: "70px",
-                    backgroundColor: bgColor,
+                    backgroundColor: darkMode ? "#202328" : "#FFFFFF",
                     "& .MuiOutlinedInput-notchedOutline": {
                       borderColor: borderColor,
                     },
@@ -962,6 +1088,7 @@ function Add_employee({ darkMode }) {
                   gap: 2,
                   color: textColor,
                   fontSize: "13px",
+                  backgroundColor: darkMode ? "#202328" : "#FFFFFF",
                 }}
               >
                 <Box
@@ -1057,7 +1184,7 @@ function Add_employee({ darkMode }) {
               if (selectedEmployee && selectedEmployee.fullData) {
                 const empData = selectedEmployee.fullData;
 
-                // First populate basic fields
+                // Basic field values
                 setEmpName(empData.emp_name);
                 setEmpContact(empData.emp_contact_no);
                 setEmpEmail(empData.emp_email);
@@ -1065,43 +1192,53 @@ function Add_employee({ darkMode }) {
                 setEmpDOB(empData.emp_dob);
                 setGroupId(empData.grp_id);
 
-                // Set editing mode first
+                // Keep existing passwords if they exist, don't reset to empty
+                setPassword(empData.password || '');
+                setPassword2(empData.password2 || '');
+
+                // Set editing flags
                 setIsEditing(true);
                 setEditingEmployeeId(empData.emp_id);
+                setEditSelectedRowId(empData.emp_id);
 
-                // Then set location IDs in sequence to trigger dependent loading
-                setSelectedStateId(empData.state_id);
-
-                // Use setTimeout to ensure state is set before setting district
-                setTimeout(() => {
+                // Set location data directly - make sure the context has this data loaded
+                if (empData.state_id) {
+                  setSelectedStateId(empData.state_id);
+                }
+                if (empData.dist_id) {
                   setSelectedDistrictId(empData.dist_id);
-                }, 100);
-
-                setTimeout(() => {
+                }
+                if (empData.tahsil_id) {
                   setSelectedTehsilId(empData.tahsil_id);
-                }, 200);
-
-                setTimeout(() => {
+                }
+                if (empData.city_id) {
                   setSelectedCityId(empData.city_id);
-                }, 300);
+                }
+                if (empData.ward_id) {
+                  setSelectedWardId(empData.ward_id);
+                }
+
+                handleClose();
               }
-              handleClose();
             }}
+
           >
             Edit
           </Button>
+
         </Popover>
 
         <Grid item xs={12} md={4.9}>
-          <Paper elevation={3} sx={{ padding: 2, borderRadius: 3, backgroundColor: bgColor, mt: 1, mb: 5 }}>
+          <Paper elevation={3} sx={{ padding: 2, borderRadius: 3, backgroundColor: paper, mt: 1, mb: 5.9 }}>
             <Box
               display="flex"
-              justifyContent="space-between"
+              justifyContent={{ xs: "center", md: "flex-end" }}
               alignItems="center"
               mb={2}
+              flexWrap="wrap"
             >
 
-              <Typography
+              {/* <Typography
                 sx={{
                   color: labelColor,
                   fontWeight: 600,
@@ -1110,20 +1247,20 @@ function Add_employee({ darkMode }) {
                 }}
               >
                 {isEditing ? "Edit Employee" : "Add Employee"}
-              </Typography>
+              </Typography> */}
               <Button
                 variant="contained"
                 startIcon={<AddCircleOutline />}
                 disabled={!isEditing} // Show only when in editing mode
                 onClick={handleAddNewEmployee}
                 sx={{
-                  backgroundColor: "#5FECC8",
-                  color: "#000",
+                  backgroundColor: "rgb(223,76,76)",
+                  color: "#fff",
                   fontWeight: 600,
                   fontFamily: "Roboto",
                   textTransform: "none",
                   "&:hover": {
-                    backgroundColor: "#4ddbb6",
+                    backgroundColor: "rgb(223,76,76)",
                   },
                 }}
               >
@@ -1452,6 +1589,49 @@ function Add_employee({ darkMode }) {
                 )}
               </Grid>
 
+              {/* Ward Select  */}
+
+              <Grid item xs={12} sm={6}>
+                <Select
+                  fullWidth
+                  displayEmpty
+                  value={selectedWardId}
+                  onChange={handleWardChange}
+                  placeholder="Select Ward"
+                  defaultValue=""
+                  error={!!formErrors.selectedWardId}
+                  helperText={formErrors.empName}
+                  inputProps={{
+                    "aria-label": "Select Ward",
+                  }}
+                  sx={{
+                    ...selectStyles,
+                    ...(formErrors.selectedWardId && {
+                      '& .MuiOutlinedInput-notchedOutline': {
+                        borderColor: '#d32f2f',
+                      }
+                    })
+                  }}
+                  IconComponent={KeyboardArrowDownIcon}
+                >
+                  <MenuItem value="" disabled>
+                    Select Ward
+                  </MenuItem>
+                  {Wards.map((ward) => (
+                    <MenuItem key={ward.pk_id} value={ward.pk_id}>
+                      {ward.ward_name}
+                    </MenuItem>
+                  ))}
+                </Select>
+
+                {formErrors.selectedWardId && (
+                  <Typography variant="caption" color="error" sx={{ ml: 1, fontSize: '0.75rem' }}>
+                    {formErrors.selectedWardId}
+                  </Typography>
+                )}
+              </Grid>
+
+
               {/* DOB TextField */}
               <Grid item xs={12} sm={6}>
                 <TextField
@@ -1494,6 +1674,32 @@ function Add_employee({ darkMode }) {
                   }}
                 />
               </Grid>
+
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  fullWidth
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Password"
+                  error={!!formErrors.empName}
+                  helperText={formErrors.empName}
+                  InputLabelProps={{ shrink: false }}
+                  sx={inputStyle}
+                />
+              </Grid>
+
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  fullWidth
+                  value={password2}
+                  onChange={(e) => setPassword2(e.target.value)}
+                  placeholder="Confirm Password"
+                  error={!!formErrors.empName}
+                  helperText={formErrors.empName}
+                  InputLabelProps={{ shrink: false }}
+                  sx={inputStyle}
+                />
+              </Grid>
             </Grid>
 
 
@@ -1507,37 +1713,38 @@ function Add_employee({ darkMode }) {
                     sx={{
                       mt: 2,
                       width: "40%",
-                      backgroundColor: "#00f0c0",
-                      color: "black",
+                      backgroundColor: "rgb(18,166,95,0.8)",
+                      color: "#fff",
                       fontWeight: "bold",
                       borderRadius: "12px",
                       "&:hover": {
-                        backgroundColor: bgColor,
+                        backgroundColor: "rgb(18,166,95,0.8)",
                         color: "white !important",
                       },
                     }}
                   >
                     Update
                   </Button>
-                  <Button
+                  {/* <Button
                     variant="outlined"
                     onClick={handleCancel}
                     disabled={loading}
                     sx={{
                       mt: 2,
                       width: "40%",
-                      // backgroundColor: "#00f0c0",
-                      color: "white",
+                       borderColor: "rgb(223,76,76)",
+                      color:darkMode ?"#fff":"rgb(223,76,76)",
                       fontWeight: "bold",
                       borderRadius: "12px",
                       "&:hover": {
-                        backgroundColor: bgColor,
+                        borderColor: "rgb(223,76,76)",
+                       backgroundColor: "rgb(223,76,76)",
                         color: "white !important",
                       },
                     }}
                   >
                     Cancel
-                  </Button>
+                  </Button> */}
                 </>
               ) : (
                 <Button
@@ -1545,15 +1752,17 @@ function Add_employee({ darkMode }) {
                   onClick={handleSubmit}
                   disabled={loading}
                   sx={{
-                    mt: 2,
+                    mt: 1,
                     width: "40%",
-                    backgroundColor: "#00f0c0",
-                    color: "black",
+                    backgroundColor: "rgb(18,166,95,0.8)",
+                    color: "#fff",
                     fontWeight: "bold",
                     borderRadius: "12px",
+                    textTransform: 'none',
                     "&:hover": {
-                      backgroundColor: bgColor,
+                      backgroundColor: "rgb(18,166,95,0.8)",
                       color: "white !important",
+                      textTransform: 'none',
                     },
                   }}
                 >

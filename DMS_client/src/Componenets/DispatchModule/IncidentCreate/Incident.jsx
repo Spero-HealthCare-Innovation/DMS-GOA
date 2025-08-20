@@ -9,8 +9,10 @@ import {
     Button,
     Checkbox,
     FormControlLabel,
+    ListItemText,
     Stack
 } from "@mui/material";
+import { FormControl, InputLabel, Select } from "@mui/material";
 import { useAuth } from "../../../Context/ContextAPI";
 import IncidentCreateMap from "./IncidentCreateMap";
 import { Snackbar, Alert } from '@mui/material';
@@ -23,9 +25,14 @@ import DialogTitle from "@mui/material/DialogTitle";
 import DialogContent from "@mui/material/DialogContent";
 import IconButton from "@mui/material/IconButton";
 import CloseIcon from "@mui/icons-material/Close";
+import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
+import AccessTimeIcon from '@mui/icons-material/AccessTime';
+import TimerIcon from '@mui/icons-material/Timer';
+import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 
 const inputStyle = {
-    mb: 1.2,
+    mb: 0.5,
+    color: "white",
 };
 const boxStyle = {
     mb: 2,
@@ -34,12 +41,134 @@ const boxStyle = {
 
 const Incident = ({ darkMode }) => {
     const port = import.meta.env.VITE_APP_API_KEY;
-    const googleKey = import.meta.env.VITE_APP_GOOGLE_MAPS_API_KEY;
+    // const googleKey = import.meta.env.VITE_APP_GOOGLE_MAPS_API_KEY;
     const location = useLocation();
     const [secondsElapsed, setSecondsElapsed] = useState(0);
     const [timerActive, setTimerActive] = useState(false);
     const now = new Date();
-    const formattedDate = now.toLocaleDateString('en-GB').slice(0, 8).replace(/\//g, '/').slice(0, -2) + now.getFullYear().toString().slice(2);
+    const formattedDate = now.toLocaleDateString('en-GB').slice(0, 8).replace(/\//g, '-').slice(0, -2) + now.getFullYear().toString().slice(2);
+    const { wardName, tehsilName, districtName } = useAuth();
+    console.log(wardName, 'fetching from map Ward');
+    console.log(tehsilName, 'fetching from map Tehsil');
+    console.log(districtName, 'fetching from map District');
+    // Ward API
+    const [ward, setWard] = useState([]);
+    const [wardOfficer, setWardOfficer] = useState([]);
+    const [selectedWard, setSelectedWard] = useState("");
+    const [selectedWardOfficer, setSelectedWardOfficer] = useState([]);
+    const {
+        districts,
+        fetchDistrictsByState,
+        Tehsils,
+        selectedDistrictId,
+        selectedTehsilId,
+        selectedCityID,
+        setSelectedStateId,
+        setSelectedDistrictId,
+        setSelectedTehsilId,
+        setSelectedCityId,
+        fetchTehsilsByDistrict
+    } = useAuth();
+
+    useEffect(() => {
+        fetchDistrictsByState();
+    }, []);
+
+    // useEffect(() => {
+    //     if (districts.length > 0) {
+    //         console.log("All districts:", districts);
+    //     }
+    // }, [districts]);
+
+    useEffect(() => {
+        if (districts.length > 0 && districtName) {
+            const matchingDistrict = districts.find(
+                (district) => district.dis_name.toLowerCase() === districtName.toLowerCase()
+            );
+            if (matchingDistrict) {
+                setSelectedDistrictId(matchingDistrict.dis_id);
+            }
+        }
+    }, [districts, districtName]);
+
+    useEffect(() => {
+        if (Tehsils.length > 0 && tehsilName) {
+            const matchingTehsil = Tehsils.find(
+                (tehsil) => tehsil.tah_name.toLowerCase() === tehsilName.toLowerCase()
+            );
+            if (matchingTehsil) {
+                setSelectedTehsilId(matchingTehsil.tah_id);
+            }
+        }
+    }, [Tehsils, tehsilName]);
+
+    useEffect(() => {
+        if (ward.length > 0 && wardName) {
+            const matchingWard = ward.find(
+                (w) => w.ward_name.toLowerCase() === wardName.toLowerCase()
+            );
+            if (matchingWard) {
+                setSelectedWard(matchingWard.pk_id);
+            }
+        }
+    }, [ward, wardName]);
+
+    useEffect(() => {
+        if (selectedDistrictId) {
+            fetchTehsilsByDistrict(selectedDistrictId);
+        }
+    }, [selectedDistrictId]);
+
+    const handleCheckboxChangeWardOfficer = (event) => {
+        const {
+            target: { value },
+        } = event;
+
+        setSelectedWardOfficer(
+            Array.isArray(value) ? value.map((v) => Number(v)) : []
+        );
+    };
+
+
+    useEffect(() => {
+        if (selectedTehsilId) {
+            const fetchWardList = async () => {
+                const res = await fetch(`${port}/admin_web/ward_get/${selectedTehsilId}/`, {
+                    headers: {
+                        Authorization: `Bearer ${token || newToken}`,
+                    }
+                });
+                const data = await res.json();
+                setWard(data);
+            };
+            fetchWardList();
+        }
+    }, [selectedTehsilId]);
+
+    useEffect(() => {
+        if (selectedWard) {
+            const fetchWardOfficerList = async () => {
+                const res = await fetch(`${port}/admin_web/ward_officer_get/${selectedWard}/`, {
+                    headers: {
+                        Authorization: `Bearer ${token || newToken}`,
+                    }
+                });
+                const data = await res.json();
+                setWardOfficer(data);
+            };
+            fetchWardOfficerList();
+        }
+    }, [selectedWard]);
+
+    window.addEventListener("storage", (e) => {
+        if (e.key === "logout") {
+            location.href = "/login";
+        }
+    });
+
+    useEffect(() => {
+        document.title = "DMS|Incident Create";
+    }, []);
 
     useEffect(() => {
         if (location.state?.startData) {
@@ -66,19 +195,20 @@ const Incident = ({ darkMode }) => {
         .toString()
         .padStart(2, "0")}`;
 
-    console.log(googleKey, 'googleKey');
+    // console.log(googleKey, 'googleKey');
     const navigate = useNavigate();
     const token = localStorage.getItem("access_token");
     const { newToken, responderScope, setDisasterIncident, disaster, popupText, setPopupText, lattitude, setLattitude,
         longitude, setLongitude, } = useAuth();
-    console.log(popupText, 'popupTextpopupText');
+    // console.log(popupText, 'popupTextpopupText');
 
     const { handleSearchChange, handleSelectSuggestion, query } = useAuth();
-    const bgColor = darkMode ? "#0a1929" : "#ffffff";
-    const labelColor = darkMode ? "#5FECC8" : "#1976d2";
+    const bgColor = darkMode ? "#202328" : "#ffffff";
+    const labelColor = darkMode ? "#5FC8EC" : "#1976d2";
+    const labelColor1 = darkMode ? "white" : "#1976d2";
     const fontFamily = "Roboto, sans-serif";
     const [selectedEmergencyValue, setSelectedEmergencyValue] = useState('');
-    console.log(responderScope, 'Fetching Scope Data');
+    // console.log(responderScope, 'Fetching Scope Data');
     const [summary, setSummary] = useState([]);
     const [selectedDisaster, setSelectedDisaster] = useState('');
     const [alertType, setAlertType] = useState('');
@@ -135,11 +265,43 @@ const Incident = ({ darkMode }) => {
         });
     };
 
+    const [errors, setErrors] = useState({});
+
     const handleSubmit = async () => {
+
+        const newErrors = {};
+
+        if (!selectedEmergencyValue) newErrors.inc_type = "Incident Type is required";
+        // if (selectedEmergencyValue === 1 && !selectedDisaster) newErrors.disaster_type = "Disaster Type is required";
+        // if (selectedEmergencyValue === 1 && !alertType) newErrors.alert_type = "Alert Type is required";
+        if (!callerNumber) newErrors.caller_no = "Caller Number is required";
+        if (!callerName) newErrors.caller_name = "Caller Name is required";
+        if (!query && !popupText) newErrors.location = "Location is required";
+        if (!summaryId) newErrors.summary = "Summary is required";
+        // Only validate these if selectedEmergencyValue === 1 (Emergency)
+        if (selectedEmergencyValue === 1) {
+            if (!selectedDisaster) newErrors.disaster_type = "Disaster Type is required";
+            if (!alertType) newErrors.alert_type = "Alert Type is required";
+            if (!comments) newErrors.comments = "Comment is required";
+            if (!sopId || sopId.length === 0) {
+                newErrors.responder_scope = "At least one responder must be selected";
+            }
+        }
+
+        if (Object.keys(newErrors).length > 0) {
+            setErrors(newErrors);
+            return;
+        }
+
+        if (Object.keys(newErrors).length > 0) {
+            setErrors(newErrors);
+            return;
+        }
+
         const payload = {
             inc_type: selectedEmergencyValue,
             disaster_type: selectedDisaster,
-            alert_type: alertType,
+            alert_type: alertType || null,
             location: popupText || query,
             latitude: lattitude,
             longitude: longitude,
@@ -154,7 +316,11 @@ const Incident = ({ darkMode }) => {
             caller_modified_by: "admin",
             comm_added_by: "admin",
             comm_modified_by: "admin",
-            mode: 1
+            mode: 1,
+            district: selectedDistrictId,
+            tahsil: selectedTehsilId,
+            ward: selectedWard,
+            ward_officer: selectedWardOfficer,
         };
 
         try {
@@ -172,7 +338,24 @@ const Incident = ({ darkMode }) => {
             if (response.status === 201) {
                 setSnackbarMessage("Incident Created Successfully");
                 setSnackbarOpen(true);
-                navigate('/sop');
+                setSelectedEmergencyValue('');
+                setSelectedDisaster('');
+                setAlertType('');
+                setCallerNumber('');
+                setCallerName('');
+                setSummaryId('');
+                setComments('');
+                setSopId([]);
+                setSelectedWard('');
+                setSelectedWardOfficer([]);
+                setErrors({});
+                setPopupText('');
+                setLattitude('');
+                setLongitude('');
+                setTimeout(() => {
+                    navigate('/sop');
+                }, 3000);
+
             } else if (response.status === 500) {
                 setSnackbarMessage("Internal Server Error");
                 setSnackbarOpen(true);
@@ -221,7 +404,7 @@ const Incident = ({ darkMode }) => {
     }, [selectedEmergencyValue]);
 
     return (
-        <Box sx={{ minHeight: "100vh", backgroundColor: darkMode ? "#0a1929" : "#f5f5f5", px: 2, py: 3 }}>
+        <Box sx={{ minHeight: "100vh", backgroundColor: darkMode ? "black" : "#f5f5f5", px: 2, py: 3 }}>
             <Snackbar
                 open={snackbarOpen}
                 autoHideDuration={3000}
@@ -239,33 +422,102 @@ const Incident = ({ darkMode }) => {
                         elevation={3}
                         sx={{
                             ...inputStyle,
-                            p: 3,
+                            p: 2,
                             borderRadius: 3,
                             backgroundColor: bgColor,
-                            height: 'auto',
+                            // height: 'auto',
+                            height: 'auto'
                         }}
                     >
-                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-                            <Typography variant="h6" gutterBottom>
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+                            <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold', color: "#5FC8EC" }}>
                                 Create Incident
                             </Typography>
-                            {/* <Typography variant="h6" sx={{ fontSize: '16px', }} gutterBottom>
-                                Time : {formattedTime}
-                            </Typography> */}
                             <Typography
                                 variant="h6"
                                 sx={{
                                     fontSize: '15px',
-                                    borderRadius: '2em',
-                                    p: 1,
-                                    ...(darkMode
-                                        ? { backgroundColor: 'white', color: "black" }
-                                        : { backgroundColor: 'lightgrey', color: 'black' }),
+                                    p: 1.5,
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: 1,
+                                    width: 'fit-content',
+                                    borderRadius: '1em',
                                 }}
                                 gutterBottom
                             >
-                                Date: {formattedDate} | Time: {formattedTime}
+                                <Box
+                                    sx={{
+                                        backgroundColor: '#E0F2F1',
+                                        px: 1.5,
+                                        py: 0.5,
+                                        borderRadius: '1em',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: 0.5,
+                                    }}
+                                >
+                                    <CalendarMonthIcon sx={{ fontSize: 18, color: '#009688' }} />
+                                    <span style={{ color: 'black', fontSize: '14px' }}>{formattedDate}</span>
+                                </Box>
+
+                                <Box
+                                    sx={{
+                                        backgroundColor: '#FFF3E0',
+                                        px: 1.5,
+                                        py: 0.5,
+                                        borderRadius: '0.8em',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: 0.5,
+                                    }}
+                                >
+                                    <AccessTimeIcon sx={{ fontSize: 18, color: '#FB8C00' }} />
+                                    <span style={{ color: 'black', fontSize: '14px' }}>
+                                        {new Date().toLocaleTimeString([], {
+                                            hour: '2-digit',
+                                            minute: '2-digit',
+                                            second: '2-digit',
+                                            hour12: false,
+                                        })}
+                                    </span>
+                                </Box>
+
+                                <Box
+                                    sx={{
+                                        backgroundColor: '#E8EAF6',
+                                        px: 1.5,
+                                        py: 0.5,
+                                        borderRadius: '1.5em',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: 0.5,
+                                    }}
+                                >
+                                    <TimerIcon sx={{ fontSize: 18, color: '#3F51B5' }} />
+                                    <span style={{ color: 'black', fontSize: '14px' }}>{formattedTime}</span>
+                                </Box>
                             </Typography>
+                            {/* <Typography
+                                variant="h6"
+                                sx={{
+                                    fontSize: '15px',
+                                    borderRadius: '2em',
+                                    p: 1.5,
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: 0.3,
+                                    width: 'fit-content',
+                                }}
+                                gutterBottom
+                            >
+                                <CalendarTodayIcon sx={{ fontSize: 18, color: '#009688' }} />
+                                {formattedDate}
+                                <AccessTimeIcon sx={{ fontSize: 18, ml: 1.3, color: '#009688' }} />
+                                {formattedTime}
+                                <TimerIcon  sx={{ fontSize: 18, ml: 1.3, color: '#009688' }} />
+                                {formattedTime}
+                            </Typography> */}
                         </Box>
 
                         <Grid container spacing={1.6}>
@@ -279,6 +531,8 @@ const Incident = ({ darkMode }) => {
                                     sx={inputStyle}
                                     value={selectedEmergencyValue}
                                     onChange={handleEmergencyChange}
+                                    error={!!errors.inc_type}
+                                    helperText={errors.inc_type}
                                 >
                                     <MenuItem value={1}>Emergency</MenuItem>
                                     <MenuItem value={2}>Non Emergency</MenuItem>
@@ -298,6 +552,8 @@ const Incident = ({ darkMode }) => {
                                                 sx={inputStyle}
                                                 value={selectedDisaster}
                                                 onChange={(e) => setSelectedDisaster(e.target.value)}
+                                                error={!!errors.disaster_type}
+                                                helperText={errors.disaster_type}
                                             >
                                                 <MenuItem disabled value="">
                                                     Select Disaster Type
@@ -320,6 +576,8 @@ const Incident = ({ darkMode }) => {
                                                 value={alertType}
                                                 onChange={handleAlertTypeChange}
                                                 sx={inputStyle}
+                                                error={!!errors.alert_type}
+                                                helperText={errors.alert_type}
                                             >
                                                 <MenuItem value={1}>High</MenuItem>
                                                 <MenuItem value={2}>Medium</MenuItem>
@@ -349,6 +607,8 @@ const Incident = ({ darkMode }) => {
                                         inputMode: 'numeric',
                                         pattern: '[0-9]*'
                                     }}
+                                    error={!!errors.caller_no}
+                                    helperText={errors.caller_no}
                                 />
                             </Grid>
 
@@ -360,7 +620,15 @@ const Incident = ({ darkMode }) => {
                                     variant="outlined"
                                     sx={inputStyle}
                                     value={callerName}
-                                    onChange={(e) => setCallerName(e.target.value)}
+                                    // onChange={(e) => setCallerName(e.target.value)}
+                                    onChange={(e) => {
+                                        const value = e.target.value;
+                                        if (/^[a-zA-Z\s]*$/.test(value)) {
+                                            setCallerName(value);
+                                        }
+                                    }}
+                                    error={!!errors.caller_name}
+                                    helperText={errors.caller_name}
                                 />
                             </Grid>
 
@@ -372,9 +640,124 @@ const Incident = ({ darkMode }) => {
                                     variant="outlined"
                                     sx={inputStyle}
                                     onChange={handleSearchChange}
-                                    onClick={() => handleSelectSuggestion(item)}
-                                    value={query}
+                                    onClick={() => handleSelectSuggestion()}
+                                    value={query || ""}
+                                    error={!!errors.location}
+                                    helperText={errors.location}
                                 />
+                            </Grid>
+
+                            <Grid item xs={12} sm={6}>
+                                <FormControl fullWidth size="small" sx={inputStyle}>
+                                    <InputLabel id="district-label">District</InputLabel>
+                                    <Select
+                                        labelId="district-label"
+                                        id="district-select"
+                                        value={districtName && districts.find(d => d.dis_name.toLowerCase() === districtName.toLowerCase())
+                                            ? districts.find(d => d.dis_name.toLowerCase() === districtName.toLowerCase()).dis_id
+                                            : (selectedDistrictId || "")}
+                                        label="District"
+                                        onChange={(e) => setSelectedDistrictId(e.target.value)}
+                                    >
+                                        {districts.map((district) => (
+                                            <MenuItem key={district.dis_id} value={district.dis_id}>
+                                                {district.dis_name}
+                                            </MenuItem>
+                                        ))}
+                                    </Select>
+                                </FormControl>
+                            </Grid>
+
+                            <Grid item xs={12} sm={6}>
+                                <TextField
+                                    fullWidth
+                                    size="small"
+                                    select
+                                    label="Tehsil"
+                                    variant="outlined"
+                                    value={tehsilName && Tehsils.find(t => t.tah_name.toLowerCase() === tehsilName.toLowerCase())
+                                        ? Tehsils.find(t => t.tah_name.toLowerCase() === tehsilName.toLowerCase()).tah_id
+                                        : (selectedTehsilId || "")}
+                                    onChange={(e) => setSelectedTehsilId(e.target.value)}
+                                    sx={inputStyle}
+                                >
+                                    {Tehsils.map((tehsil) => (
+                                        <MenuItem key={tehsil.tah_id} value={tehsil.tah_id}>
+                                            {tehsil.tah_name}
+                                        </MenuItem>
+                                    ))}
+                                </TextField>
+                            </Grid>
+
+                            <Grid item xs={12} sm={6}>
+                                <TextField
+                                    fullWidth
+                                    size="small"
+                                    select
+                                    label="Ward"
+                                    variant="outlined"
+                                    value={selectedWard || ""}
+                                    onChange={(e) => setSelectedWard(e.target.value)}
+                                    sx={{
+                                        ...inputStyle,
+                                        '& .MuiSelect-select': {
+                                            overflowY: 'auto',
+                                            '&::-webkit-scrollbar': {
+                                                width: '6px',
+                                            },
+                                            '&::-webkit-scrollbar-track': {
+                                                background: darkMode ? '#2e2e2e' : '#f1f1f1',
+                                                borderRadius: '3px',
+                                            },
+                                            '&::-webkit-scrollbar-thumb': {
+                                                background: darkMode ? '#555' : '#888',
+                                                borderRadius: '3px',
+                                            },
+                                            '&::-webkit-scrollbar-thumb:hover': {
+                                                background: darkMode ? '#777' : '#555',
+                                            },
+                                        },
+                                    }}
+                                    SelectProps={{
+                                        MenuProps: {
+                                            PaperProps: {
+                                                style: {
+                                                    maxHeight: 200,
+                                                },
+                                            },
+                                        },
+                                    }}
+                                >
+                                    {ward.map((ward) => (
+                                        <MenuItem key={ward.pk_id} value={ward.pk_id}>
+                                            {ward.ward_name}
+                                        </MenuItem>
+                                    ))}
+                                </TextField>
+                            </Grid>
+
+                            <Grid item xs={12} sm={6}>
+                                <FormControl fullWidth size="small">
+                                    <InputLabel>Ward Officer</InputLabel>
+                                    <Select
+                                        multiple
+                                        value={selectedWardOfficer}
+                                        onChange={handleCheckboxChangeWardOfficer}
+                                        renderValue={(selected) =>
+                                            wardOfficer
+                                                .filter((officer) => selected.includes(officer.emp_id))
+                                                .map((officer) => officer.emp_name)
+                                                .join(', ')
+                                        }
+                                    >
+                                        {wardOfficer.map((wardOff) => (
+                                            <MenuItem key={wardOff.emp_id} value={wardOff.emp_id}>
+                                                <Checkbox checked={selectedWardOfficer.includes(wardOff.emp_id)} />
+                                                <ListItemText primary={wardOff.emp_name} />
+                                            </MenuItem>
+                                        ))}
+                                    </Select>
+                                </FormControl>
                             </Grid>
 
                             <Grid item xs={12}>
@@ -387,6 +770,8 @@ const Incident = ({ darkMode }) => {
                                     sx={inputStyle}
                                     value={summaryId}
                                     onChange={(e) => setSummaryId(e.target.value)}
+                                    error={!!errors.summary}
+                                    helperText={errors.summary}
                                 >
                                     <MenuItem disabled value="">
                                         Select Summary
@@ -406,144 +791,191 @@ const Incident = ({ darkMode }) => {
                     <IncidentCreateMap />
                 </Grid>
 
-                {selectedEmergencyValue === 1 && (
-                    <Grid item xs={12}>
-                        <Paper elevation={3} sx={{ ...inputStyle, p: 3, borderRadius: 3, backgroundColor: bgColor }}>
-                            <Grid container spacing={2}>
-                                <Grid item xs={12} md={3} sx={{ borderRight: { md: `1px solid white` }, pr: 2 }}>
-                                    <Box sx={boxStyle}>
+                {
+                    selectedEmergencyValue === 1 && (
+                        <Grid item xs={12}>
+                            <Paper elevation={3} sx={{ ...inputStyle, p: 1.5, borderRadius: 3, backgroundColor: bgColor }}>
+                                <Grid container spacing={2}>
+                                    <Grid item xs={12} md={3} sx={{ borderRight: { md: `1px solid white` }, pr: 2, mt: 1.5 }}>
+                                        {/* <Box sx={boxStyle}>
                                         <Typography sx={{ color: labelColor, fontWeight: 500, fontFamily }}>
                                             Incident Type
                                         </Typography>
                                         <Typography variant="subtitle2" sx={{ fontFamily }}>
                                             {selectedEmergencyValue === 1 ? "Emergency" : "Non-Emergency"}
                                         </Typography>
-                                    </Box>
-                                    <Box>
-                                        <Typography variant="subtitle2" sx={{ color: labelColor, fontWeight: 500, fontFamily }}>
-                                            Alert Type
-                                        </Typography>
-                                        <Typography variant="subtitle2" sx={{ fontFamily }}>
-                                            {alertType === 1 ? "High" : alertType === 2 ? "Medium" : "Low"}
-                                        </Typography>
-                                    </Box>
-                                </Grid>
-
-                                {/* SOP Section */}
-                                <Grid item xs={12} md={5} sx={{ px: 2, borderRight: { md: `1px solid white` } }}>
-                                    <Box sx={boxStyle}>
-                                        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                                            <Typography variant="subtitle2" sx={{ color: labelColor, fontWeight: 500, fontFamily }}>
-                                                Response Procedure
+                                    </Box> */}
+                                        <Box>
+                                            <Typography variant="subtitle2" sx={{ color: labelColor, fontWeight: 500, fontFamily, fontSize: '16px' }}>
+                                                Incident Type
                                             </Typography>
-                                            <IconButton
-                                                size="small"
-                                                onClick={() => setOpenSopModal(true)}
-                                                sx={{ color: labelColor, ml: 1 }}
+                                            <Typography variant="subtitle2"
+                                                sx={{
+                                                    fontFamily,
+                                                    mb: 2,
+                                                    ml: 1,
+                                                    color: labelColor1,
+                                                    fontSize: '15px',
+                                                    // color: selectedEmergencyValue === 1 ? 'red' : 'green'
+                                                }}
                                             >
-                                                <VisibilityIcon />
-                                            </IconButton>
+                                                {selectedEmergencyValue === 1 ? "Emergency" : "Non-Emergency"}
+                                            </Typography>
                                         </Box>
-                                        <Typography
-                                            variant="subtitle2"
-                                            sx={{
-                                                fontFamily,
-                                                cursor: "pointer",
-                                                display: "-webkit-box",
-                                                WebkitLineClamp: 2,
-                                                WebkitBoxOrient: "vertical",
-                                                overflow: "hidden",
-                                                textOverflow: "ellipsis",
-                                                maxWidth: 300,
-                                            }}
-                                        >
-                                            {(() => {
-                                                const sops = responderScope?.sop_responses || [];
-                                                if (sops.length === 0) return "No SOP description";
-                                                const shown = sops.slice(0, 2).map(sop => sop.sop_description || "No SOP description");
-                                                let text = shown.join(", ");
-                                                if (sops.length > 2) text += " ...";
-                                                return text;
-                                            })()}
-                                        </Typography>
-                                        {/* </Tooltip> */}
-
-                                        <Dialog open={openSopModal} onClose={() => setOpenSopModal(false)} maxWidth="sm" fullWidth>
-                                            <DialogTitle sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                                                All Response Procedures
-                                                <IconButton
-                                                    aria-label="close"
-                                                    onClick={() => setOpenSopModal(false)}
-                                                    sx={{
-                                                        color: (theme) => theme.palette.grey[500],
-                                                        ml: 2,
-                                                    }}
-                                                    size="small"
-                                                >
-                                                    <CloseIcon />
-                                                </IconButton>
-                                            </DialogTitle>
-                                            <DialogContent dividers>
-                                                {(responderScope?.sop_responses?.length > 0)
-                                                    ? responderScope.sop_responses.map((sop, idx) => (
-                                                        <Typography key={sop.sop_id || idx} sx={{ mb: 1 }}>
-                                                            {sop?.sop_description || "No SOP description"}
-                                                        </Typography>
-                                                    ))
-                                                    : <Typography>No SOP description</Typography>
+                                        <Box>
+                                            <Typography variant="subtitle2" sx={{ color: labelColor, fontWeight: 500, fontFamily, fontSize: '16px' }}>
+                                                Alert Type
+                                            </Typography>
+                                            <Typography variant="subtitle2" sx={{
+                                                fontFamily, mb: 2,
+                                                ml: 1,
+                                                color: labelColor1,
+                                                fontSize: '15px',
+                                            }}>
+                                                {alertType === 1 ? "High" : alertType === 2 ? "Medium" : alertType === 2 ? "Low" : '-'}
+                                            </Typography>
+                                        </Box>
+                                        <Box>
+                                            <Typography variant="subtitle2" sx={{ color: labelColor, fontWeight: 500, fontFamily, fontSize: '16px' }}>
+                                                Disaster Type
+                                            </Typography>
+                                            <Typography variant="subtitle2" sx={{
+                                                fontFamily, mb: 2, ml: 1,
+                                                color: labelColor1,
+                                                fontSize: '15px',
+                                            }}>
+                                                {
+                                                    disaster.find(item => item.disaster_id === selectedDisaster)?.disaster_name || '-'
                                                 }
-                                            </DialogContent>
-                                        </Dialog>
-                                    </Box>
+                                            </Typography>
+                                        </Box>
+                                    </Grid>
 
-                                    <Box>
-                                        <Typography variant="subtitle2" sx={{ color: labelColor, fontWeight: 500, fontFamily }}>
-                                            Responder Scope
-                                        </Typography>
-                                        <Stack spacing={1} mt={1}>
-                                            <Box display="flex" flexWrap="wrap" gap={1}>
-                                                {responderScope?.responder_scope?.map((responder) => (
-                                                    <FormControlLabel
-                                                        key={responder.res_id}
-                                                        control={
-                                                            <Checkbox
-                                                                checked={sopId.includes(responder.res_id)}
-                                                                onChange={() => handleCheckboxChange(responder.res_id)}
-                                                                sx={{ color: labelColor }}
-                                                            />
-                                                        }
-                                                        label={
-                                                            <Typography variant="subtitle2" sx={{ fontFamily }}>
-                                                                {responder.responder_name}
-                                                            </Typography>
-                                                        }
-                                                    />
-                                                ))}
+                                    {/* SOP Section */}
+                                    <Grid item xs={12} md={5} sx={{ px: 2, borderRight: { md: `1px solid white` }, mt: 1.5 }}>
+                                        <Box sx={boxStyle}>
+                                            <Box sx={{ display: "flex", alignItems: "center" }}>
+                                                <Typography variant="subtitle2" sx={{ color: labelColor, fontWeight: 500, fontFamily, fontSize: '16px' }}>
+                                                    Response Procedure
+                                                </Typography>
+                                                <IconButton
+                                                    size="small"
+                                                    onClick={() => setOpenSopModal(true)}
+                                                    sx={{ color: 'orange', ml: 1 }}
+                                                >
+                                                    <VisibilityIcon />
+                                                </IconButton>
                                             </Box>
-                                        </Stack>
-                                    </Box>
-                                </Grid>
+                                            <Typography
+                                                variant="subtitle2"
+                                                sx={{
+                                                    fontFamily,
+                                                    cursor: "pointer",
+                                                    display: "-webkit-box",
+                                                    WebkitLineClamp: 2,
+                                                    WebkitBoxOrient: "vertical",
+                                                    overflow: "hidden",
+                                                    textOverflow: "ellipsis",
+                                                    maxWidth: 300,
+                                                    color: labelColor1,
+                                                    marginLeft: '15px'
+                                                }}
+                                            >
+                                                {(() => {
+                                                    const sops = responderScope?.sop_responses || [];
+                                                    if (sops.length === 0) return "No SOP description";
+                                                    const shown = sops.slice(0, 2).map(sop => sop.sop_description || "No SOP description");
+                                                    let text = shown.join(", ");
+                                                    if (sops.length > 2) text += " ...";
+                                                    return text;
+                                                })()}
+                                            </Typography>
+                                            {/* </Tooltip> */}
 
-                                <Grid item xs={12} md={4}>
-                                    <Typography variant="h6" sx={{ fontSize: '16px' }} gutterBottom>
-                                        Comments
-                                    </Typography>
-                                    <TextField
-                                        fullWidth
-                                        size="small"
-                                        multiline
-                                        className='textarea'
-                                        rows={4}
-                                        variant="outlined"
-                                        sx={{ ...inputStyle }}
-                                        value={comments}
-                                        onChange={(e) => setComments(e.target.value)}
-                                    />
+                                            <Dialog open={openSopModal} onClose={() => setOpenSopModal(false)} maxWidth="sm" fullWidth>
+                                                <DialogTitle sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                                                    All Response Procedures
+                                                    <IconButton
+                                                        aria-label="close"
+                                                        onClick={() => setOpenSopModal(false)}
+                                                        sx={{
+                                                            color: (theme) => theme.palette.grey[500],
+                                                            ml: 2,
+                                                        }}
+                                                        size="small"
+                                                    >
+                                                        <CloseIcon />
+                                                    </IconButton>
+                                                </DialogTitle>
+                                                <DialogContent dividers>
+                                                    {(responderScope?.sop_responses?.length > 0)
+                                                        ? responderScope.sop_responses.map((sop, idx) => (
+                                                            <Typography key={sop.sop_id || idx} sx={{ mb: 1 }}>
+                                                                {sop?.sop_description || "No SOP description"}
+                                                            </Typography>
+                                                        ))
+                                                        : <Typography>No SOP description</Typography>
+                                                    }
+                                                </DialogContent>
+                                            </Dialog>
+                                        </Box>
+
+                                        <Box>
+                                            <Typography variant="subtitle2" sx={{ color: labelColor, fontWeight: 500, fontFamily, fontSize: '16px' }}>
+                                                Responder Scope
+                                            </Typography>
+                                            <Stack spacing={1} mt={1}>
+                                                <Box display="flex" flexWrap="wrap" gap={1}>
+                                                    {responderScope?.responder_scope?.map((responder) => (
+                                                        <FormControlLabel
+                                                            key={responder.res_id}
+                                                            control={
+                                                                <Checkbox
+                                                                    checked={sopId.includes(responder.res_id)}
+                                                                    onChange={() => handleCheckboxChange(responder.res_id)}
+                                                                    sx={{ color: labelColor }}
+                                                                />
+                                                            }
+                                                            label={
+                                                                <Typography variant="subtitle2" sx={{ fontFamily }}>
+                                                                    {responder.responder_name}
+                                                                </Typography>
+                                                            }
+                                                        />
+                                                    ))}
+                                                </Box>
+                                            </Stack>
+                                            {errors?.responder_scope && (
+                                                <Typography color="error" variant="body2" mt={1}>
+                                                    {errors.responder_scope}
+                                                </Typography>
+                                            )}
+                                        </Box>
+                                    </Grid>
+
+                                    <Grid item xs={12} md={4}>
+                                        <Typography variant="h6" sx={{ color: labelColor, fontWeight: 500, fontFamily, fontSize: '16px' }} gutterBottom>
+                                            Comments
+                                        </Typography>
+                                        <TextField
+                                            fullWidth
+                                            size="small"
+                                            multiline
+                                            className='textarea'
+                                            rows={6}
+                                            variant="outlined"
+                                            sx={{ ...inputStyle }}
+                                            value={comments}
+                                            onChange={(e) => setComments(e.target.value)}
+                                            error={!!errors.comments}
+                                            helperText={errors.comments}
+                                        />
+                                    </Grid>
                                 </Grid>
-                            </Grid>
-                        </Paper>
-                    </Grid>
-                )}
+                            </Paper>
+                        </Grid>
+                    )
+                }
 
                 <Grid item xs={12}>
                     <Box sx={{ display: 'flex', justifyContent: 'center' }}>
@@ -551,11 +983,12 @@ const Incident = ({ darkMode }) => {
                             variant="contained"
                             sx={{
                                 width: "10%",
-                                backgroundColor: "white",
-                                color: "black",
-                                fontWeight: "bold",
+                                backgroundColor: "rgb(18,166,95)",
+                                color: "white",
+                                // fontWeight: "bold",
                                 borderRadius: "12px",
                                 mb: 5,
+                                textTransform: "none",
                             }}
                             onClick={handleSubmit}
                         >
@@ -563,7 +996,7 @@ const Incident = ({ darkMode }) => {
                         </Button>
                     </Box>
                 </Grid>
-            </Grid>
+            </Grid >
         </Box >
     );
 };

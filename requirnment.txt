@@ -73,7 +73,10 @@ geopy
 feedparser
 shapely
 APScheduler
+<<<<<<< HEAD
 selenium
 deep-translator
 tweepy
 langdetect
+=======
+>>>>>>> UserTable

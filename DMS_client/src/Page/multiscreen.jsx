@@ -26,7 +26,7 @@ function MultiScreen({ darkMode }) {
     <Box
       sx={{
         minHeight: '100vh',
-        bgcolor: darkMode ? '#0a1929' : '#f5f5f5',
+        // bgcolor: darkMode ? '#0a1929' : '#f5f5f5',
         color: darkMode ? 'white' : 'black',
         display: 'flex',
         justifyContent: 'center',
