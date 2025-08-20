@@ -19,7 +19,19 @@ class check_in_out_status(enum.Enum):
     
     __default__ = check_in
     
-    
+class vehicle_status(enum.Enum):
+    free = 1
+    buzy = 2
+    maintenance = 3
+
+    __default__ = free
+
+class jobclosure_status(enum.Enum):
+    completed = 1
+    pending = 2
+
+    __default__ = pending 
+
 class Vehical_base_location(models.Model):
     bs_id = models.AutoField(primary_key=True)
     bs_name = models.CharField(max_length=100)
@@ -55,6 +67,7 @@ class Vehical(models.Model):
     veh_address = models.TextField(null=True)
     veh_ward_id = models.ForeignKey(DMS_Ward, on_delete=models.CASCADE, null=True)
     user = models.ForeignKey(DMS_User, on_delete=models.CASCADE, null=True)
+    vehical_status = enum.EnumField(vehicle_status, null=True)
     status = enum.EnumField(status_enum, null=True)
     vehis_login = models.BooleanField(default=False)
     veh_added_by = models.CharField(max_length=100, null=True)
@@ -113,11 +126,23 @@ class employee_clockin_info(models.Model):
     veh_id = models.ForeignKey(Vehical, on_delete=models.CASCADE, null=True)
     emp_image = models.FileField(upload_to='media_files/Mdt_employee/', null=True)
     
-class incident_vehicle(models.Model):
+class incident_vehicles(models.Model):
     inc_veh_id = models.AutoField(primary_key=True)
     incident_id=models.ForeignKey(DMS_Incident,on_delete=models.CASCADE,null=True,blank=True)
     veh_id = models.ForeignKey(Vehical, on_delete=models.CASCADE, to_field='veh_number', null=True)
     dep_id = models.ForeignKey(DMS_Department, on_delete=models.CASCADE,null=True, blank=True)
+    status = enum.EnumField(status_enum, null=True)
+    added_by = models.CharField(max_length=100, null=True)
+    added_date = models.DateTimeField(auto_now_add=True)
+    modify_by = models.CharField(max_length=100, null=True)
+    modify_date = models.DateTimeField(auto_now=True)
+    
+class incident_wise_vehicle(models.Model):
+    inc_veh_id = models.AutoField(primary_key=True)
+    incident_id=models.ForeignKey(DMS_Incident,on_delete=models.CASCADE,null=True,blank=True)
+    veh_id = models.ForeignKey(Vehical, on_delete=models.CASCADE, to_field='veh_number', null=True)
+    dep_id = models.ForeignKey(DMS_Department, on_delete=models.CASCADE,null=True, blank=True)
+    jobclosure_status = enum.EnumField(jobclosure_status, null=True)
     status = enum.EnumField(status_enum, null=True)
     added_by = models.CharField(max_length=100, null=True)
     added_date = models.DateTimeField(auto_now_add=True)
