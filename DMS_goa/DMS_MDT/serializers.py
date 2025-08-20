@@ -60,5 +60,5 @@ class add_device_serializer(serializers.ModelSerializer):
         
 class inc_veh_serialiZers(serializers.ModelSerializer):
     class Meta:
-        model = incident_vehicle
+        model = incident_vehicles
         fields = ["inc_veh_id","incident_id","veh_id","dep_id"]
