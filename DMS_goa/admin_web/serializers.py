@@ -2,6 +2,7 @@ from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework import serializers
 from django.contrib.auth.hashers import make_password, check_password
 from captcha.models import CaptchaStore
+from django.db import transaction
 from .models import *
 from django.utils.http import urlsafe_base64_decode
 from django.contrib.auth.tokens import default_token_generator
@@ -60,37 +61,81 @@ class DMS_Group_serializer(serializers.ModelSerializer):
         model=DMS_Group
         fields='__all__'
 
-class DMS_User_serializer(serializers.ModelSerializer):
-    password2 = serializers.CharField(style={'input_type':'password'}, write_only=True)
-    # grp_id = serializers.PrimaryKeyRelatedField(queryset=DMS_Group.objects.all(),many=False)
+# class DMS_Employee_serializer(serializers.ModelSerializer):
+#     password2 = serializers.CharField(style={'input_type':'password'}, write_only=True)
+#     # grp_id = serializers.PrimaryKeyRelatedField(queryset=DMS_Group.objects.all(),many=False)
     
-    class Meta:
-        model  = DMS_User
-        fields = ['emp_id', 'emp_username', 'grp_id', 'emp_name', 'emp_email', 'emp_contact_no', 'emp_dob', 'emp_doj', 'emp_is_login', 'state_id', 'dist_id', 'tahsil_id', 'city_id', 'emp_is_deleted', 'emp_added_by', 'emp_modified_by', 'password','password2','ward_id' ]
+#     class Meta:
+#         model  = DMS_Employee
+#         # fields = ['emp_id', 'emp_username', 'grp_id', 'emp_name', 'emp_email', 'emp_contact_no', 'emp_dob', 'emp_doj', 'emp_is_login', 'state_id', 'dist_id', 'tahsil_id', 'city_id', 'emp_is_deleted', 'emp_added_by', 'emp_modified_by', 'password','password2','ward_id' ]
+#         fields='__all__'
 
-        extra_kwargs = {
-            'password':{'write_only':True}
-        }
+#         extra_kwargs = {
+#             'password':{'write_only':True}
+#         }
         
+#     def validate(self, data):
+#         password = data.get('password')
+#         password2 = data.get('password2')
+#         if password != password2:
+#             raise serializers.ValidationError('Password and Confirm Password does not match')
+
+#         return data
+    
+#     def create(self, validated_data):
+#         # group_data = validated_data.pop('grp_id')
+#         # validated_data['grp_id'] = group_data
+
+#         # # Hash the password before creating the user
+#         # password = validated_data.pop('password')
+#         emp = DMS_Employee.objects.create_user(**validated_data)
+#         # user.set_password(password)  # hashes and sets it correctly
+#         emp.save()
+#         return emp
+    
+
+class DMS_Employee_serializer(serializers.ModelSerializer):
+    # These belong to DMS_User
+    user_username = serializers.CharField(write_only=True)
+    grp_id = serializers.PrimaryKeyRelatedField(queryset=DMS_Group.objects.all(), write_only=True)
+    password = serializers.CharField(write_only=True, style={'input_type': 'password'})
+    password2 = serializers.CharField(write_only=True, style={'input_type': 'password'})
+
+    class Meta:
+        model = DMS_Employee
+        fields = '__all__'
+        # extra_kwargs = {
+        #     'password': {'write_only': True}
+        # }
+
     def validate(self, data):
-        password = data.get('password')
-        password2 = data.get('password2')
-        if password != password2:
-            raise serializers.ValidationError('Password and Confirm Password does not match')
-
+        if data['password'] != data['password2']:
+            raise serializers.ValidationError("Password and Confirm Password do not match")
         return data
-    
-    def create(self, validated_data):
-        group_data = validated_data.pop('grp_id')
-        validated_data['grp_id'] = group_data
 
-        # Hash the password before creating the user
+    def create(self, validated_data):
+        # Extract DMS_User fields
+        user_username = validated_data.pop('user_username')
+        grp_id = validated_data.pop('grp_id')
         password = validated_data.pop('password')
-        user = DMS_User.objects.create_user(**validated_data)
-        user.set_password(password)  # hashes and sets it correctly
-        user.save()
-        return user
-    
+        validated_data.pop('password2')
+
+        with transaction.atomic():
+            # 1️⃣ Create DMS_User first
+            user = DMS_User.objects.create(
+                user_username=user_username,
+                grp_id=grp_id
+            )
+            user.set_password(password)
+            user.save()
+
+            # 2️⃣ Create DMS_Employee with FK to DMS_User
+            emp = DMS_Employee.objects.create(
+                user_id=user,  # FK assignment
+                **validated_data
+            )
+
+        return emp
 
 
 class DMS_User_serializer(serializers.ModelSerializer):
@@ -138,13 +183,14 @@ class DMS_User_GET_serializer(serializers.ModelSerializer):
     
 
     class Meta:
-        model = DMS_User
-        fields = [
-            'emp_id', 'emp_username', 'grp_id', 'emp_name', 'emp_email',
-            'emp_contact_no', 'emp_dob', 'emp_doj', 'emp_is_login',
-            'state_id', 'state_name', 'dist_id','dis_name','tahsil_id','tah_name','city_id','cit_name','grp_name',
-            'emp_is_deleted', 'emp_added_by', 'emp_modified_by', 'password','ward_id','ward_name'
-        ]
+        model = DMS_Employee
+        # fields = [
+        #     'emp_id', 'emp_username', 'grp_id', 'emp_name', 'emp_email',
+        #     'emp_contact_no', 'emp_dob', 'emp_doj', 'emp_is_login',
+        #     'state_id', 'state_name', 'dist_id','dis_name','tahsil_id','tah_name','city_id','cit_name','grp_name',
+        #     'emp_is_deleted', 'emp_added_by', 'emp_modified_by', 'password','ward_id','ward_name'
+        # ]
+        fields = '__all__'
         
     
 class DMS_District_Serializer(serializers.ModelSerializer):
