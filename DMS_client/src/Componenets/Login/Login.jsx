@@ -20,29 +20,30 @@ import { useNavigate } from "react-router-dom";
 import CachedIcon from "@mui/icons-material/Cached";
 
 function Login() {
-  const port = import.meta.env.VITE_APP_API_KEY;
-  const socketUrl = import.meta.env.VITE_SOCKET_API_KEY;
-  console.log(socketUrl, "socketUrlsocketUrlsocketUrl")
-  const theme = useTheme();
-  const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
-  const navigate = useNavigate();
-  const [emp_username, setEmp_Username] = useState("");
-  const [password, setPassword] = useState("");
-  const [usernameError, setUsernameError] = useState("");
-  const [passwordError, setPasswordError] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [captchaKey, setCaptchaKey] = useState("");
-  const [captchaImageUrl, setCaptchaImageUrl] = useState("");
-  const [captchaValue, setCaptchaValue] = useState("");
-  const [captchaLoading, setCaptchaLoading] = useState(true);
-  const [captchaError, setCaptchaError] = useState(false);
-  const [captchaTextError, setCaptchaTextError] = useState("");
-  const [openForgotDialog, setOpenForgotDialog] = useState(false);
-  const [username, setUsername] = useState("");
-  const [contact, setContact] = useState("");
-  useEffect(() => {
-    document.title = "DMS|Login";
-  }, []);
+    const port = import.meta.env.VITE_APP_API_KEY;
+    const socketUrl = import.meta.env.VITE_SOCKET_API_KEY;
+    console.log(socketUrl,'socketUrlsocketUrlsocketUrl');
+    
+    const theme = useTheme();
+    const isSmallScreen = useMediaQuery(theme.breakpoints.down('sm'));
+    const navigate = useNavigate();
+    const [emp_username, setEmp_Username] = useState('');
+    const [password, setPassword] = useState('');
+    const [usernameError, setUsernameError] = useState('');
+    const [passwordError, setPasswordError] = useState('');
+    const [loading, setLoading] = useState(false);
+    const [captchaKey, setCaptchaKey] = useState('');
+    const [captchaImageUrl, setCaptchaImageUrl] = useState('');
+    const [captchaValue, setCaptchaValue] = useState('');
+    const [captchaLoading, setCaptchaLoading] = useState(true);
+    const [captchaError, setCaptchaError] = useState(false);
+    const [captchaTextError, setCaptchaTextError] = useState('');
+    const [openForgotDialog, setOpenForgotDialog] = useState(false);
+    const [username, setUsername] = useState('');
+    const [contact, setContact] = useState('');
+    useEffect(() => {
+        document.title = "DMS|Login";
+    }, []);
 
   const fetchCaptcha = async () => {
     try {
@@ -105,17 +106,17 @@ function Login() {
     let hasError = false;
 
     if (!emp_username) {
-      setUsernameError("Please enter User ID");
+      setUsernameError("Please Enter User Name");
       hasError = true;
     }
 
     if (!password) {
-      setPasswordError("Please enter Password");
+      setPasswordError("Please Enter Password");
       hasError = true;
     }
 
     if (captchaError || (!captchaValue && captchaKey)) {
-      setCaptchaTextError("Please enter valid captcha text");
+      setCaptchaTextError("Please Enter Valid Captcha Text");
       hasError = true;
     }
 
@@ -320,24 +321,24 @@ function Login() {
             }}
           >
             <Box
-    sx={{
-      mb: 1, 
-      display: "flex",
-      justifyContent: "center",
-      alignItems: "center",
-    }}
-  >
-    <Box
-      component="img"
-      src={PMCLogo} 
-      alt="Company Logo"
-      sx={{
-        width: "70px", 
-        height: "auto",
-        objectFit: "contain",
-      }}
-    />
-  </Box>
+              sx={{
+                mb: 1,
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+              }}
+            >
+              <Box
+                component="img"
+                src={PMCLogo}
+                alt="Company Logo"
+                sx={{
+                  width: "70px",
+                  height: "auto",
+                  objectFit: "contain",
+                }}
+              />
+            </Box>
             <Typography variant="h6" gutterBottom sx={{ color: "white" }}>
               <b>User Login</b>
             </Typography>

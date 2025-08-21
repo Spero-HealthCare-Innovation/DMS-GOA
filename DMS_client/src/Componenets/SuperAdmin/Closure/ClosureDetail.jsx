@@ -32,7 +32,9 @@ import { useAuth } from "./../../../Context/ContextAPI";
 
 function ClosureDetail({ darkMode, fromDate, toDate, onChange, onDownload }) {
   const textColor = darkMode ? "#ffffff" : "#000000";
-  const bgColor = darkMode ? "#0a1929" : "#ffffff";
+  const bgColor = "linear-gradient(to bottom, #53bce1, rgb(173, 207, 216))";
+  const paper = darkMode ? "202328" : "#FFFFFF";
+  const tableRow = "rgb(53 53 53)";
   const labelColor = darkMode ? "#5FECC8" : "#1976d2";
   const fontFamily = "Roboto, sans-serif";
   const borderColor = darkMode ? "#7F7F7F" : "#ccc";
@@ -44,21 +46,21 @@ function ClosureDetail({ darkMode, fromDate, toDate, onChange, onDownload }) {
     ? "rgba(255, 255, 255, 0.16)"
     : "rgba(0, 0, 0, 0.04)";
 
- 
-const port = import.meta.env.VITE_SOCKET1_API_KEY;
- const { newToken } = useAuth(); 
+
+  const port = import.meta.env.VITE_SOCKET1_API_KEY;
+  const { newToken } = useAuth();
   const [showDownload, setShowDownload] = useState(false);
   const [closureData, setClosureData] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const [hasSubmitted, setHasSubmitted] = useState(false);
-    const [downloadLoading, setDownloadLoading] = useState(false);
+  const [downloadLoading, setDownloadLoading] = useState(false);
 
   const [page, setPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(5);
 
-    // Determine effective token (context token takes priority)
+  // Determine effective token (context token takes priority)
   const effectiveToken = newToken || localStorage.getItem("access_token");
 
   //  const onSubmit = () => {
@@ -74,16 +76,16 @@ const port = import.meta.env.VITE_SOCKET1_API_KEY;
   // };
 
   const handleChange = (fieldName, value) => {
-  setFormData(prev => ({
-    ...prev,
-    [fieldName]: value
-  }));
-};
+    setFormData(prev => ({
+      ...prev,
+      [fieldName]: value
+    }));
+  };
 
-const [formData, setFormData] = useState({
-  fromDate: '',
-  toDate: ''
-});
+  const [formData, setFormData] = useState({
+    fromDate: '',
+    toDate: ''
+  });
 
   const mockData = [
     {
@@ -135,9 +137,9 @@ const [formData, setFormData] = useState({
 
 
   const formatDateForAPI = (date) => {
-  const d = typeof date === "string" ? new Date(date) : date;
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-};
+    const d = typeof date === "string" ? new Date(date) : date;
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  };
 
   const formatDateTime = (dateTimeString) => {
     if (!dateTimeString) return '';
@@ -170,8 +172,8 @@ const [formData, setFormData] = useState({
         {
           method: 'GET',
           headers: {
-          Authorization: `Bearer ${effectiveToken}`,
-           "Content-Type": "application/json",
+            Authorization: `Bearer ${effectiveToken}`,
+            "Content-Type": "application/json",
           },
         }
       );
@@ -196,16 +198,16 @@ const [formData, setFormData] = useState({
   };
 
   const onSubmit = () => {
-     setShowDownload(true);
-   
-     if (effectiveToken) {
+    setShowDownload(true);
+
+    if (effectiveToken) {
       fetchClosureData();
     } else {
       console.warn("No token found for department fetch.");
     }
   };
 
-   // Download function to handle the download API call
+  // Download function to handle the download API call
   const handleDownload = async () => {
     if (!formData.fromDate || !formData.toDate) {
       setError('Please select both from and to dates before downloading');
@@ -236,7 +238,7 @@ const [formData, setFormData] = useState({
       // Get the filename from response headers or use a default name
       const contentDisposition = response.headers.get('content-disposition');
       let filename = 'incident_closure_report.xlsx'; // default filename
-      
+
       if (contentDisposition) {
         const filenameMatch = contentDisposition.match(/filename="?([^"]+)"?/);
         if (filenameMatch) {
@@ -246,7 +248,7 @@ const [formData, setFormData] = useState({
 
       // Create blob from response
       const blob = await response.blob();
-      
+
       // Create download link
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
@@ -254,7 +256,7 @@ const [formData, setFormData] = useState({
       link.download = filename;
       document.body.appendChild(link);
       link.click();
-      
+
       // Clean up
       window.URL.revokeObjectURL(url);
       document.body.removeChild(link);
@@ -268,28 +270,27 @@ const [formData, setFormData] = useState({
     }
   };
 
-  
+
 
 
   return (
     <div style={{ marginLeft: "3.5rem" }}>
 
 
-    <LocalizationProvider dateAdapter={AdapterDateFns}>
-  <Box
-    sx={{
-      display: "flex",
-      alignItems: "center",
-      flexWrap: "wrap",
-      gap: 2,
-      pb: 2,
-      mt: 3,
-    }}
-  >
-    {/* Back Button */}
-    <IconButton
+      <LocalizationProvider dateAdapter={AdapterDateFns}>
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            flexWrap: "wrap",
+            gap: 2,
+            pb: 2,
+            mt: 3,
+          }}
+        >
+          {/* Back Button */}
+          {/* <IconButton
       size="small"
-      onClick={() => {/* handle back */ }}
       sx={{
         backgroundColor: "#00f0c0",
         color: "#fff",
@@ -299,173 +300,179 @@ const [formData, setFormData] = useState({
       }}
     >
       <ArrowBackIosIcon sx={{ fontSize: 20, color: darkMode ? "#fff" : "#000" }} />
-    </IconButton>
+    </IconButton> */}
 
-    {/* Title */}
-    <Typography
-      variant="h6"
-      sx={{
-        color: labelColor,
-        fontWeight: 600,
-        fontFamily,
-        fontSize: 16,
-        minWidth: "120px",
-      }}
-    >
-      Closure Report
-    </Typography>
+          {/* Title */}
+          <Typography
+            variant="h6"
+            sx={{
+              color: "rgb(95,200,236)",
+              fontWeight: 600,
+              fontFamily,
+              fontSize: 18,
+              minWidth: "120px",
+              marginLeft: "2em",
+            }}
+          >
+            Closure Report
+          </Typography>
 
-    {/* Search Field */}
-    <TextField
-      variant="outlined"
-      size="small"
-      placeholder="Search"
-      value={searchTerm}
-      onChange={(e) => setSearchTerm(e.target.value)}
-      InputProps={{
-        startAdornment: (
-          <InputAdornment position="start">
-            <Search sx={{ color: "gray", fontSize: 18 }} />
-          </InputAdornment>
-        ),
-      }}
-      sx={{
-        width: "200px",
-        "& .MuiOutlinedInput-root": {
-          borderRadius: "25px",
-          backgroundColor: darkMode ? "#1e293b" : "#fff",
-          color: darkMode ? "#fff" : "#000",
-          px: 1,
-          py: 0.2,
-          height: "35px",
-        },
-        "& .MuiOutlinedInput-notchedOutline": {
-          borderColor: darkMode ? "#444" : "#ccc",
-        },
-        "& input": {
-          padding: "6px 8px",
-          fontSize: "13px",
-        },
-      }}
-    />
+          {/* Search Field */}
+          <TextField
+            variant="outlined"
+            size="small"
+            placeholder="Search"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <Search sx={{ color: "gray", fontSize: 18 }} />
+                </InputAdornment>
+              ),
+            }}
+            sx={{
+              width: "200px",
+              "& .MuiOutlinedInput-root": {
+                borderRadius: "25px",
+                backgroundColor: darkMode ? "#1e293b" : "#fff",
+                color: darkMode ? "#fff" : "#000",
+                px: 1,
+                py: 0.2,
+                height: "35px",
+              },
+              "& .MuiOutlinedInput-notchedOutline": {
+                borderColor: darkMode ? "#444" : "#ccc",
+              },
+              "& input": {
+                padding: "6px 8px",
+                fontSize: "13px",
+              },
+            }}
+          />
 
-    {/* From Date */}
-    <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-      <label
-        style={{
-          color: 'grey',
-          fontSize: '13px',
-          fontWeight: '600',
-          userSelect: 'none',
-        }}
-      >
-        From Date
-      </label>
-      <input
-        type="date"
-        name="fromDate"
-        className="custom-date-input"
-        value={
-          formData.fromDate
-            ? new Date(formData.fromDate).toISOString().split('T')[0]
-            : ''
-        }
-        onChange={(e) => handleChange("fromDate", new Date(e.target.value))}
-        style={{
-          width: '150px',
-          height: '35px',
-          padding: '10px',
-          backgroundColor: bgColor,
-          color: 'grey',
-          border: '1px solid gray',
-          borderRadius: '4px',
-          outline: 'none',
-          fontSize: '14px',
-          cursor: 'pointer',
-          appearance: 'none',
-        }}
-      />
-    </Box>
+          {/* From Date */}
 
-    {/* To Date */}
-    <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-      <label
-        style={{
-          color: 'grey',
-          fontSize: '13px',
-          fontWeight: '600',
-          userSelect: 'none',
-        }}
-      >
-        To Date
-      </label>
-      <input
-        type="date"
-        name="toDate"
-        className="custom-date-input"
-        value={
-          formData.toDate
-            ? new Date(formData.toDate).toISOString().split('T')[0]
-            : ''
-        }
-        onChange={(e) => handleChange("toDate", new Date(e.target.value))}
-        style={{
-          width: '150px',
-          height: '35px',
-          padding: '10px',
-          backgroundColor: bgColor,
-          color: 'grey',
-          border: '1px solid gray',
-          borderRadius: '4px',
-          outline: 'none',
-          fontSize: '14px',
-          cursor: 'pointer',
-          appearance: 'none',
-        }}
-      />
-    </Box>
 
-    {/* Submit Button */}
-    <Button
-      variant="contained"
-      size="small"
-      sx={{
-        backgroundColor: "#00f0c0",
-        "&:hover": { backgroundColor: "#00d8ac" },
-        height: 35,
-        minWidth: 100,
-        color: darkMode ? "black" : "#000",
-      }}
-      onClick={onSubmit}
-    >
-      Submit
-    </Button>
 
-    {/* Download Button */}
-    {showDownload && (
-      <Button
-        variant="outlined"
-        color="success"
-        startIcon={downloadLoading ? <CircularProgress size={16} /> : <DownloadIcon />}
-        size="small"
-        sx={{ height: 35, minWidth: 130 }}
-        onClick={handleDownload}
-      >
-        Download
-      </Button>
-    )}
-  </Box>
 
-  {/* Date icon styling */}
-  <style>
-    {`
+          <Grid item md={4}>
+            <DatePicker
+              label="From Date *"
+              format="yyyy-MM-dd"
+              slotProps={{ textField: { size: 'small' } }}
+              value={formData.fromDate || null}
+              onChange={(newValue) => handleChange("fromDate", newValue)}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  fullWidth
+                  placeholder="yyyy-MM-dd"
+                  variant="outlined"
+                  size="small"
+                  required
+                  error={!!validationErrors.fromdate}
+                  helperText={validationErrors.fromdate}
+                  InputLabelProps={{ shrink: true }}
+                  InputProps={{
+                    ...params.InputProps,
+                    sx: {
+                      color: textColor,
+                      height: "35px",
+                      fontSize: "0.45rem",
+                      "& .MuiSvgIcon-root": {
+                        color: "white",
+                      },
+                    },
+                  }}
+                  sx={textFieldStyle}
+                />
+              )}
+            />
+          </Grid>
+
+
+
+
+          {/* To Date */}
+          <Grid item>
+            <DatePicker
+              label="To Date *"
+              format="yyyy-MM-dd"
+              slotProps={{ textField: { size: 'small' } }}
+              value={formData.toDate || null}
+              onChange={(newValue) => handleChange("toDate", newValue)}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  fullWidth
+                  placeholder="yyyy-MM-dd"
+                  variant="outlined"
+                  size="small"
+                  required
+                  error={!!validationErrors.startBaseLocation}
+                  helperText={validationErrors.startBaseLocation}
+                  InputLabelProps={{ shrink: true }}
+                  InputProps={{
+                    ...params.InputProps,
+                    sx: {
+                      color: textColor,
+                      height: "35px",
+                      fontSize: "0.45rem",
+                      "& .MuiSvgIcon-root": {
+                        color: "white",
+                      },
+                    },
+                  }}
+                  sx={textFieldStyle}
+                />
+              )}
+            />
+          </Grid>
+
+
+          {/* Submit Button */}
+          <Button
+            variant="contained"
+            size="small"
+            sx={{
+              backgroundColor: "rgb(18,166,95,0.8)",
+              "&:hover": { backgroundColor: "rgb(18,166,95,0.8)" },
+              height: 35,
+              minWidth: 100,
+              color: darkMode ? "#fff" : "#fff",
+              textTransform: 'none'
+            }}
+            onClick={onSubmit}
+          >
+            Submit
+          </Button>
+
+          {/* Download Button */}
+          {showDownload && (
+            <Button
+              variant="outlined"
+              color="success"
+              startIcon={downloadLoading ? <CircularProgress size={16} /> : <DownloadIcon />}
+              size="small"
+              sx={{ height: 35, minWidth: 130 }}
+              onClick={handleDownload}
+            >
+              Download
+            </Button>
+          )}
+        </Box>
+
+        {/* Date icon styling */}
+        <style>
+          {`
       .custom-date-input::-webkit-calendar-picker-indicator {
         filter: invert(1);
         cursor: pointer;
       }
     `}
-  </style>
-</LocalizationProvider>
+        </style>
+      </LocalizationProvider>
 
 
       {error && (
@@ -477,17 +484,18 @@ const [formData, setFormData] = useState({
       )}
 
       <Grid item xs={12} md={7}>
-        <Paper elevation={3} sx={{ padding: 3, borderRadius: 3, backgroundColor: bgColor, mt: 1, mb: 5 }}>
+        <Paper elevation={3} sx={{ padding: 3, borderRadius: 3, backgroundColor: paper, mt: 1, mb: 5 }}>
           <TableContainer>
             <Table>
               <TableHead>
                 <TableRow>
                   <EnquiryCard sx={{
-                    backgroundColor: "#5FECC8",
+                    backgroundColor: bgColor,
                     color: "#000",
                     display: "flex",
                     width: "100%",
                     borderRadius: 2,
+                    position: "sticky",
                     p: 3,
                   }}>
                     <StyledCardContent
@@ -527,7 +535,7 @@ const [formData, setFormData] = useState({
                         Disaster Type
                       </Typography>
                     </StyledCardContent>
-                       <StyledCardContent
+                    <StyledCardContent
                       sx={{
                         flex: 1.6,
                         borderRight: "1px solid black",
@@ -613,10 +621,28 @@ const [formData, setFormData] = useState({
                 </TableRow>
               </TableHead>
 
-              <TableBody>
+              <TableBody
+                sx={{
+                  display: "block",
+                  maxHeight: "50vh",
+                  overflowY: "auto",
+                  scrollBehavior: "smooth",
+                  width: "100%",
+                  "&::-webkit-scrollbar": {
+                    width: "6px",
+                  },
+                  "&::-webkit-scrollbar-thumb": {
+                    backgroundColor: darkMode ? "#5FC8EC" : "#888",
+                    borderRadius: 3,
+                  },
+                  "&::-webkit-scrollbar-thumb:hover": {
+                    backgroundColor: darkMode ? "#5FC8EC" : "#555",
+                  },
+                }}
+              >
                 {loading ? (
                   <Box p={4} display="flex" justifyContent="center">
-                    <CircularProgress sx={{ color: "#5FECC8" }} />
+                    <CircularProgress sx={{ color: "rgb(95,200,236)" }} />
                   </Box>
                 ) : !hasSubmitted ? (
                   <Box p={2}>
@@ -635,7 +661,7 @@ const [formData, setFormData] = useState({
                     <EnquiryCardBody
                       key={index}
                       sx={{
-                        backgroundColor: inputBgColor,
+                        backgroundColor: tableRow,
                         p: 2,
                         borderRadius: 2,
                         color: textColor,
@@ -650,25 +676,25 @@ const [formData, setFormData] = useState({
                         </Typography>
                       </StyledCardContent>
                       <StyledCardContent sx={{ flex: 2, justifyContent: "center", ...fontsTableBody }}>
-                        <Typography variant="subtitle2" sx={{fontSize:"12px"}}>{item.incident_id || 'N/A'}</Typography>
+                        <Typography variant="subtitle2" sx={{ fontSize: "12px" }}>{item.incident_id || 'N/A'}</Typography>
                       </StyledCardContent>
                       <StyledCardContent sx={{ flex: 2, justifyContent: "center", ...fontsTableBody }}>
-                        <Typography variant="subtitle2" sx={{fontSize:"12px"}}>{item.disaster_type}</Typography>
-                      </StyledCardContent>
-                        <StyledCardContent sx={{ flex: 2, justifyContent: "center", ...fontsTableBody }}>
-                        <Typography variant="subtitle2" sx={{fontSize:"12px"}}>{formatDateTime(item.closure_acknowledge)}</Typography>
+                        <Typography variant="subtitle2" sx={{ fontSize: "12px" }}>{item.disaster_type}</Typography>
                       </StyledCardContent>
                       <StyledCardContent sx={{ flex: 2, justifyContent: "center", ...fontsTableBody }}>
-                        <Typography variant="subtitle2" sx={{fontSize:"12px"}}>{formatDateTime(item.closure_start_base_location)}</Typography>
+                        <Typography variant="subtitle2" sx={{ fontSize: "12px" }}>{formatDateTime(item.closure_acknowledge)}</Typography>
                       </StyledCardContent>
                       <StyledCardContent sx={{ flex: 2, justifyContent: "center", ...fontsTableBody }}>
-                        <Typography variant="subtitle2" sx={{fontSize:"12px"}}>{formatDateTime(item.closure_at_scene)}</Typography>
+                        <Typography variant="subtitle2" sx={{ fontSize: "12px" }}>{formatDateTime(item.closure_start_base_location)}</Typography>
                       </StyledCardContent>
                       <StyledCardContent sx={{ flex: 2, justifyContent: "center", ...fontsTableBody }}>
-                        <Typography variant="subtitle2" sx={{fontSize:"12px"}}>{formatDateTime(item.closure_from_scene)}</Typography>
+                        <Typography variant="subtitle2" sx={{ fontSize: "12px" }}>{formatDateTime(item.closure_at_scene)}</Typography>
                       </StyledCardContent>
                       <StyledCardContent sx={{ flex: 2, justifyContent: "center", ...fontsTableBody }}>
-                        <Typography variant="subtitle2" sx={{fontSize:"12px"}}>{formatDateTime(item.closure_back_to_base)}</Typography>
+                        <Typography variant="subtitle2" sx={{ fontSize: "12px" }}>{formatDateTime(item.closure_from_scene)}</Typography>
+                      </StyledCardContent>
+                      <StyledCardContent sx={{ flex: 2, justifyContent: "center", ...fontsTableBody }}>
+                        <Typography variant="subtitle2" sx={{ fontSize: "12px" }}>{formatDateTime(item.closure_back_to_base)}</Typography>
                       </StyledCardContent>
                       {/* <StyledCardContent sx={{ flex: 2, justifyContent: "center", ...fontsTableBody }}>
                         <Typography variant="subtitle2" sx={{fontSize:"12px"}}>{item.closure_remark || 'N/A'}</Typography>
@@ -706,7 +732,7 @@ const [formData, setFormData] = useState({
                   borderColor: borderColor,
                   height: "30px",
                   minWidth: "70px",
-                  backgroundColor: bgColor,
+                  backgroundColor: darkMode ? "#202328" : "#FFFFFF",
                   "& .MuiOutlinedInput-notchedOutline": {
                     borderColor: borderColor,
                   },
@@ -734,6 +760,7 @@ const [formData, setFormData] = useState({
                 gap: 2,
                 color: textColor,
                 fontSize: "13px",
+                backgroundColor: darkMode ? "#202328" : "#FFFFFF",
               }}
             >
               <Box

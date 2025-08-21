@@ -329,10 +329,10 @@ class DMS_User_Manager(BaseUserManager):
         user.set_password(password)
         user.save(using=self._db)
         return user
- 
+
     # def create_superuser(self, user_username, grp_id, user_name, user_email, user_contact_no, user_is_login, user_is_deleted, user_added_by, user_modified_by, password=None,):
     def create_superuser(self, user_username, grp_id, password=None):
- 
+
         """Creates and saves a superuser with the given email, name, tc and password."""
         user = self.create_user(
             password=password,
@@ -350,6 +350,7 @@ class DMS_User_Manager(BaseUserManager):
         user.is_admin = True
         user.save(using=self._db)
         return user
+# ==========================================================================================================
 
 class DMS_User(AbstractBaseUser):
     user_id = models.AutoField(primary_key=True, auto_created=True)
@@ -449,7 +450,6 @@ class Weather_alerts(models.Model):
     pk_id = models.AutoField(primary_key=True)
     alert_code = models.CharField(max_length=255, null=True, blank=True, unique=True)
     latitude = models.FloatField(null=True,blank=True)
-    # latitude = models.FloatField(null=True,blank=True)
     longitude = models.FloatField(null=True,blank=True)
     elevation = models.FloatField(null=True,blank=True)
     timezone = models.TextField(null=True,blank=True)
@@ -728,6 +728,7 @@ class DMS_open_weather_alerts(models.Model):
     alert_id = models.AutoField(primary_key=True)
     alert_code = models.CharField(max_length=255, null=True, blank=True, unique=True)
     location_ward = models.TextField()
+    ward_id = models.IntegerField(null=True, blank=True)
     latitude = models.FloatField()
     longitude = models.FloatField()
     current_weather_time = models.DateTimeField()
@@ -754,7 +755,7 @@ class DMS_open_weather_alerts(models.Model):
     alerts = models.JSONField(null=True, blank=True)
     triger_status = models.IntegerField(null=True,blank=True)
     disaster_id = models.ForeignKey(DMS_Disaster_Type,on_delete=models.CASCADE,null=True,blank=True)
-    alert_type = models.IntegerField(null=True,blank=True)
+    alert_type = models.CharField(max_length=255, null=True, blank=True)
     added_by = models.CharField(max_length=255, null=True, blank=True)
     added_date = models.DateTimeField(auto_now_add=True)  # Only once at creation
     modified_by = models.CharField(max_length=255, null=True, blank=True)
@@ -889,3 +890,17 @@ class agg_save_permissions(models.Model):
     added_by = models.IntegerField(blank=True, null=True)
     modify_by =	models.IntegerField(null=True, blank=True)
     modify_date = models.DateTimeField(auto_now=True)
+    
+    
+class DMS_Disaster_Severity2(models.Model):
+    pk_id = models.AutoField(primary_key=True)
+    hazard_types = models.CharField(max_length=255,null=True,blank=True)
+    hazard_rng_low = models.CharField(max_length=255,null=True, blank=True)
+    hazard_rng_medium = models.CharField(max_length=255,null=True, blank=True)
+    hazard_rng_high = models.CharField(max_length=255,null=True, blank=True)
+    unit = models.CharField(max_length=255,null=True,blank=True)
+    is_deleted = models.BooleanField(default=False)
+    added_date = models.DateTimeField(auto_now=True,null=True, blank=True)
+    added_by = models.CharField(max_length=255, null=True, blank=True)
+    modified_by = models.CharField(max_length=255, null=True, blank=True)
+    modified_date = models.DateTimeField(null=True, blank=True)

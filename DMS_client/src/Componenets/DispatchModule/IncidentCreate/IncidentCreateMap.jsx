@@ -5,7 +5,7 @@ import L from 'leaflet';
 import axios from 'axios';
 import customIconUrl from '../../../assets/Rectangle.png';
 import { useAuth } from '../../../Context/ContextAPI';
-
+import * as turf from '@turf/turf';
 const customIcon = new L.Icon({
   iconUrl: customIconUrl,
   iconSize: [32, 32],
@@ -18,39 +18,60 @@ const HERE_API_KEY = import.meta.env.VITE_APP_GOOGLE_MAPS_API_KEY;
 
 const FlyToLocation = ({ position, zoom }) => {
   const map = useMap();
+  const hasDragged = useRef(false);
+  const previousPosition = useRef(null);
+
   useEffect(() => {
-    if (position) {
-      map.flyTo(position, zoom ?? map.getZoom(), { duration: 2.0 });
+    // Skip on first load
+    if (!hasDragged.current && previousPosition.current === null) {
+      previousPosition.current = position;
+      return;
+    }
+
+    // Only fly if position has changed
+    if (
+      position &&
+      (!previousPosition.current ||
+        position[0] !== previousPosition.current[0] ||
+        position[1] !== previousPosition.current[1])
+    ) {
+      hasDragged.current = true;
+      map.flyTo(position, zoom ?? map.getZoom(), { duration: 1.5 });
+      previousPosition.current = position;
     }
   }, [position, zoom]);
+
   return null;
 };
 
 const IncidentCreateMap = () => {
-  const { query, suggestions, selectedPosition, popupText, handleSearchChange, handleSelectSuggestion, setQuery } = useAuth();
+  const { query, suggestions, selectedPosition, popupText, handleSearchChange, handleSelectSuggestion, setQuery,
+    setWardName, setTehsilName, setDistrictName, } = useAuth();
   const [queryMap, setQueryMap] = useState('');
   const [suggestionsMap, setSuggestionsMap] = useState([]);
-  const [selectedPositionMap, setSelectedPositionMap] = useState([18.5329846,73.8216998]); // Default: Pune (PMC)
+  const [selectedPositionMap, setSelectedPositionMap] = useState([18.519566133802865, 73.85534807018765]); // Default: Pune (PMC)
   const [popupTextMap, setPopupTextMap] = useState('You are here!');
   const [stateData, setStateData] = useState();
-  const [mapZoom, setMapZoom] = useState(7);
+  const [mapZoom, setMapZoom] = useState(10.5);
   const mapRef = useRef();
 
-  
+
 
   useEffect(() => {
     setQueryMap(query);
     setSuggestionsMap(suggestions);
     setSelectedPositionMap(selectedPosition);
-    setPopupTextMap(popupText);
-  }, [query, suggestions, selectedPosition, popupText]);
+    if (!document.activeElement || document.activeElement.tagName !== 'INPUT') {
+      setPopupTextMap(query);
+    }
+  }, [query, suggestions, selectedPosition]);
+
+  // useEffect(() => {
+  //   setQuery(queryMap);  // send value to context
+  // }, [queryMap]);
 
   useEffect(() => {
-    setQuery(queryMap);  // send value to context
-  }, [queryMap]);
-
-  useEffect(() => {
-    fetch('/Boundaries/Pune_district_02.geojson')
+    fetch('/Boundaries/PUNEWARDS.geojson')
       .then(res => res.json())
       .then(data => {
         setStateData(data);
@@ -68,7 +89,7 @@ const IncidentCreateMap = () => {
   //   const value = e.target.value;
   //   setQuery(value);
 
-  
+
   //   if (value.length < 3) return;
 
   //   const response = await axios.get('https://autosuggest.search.hereapi.com/v1/autosuggest', {
@@ -106,9 +127,30 @@ const IncidentCreateMap = () => {
   //   setSelectedPosition([lat, lng]);
   //   setPopupText(label);
   // };
+  const checkPolygonMatch = (lat, lng) => {
+    if (!stateData) return;
+
+    const point = turf.point([lng, lat]);
+    const matchedFeature = stateData.features.find(feature =>
+      turf.booleanPointInPolygon(point, feature)
+    );
+
+    if (matchedFeature) {
+      const { ward_name, tehsil_name, district_name } = matchedFeature.properties;
+      setWardName(ward_name || "");
+      setTehsilName(tehsil_name || "");
+      setDistrictName(district_name || "");
+    } else {
+      setWardName("");
+      setTehsilName("");
+      setDistrictName("");
+    }
+  };
+
+
 
   return (
-    <div style={{ position: "relative", width: "100%"}}>
+    <div style={{ position: "relative", width: "100%", height: "100%" }}>
       {/* Search input & suggestions */}
       <div
         style={{
@@ -134,15 +176,15 @@ const IncidentCreateMap = () => {
           <ul style={{ listStyle: 'none', padding: 0, margin: 0, background: 'white', color: 'black', fontFamily: 'initial' }}>
             {suggestions.map((item, idx) => (
               <li
-  key={idx}
-  onClick={() => {
-    handleSelectSuggestion(item);
-    setMapZoom(13);
-  }}
-  style={{ padding: '5px', cursor: 'pointer', borderBottom: '1px solid #ccc' }}
->
-  {item.address.label}
-</li>
+                key={idx}
+                onClick={() => {
+                  handleSelectSuggestion(item);
+                  setMapZoom(13);
+                }}
+                style={{ padding: '5px', cursor: 'pointer', borderBottom: '1px solid #ccc' }}
+              >
+                {item.address.label}
+              </li>
             ))}
           </ul>
         )}
@@ -152,7 +194,7 @@ const IncidentCreateMap = () => {
       <MapContainer
         center={selectedPosition}
         zoom={mapZoom}
-        style={{ height: "55vh", width: "100%", borderRadius: 10 }}
+        style={{ height: "68vh", width: "100%", borderRadius: 10 }}
         whenCreated={(mapInstance) => {
           mapRef.current = mapInstance;
         }}
@@ -176,6 +218,7 @@ const IncidentCreateMap = () => {
               setMapZoom(13);
 
               try {
+                // Reverse geocode
                 const response = await axios.get(
                   "https://revgeocode.search.hereapi.com/v1/revgeocode",
                   {
@@ -186,18 +229,41 @@ const IncidentCreateMap = () => {
                   }
                 );
 
-                const label =
-                  response.data.items[0]?.address?.label || "No address found";
+                const label = response.data.items[0]?.address?.label || "No address found";
                 setPopupTextMap(label);
-                setQueryMap(label);
+                // setQueryMap(label);
+                setQuery(label);
+
+    // 👇 GeoJSON + Turf match
+    const geojsonRes = await fetch('/Boundaries/PUNEWARDS.geojson');
+    const geojson = await geojsonRes.json();
+    const point = turf.point([position.lng, position.lat]);
+
+                const matchedFeature = geojson.features.find(feature =>
+                  turf.booleanPointInPolygon(point, feature)
+                );
+
+                if (matchedFeature) {
+                  const { Name1, Teshil, District } = matchedFeature.properties;
+                  setWardName(Name1 || "");
+                  setTehsilName(Teshil || "");
+                  setDistrictName(District || "");
+                } else {
+                  setWardName("");
+                  setTehsilName("");
+                  setDistrictName("");
+                }
               } catch (error) {
-                console.error("Reverse geocoding failed:", error);
+                console.error("Reverse geocoding or geojson lookup failed:", error);
                 setPopupTextMap("Failed to fetch address");
               }
-            },
+            }
+
+
           }}
         >
-          <Popup>{query}</Popup>
+          <Popup>{popupTextMap || "PUNE"}</Popup>
+
         </Marker>
       </MapContainer>
     </div>
@@ -205,4 +271,4 @@ const IncidentCreateMap = () => {
 
 };
 
-export default IncidentCreateMap;
+export default IncidentCreateMap
