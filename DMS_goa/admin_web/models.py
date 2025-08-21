@@ -16,6 +16,7 @@ from django.contrib.auth.models import(
 )
 from django_enumfield import enum
 
+from DMS_goa.DMS_MDT.models import *
 
 
 
@@ -661,14 +662,19 @@ class DMS_incident_closure(models.Model):
     closure_id=models.AutoField(primary_key=True)
     incident_id=models.ForeignKey(DMS_Incident,on_delete=models.CASCADE,null=True,blank=True)
     responder = models.ForeignKey(DMS_Responder, on_delete=models.CASCADE, null=True, blank=True)
-    vehicle_no = models.CharField(max_length=100, null= True, blank=True)
+    # vehicle_no = models.CharField(max_length=100, null= True, blank=True)
+    vehicle_no = models.ForeignKey(Vehical, on_delete=models.CASCADE, null=True, blank=True)
     closure_acknowledge=models.DateTimeField(null=True, blank=True)
     closure_start_base_location=models.DateTimeField(null=True, blank=True)
     closure_at_scene=models.DateTimeField(null=True, blank=True)
     closure_from_scene=models.DateTimeField(null=True, blank=True)
     closure_back_to_base=models.DateTimeField(null=True, blank=True)
+    closure_is_abundant = models.BooleanField(default=False)
+    closure_abundant=models.DateTimeField(null=True, blank=True)
     closure_is_deleted = models.BooleanField(default=False)
     image = models.FileField(upload_to='media_files/', null=True, blank=True)
+    audio = models.FileField(upload_to='media_files/', null=True, blank=True)
+    video = models.FileField(upload_to='media_files/', null=True, blank=True)
     closure_inc_id = models.CharField(max_length=255, null=True, blank=True)
     closure_amb_no = models.CharField(max_length=255, null=True, blank=True)
     closure_responder_name = models.CharField(max_length=100, null=True, blank=True)
