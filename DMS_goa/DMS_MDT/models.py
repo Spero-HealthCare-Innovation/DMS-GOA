@@ -66,6 +66,7 @@ class Vehical(models.Model):
     veh_gps_log = models.DecimalField(max_digits=9, decimal_places=6, null=True)
     veh_address = models.TextField(null=True)
     veh_ward_id = models.ForeignKey(DMS_Ward, on_delete=models.CASCADE, null=True)
+    dep_id = models.ForeignKey(DMS_Department, on_delete=models.CASCADE,null=True, blank=True)
     user = models.ForeignKey(DMS_User, on_delete=models.CASCADE, null=True)
     vehical_status = enum.EnumField(vehicle_status, null=True)
     status = enum.EnumField(status_enum, null=True)

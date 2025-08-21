@@ -127,7 +127,7 @@ class add_device(APIView):
         
 class get_incident_wise_vehicle(APIView):
     def get(self, request):
-        inc_veh = incident_vehicle.objects.filter(status=1)
+        inc_veh = incident_wise_vehicle.objects.filter(status=1)
         inc_veh_serialiZers = inc_veh_serialiZers(inc_veh, many=True)
         return Response(inc_veh_serialiZers.data, status=status.HTTP_200_OK)
     
@@ -155,6 +155,14 @@ class emp_clockinout(APIView):
             employee.save()
             return Response(employee.data, status=status.HTTP_201_CREATED)
         return Response(employee.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class Vehical_department_wise(APIView):
+    def get(self, request):
+        # vehicle_number = request.data.get('vehicleNumber')
+        vehicle_responder = request.data.get('responder')
+        inc_veh = Vehical.objects.filter(dep_id=vehicle_responder,status=1)
+        vehicles = Vehical_department_wise_serializer(inc_veh, many=True)
+        return Response({'data':vehicles.data})
 
 
 # vehicleNumber:MH-14-CL-0463
