@@ -12,3 +12,4 @@ urlpatterns = [
     path('Vehical_department_wise',Vehical_department_wise.as_view()),
     
 ]
+ 

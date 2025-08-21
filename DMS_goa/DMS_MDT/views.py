@@ -163,7 +163,7 @@ class Vehical_department_wise(APIView):
         inc_veh = Vehical.objects.filter(dep_id=vehicle_responder,status=1)
         vehicles = Vehical_department_wise_serializer(inc_veh, many=True)
         return Response({'data':vehicles.data})
-
+ 
 
 # vehicleNumber:MH-14-CL-0463
 # userId:297
