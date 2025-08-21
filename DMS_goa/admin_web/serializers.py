@@ -542,7 +542,7 @@ class incident_get_serializer(serializers.ModelSerializer):
     
     class Meta:
         model = DMS_Incident
-        fields=['incident_id','disaster_type','inc_type','responder_scope','caller_id','caller_name','caller_no','location','summary','summary_name','disaster_name','alert_type','mode','latitude','longitude','inc_datetime','location','comment_added_by','ward','district','ward_officer','tahsil','ward_name','district_name','tahsil_name','ward_officer_name']
+        fields=['incident_id','disaster_type','inc_type','responder_scope','caller_id','caller_name','caller_no','location','summary','summary_name','disaster_name','alert_type','mode','latitude','longitude','inc_added_date','location','comment_added_by','ward','district','ward_officer','tahsil','ward_name','district_name','tahsil_name','ward_officer_name']
 
     
     def get_ward_officer_name(self, obj):
