@@ -66,4 +66,4 @@ class inc_veh_serialiZers(serializers.ModelSerializer):
 class Vehical_department_wise_serializer(serializers.ModelSerializer):
     class Meta:
         model = Vehical
-        fields = ["veh_id","veh_number"]
+        fields = ["veh_id","veh_number"] 

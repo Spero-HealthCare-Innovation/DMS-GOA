@@ -75,7 +75,7 @@ class Vehical(models.Model):
     veh_added_date = models.DateTimeField(auto_now_add=True)
     veh_modify_by = models.CharField(max_length=100, null=True)
     veh_modify_date = models.DateTimeField(auto_now=True)
-     
+      
     def save(self, *args, **kwargs):
         user = DMS_User.objects.filter(user_username=self.veh_number).last()
         if user:
