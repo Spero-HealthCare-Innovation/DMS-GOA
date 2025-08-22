@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import *
+from DMS_MDT.models import *
 
 # class vehical_serializer(serializers.ModelSerializer):
 #     class Meta:
