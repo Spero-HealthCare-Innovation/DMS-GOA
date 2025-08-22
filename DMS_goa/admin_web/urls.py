@@ -9,21 +9,21 @@ urlpatterns = [
     path('department_put/<int:dep_id>/',DMS_department_put_api.as_view(),name='department_put'),
     path('department_delete/<int:dep_id>/',DMS_department_delete_api.as_view(),name='department_delete'),
 
+
     path('group_post/',DMS_Group_post_api.as_view(),name='group_post'),
     path('group_put/<int:grp_id>/',DMS_Group_put_api.as_view(),name='group_put'),
     path('group_delete/<int:grp_id>/',DMS_Group_delete_api.as_view(),name='group_delete'),
 
-    path('employee_get/',DMS_Employee_get_api.as_view(), name='employee_get'),
-    path('employee_post/',DMS_Employee_post_api.as_view(),name='employee_post'),
-    path('employee_put/<int:emp_id>/',DMS_Employee_put_api.as_view(),name='employee_put'),
-    path('employee_delete/<int:emp_id>/',DMS_Employee_delete_api.as_view(),name='employee_delete'),
-    path('employee_get_id_wise/<int:emp_id>/',DMS_Employee_Idwise_get_api.as_view(), name='employee_get_id_wise'),
+    path('employee_get/',DMS_User_get_api.as_view(), name='employee_get'),
+    path('employee_post/',DMS_User_post_api.as_view(),name='employee_post'),
+    path('employee_put/<int:emp_id>/',DMS_User_put_api.as_view(),name='employee_put'),
+    path('employee_delete/<int:emp_id>/',DMS_User_delete_api.as_view(),name='employee_delete'),
+    path('employee_get_id_wise/<int:emp_id>/',DMS_User_Idwise_get_api.as_view(), name='employee_get_id_wise'),
     
 
     path('employee_changepasswordput/<int:emp_id>/',DMS_ChangePassword_put_api.as_view(),name='employee_put'),
 
     path('emp_changepassword/',DMS_ChangePassword_api.as_view(),name='employee_password'),
-    path('emp_forgotpassword/',DMS_ForgotPassword_api.as_view(),name='employee_forgot_password'),
     path('reset-password-request/', PasswordResetRequestView.as_view(), name='reset-password-request'),
     path('reset-password-confirm/<uid>/<token>/', PasswordResetConfirmView.as_view(), name='reset-password-confirm'),
 

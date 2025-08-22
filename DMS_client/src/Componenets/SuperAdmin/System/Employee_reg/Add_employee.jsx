@@ -736,6 +736,31 @@ function Add_employee({ darkMode }) {
     }
   };
 
+  const validatePassword = (password) => {
+    return /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?#&])[A-Za-z\d@$!%*?#&]{8,}$/.test(password);
+  };
+
+  const fetchDistrictsByState = async (stateId) => {
+    // This function should already exist in your context, if not add it
+    setSelectedStateId(stateId);
+  };
+
+  const fetchTehsilsByDistrict = async (districtId) => {
+    // This function should already exist in your context, if not add it  
+    setSelectedDistrictId(districtId);
+  };
+
+  const fetchCitiesByTehsil = async (tehsilId) => {
+    // This function should already exist in your context, if not add it
+    setSelectedTehsilId(tehsilId);
+  };
+
+  const fetchWardsByCity = async (cityId) => {
+    // This function should already exist in your context, if not add it
+    setSelectedCityId(cityId);
+  };
+
+
   return (
     <div style={{ marginLeft: "4rem" }}>
       <Snackbar
@@ -820,7 +845,11 @@ function Add_employee({ darkMode }) {
 
       <Grid container spacing={2}>
         <Grid item xs={12} md={7}>
+<<<<<<< HEAD
           <Paper elevation={3} sx={{ padding: 2, borderRadius: 3, backgroundColor: paper, mt: 1, mb: 1, height: "auto" }}>
+=======
+          <Paper elevation={3} sx={{ padding: 3, borderRadius: 3, backgroundColor: paper, mt: 1, mb: 1, height: "89%" }}>
+>>>>>>> Backend
             <TableContainer >
               <Table >
                 <TableHead>
@@ -899,6 +928,10 @@ function Add_employee({ darkMode }) {
                   </TableRow>
                 </TableHead>
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> Backend
                 <TableBody
                   sx={{
                     display: "block",
@@ -1234,7 +1267,11 @@ function Add_employee({ darkMode }) {
                 if (empData.ward_id) {
                   setSelectedWardId(empData.ward_id);
                 }
+<<<<<<< HEAD
                 setPasswordValue('');
+=======
+
+>>>>>>> Backend
                 handleClose();
               }
             }}
@@ -1243,6 +1280,7 @@ function Add_employee({ darkMode }) {
             Edit
           </Button>
 
+<<<<<<< HEAD
           <Button
             fullWidth
             variant="outlined"
@@ -1269,6 +1307,8 @@ function Add_employee({ darkMode }) {
           >
             Password
           </Button>
+=======
+>>>>>>> Backend
         </Popover>
 
         <Grid item xs={12} md={4.9}>
@@ -1280,6 +1320,20 @@ function Add_employee({ darkMode }) {
               mb={2}
               flexWrap="wrap"
             >
+<<<<<<< HEAD
+=======
+
+              {/* <Typography
+                sx={{
+                  color: labelColor,
+                  fontWeight: 600,
+                  fontSize: 18,
+                  fontFamily,
+                }}
+              >
+                {isEditing ? "Edit Employee" : "Add Employee"}
+              </Typography> */}
+>>>>>>> Backend
               <Button
                 variant="contained"
                 startIcon={<AddCircleOutline />}
@@ -1695,6 +1749,7 @@ function Add_employee({ darkMode }) {
                         )}
                       </Grid>
 
+<<<<<<< HEAD
                       {/* Ward Select  */}
 
                       <Grid item xs={12} sm={6}>
@@ -1780,6 +1835,189 @@ function Add_employee({ darkMode }) {
                           }}
                         />
                       </Grid>
+=======
+              {/* Ward Select  */}
+
+              <Grid item xs={12} sm={6}>
+                <Select
+                  fullWidth
+                  displayEmpty
+                  value={selectedWardId}
+                  onChange={handleWardChange}
+                  placeholder="Select Ward"
+                  defaultValue=""
+                  error={!!formErrors.selectedWardId}
+                  helperText={formErrors.empName}
+                  inputProps={{
+                    "aria-label": "Select Ward",
+                  }}
+                  sx={{
+                    ...selectStyles,
+                    ...(formErrors.selectedWardId && {
+                      '& .MuiOutlinedInput-notchedOutline': {
+                        borderColor: '#d32f2f',
+                      }
+                    })
+                  }}
+                  IconComponent={KeyboardArrowDownIcon}
+                >
+                  <MenuItem value="" disabled>
+                    Select Ward
+                  </MenuItem>
+                  {Wards.map((ward) => (
+                    <MenuItem key={ward.pk_id} value={ward.pk_id}>
+                      {ward.ward_name}
+                    </MenuItem>
+                  ))}
+                </Select>
+
+                {formErrors.selectedWardId && (
+                  <Typography variant="caption" color="error" sx={{ ml: 1, fontSize: '0.75rem' }}>
+                    {formErrors.selectedWardId}
+                  </Typography>
+                )}
+              </Grid>
+
+
+              {/* DOB TextField */}
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  fullWidth
+                  type="date"
+                  value={empDOB}
+                  onChange={(e) => {
+                    setEmpDOB(e.target.value);
+                    if (formErrors.empDOB) {
+                      setFormErrors(prev => ({ ...prev, empDOB: '' }));
+                    }
+                  }}
+                  error={!!formErrors.empDOB}
+                  helperText={formErrors.empDOB}
+                  sx={{
+                    ...selectStyles,
+                    "& input[type='date']::-webkit-calendar-picker-indicator": {
+                      opacity: 0,
+                      cursor: "pointer"
+                    },
+                    "& input[type='date']": {
+                      color: empDOB ? (darkMode ? "#9e9e9e" : "#000") : "transparent",
+                      fontSize: "13px",
+                    },
+                    "& input[type='date']:focus": {
+                      color: darkMode ? "#000" : "#000",
+                    },
+                    "& input[type='date']:before": {
+                      content: empDOB ? '""' : '"Employee DOB"',
+                      color: "#9e9e9e",
+                      position: "absolute",
+                      fontSize: "13px",
+                    }
+                  }}
+                  InputProps={{
+                    placeholder: "Employee DOB"
+                  }}
+                  onFocus={(e) => {
+                    e.target.showPicker();
+                  }}
+                />
+              </Grid>
+
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  fullWidth
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Password"
+                  error={!!formErrors.empName}
+                  helperText={formErrors.empName}
+                  InputLabelProps={{ shrink: false }}
+                  sx={inputStyle}
+                />
+              </Grid>
+
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  fullWidth
+                  value={password2}
+                  onChange={(e) => setPassword2(e.target.value)}
+                  placeholder="Confirm Password"
+                  error={!!formErrors.empName}
+                  helperText={formErrors.empName}
+                  InputLabelProps={{ shrink: false }}
+                  sx={inputStyle}
+                />
+              </Grid>
+            </Grid>
+
+
+            <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, mt: 3, mb: 1 }}>
+              {isEditing ? (
+                <>
+                  <Button
+                    variant="contained"
+                    onClick={handleUpdate}
+                    disabled={loading}
+                    sx={{
+                      mt: 2,
+                      width: "40%",
+                      backgroundColor: "rgb(18,166,95,0.8)",
+                      color: "#fff",
+                      fontWeight: "bold",
+                      borderRadius: "12px",
+                      "&:hover": {
+                        backgroundColor: "rgb(18,166,95,0.8)",
+                        color: "white !important",
+                      },
+                    }}
+                  >
+                    Update
+                  </Button>
+                  {/* <Button
+                    variant="outlined"
+                    onClick={handleCancel}
+                    disabled={loading}
+                    sx={{
+                      mt: 2,
+                      width: "40%",
+                       borderColor: "rgb(223,76,76)",
+                      color:darkMode ?"#fff":"rgb(223,76,76)",
+                      fontWeight: "bold",
+                      borderRadius: "12px",
+                      "&:hover": {
+                        borderColor: "rgb(223,76,76)",
+                       backgroundColor: "rgb(223,76,76)",
+                        color: "white !important",
+                      },
+                    }}
+                  >
+                    Cancel
+                  </Button> */}
+                </>
+              ) : (
+                <Button
+                  variant="contained"
+                  onClick={handleSubmit}
+                  disabled={loading}
+                  sx={{
+                    mt: 1,
+                    width: "40%",
+                    backgroundColor: "rgb(18,166,95,0.8)",
+                    color: "#fff",
+                    fontWeight: "bold",
+                    borderRadius: "12px",
+                    textTransform: 'none',
+                    "&:hover": {
+                      backgroundColor: "rgb(18,166,95,0.8)",
+                      color: "white !important",
+                      textTransform: 'none',
+                    },
+                  }}
+                >
+                  Submit
+                </Button>
+              )}
+            </Box>
+>>>>>>> Backend
 
                       <Grid item xs={12} sm={12} sx={{ display: 'flex', justifyContent: 'center' }}>
                         {isEditing ? (
