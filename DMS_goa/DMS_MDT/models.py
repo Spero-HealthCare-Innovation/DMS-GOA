@@ -67,6 +67,7 @@ class Vehical(models.Model):
     veh_address = models.TextField(null=True)
     veh_ward_id = models.ForeignKey("admin_web.DMS_Ward", on_delete=models.CASCADE, null=True)
     dep_id = models.ForeignKey("admin_web.DMS_Department", on_delete=models.CASCADE,null=True, blank=True)
+    responder = models.ForeignKey("admin_web.DMS_Responder", on_delete=models.CASCADE,null=True, blank=True)
     user = models.ForeignKey("admin_web.DMS_User", on_delete=models.CASCADE, null=True)
     vehical_status = enum.EnumField(vehicle_status, null=True)
     status = enum.EnumField(status_enum, null=True)
