@@ -1,5 +1,5 @@
 from django.db import models
-
+from DMS_MDT.models import Vehical
 from django_enumfield import enum
 from django.utils import timezone
 from django.core.validators import RegexValidator
@@ -16,9 +16,17 @@ from django.contrib.auth.models import(
 )
 from django_enumfield import enum
 
+class status_enum(enum.Enum):
+	Active = 1
+	Inactive = 2
+	Delete = 3
+	__default__ = Active
+ 
+class jobclosure_status(enum.Enum):
+    completed = 1
+    pending = 2
 
-
-
+    __default__ = pending 
 
 class summary_enum(enum.Enum):
     Emergency=1
@@ -328,10 +336,10 @@ class DMS_User_Manager(BaseUserManager):
         user.set_password(password)
         user.save(using=self._db)
         return user
- 
+
     # def create_superuser(self, user_username, grp_id, user_name, user_email, user_contact_no, user_is_login, user_is_deleted, user_added_by, user_modified_by, password=None,):
     def create_superuser(self, user_username, grp_id, password=None):
- 
+
         """Creates and saves a superuser with the given email, name, tc and password."""
         user = self.create_user(
             password=password,
@@ -349,6 +357,7 @@ class DMS_User_Manager(BaseUserManager):
         user.is_admin = True
         user.save(using=self._db)
         return user
+# ==========================================================================================================
 
 class DMS_User(AbstractBaseUser):
     user_id = models.AutoField(primary_key=True, auto_created=True)
@@ -448,7 +457,6 @@ class Weather_alerts(models.Model):
     pk_id = models.AutoField(primary_key=True)
     alert_code = models.CharField(max_length=255, null=True, blank=True, unique=True)
     latitude = models.FloatField(null=True,blank=True)
-    # latitude = models.FloatField(null=True,blank=True)
     longitude = models.FloatField(null=True,blank=True)
     elevation = models.FloatField(null=True,blank=True)
     timezone = models.TextField(null=True,blank=True)
@@ -514,7 +522,12 @@ import re
 class DMS_Incident(models.Model):
     inc_id = models.AutoField(primary_key=True)
     incident_id = models.CharField(max_length=255, unique=True, blank=True)
-    responder_scope = models.JSONField(null=True,blank=True)
+    # responder_scope = models.JSONField(null=True,blank=True)
+    responder_scope = models.ManyToManyField(
+        'DMS_Disaster_Responder',
+        blank=True,
+        related_name='disaster_scopes'
+    )
     alert_id = models.ForeignKey(Weather_alerts,on_delete=models.CASCADE,null=True,blank=True)
     caller_id = models.ForeignKey(DMS_Caller,on_delete=models.CASCADE,null=True,blank=True)
     notify_id = models.ForeignKey('DMS_Notify',on_delete=models.CASCADE,null=True,blank=True)
@@ -532,6 +545,11 @@ class DMS_Incident(models.Model):
     mode = models.IntegerField(null=True,blank=True)
     time = models.CharField(max_length=255,null=True,blank=True)
     ward = models.ForeignKey('DMS_Ward',on_delete=models.CASCADE,null=True,blank=True)
+    # ward_officer = models.ManyToManyField(
+    #     'DMS_Ward',
+    #     blank=True,
+    #     related_name='ward_officer_scopes'
+    # )
     tahsil = models.ForeignKey(DMS_Tahsil,on_delete=models.CASCADE,null=True,blank=True)
     district = models.ForeignKey(DMS_District,on_delete=models.CASCADE,null=True,blank=True)
     ward_officer = models.JSONField(null=True,blank=True)
@@ -600,7 +618,21 @@ class DMS_Incident(models.Model):
     #         self.alert_code = f"{timestamp}-CALL-{next_number:02d}"
     #         super().save(update_fields=['alert_code'])
 
-            
+
+class incident_wise_vehicle(models.Model):
+    inc_veh_id = models.AutoField(primary_key=True)
+    incident_id=models.ForeignKey(DMS_Incident,on_delete=models.CASCADE,null=True,blank=True)
+    veh_id = models.ForeignKey(Vehical, on_delete=models.CASCADE, to_field='veh_number', null=True)
+    dep_id = models.ForeignKey(DMS_Department, on_delete=models.CASCADE,null=True, blank=True)
+    jobclosure_status = enum.EnumField(jobclosure_status, null=True)
+    status = enum.EnumField(status_enum, null=True)
+    added_by = models.CharField(max_length=100, null=True)
+    added_date = models.DateTimeField(auto_now_add=True)
+    modify_by = models.CharField(max_length=100, null=True)
+    modify_date = models.DateTimeField(auto_now=True)
+
+
+
 class DMS_Comments(models.Model):
     comm_id = models.AutoField(primary_key=True)
     alert_id = models.ForeignKey(Weather_alerts,on_delete=models.CASCADE,null=True,blank=True)
@@ -648,7 +680,12 @@ class DMS_Responder(models.Model):
     
 class DMS_Disaster_Responder(models.Model):
     pk_id = models.AutoField(primary_key=True)
-    res_id = models.JSONField()
+    # res_id = models.JSONField()
+    res_id = models.ManyToManyField(
+        'DMS_Responder',
+        blank=True,
+        related_name='responder_ids'
+    )
     dis_id = models.ForeignKey(DMS_Disaster_Type,on_delete=models.CASCADE,null=True, blank=True)
     dr_is_deleted = models.BooleanField(default=False)
     dr_added_date = models.DateTimeField(auto_now=True,null=True, blank=True)
@@ -661,14 +698,19 @@ class DMS_incident_closure(models.Model):
     closure_id=models.AutoField(primary_key=True)
     incident_id=models.ForeignKey(DMS_Incident,on_delete=models.CASCADE,null=True,blank=True)
     responder = models.ForeignKey(DMS_Responder, on_delete=models.CASCADE, null=True, blank=True)
-    vehicle_no = models.CharField(max_length=100, null= True, blank=True)
+    # vehicle_no = models.CharField(max_length=100, null= True, blank=True)
+    vehicle_no = models.ForeignKey(Vehical, on_delete=models.CASCADE, null=True, blank=True)
     closure_acknowledge=models.DateTimeField(null=True, blank=True)
     closure_start_base_location=models.DateTimeField(null=True, blank=True)
     closure_at_scene=models.DateTimeField(null=True, blank=True)
     closure_from_scene=models.DateTimeField(null=True, blank=True)
     closure_back_to_base=models.DateTimeField(null=True, blank=True)
+    closure_is_abundant = models.BooleanField(default=False)
+    closure_abundant=models.DateTimeField(null=True, blank=True)
     closure_is_deleted = models.BooleanField(default=False)
     image = models.FileField(upload_to='media_files/', null=True, blank=True)
+    audio = models.FileField(upload_to='media_files/', null=True, blank=True)
+    video = models.FileField(upload_to='media_files/', null=True, blank=True)
     closure_inc_id = models.CharField(max_length=255, null=True, blank=True)
     closure_amb_no = models.CharField(max_length=255, null=True, blank=True)
     closure_responder_name = models.CharField(max_length=100, null=True, blank=True)
@@ -722,6 +764,7 @@ class DMS_open_weather_alerts(models.Model):
     alert_id = models.AutoField(primary_key=True)
     alert_code = models.CharField(max_length=255, null=True, blank=True, unique=True)
     location_ward = models.TextField()
+    ward_id = models.IntegerField(null=True, blank=True)
     latitude = models.FloatField()
     longitude = models.FloatField()
     current_weather_time = models.DateTimeField()
@@ -748,7 +791,7 @@ class DMS_open_weather_alerts(models.Model):
     alerts = models.JSONField(null=True, blank=True)
     triger_status = models.IntegerField(null=True,blank=True)
     disaster_id = models.ForeignKey(DMS_Disaster_Type,on_delete=models.CASCADE,null=True,blank=True)
-    alert_type = models.IntegerField(null=True,blank=True)
+    alert_type = models.CharField(max_length=255, null=True, blank=True)
     added_by = models.CharField(max_length=255, null=True, blank=True)
     added_date = models.DateTimeField(auto_now_add=True)  # Only once at creation
     modified_by = models.CharField(max_length=255, null=True, blank=True)
@@ -883,3 +926,17 @@ class agg_save_permissions(models.Model):
     added_by = models.IntegerField(blank=True, null=True)
     modify_by =	models.IntegerField(null=True, blank=True)
     modify_date = models.DateTimeField(auto_now=True)
+    
+    
+class DMS_Disaster_Severity2(models.Model):
+    pk_id = models.AutoField(primary_key=True)
+    hazard_types = models.CharField(max_length=255,null=True,blank=True)
+    hazard_rng_low = models.CharField(max_length=255,null=True, blank=True)
+    hazard_rng_medium = models.CharField(max_length=255,null=True, blank=True)
+    hazard_rng_high = models.CharField(max_length=255,null=True, blank=True)
+    unit = models.CharField(max_length=255,null=True,blank=True)
+    is_deleted = models.BooleanField(default=False)
+    added_date = models.DateTimeField(auto_now=True,null=True, blank=True)
+    added_by = models.CharField(max_length=255, null=True, blank=True)
+    modified_by = models.CharField(max_length=255, null=True, blank=True)
+    modified_date = models.DateTimeField(null=True, blank=True)

@@ -1,7 +1,7 @@
 from django.contrib import admin
 from .models import *
 
-from admin_web.models import DMS_Employee
+from admin_web.models import DMS_User
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django import forms
 from django.contrib.auth.forms import ReadOnlyPasswordHashField
@@ -157,7 +157,7 @@ admin.site.register(DMS_Module)
 admin.site.register(DMS_SubModule)
 admin.site.register(DMS_Action)
 admin.site.register(DMS_Permission)
-admin.site.register(DMS_Employee)
+admin.site.register(DMS_User)
 admin.site.register(DMS_WebLogin)
 admin.site.register(DMS_Disaster_Type)
 admin.site.register(DMS_Incident)
@@ -171,5 +171,6 @@ admin.site.register(DMS_Responder)
 admin.site.register(DMS_Summary)
 admin.site.register(DMS_Comments)
 admin.site.register(DMS_Ward)
-admin.site.register(DMS_User)
-
+admin.site.register(DMS_open_weather_alerts)
+admin.site.register(DMS_Employee)
+admin.site.register(incident_wise_vehicle)
