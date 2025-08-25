@@ -615,18 +615,6 @@ class DMS_Incident(models.Model):
     #         super().save(update_fields=['alert_code'])
 
 
-class incident_wise_vehicle(models.Model):
-    inc_veh_id = models.AutoField(primary_key=True)
-    incident_id=models.ForeignKey(DMS_Incident,on_delete=models.CASCADE,null=True,blank=True)
-    veh_id = models.ForeignKey(Vehical, on_delete=models.CASCADE, to_field='veh_number', null=True)
-    dep_id = models.ForeignKey(DMS_Department, on_delete=models.CASCADE,null=True, blank=True)
-    jobclosure_status = enum.EnumField(jobclosure_status, null=True)
-    status = enum.EnumField(status_enum, null=True)
-    added_by = models.CharField(max_length=100, null=True)
-    added_date = models.DateTimeField(auto_now_add=True)
-    modify_by = models.CharField(max_length=100, null=True)
-    modify_date = models.DateTimeField(auto_now=True)
-
 
 
 class DMS_Comments(models.Model):
