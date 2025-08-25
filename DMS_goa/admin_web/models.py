@@ -654,7 +654,11 @@ class DMS_Alert_Type(models.Model):
     
 class DMS_Notify(models.Model):
     not_id = models.AutoField(primary_key=True)
-    alert_type_id = models.JSONField(null=True,blank=True)
+    # alert_type_id = models.JSONField(null=True,blank=True)
+    alert_type_id = models.ManyToManyField(
+        'DMS_Responder',
+        blank=True
+    )
     incident_id=models.ForeignKey(DMS_Incident,on_delete=models.CASCADE,null=True,blank=True)
     disaster_type = models.ForeignKey(DMS_Disaster_Type,on_delete=models.CASCADE,null=True,blank=True)
     not_is_deleted= models.BooleanField(default=False)
