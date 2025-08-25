@@ -82,7 +82,7 @@ const AppRoutes = ({ darkMode, setIsLoggedIn }) => {
           }
         />
         <Route
-          path="/alert-panel"
+          path="/Alert---Panel"
           element={
             <PrivateRoute>
               <AlertPanel darkMode={darkMode} />
@@ -130,7 +130,7 @@ const AppRoutes = ({ darkMode, setIsLoggedIn }) => {
           }
         />
         <Route
-          path="/Register Sop"
+          path="/Register-Sop"
           element={
             <PrivateRoute>
               <SopRegister darkMode={darkMode} />
@@ -146,7 +146,7 @@ const AppRoutes = ({ darkMode, setIsLoggedIn }) => {
           }
         />
         <Route
-          path="/Closure Report"
+          path="/Closure-Report"
           element={
             <PrivateRoute>
               <ClosureDetail darkMode={darkMode} />
@@ -154,7 +154,7 @@ const AppRoutes = ({ darkMode, setIsLoggedIn }) => {
           }
         />
          <Route
-          path="/Incident Report"
+          path="/Incident-Report"
           element={
             <PrivateRoute>
               <IncidentReport darkMode={darkMode} />
@@ -162,7 +162,7 @@ const AppRoutes = ({ darkMode, setIsLoggedIn }) => {
           }
         />
          <Route
-          path="/Manage Roles"
+          path="/Permission"
           element={
             <PrivateRoute>
               <Permission darkMode={darkMode} />

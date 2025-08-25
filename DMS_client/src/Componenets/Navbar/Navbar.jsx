@@ -157,6 +157,8 @@ const [newPasswordError, setNewPasswordError] = useState("");
       localStorage.removeItem("refresh_token");
       localStorage.removeItem("user");
       localStorage.removeItem("user_group");
+      localStorage.removeItem("user_id");
+      localStorage.removeItem("permissions");
 
       if (response.ok) {
         console.log("Logged out successfully");
