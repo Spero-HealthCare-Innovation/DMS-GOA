@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from DMS_MDT.models import *
-
+from admin_web.models import DMS_Group
 # class vehical_serializer(serializers.ModelSerializer):
 #     class Meta:
 #         model = Vehical
