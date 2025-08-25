@@ -9,7 +9,7 @@ from django.contrib.auth.tokens import default_token_generator
 from django.contrib.auth.password_validation import validate_password
 from django.contrib.auth import password_validation
 from admin_web.models import DMS_User
-from Spero_DMS.models import Vehical, incident_vehicles
+from DMS_MDT.models import Vehical, incident_vehicles
 
 class ChangePasswordSerializer(serializers.Serializer):
     old_password = serializers.CharField(required=True)

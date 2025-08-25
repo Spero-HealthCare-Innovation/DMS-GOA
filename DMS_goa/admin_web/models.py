@@ -1,5 +1,5 @@
 from django.db import models
-from Spero_DMS.models import Vehical
+from DMS_MDT.models import Vehical
 from django_enumfield import enum
 from django.utils import timezone
 from django.core.validators import RegexValidator
