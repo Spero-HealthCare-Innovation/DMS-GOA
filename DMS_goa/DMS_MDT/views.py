@@ -125,6 +125,30 @@ class add_device(APIView):
         else:
             return Response (device.errors, status=status.HTTP_400_BAD_REQUEST)
         
+class get_base_location_vehicle(APIView):
+    def get(self, request):
+        veh_base = Vehical_base_location.objects.filter(status=1)
+        veh_base_serializer = base_location_vehicle_serializer(veh_base, many=True)
+        return Response(veh_base_serializer.data, status=status.HTTP_200_OK)
+    
+class get_vehicle(APIView):
+    def get(self, request):
+        veh_base_location = request.GET.get("veh_base_loc")
+        responder = request.GET.get("responder")
+
+        veh = Vehical.objects.filter(status=1)
+
+        if veh_base_location:
+            veh = veh.filter(veh_base_location=veh_base_location)
+
+        if responder:
+            veh = veh.filter(responder=responder)
+
+        veh_serializer = vehicle_serializer(veh, many=True)
+        return Response(veh_serializer.data, status=status.HTTP_200_OK)
+
+    
+
 class get_incident_wise_vehicle(APIView):
     def get(self, request):
         inc_veh = incident_wise_vehicle.objects.filter(status=1)

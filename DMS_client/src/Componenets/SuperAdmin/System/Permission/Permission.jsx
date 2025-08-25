@@ -8,7 +8,12 @@ import axios from 'axios';
 const Permission = () => {
     const permission = localStorage.getItem('permissions');
     const usergrp = localStorage.getItem('usergrp');
+<<<<<<< HEAD
     const Port = import.meta.env.VITE_APP_API_KEY3;
+=======
+    const Port = import.meta.env.VITE_SOCKET2_API_KEY;
+
+>>>>>>> Development
     const accessToken = localStorage.getItem('token');
 
     const [source, setSource] = useState([]);

@@ -46,11 +46,12 @@ const screenConfig = {
       { id: 1, text: "Closure Report", path: "/Closure Report" },
       { id: 2, text: "Incident Report", path: "/Incident Report" },
     ],
+
   },
   Permission: {
     icon: <LockIcon />,
     screens: [
-      { id: 4, text: "Manage Roles", path: "/roles" },
+      { id: 4, text: "Manage Roles", path: "/Manage Roles" },
       { id: 5, text: "Access Control", path: "/access-control" },
     ],
   },
