@@ -134,6 +134,7 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
   const [isNewEntry, setIsNewEntry] = useState(false);
   const [activeTab, setActiveTab] = useState("");
   const [editRowId, setEditRowId] = useState(null);
+  const [error, setError] = useState(null);
 
   const labelColor = darkMode ? "#5FECC8" : "#1976d2";
   const borderColor = darkMode ? "#7F7F7F" : "#ccc";
@@ -630,6 +631,50 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
     }
   }, [selectedStateId, isNewEntry]);
 
+  // localStorage se check karne ke liye function
+const hasPermission = (moduleName, submoduleName, actionName) => {
+  const stored = localStorage.getItem("permissions");
+  console.log("Stored permissions:", stored);
+  
+  if (!stored) {
+    console.log("No permissions found in localStorage.");
+    return false;
+  }
+
+  const permissions = JSON.parse(stored);
+  console.log("Parsed permissions:", permissions);
+
+  // Module find karo
+  const module = permissions[0]?.modules_submodule.find(
+    (m) => m.moduleName === moduleName
+  );
+  console.log(`Looking for module "${moduleName}":`, module);
+  if (!module) {
+    console.log(`Module "${moduleName}" not found.`);
+    return false;
+  }
+
+  // Submodule find karo
+  const submodule = module.selectedSubmodules.find(
+    (s) => s.submoduleName === submoduleName
+  );
+  console.log(`Looking for submodule "${submoduleName}":`, submodule);
+  if (!submodule) {
+    console.log(`Submodule "${submoduleName}" not found.`);
+    return false;
+  }
+
+  // Action find karo
+  const hasAction = submodule.selectedActions.some(
+    (a) => a.actionName === actionName
+  );
+  console.log(`Checking action "${actionName}":`, hasAction);
+  
+  return hasAction;
+};
+
+
+
   return (
     // ..
     <Box sx={{ p: 2, marginLeft: "3rem" }}>
@@ -1037,6 +1082,7 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
                             >
                               <CloseIcon  sx={{ fontSize: "14px" , alignItems: "center"}}/>
                             </IconButton> */}
+                            {hasPermission("System User", "Add Department", "Edit") && (
                             <Button
                               fullWidth
                               variant="outlined"
@@ -1057,31 +1103,35 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
                             >
                               Edit
                             </Button>
+                            )}
 
-                            <Button
-                              fullWidth
-                              variant="outlined"
-                              color="error"
-                              startIcon={
-                                <DeleteOutline
-                                  sx={{
-                                    fontSize: "14px",
-                                    alignItems: "center",
-                                  }}
-                                />
-                              }
-                              // onClick={() => handleDelete(selectedItem.dep_id)}
-                              onClick={() => {
-                                setDeleteDepId(selectedItem.dep_id);
-                                setOpenDeleteDialog(true);
-                              }}
-                              sx={{
-                                textTransform: "none",
-                                fontSize: "14px",
-                              }}
-                            >
-                              Delete
-                            </Button>
+
+                           {hasPermission("System User", "Add Department", "Delete") && (
+  <Button
+    fullWidth
+    variant="outlined"
+    color="error"
+    startIcon={
+      <DeleteOutline
+        sx={{
+          fontSize: "14px",
+          alignItems: "center",
+        }}
+      />
+    }
+    onClick={() => {
+      setDeleteDepId(selectedItem.dep_id);
+      setOpenDeleteDialog(true);
+    }}
+    sx={{
+      textTransform: "none",
+      fontSize: "14px",
+    }}
+  >
+    Delete
+  </Button>
+)}
+
                           </Popover>
                           <Snackbar
                             open={snackbarOpen}
@@ -1244,6 +1294,7 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
               flexWrap="wrap"
               // sx={{backgroundColor: darkMode ? "rgb(88,92,99)" : "#FFFFFF"}}
             >
+              {hasPermission("System User", "Add Department", "Add New  Department") && (
               <Button
                 variant="contained"
                 startIcon={<AddCircleOutline />}
@@ -1265,6 +1316,7 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
               >
                 Add New Department
               </Button>
+              )}
             </Box>
 
             <Grid container spacing={2}>
