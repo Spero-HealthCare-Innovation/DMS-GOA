@@ -4,6 +4,7 @@ from .serializers import *
 from django.contrib.auth import authenticate
 from rest_framework_simplejwt.tokens import RefreshToken, TokenError
 from rest_framework import status
+from datetime import datetime
 
 class Register_veh(APIView):
     def post(self, request):
@@ -53,7 +54,7 @@ class VehicleLogin(APIView):
             ]
             return Response(conflict_messages, status=status.HTTP_400_BAD_REQUEST)
         # emp_data = [{'emp_clockin_time': now(),'emp_id': emp_id,'veh_id': vehicle_obj.veh_id} for emp_id in employee_ids]
-        emp_data = [{'emp_clockin_time': now(),'emp_id': emp_id,'veh_id': vehicle_obj.veh_id, 'emp_image':emp_image} for emp_id, emp_image in zip(employee_ids,employee_photo)]
+        emp_data = [{'emp_clockin_time': datetime.now(),'emp_id': emp_id,'veh_id': vehicle_obj.veh_id, 'emp_image':emp_image} for emp_id, emp_image in zip(employee_ids,employee_photo)]
         # print(emp_data, 'datas')
         emp_serializer = emp_clockin_serializer(data=emp_data, many=True)
         if not emp_serializer.is_valid():
@@ -64,10 +65,10 @@ class VehicleLogin(APIView):
         previous_sessions = vehicle_login_info.objects.filter(veh_id=vehicle_obj.veh_id, status=1)
         for session in previous_sessions:
             session.status = 2
-            session.veh_logout_time = now()
+            session.veh_logout_time = datetime.now()
             session.save()
         login_data = {
-            'veh_login_time': now(),
+            'veh_login_time': datetime.now(),
             'veh_id': vehicle_obj.veh_id,
             'latitude':lat,
             'longitude':long,
@@ -100,12 +101,12 @@ class VehicleLogout(APIView):
         active_vehicle_sessions = vehicle_login_info.objects.filter(veh_id=vehicle_obj.veh_id, status=1)
         for session in active_vehicle_sessions:
             session.clock_out_in_status = 2
-            session.veh_logout_time = now()
+            session.veh_logout_time = datetime.now()
             session.save()
         active_employee_sessions = employee_clockin_info.objects.filter(veh_id=vehicle_obj.veh_id, clock_out_in_status=1, status=1)
         for emp in active_employee_sessions:
             emp.clock_out_in_status = 2
-            emp.emp_clockout_time = now()
+            emp.emp_clockout_time = datetime.now()
             emp.save()
         user_obj.user_is_login = False
         user_obj.save()

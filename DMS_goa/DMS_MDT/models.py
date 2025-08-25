@@ -1,5 +1,4 @@
 from django.db import models
-from admin_web.models import *
 from django_enumfield import enum
 from django.contrib.auth.hashers import make_password
 
@@ -78,6 +77,7 @@ class Vehical(models.Model):
     veh_modify_date = models.DateTimeField(auto_now=True)
       
     def save(self, *args, **kwargs):
+        from admin_web.models import DMS_User
         user = DMS_User.objects.filter(user_username=self.veh_number).last()
         if user:
             user.password = make_password(self.veh_default_mobile)
