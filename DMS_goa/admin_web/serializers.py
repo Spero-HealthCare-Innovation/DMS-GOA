@@ -9,6 +9,7 @@ from django.contrib.auth.tokens import default_token_generator
 from django.contrib.auth.password_validation import validate_password
 from django.contrib.auth import password_validation
 from admin_web.models import DMS_User
+from DMS_MDT.models import Vehical, incident_vehicles
 
 class ChangePasswordSerializer(serializers.Serializer):
     old_password = serializers.CharField(required=True)
@@ -340,48 +341,117 @@ class CommentsSerializer(serializers.ModelSerializer):
         model = DMS_Comments
         exclude = ['alert_id','comm_modified_by','comm_modified_date']
 
+# class Incident_Serializer(serializers.ModelSerializer):
+#     responder_scope = serializers.ListField(child=serializers.CharField(), write_only=True)
+#     comments = serializers.CharField(write_only=True)
+#     comm_added_by = serializers.CharField(write_only=True)
+
+#     class Meta:
+#         model = DMS_Incident
+#         fields = '__all__'
+#         extra_fields = ['latitude','longitude','responder_scope', 'comments', 'comm_added_by']
+
+#     def create(self, validated_data):
+#         responder_scope = validated_data.pop('responder_scope', [])
+#         comments_text = validated_data.pop('comments')
+#         comm_added_by = validated_data.pop('comm_added_by')
+
+#         incident = DMS_Incident.objects.create(
+#             responder_scope=responder_scope,
+#             **validated_data
+#         )
+
+#         notify = DMS_Notify.objects.create(
+#             alert_type_id=responder_scope,
+#             disaster_type=incident.disaster_type,
+#             not_added_by=incident.inc_added_by,
+#             incident_id=incident  
+#         )
+
+#         incident.notify_id = notify
+#         incident.save(update_fields=['notify_id'])
+
+
+#         comment = DMS_Comments.objects.create(
+#             alert_id=incident.alert_id,
+#             incident_id=incident,
+#             comments=comments_text,
+#             comm_added_by=comm_added_by
+#         )
+
+#         incident.comment_id = comment
+#         incident.save(update_fields=['comment_id'])
+
+#         return incident
+
+
+
 class Incident_Serializer(serializers.ModelSerializer):
-    responder_scope = serializers.ListField(child=serializers.CharField(), write_only=True)
+    responder_scope = serializers.PrimaryKeyRelatedField(
+        queryset=DMS_Responder.objects.all(), many=True, write_only=True
+    )
+    vehicle = serializers.ListField(
+        child=serializers.CharField(), write_only=True, required=False
+    )
     comments = serializers.CharField(write_only=True)
     comm_added_by = serializers.CharField(write_only=True)
 
     class Meta:
         model = DMS_Incident
         fields = '__all__'
-        extra_fields = ['latitude','longitude','responder_scope', 'comments', 'comm_added_by']
+        extra_fields = [
+            'latitude', 'longitude', 'responder_scope',
+            'vehicle', 'comments', 'comm_added_by'
+        ]
 
     def create(self, validated_data):
         responder_scope = validated_data.pop('responder_scope', [])
+        vehicle_list = validated_data.pop('vehicle', [])
         comments_text = validated_data.pop('comments')
         comm_added_by = validated_data.pop('comm_added_by')
 
-        incident = DMS_Incident.objects.create(
-            responder_scope=responder_scope,
-            **validated_data
-        )
+        # Create incident first
+        incident = DMS_Incident.objects.create(**validated_data)
 
+        # Add responders
+        incident.responder_scope.set(responder_scope)
+
+        # Create notify
         notify = DMS_Notify.objects.create(
-            alert_type_id=responder_scope,
             disaster_type=incident.disaster_type,
             not_added_by=incident.inc_added_by,
-            incident_id=incident  
+            incident_id=incident
         )
-
+        notify.alert_type_id.set(responder_scope)
         incident.notify_id = notify
         incident.save(update_fields=['notify_id'])
 
-
+        # Create comment
         comment = DMS_Comments.objects.create(
             alert_id=incident.alert_id,
             incident_id=incident,
             comments=comments_text,
             comm_added_by=comm_added_by
         )
-
         incident.comment_id = comment
         incident.save(update_fields=['comment_id'])
 
+        for veh_id in vehicle_list:
+            try:
+                veh = Vehical.objects.get(veh_id=veh_id)
+                incident_vehicles.objects.create(
+                    incident_id=incident,
+                    veh_id=veh,
+                    dep_id=veh.dep_id if hasattr(veh, 'dep_id') else None,
+                    status=1,
+                    added_by=incident.inc_added_by
+                )
+            except Vehical.DoesNotExist:
+                # skip if invalid vehicle number
+                continue
+
         return incident
+
 
 
         
