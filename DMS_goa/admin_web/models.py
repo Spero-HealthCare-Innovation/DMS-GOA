@@ -523,11 +523,7 @@ class DMS_Incident(models.Model):
     inc_id = models.AutoField(primary_key=True)
     incident_id = models.CharField(max_length=255, unique=True, blank=True)
     # responder_scope = models.JSONField(null=True,blank=True)
-    responder_scope = models.ManyToManyField(
-        'DMS_Disaster_Responder',
-        blank=True,
-        related_name='disaster_scopes'
-    )
+    responder_scope = models.ManyToManyField('DMS_Responder',blank=True)
     alert_id = models.ForeignKey(Weather_alerts,on_delete=models.CASCADE,null=True,blank=True)
     caller_id = models.ForeignKey(DMS_Caller,on_delete=models.CASCADE,null=True,blank=True)
     notify_id = models.ForeignKey('DMS_Notify',on_delete=models.CASCADE,null=True,blank=True)

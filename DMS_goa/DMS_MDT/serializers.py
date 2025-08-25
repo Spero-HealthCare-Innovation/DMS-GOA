@@ -67,3 +67,13 @@ class Vehical_department_wise_serializer(serializers.ModelSerializer):
     class Meta:
         model = Vehical
         fields = ["veh_id","veh_number"] 
+
+class base_location_vehicle_serializer(serializers.ModelSerializer):
+    class Meta:
+        model = Vehical_base_location
+        fields = "__all__"
+        
+class vehicle_serializer(serializers.ModelSerializer):
+    class Meta:
+        model = Vehical
+        fields = "__all__"
