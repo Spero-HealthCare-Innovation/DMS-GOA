@@ -5,6 +5,15 @@ from django.contrib.auth.hashers import make_password
 from django.utils import timezone
 
 
+
+class pcr_status_enum(enum.Enum):
+    Pending = 1
+    Inprogress = 2
+    Complete = 3
+    __default__ = Pending
+     
+ 
+
 class status_enum(enum.Enum):
 	Active = 1
 	Inactive = 2
@@ -147,23 +156,25 @@ class incident_vehicles(models.Model):
     veh_id = models.ForeignKey(Vehical, on_delete=models.CASCADE, to_field='veh_number', null=True)
     dep_id = models.ForeignKey("admin_web.DMS_Department", on_delete=models.CASCADE,null=True, blank=True)
     status = enum.EnumField(status_enum, null=True)
-    added_by = models.CharField(max_length=100, null=True)
-    added_date = models.DateTimeField(auto_now_add=True)
-    modify_by = models.CharField(max_length=100, null=True)
-    modify_date = models.DateTimeField(auto_now=True)
-    
-    
-class incident_wise_vehicle(models.Model):
-    inc_veh_id = models.AutoField(primary_key=True)
-    incident_id=models.ForeignKey(DMS_Incident,on_delete=models.CASCADE,null=True,blank=True)
-    veh_id = models.ForeignKey(Vehical, on_delete=models.CASCADE, to_field='veh_number', null=True)
-    dep_id = models.ForeignKey(DMS_Department, on_delete=models.CASCADE,null=True, blank=True)
     jobclosure_status = enum.EnumField(jobclosure_status, null=True)
-    status = enum.EnumField(status_enum, null=True)
+    pcr_status = enum.EnumField(pcr_status_enum, null=True)
     added_by = models.CharField(max_length=100, null=True)
     added_date = models.DateTimeField(auto_now_add=True)
     modify_by = models.CharField(max_length=100, null=True)
     modify_date = models.DateTimeField(auto_now=True)
+    
+    
+# class incident_wise_vehicle(models.Model):
+#     inc_veh_id = models.AutoField(primary_key=True)
+#     incident_id=models.ForeignKey("admin_web.DMS_Incident",on_delete=models.CASCADE,null=True,blank=True)
+#     veh_id = models.ForeignKey(Vehical, on_delete=models.CASCADE, to_field='veh_number', null=True)
+#     dep_id = models.ForeignKey("admin_web.DMS_Department", on_delete=models.CASCADE,null=True, blank=True)
+#     jobclosure_status = enum.EnumField(jobclosure_status, null=True)
+#     status = enum.EnumField(status_enum, null=True)
+#     added_by = models.CharField(max_length=100, null=True)
+#     added_date = models.DateTimeField(auto_now_add=True)
+#     modify_by = models.CharField(max_length=100, null=True)
+#     modify_date = models.DateTimeField(auto_now=True)
     
     
     
@@ -171,7 +182,7 @@ class incident_wise_vehicle(models.Model):
 class PcrReport(models.Model):
     pcr_id = models.TextField(primary_key=True)
 
-    incident_id = models.ForeignKey(DMS_Incident, on_delete=models.CASCADE, null=True)
+    incident_id = models.ForeignKey("admin_web.DMS_Incident", on_delete=models.CASCADE, null=True)
     amb_no = models.TextField(null=True, blank=True)
     status = enum.EnumField(PcrStatusEnum, null=True)
 

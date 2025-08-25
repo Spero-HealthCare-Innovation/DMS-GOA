@@ -152,12 +152,6 @@ class get_vehicle(APIView):
         return Response(veh_serializer.data, status=status.HTTP_200_OK)
 
     
-
-class get_incident_wise_vehicle(APIView):
-    def get(self, request):
-        inc_veh = incident_wise_vehicle.objects.filter(status=1)
-        inc_veh_serialiZers = inc_veh_serialiZers(inc_veh, many=True)
-        return Response(inc_veh_serialiZers.data, status=status.HTTP_200_OK)
     
 class emp_clockinout(APIView):
     def post(self, request):
