@@ -2,6 +2,8 @@ from django.db import models
 from admin_web.models import *
 from django_enumfield import enum
 from django.contrib.auth.hashers import make_password
+from django.utils import timezone
+
 
 class status_enum(enum.Enum):
 	Active = 1
@@ -31,6 +33,17 @@ class jobclosure_status(enum.Enum):
     pending = 2
 
     __default__ = pending 
+    
+    
+class PcrStatusEnum(enum.Enum):
+    Acknowledge = 1
+    StartedFromBase = 2
+    AtScene = 3
+    DepartedFromScene = 4
+    BackToBase = 5
+    Abandoned = 6
+
+    __default__ = Acknowledge
 
 class Vehical_base_location(models.Model):
     bs_id = models.AutoField(primary_key=True)
@@ -139,3 +152,60 @@ class incident_vehicles(models.Model):
     modify_by = models.CharField(max_length=100, null=True)
     modify_date = models.DateTimeField(auto_now=True)
     
+    
+class incident_wise_vehicle(models.Model):
+    inc_veh_id = models.AutoField(primary_key=True)
+    incident_id=models.ForeignKey(DMS_Incident,on_delete=models.CASCADE,null=True,blank=True)
+    veh_id = models.ForeignKey(Vehical, on_delete=models.CASCADE, to_field='veh_number', null=True)
+    dep_id = models.ForeignKey(DMS_Department, on_delete=models.CASCADE,null=True, blank=True)
+    jobclosure_status = enum.EnumField(jobclosure_status, null=True)
+    status = enum.EnumField(status_enum, null=True)
+    added_by = models.CharField(max_length=100, null=True)
+    added_date = models.DateTimeField(auto_now_add=True)
+    modify_by = models.CharField(max_length=100, null=True)
+    modify_date = models.DateTimeField(auto_now=True)
+    
+    
+    
+
+class PcrReport(models.Model):
+    pcr_id = models.TextField(primary_key=True)
+
+    incident_id = models.ForeignKey(DMS_Incident, on_delete=models.CASCADE, null=True)
+    amb_no = models.TextField(null=True, blank=True)
+    status = enum.EnumField(PcrStatusEnum, null=True)
+
+    acknowledge_time = models.DateTimeField(null=True, blank=True)
+    acknowledge_lat = models.FloatField(null=True, blank=True)
+    acknowledge_lng = models.FloatField(null=True, blank=True)
+
+    start_from_base_time = models.DateTimeField(null=True, blank=True)
+    start_fr_bs_loc_lat = models.FloatField(null=True, blank=True)
+    start_fr_bs_loc_lng = models.FloatField(null=True, blank=True)
+
+    at_scene_time = models.DateTimeField(null=True, blank=True)
+    at_scene_remark = models.TextField(null=True, blank=True)
+    at_scene_photo = models.FileField(upload_to='media_files/at_scene_photo/', null=True)
+    at_scene_lat = models.FloatField(null=True, blank=True)
+    at_scene_lng = models.FloatField(null=True, blank=True)
+
+    from_scene_time = models.DateTimeField(null=True, blank=True)
+    from_scene_photo = models.FileField(upload_to='media_files/from_scene_photo/', null=True)
+    from_scene_remark = models.TextField(null=True, blank=True)
+    from_scene_lat = models.FloatField(null=True, blank=True)
+    from_scene_lng = models.FloatField(null=True, blank=True)
+
+    back_to_base_time = models.DateTimeField(null=True, blank=True)
+    back_to_bs_loc_lat = models.FloatField(null=True, blank=True)
+    back_to_bs_loc_lng = models.FloatField(null=True, blank=True)
+
+    abandoned_time = models.DateTimeField(null=True, blank=True)
+    abandoned_lat = models.FloatField(null=True, blank=True)
+    abandoned_lng = models.FloatField(null=True, blank=True)
+
+    added_date = models.DateTimeField(auto_now_add=True)
+    updated_date = models.DateTimeField(auto_now=True)  
+    added_by = models.TextField(null=True, blank=True)
+
+    class Meta:
+        db_table = "pcr_report"

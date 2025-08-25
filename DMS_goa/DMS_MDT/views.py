@@ -1,9 +1,13 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from .serializers import *  
+from .models import *
 from django.contrib.auth import authenticate
 from rest_framework_simplejwt.tokens import RefreshToken, TokenError
 from rest_framework import status
+from rest_framework.decorators import api_view
+from django.utils import timezone
+
 
 class Register_veh(APIView):
     def post(self, request):
@@ -196,5 +200,79 @@ class Vehical_department_wise(APIView):
 # clockTime:2025-05-22 14:32:19
 # clock_out_in_status:in
 
+@api_view(["POST"])
+def update_pcr_report(request):
+    data = request.data
 
+    inc_id = data.get("inc_id")
+    status_code = int(data.get("status"))
+    ambulance_no = data.get("ambulance_no")
+    lat = data.get("lat")
+    lng = data.get("lng")
+    at_scene_remark = data.get("at_scene_remark")
+    from_scene_remark = data.get("from_scene_remark")
+    at_scene_photo = request.FILES.get("at_scene_photo")
+    from_scene_photo = request.FILES.get("from_scene_photo")
+
+    try:
+        # ✅ record get or create (based on incident id)
+        report, created = PcrReport.objects.get_or_create(
+            incident_id=inc_id,
+            defaults={"pcr_id": inc_id, "amb_no": ambulance_no}
+        )
+
+        report.status = status_code
+        report.amb_no = ambulance_no
+
+        # ✅ Enum wise updates
+        if status_code == PcrStatusEnum.Acknowledge.value:
+            report.acknowledge_time = timezone.now()
+            report.acknowledge_lat = lat
+            report.acknowledge_lng = lng
+
+        elif status_code == PcrStatusEnum.StartedFromBase.value:
+            report.start_from_base_time = timezone.now()
+            report.start_fr_bs_loc_lat = lat
+            report.start_fr_bs_loc_lng = lng
+
+        elif status_code == PcrStatusEnum.AtScene.value:
+            report.at_scene_time = timezone.now()
+            report.at_scene_lat = lat
+            report.at_scene_lng = lng
+            if at_scene_remark:
+                report.at_scene_remark = at_scene_remark
+            if at_scene_photo:
+                report.at_scene_photo = at_scene_photo
+
+        elif status_code == PcrStatusEnum.DepartedFromScene.value:
+            report.from_scene_time = timezone.now()
+            report.from_scene_lat = lat
+            report.from_scene_lng = lng
+            if from_scene_remark:
+                report.from_scene_remark = from_scene_remark
+            if from_scene_photo:
+                report.from_scene_photo = from_scene_photo
+
+        elif status_code == PcrStatusEnum.BackToBase.value:
+            report.back_to_base_time = timezone.now()
+            report.back_to_bs_loc_lat = lat
+            report.back_to_bs_loc_lng = lng
+
+        elif status_code == PcrStatusEnum.Abandoned.value:
+            report.abandoned_time = timezone.now()
+            report.abandoned_lat = lat
+            report.abandoned_lng = lng
+
+        report.save()
+
+        return Response(
+            {"message": "PCR Report updated successfully", "status": "success"},
+            status=status.HTTP_200_OK
+        )
+
+    except Exception as e:
+        return Response(
+            {"message": f"Error: {str(e)}", "status": "failed"},
+            status=status.HTTP_400_BAD_REQUEST
+        )
 

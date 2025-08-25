@@ -12,5 +12,7 @@ urlpatterns = [
     path('Vehical_department_wise/',Vehical_department_wise.as_view()),
     path('vehical_base_loc/',get_base_location_vehicle.as_view()),
     path('vehical/',get_vehicle.as_view()),
+    path("parametersdetails/", update_pcr_report, name="update_pcr_report"),
+    
 ]
  
