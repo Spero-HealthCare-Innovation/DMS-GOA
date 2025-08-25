@@ -153,7 +153,7 @@ class employee_clockin_info(models.Model):
 class incident_vehicles(models.Model):
     inc_veh_id = models.AutoField(primary_key=True)
     incident_id=models.ForeignKey("admin_web.DMS_Incident",on_delete=models.CASCADE,null=True,blank=True)
-    veh_id = models.ForeignKey(Vehical, on_delete=models.CASCADE, to_field='veh_number', null=True)
+    veh_id = models.ForeignKey(Vehical, on_delete=models.CASCADE,null=True)
     dep_id = models.ForeignKey("admin_web.DMS_Department", on_delete=models.CASCADE,null=True, blank=True)
     status = enum.EnumField(status_enum, null=True)
     jobclosure_status = enum.EnumField(jobclosure_status, null=True)

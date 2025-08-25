@@ -579,15 +579,9 @@ def get_disaster_name(disaster_id):
 def get_user_id(user_id):
     try:
         print("******************************GOT THE EMP ID *****************************")
-<<<<<<< HEAD
-        user_obj = DMS_Employee.objects.get(emp_id=user_id)
-        return user_obj.emp_name
-    except DMS_Employee.DoesNotExist:
-=======
         user_obj = DMS_User.objects.get(user_id=user_id)
         return user_obj.user_username
     except DMS_User.DoesNotExist:
->>>>>>> UserTable
         return None
 
 
