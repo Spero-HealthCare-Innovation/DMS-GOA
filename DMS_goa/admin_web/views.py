@@ -712,7 +712,9 @@ class DMS_Alert_idwise_get_api(APIView):
     
 class DMS_Incident_Post_api(APIView):
     def post(self,request):
+        print("hiiiiiii--post", request.data)
         serializers=Incident_Serializer(data=request.data)
+        # print("hiiiiiii--post1", serializers.data)
         if serializers.is_valid():
             serializers.save()
             print(serializers.data.get('inc_id'))
@@ -945,6 +947,26 @@ class Manual_Call_Incident_api(APIView):
         if not incident_serializer.is_valid():
             return Response({"incident_errors": incident_serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
         incident_instance = incident_serializer.save()
+
+        # After incident_instance.save()
+        vehicle_list = data.get("vehicle", [])
+        if vehicle_list:
+            for veh_id in vehicle_list:
+                try:
+                    print(f"Trying to fetch vehicle with veh_number={veh_id}")
+                    veh = Vehical.objects.get(veh_id=veh_id)
+                    incident_vehicles.objects.create(
+                        incident_id=incident_instance,
+                        veh_id=veh,
+                        dep_id=veh.dep_id if hasattr(veh, 'dep_id') else None,
+                        status=1, 
+                        added_by=incident_instance.inc_added_by
+                    )
+                    print(f"incident_vehicles created for veh_id={veh_id}")
+                except Vehical.DoesNotExist:
+                    print(f"Vehicle not found: veh_id={veh_id}")
+
+
         base_code = incident_instance.incident_id
         alert_code = f"CALL-{base_code}"
         incident_instance.alert_code = alert_code
@@ -989,7 +1011,8 @@ class Manual_Call_Incident_api(APIView):
         dms_notify_data = {
             "incident_id": incident_instance.inc_id,
             "disaster_type": incident_instance.disaster_type.pk if incident_instance.disaster_type else None,
-            "alert_type_id": incident_instance.responder_scope,
+            # "alert_type_id": incident_instance.responder_scope,
+            "alert_type_id": list(incident_instance.responder_scope.values_list("pk", flat=True)),  # ✅ pass list of responder IDs
             "added_by": incident_instance.inc_added_by
         }
         print("DMS notify data:", dms_notify_data)
