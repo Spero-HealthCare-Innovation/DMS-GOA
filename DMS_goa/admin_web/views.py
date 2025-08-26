@@ -1055,21 +1055,26 @@ class Manual_Call_Incident_api(APIView):
 
 
 
-
-
-
 class Responder_Scope_Get_api(APIView):
     def get(self, request, disaster_id):
+        print("disaster_id--", disaster_id)
+
+        # Get SOPs related to the disaster
         sop_responses = DMS_SOP.objects.filter(disaster_id=disaster_id)
         sop_serializer = Sop_Response_Procedure_Serializer(sop_responses, many=True)
 
-        disaster_responders = DMS_Disaster_Responder.objects.filter(dr_is_deleted=False, dis_id=disaster_id)
+        # Get all disaster responders for the disaster
+        disaster_responders = DMS_Disaster_Responder.objects.filter(
+            dr_is_deleted=False,
+            dis_id=disaster_id
+        )
+        print("disaster_responders--", disaster_responders)
 
         responder_scope_data = []
 
         for dr in disaster_responders:
-            res_ids = dr.res_id if isinstance(dr.res_id, list) else []
-            responders = DMS_Responder.objects.filter(responder_id__in=res_ids)
+            # res_id is ManyToMany → use .all()
+            responders = dr.res_id.all()
             for responder in responders:
                 responder_scope_data.append({
                     "res_id": responder.responder_id,
