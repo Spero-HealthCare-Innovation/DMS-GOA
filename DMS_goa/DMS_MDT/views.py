@@ -3,6 +3,7 @@ from rest_framework.response import Response
 from .serializers import *  
 from .models import *
 from django.contrib.auth import authenticate
+import hashlib
 from rest_framework_simplejwt.tokens import RefreshToken, TokenError
 from rest_framework import status
 from rest_framework.decorators import api_view
@@ -135,6 +136,7 @@ class add_device(APIView):
         
         device = add_device_serializer(data=data)
         if device.is_valid():
+            device.save()
             return Response(device.data, status=status.HTTP_201_CREATED)
         else:
             return Response (device.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -294,3 +296,55 @@ class get_assign_inc_calls(APIView):
         inc_veh = incident_vehicles.objects.filter(veh_id__user = user_id, status=1)
         inc_veh_serializer = incident_veh_serializer(inc_veh, many=True)
         return Response(inc_veh_serializer.data, status=status.HTTP_200_OK)
+
+class vehicleotp(APIView):
+    def post(self, request):
+        vehicle_number = request.data.get('vehicleNumber')
+        password = request.data.get('password')  # This should be MD5 hashed from client
+
+        if not all([vehicle_number, password]):
+            return Response({
+                "data": None,
+                "error": {
+                    "code": 1,
+                    "message": 'Missing required fields'
+                }
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+        try:
+            user = authenticate(user_username=vehicle_number, password=password)
+            if not user:
+                return Response({
+                    "data": None,
+                    "error": {
+                        "code": 1,
+                        "message": 'Invalid credentials'
+                    }
+                }, status=status.HTTP_401_UNAUTHORIZED)
+
+            user_obj = DMS_User.objects.filter(user_username=vehicle_number, user_is_deleted=False).last()
+            if not user_obj:
+                return Response({
+                    "data": None,
+                    "error": {
+                        "code": 1,
+                        "message": 'User not found'
+                    }
+                }, status=status.HTTP_404_NOT_FOUND)
+
+            return Response({
+                    "data": {
+                        "type": 1,
+                        "isGovtAmbulance": True
+                    },
+                    "error": None
+                }, status=status.HTTP_200_OK)
+            
+        except Exception as e:
+            return Response({
+                "data": None,
+                "error": {
+                    "code": 1,
+                    "message": 'Vehicle Number not registered'
+                }
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
