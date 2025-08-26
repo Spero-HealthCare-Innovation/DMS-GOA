@@ -671,7 +671,8 @@ class DMS_Disaster_Responder(models.Model):
     # res_id = models.JSONField()
     res_id = models.ManyToManyField(
         'DMS_Responder',
-        blank=True
+        blank=True,
+        null=True
     )
     dis_id = models.ForeignKey(DMS_Disaster_Type,on_delete=models.CASCADE,null=True, blank=True)
     dr_is_deleted = models.BooleanField(default=False)
