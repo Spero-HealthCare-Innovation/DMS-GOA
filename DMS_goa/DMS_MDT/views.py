@@ -7,7 +7,7 @@ from rest_framework_simplejwt.tokens import RefreshToken, TokenError
 from rest_framework import status
 from rest_framework.decorators import api_view
 from django.utils import timezone
-
+from admin_web.models import *
 
 class Register_veh(APIView):
     def post(self, request):
@@ -270,3 +270,11 @@ def update_pcr_report(request):
             status=status.HTTP_400_BAD_REQUEST
         )
 
+
+
+class get_assign_inc_calls(APIView):
+    def get(self, request):
+        user_id = request.GET.get("userId")
+        inc_veh = incident_vehicles.objects.filter(veh_id__user = user_id, status=1)
+        inc_veh_serializer = incident_veh_serializer(inc_veh, many=True)
+        return Response(inc_veh_serializer.data, status=status.HTTP_200_OK)
