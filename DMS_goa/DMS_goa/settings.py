@@ -52,7 +52,6 @@ INSTALLED_APPS = [
     "corsheaders",
     "captcha",
     "DMS_MDT",
-    'Spero_DMS',
 
 ]
 
