@@ -257,6 +257,13 @@ def update_pcr_report(request):
             report.abandoned_lat = lat
             report.abandoned_lng = lng
 
+        # ✅ Extra handling for incident_vehicles
+        if status_code == 1:  # Acknowledge
+            incident_vehicles.objects.filter(incident_id=inc_id).update(pcr_status=2)
+
+        elif status_code == 6:  # Back to Base
+            incident_vehicles.objects.filter(incident_id=inc_id).update(pcr_status=3)
+
         report.save()
 
         return Response(
