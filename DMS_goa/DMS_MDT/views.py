@@ -359,7 +359,8 @@ def update_pcr_report(request):
 
 class get_assign_inc_calls(APIView):
     def get(self, request):
-        user_id = request.GET.get("userId")
+        user_id = request.user.user_id
+        print("user id in assign inc call", user_id)
         inc_veh = incident_vehicles.objects.filter(veh_id__user = user_id, status=1, jobclosure_status=2).order_by("-added_date")
         assign_inc_objs_arr = []
         for veh in inc_veh:
