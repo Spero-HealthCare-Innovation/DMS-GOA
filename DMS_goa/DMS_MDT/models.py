@@ -183,7 +183,7 @@ class PcrReport(models.Model):
     pcr_id = models.TextField(primary_key=True)
 
     incident_id = models.ForeignKey("admin_web.DMS_Incident", on_delete=models.CASCADE, null=True)
-    amb_no = models.TextField(null=True, blank=True)
+    amb_no = models.ForeignKey(Vehical, on_delete=models.CASCADE, null=True)
     status = enum.EnumField(PcrStatusEnum, null=True)
 
     acknowledge_time = models.DateTimeField(null=True, blank=True)
