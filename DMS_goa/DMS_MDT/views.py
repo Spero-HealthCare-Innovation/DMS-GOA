@@ -134,8 +134,11 @@ class add_device(APIView):
         data['date_time'] = request.data.get('deviceCurrentTimestamp')
         data['device_token'] = request.data.get('token')
         data['model_name'] = request.data.get('modelName')
-        
-        device = add_device_serializer(data=data)
+        if request.data['deviceId'] != 0:
+            device = Device_version.objects.filter(device_id=request.data['deviceId']).last()
+            device = add_device_serializer(device,data=data)
+        else:
+            device = add_device_serializer(data=data)
         if device.is_valid():
             device.save()
             if device.data['device_platform']== 'Android':
@@ -211,7 +214,7 @@ class get_vehicle(APIView):
             v_data = {
                 "veh_id": v.veh_id,
                 "veh_number": v.veh_number,  
-                "veh_base_location": v.veh_base_location.bs_name,  
+                "veh_base_location": v.veh_base_location.bs_name if v.veh_base_location and v.veh_base_location.bs_name else None,  
                 "veh_app_lat": v.veh_app_lat,
                 "veh_app_log": v.veh_app_log,
                 "veh_gps_lat": v.veh_gps_lat,
@@ -519,11 +522,13 @@ class closure_Post_api_app(APIView):
             invh_dtl = incident_vehicles.objects.filter(veh_id=vehicl_dtls,jobclosure_status=0)
             if invh_dtl.exists() and invh_dtl.exclude(jobclosure_status=1).exists():
                 vehicl_dtls.update(vehical_status=1)
-            return Response({"msg": f"Closure for {dpt_dtl.responder_name} - {vehicl_dtls.veh_number} is done",}, status=status.HTTP_201_CREATED)
+            # return Response({"msg": f"Closure for {dpt_dtl.responder_name} - {vehicl_dtls.veh_number} is done",}, status=status.HTTP_201_CREATED)
+            return Response({"data": {"code": 1,"message": "Case Closure Successfully"},"error": None})
         except DMS_Incident.DoesNotExist:
-            return Response({"error": "Incident not found."}, status=status.HTTP_404_NOT_FOUND)
+            return Response({"data": None,"error": {"code": 1,"message": "Case Closure Not Successfully"}})
         except DMS_Department.DoesNotExist:
-            return Response({"error": "Department not found."}, status=status.HTTP_404_NOT_FOUND)
+            return Response({"data": None,"error": {"code": 1,"message": "Case Closure Not Successfully"}})
         except Exception as e:
-            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            # return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response({"data": None,"error": {"code": 1,"message": "Case Closure Not Successfully"},"ex_error": str(e)})
         
