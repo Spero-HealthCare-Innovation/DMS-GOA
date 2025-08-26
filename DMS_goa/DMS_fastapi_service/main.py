@@ -884,9 +884,12 @@ async def websocket_trigger2(websocket: WebSocket):
     user_id = get_user_from_token(token)
     if user_id:
         user_obj = await get_user_by_emp_id(user_id)
-        user_exist = user_obj.emp_id
-        print("user obj-----", user_obj.emp_id)
-        user_IDdd = await get_user_id(user_obj.emp_id)
+        user_exist = user_obj.user_id
+        print("user obj-----", user_obj.user_id)
+        user_IDdd = await get_user_id(user_obj.user_id)
+        # user_exist = user_obj.emp_id
+        # print("user obj-----", user_obj.emp_id)
+        # user_IDdd = await get_user_id(user_obj.emp_id)
         print("MAIN.py user idd function called-----", user_IDdd)
 
     if user_exist == 0:
