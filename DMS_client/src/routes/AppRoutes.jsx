@@ -7,6 +7,7 @@ import SopRegister from "../Componenets/SuperAdmin/SOP/SopRegister";
 import RegisterResponder from "../Componenets/SuperAdmin/Responder/RegisterResponder";
 import ProtectedLoginRoute from "../Componenets/Login/ProtectedLoginRoute";
 import IncidentReport from "../Componenets/SuperAdmin/Incident/IncidentReport";
+import Permission from "../Componenets/SuperAdmin/System/Permission/Permission";
 const Login = lazy(() => import("../Componenets/Login/Login"));
 const Sop = lazy(() => import("../Componenets/DispatchModule/SOP/Sop"));
 const AlertPanel = lazy(() => import("../Componenets/DispatchModule/AlertPanel/AlertPanel"));
@@ -81,7 +82,7 @@ const AppRoutes = ({ darkMode, setIsLoggedIn }) => {
           }
         />
         <Route
-          path="/alert-panel"
+          path="/Alert---Panel"
           element={
             <PrivateRoute>
               <AlertPanel darkMode={darkMode} />
@@ -129,7 +130,7 @@ const AppRoutes = ({ darkMode, setIsLoggedIn }) => {
           }
         />
         <Route
-          path="/Register Sop"
+          path="/Register-Sop"
           element={
             <PrivateRoute>
               <SopRegister darkMode={darkMode} />
@@ -145,7 +146,7 @@ const AppRoutes = ({ darkMode, setIsLoggedIn }) => {
           }
         />
         <Route
-          path="/Closure Report"
+          path="/Closure-Report"
           element={
             <PrivateRoute>
               <ClosureDetail darkMode={darkMode} />
@@ -153,10 +154,18 @@ const AppRoutes = ({ darkMode, setIsLoggedIn }) => {
           }
         />
          <Route
-          path="/Incident Report"
+          path="/Incident-Report"
           element={
             <PrivateRoute>
               <IncidentReport darkMode={darkMode} />
+            </PrivateRoute>
+          }
+        />
+         <Route
+          path="/Permission"
+          element={
+            <PrivateRoute>
+              <Permission darkMode={darkMode} />
             </PrivateRoute>
           }
         />
