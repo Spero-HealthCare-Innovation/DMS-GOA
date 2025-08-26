@@ -123,12 +123,21 @@ class employee_list(APIView):
     
 class add_device(APIView):
     def post(self,request):
-        device = add_device_serializer(data=request.data)
+        print(request.data,'1')
+        data = {}
+        data['os_version'] = request.data.get('osVersion')
+        data['device_platform'] = 1 if request.data.get('devicePlatform') == 'Android' else 2 if request.data.get('devicePlatform') == 'iOS' else None
+        data['app_version'] = request.data.get('appVersion')
+        data['device_timezone'] = request.data.get('deviceTimezone')
+        data['date_time'] = request.data.get('deviceCurrentTimestamp')
+        data['device_token'] = request.data.get('token')
+        data['model_name'] = request.data.get('modelName')
+        
+        device = add_device_serializer(data=data)
         if device.is_valid():
             return Response(device.data, status=status.HTTP_201_CREATED)
         else:
             return Response (device.errors, status=status.HTTP_400_BAD_REQUEST)
-        
 class get_base_location_vehicle(APIView):
     def get(self, request):
         veh_base = Vehical_base_location.objects.filter(status=1)
@@ -282,6 +291,29 @@ def update_pcr_report(request):
 class get_assign_inc_calls(APIView):
     def get(self, request):
         user_id = request.GET.get("userId")
-        inc_veh = incident_vehicles.objects.filter(veh_id__user = user_id, status=1)
-        inc_veh_serializer = incident_veh_serializer(inc_veh, many=True)
-        return Response(inc_veh_serializer.data, status=status.HTTP_200_OK)
+        inc_veh = incident_vehicles.objects.filter(veh_id__user = user_id, status=1, jobclosure_status=2).order_by("-added_date")
+        assign_inc_objs_arr = []
+        for veh in inc_veh:
+            assign_inc_obj = {
+                "incidentId": veh.incident_id.inc_id,
+                "incidentDate": veh.incident_id.inc_added_date,
+                "incidentTime": veh.incident_id.inc_added_date,
+                "callType": veh.incident_id.disaster_type.disaster_name,
+                "lat": veh.incident_id.latitude,
+                "long": veh.incident_id.longitude,
+                "incidentAddress": veh.incident_id.location,
+                "incidentStatus": veh.pcr_status,
+                "currentStatus": {
+                    "code": 5,
+                    "outOfSych": "false",
+                    "message": "Already back to base"
+                },
+                "incidentCallsStatus": "In-progress",
+                "clikable": "true",
+                "progress": "true",
+                "completed": "false",
+                "onsceneCare": None
+            }
+            assign_inc_objs_arr.append(assign_inc_obj)
+        # inc_veh_serializer = incident_veh_serializer(inc_veh, many=True)
+        return Response({"data": assign_inc_objs_arr}, status=status.HTTP_200_OK)

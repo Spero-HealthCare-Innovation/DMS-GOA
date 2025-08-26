@@ -949,6 +949,27 @@ class Manual_Call_Incident_api(APIView):
         alert_code = f"CALL-{base_code}"
         incident_instance.alert_code = alert_code
         incident_instance.save()
+
+        vehicle_list = data.get("vehicle", [])
+        if vehicle_list:
+            for veh_id in vehicle_list:
+                try:
+                    print(f"Trying to fetch vehicle with veh_id={veh_id}")
+                    veh = Vehical.objects.get(veh_id=veh_id)
+                    veh.vehical_status = 2  # Mark vehicle as 'in use'
+                    veh.save(update_fields=['vehical_status'])
+                    incident_vehicles.objects.create(
+                        incident_id=incident_instance,
+                        veh_id=veh,  # FK is to_field='veh_id', so Vehical object works
+                        dep_id=veh.dep_id if hasattr(veh, 'dep_id') else None,
+                        status=1,   # or status_enum.ACTIVE
+                        added_by=incident_instance.inc_added_by
+                    )
+                    print(f"incident_vehicles created for veh_id={veh_id}")
+                except Vehical.DoesNotExist:
+                    print(f"Vehicle not found: veh_id={veh_id}")
+
+
         comments_data['incident_id'] = incident_instance.inc_id
         comments_serializer = manual_Comments_Serializer(data=comments_data)
         if not comments_serializer.is_valid():
@@ -989,7 +1010,7 @@ class Manual_Call_Incident_api(APIView):
         dms_notify_data = {
             "incident_id": incident_instance.inc_id,
             "disaster_type": incident_instance.disaster_type.pk if incident_instance.disaster_type else None,
-            "alert_type_id": incident_instance.responder_scope,
+            "alert_type_id": list(incident_instance.responder_scope.values_list("pk", flat=True)),
             "added_by": incident_instance.inc_added_by
         }
         print("DMS notify data:", dms_notify_data)
@@ -1055,21 +1076,26 @@ class Manual_Call_Incident_api(APIView):
 
 
 
-
-
-
 class Responder_Scope_Get_api(APIView):
     def get(self, request, disaster_id):
+        print("disaster_id--", disaster_id)
+
+        # Get SOPs related to the disaster
         sop_responses = DMS_SOP.objects.filter(disaster_id=disaster_id)
         sop_serializer = Sop_Response_Procedure_Serializer(sop_responses, many=True)
 
-        disaster_responders = DMS_Disaster_Responder.objects.filter(dr_is_deleted=False, dis_id=disaster_id)
+        # Get all disaster responders for the disaster
+        disaster_responders = DMS_Disaster_Responder.objects.filter(
+            dr_is_deleted=False,
+            dis_id=disaster_id
+        )
+        print("disaster_responders--", disaster_responders)
 
         responder_scope_data = []
 
         for dr in disaster_responders:
-            res_ids = dr.res_id if isinstance(dr.res_id, list) else []
-            responders = DMS_Responder.objects.filter(responder_id__in=res_ids)
+            # res_id is ManyToMany → use .all()
+            responders = dr.res_id.all()
             for responder in responders:
                 responder_scope_data.append({
                     "res_id": responder.responder_id,
