@@ -332,7 +332,7 @@ class vehicleotp(APIView):
                     "code": 1,
                     "message": 'Missing required fields'
                 }
-            }, status=status.HTTP_400_BAD_REQUEST)
+            }, status=status.HTTP_200_OK)
         
         try:
             user = authenticate(user_username=vehicle_number, password=password)
@@ -343,7 +343,7 @@ class vehicleotp(APIView):
                         "code": 1,
                         "message": 'Invalid credentials'
                     }
-                }, status=status.HTTP_401_UNAUTHORIZED)
+                }, status=status.HTTP_200_OK)
 
             user_obj = DMS_User.objects.filter(user_username=vehicle_number, user_is_deleted=False).last()
             if not user_obj:
@@ -353,7 +353,7 @@ class vehicleotp(APIView):
                         "code": 1,
                         "message": 'User not found'
                     }
-                }, status=status.HTTP_404_NOT_FOUND)
+                }, status=status.HTTP_200_OK)
 
             return Response({
                     "data": {
@@ -370,4 +370,4 @@ class vehicleotp(APIView):
                     "code": 1,
                     "message": 'Vehicle Number not registered'
                 }
-            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            }, status=status.HTTP_200_OK)
