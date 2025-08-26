@@ -671,8 +671,7 @@ class DMS_Disaster_Responder(models.Model):
     # res_id = models.JSONField()
     res_id = models.ManyToManyField(
         'DMS_Responder',
-        blank=True,
-        related_name='responder_ids'
+        blank=True
     )
     dis_id = models.ForeignKey(DMS_Disaster_Type,on_delete=models.CASCADE,null=True, blank=True)
     dr_is_deleted = models.BooleanField(default=False)
@@ -680,6 +679,8 @@ class DMS_Disaster_Responder(models.Model):
     dr_added_by = models.CharField(max_length=255, null=True, blank=True)
     dr_modified_by = models.CharField(max_length=255, null=True, blank=True)
     dr_modified_date = models.DateTimeField(null=True, blank=True)
+    
+    
 
 
 class DMS_incident_closure(models.Model):

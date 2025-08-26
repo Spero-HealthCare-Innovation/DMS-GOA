@@ -123,12 +123,21 @@ class employee_list(APIView):
     
 class add_device(APIView):
     def post(self,request):
-        device = add_device_serializer(data=request.data)
+        print(request.data,'1')
+        data = {}
+        data['os_version'] = request.data.get('osVersion')
+        data['device_platform'] = 1 if request.data.get('devicePlatform') == 'Android' else 2 if request.data.get('devicePlatform') == 'iOS' else None
+        data['app_version'] = request.data.get('appVersion')
+        data['device_timezone'] = request.data.get('deviceTimezone')
+        data['date_time'] = request.data.get('deviceCurrentTimestamp')
+        data['device_token'] = request.data.get('token')
+        data['model_name'] = request.data.get('modelName')
+        
+        device = add_device_serializer(data=data)
         if device.is_valid():
             return Response(device.data, status=status.HTTP_201_CREATED)
         else:
             return Response (device.errors, status=status.HTTP_400_BAD_REQUEST)
-        
 class get_base_location_vehicle(APIView):
     def get(self, request):
         veh_base = Vehical_base_location.objects.filter(status=1)
