@@ -13,7 +13,7 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         print(validated_data['veh_number'])
         print(validated_data['veh_default_mobile'])
-        grp_obj = DMS_Group.objects.get(grp_id=5)
+        grp_obj = DMS_Group.objects.get(grp_id=1)
         if Vehical.objects.filter(veh_number=validated_data['veh_number']).exists():
             raise serializers.ValidationError("Vehicle with this number already exists.")
         try:
@@ -59,7 +59,7 @@ class add_device_serializer(serializers.ModelSerializer):
     #     fields = ['device_version_id','os_name','os_version','app_location','app_current_version','app_compulsory_version']
     class Meta:
         model = Device_version
-        fields = ['os_version', 'device_platform', 'app_version', 'device_timezone', 'date_time', 'device_token', 'model_name']
+        fields = ['device_id','os_version', 'device_platform', 'app_version', 'device_timezone', 'date_time', 'device_token', 'model_name']
      
 class inc_veh_serialiZers(serializers.ModelSerializer):
     class Meta:
