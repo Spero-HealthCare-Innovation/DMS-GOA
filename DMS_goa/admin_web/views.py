@@ -40,7 +40,7 @@ from admin_web.utils.facebook_scraper import scrape_facebook_posts
 from admin_web.utils.twitter_scraper import scrape_pune_ems_tweets
 from admin_web.constants import KEYWORDS, PUNE_LOCATIONS, query
 from admin_web.utils.news_scraper import news_dms_scraper
-
+from DMS_MDT.models import employee_clockin_info
 
 class DMS_department_post_api(APIView):
     def post(self,request):
@@ -1340,32 +1340,34 @@ class closure_Post_api(APIView):
 class closure_Post_api_app(APIView):
     def post(self, request):
         try:
-            inccc = request.data.get('incident_id')
-            dpt = request.data.get('responder')
-            vehicle_no=request.data.get('vehicle_no')
-
-            vehicl_dtls = Vehical.objects.get(veh_id=vehicle_no)
+            inccc = request.data.get('incidentId')
+            vehicle_no=request.user
+            print(vehicle_no)
+            vehicl_dtls = Vehical.objects.get(veh_number=vehicle_no)
             inc_dtl = DMS_Incident.objects.get(incident_id=inccc)
-            dpt_dtl = DMS_Responder.objects.get(responder_name=dpt)  
+            dpt_dtl = vehicl_dtls.responder
             ex_cl_dtl = DMS_incident_closure.objects.filter(incident_id=inc_dtl, responder=dpt_dtl,vehicle_no=vehicl_dtls, closure_is_deleted=False)
             if ex_cl_dtl.exists():
                 return Response({"msg":f"Closure already done for incident {inc_dtl.incident_id} of that department/Responder {dpt_dtl.responder_name} with vehicle no {vehicle_no}"},
                                  status=status.HTTP_200_OK)
+            log_in_user = employee_clockin_info.objects.filter(veh_id=vehicl_dtls,clock_out_in_status=1,status=1)
+            print(vehicle_no)
             cls_dtl_add = DMS_incident_closure.objects.create(
                 incident_id=inc_dtl,
                 responder=dpt_dtl,
                 vehicle_no=vehicl_dtls,
-                closure_acknowledge=request.data.get('closure_acknowledge'),
-                closure_start_base_location=request.data.get('closure_start_base_location'),
-                closure_at_scene=request.data.get('closure_at_scene'),
-                closure_from_scene=request.data.get('closure_from_scene'),
-                closure_back_to_base=request.data.get('closure_back_to_base'),
-                closure_responder_name=request.data.get('closure_responder_name'),
+                closure_acknowledge=request.data.get('acknowledge'),
+                closure_start_base_location=request.data.get('startFromBaseLoc'),
+                closure_at_scene=request.data.get('atScene'),
+                closure_from_scene=request.data.get('fromScene'),
+                closure_back_to_base=request.data.get('backToBaseLoc'),
+                closure_responder_name=log_in_user.values_list('emp_id__emp_name', flat=True).first() if log_in_user.exists() else '',
                 closure_is_deleted=False,
-                closure_added_by=request.data.get('closure_added_by'),
-                closure_modified_by=request.data.get('closure_modified_by'),
-                closure_modified_date=request.data.get('closure_modified_date'),
-                closure_remark=request.data.get('closure_remark')
+                closure_added_by=request.user,
+                closure_added_date=datetime.now(),
+                closure_modified_by=request.user,
+                closure_modified_date=datetime.now(),
+                closure_remark=request.data.get('remark')
             )
             inc_vh = incident_vehicles.objects.filter(incident_id=inc_dtl, veh_id=vehicl_dtls, status=1)
             inc_vh.update(jobclosure_status=1)

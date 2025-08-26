@@ -6,6 +6,7 @@ urlpatterns = [
     path('Register_veh/', Register_veh.as_view()),
     path('vehicleotp',vehicleotp.as_view()),
     path('Checkpilotemtotp', VehicleLogin.as_view()),
+    path('userlist', userlist.as_view()),
     path('VehicleLogout/', VehicleLogout.as_view()),
     path('employee_list/', employee_list.as_view()),
     path('device', add_device.as_view()),
