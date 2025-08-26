@@ -371,3 +371,19 @@ class vehicleotp(APIView):
                     "message": 'Vehicle Number not registered'
                 }
             }, status=status.HTTP_200_OK)
+
+class userlist(APIView):
+    def get(self, request):
+        users = DMS_Employee.objects.filter(emp_is_deleted=False,user_id__user_is_deleted=False)
+        user_data = []
+        for user in users:
+            user_data.append({
+                "id": user.emp_id,
+                "name": user.emp_name,
+                "clg_name": user.user_id.user_id,
+                
+            })
+        return Response({
+            "data": user_data,
+            "error": None
+        }, status=status.HTTP_200_OK)
