@@ -51,8 +51,7 @@ INSTALLED_APPS = [
     'rest_framework',
     "corsheaders",
     "captcha",
-    "DMS_MDT",
-
+    "DMS_MDT"
 ]
 
 MIDDLEWARE = [
