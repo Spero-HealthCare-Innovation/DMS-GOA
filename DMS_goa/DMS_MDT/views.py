@@ -3,11 +3,13 @@ from rest_framework.response import Response
 from .serializers import *  
 from .models import *
 from django.contrib.auth import authenticate
+import hashlib
 from rest_framework_simplejwt.tokens import RefreshToken, TokenError
 from rest_framework import status
 from rest_framework.decorators import api_view
 from django.utils import timezone
 from admin_web.models import *
+import math
 
 class Register_veh(APIView):
     def post(self, request):
@@ -135,6 +137,7 @@ class add_device(APIView):
         
         device = add_device_serializer(data=data)
         if device.is_valid():
+            device.save()
             return Response(device.data, status=status.HTTP_201_CREATED)
         else:
             return Response (device.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -144,10 +147,30 @@ class get_base_location_vehicle(APIView):
         veh_base_serializer = base_location_vehicle_serializer(veh_base, many=True)
         return Response(veh_base_serializer.data, status=status.HTTP_200_OK)
     
+# class get_vehicle(APIView):
+#     def get(self, request):
+#         veh_base_location = request.GET.get("veh_base_loc")
+#         responder = request.GET.get("responder")
+#         lat = request.GET.get("lat")
+#         long = request.GET.get("long")
+
+#         veh = Vehical.objects.filter(status=1)
+
+#         if veh_base_location:
+#             veh = veh.filter(veh_base_location=veh_base_location)
+
+#         if responder:
+#             veh = veh.filter(responder=responder)
+
+#         veh_serializer = vehicle_serializer(veh, many=True)
+#         return Response(veh_serializer.data, status=status.HTTP_200_OK)
+
 class get_vehicle(APIView):
     def get(self, request):
         veh_base_location = request.GET.get("veh_base_loc")
         responder = request.GET.get("responder")
+        lat = request.GET.get("lat")
+        long = request.GET.get("long")
 
         veh = Vehical.objects.filter(status=1)
 
@@ -157,10 +180,58 @@ class get_vehicle(APIView):
         if responder:
             veh = veh.filter(responder=responder)
 
-        veh_serializer = vehicle_serializer(veh, many=True)
-        return Response(veh_serializer.data, status=status.HTTP_200_OK)
+        # Convert to float (only if lat/long provided)
+        try:
+            lat = float(lat)
+            long = float(long)
+        except (TypeError, ValueError):
+            lat, long = None, None
 
-    
+        veh_data = []
+        for v in veh:
+            v_data = {
+                "veh_id": v.veh_id,
+                "veh_number": v.veh_number,  
+                "veh_base_location": v.veh_base_location.bs_name,  
+                "veh_app_lat": v.veh_app_lat,
+                "veh_app_log": v.veh_app_log,
+                "veh_gps_lat": v.veh_gps_lat,
+                "veh_gps_log": v.veh_gps_log,
+                "vehical_status": v.vehical_status,
+            }
+
+            if lat and long and v.veh_app_lat and v.veh_gps_log:
+                # Calculate distance (km) using haversine
+                distance_km = self.haversine(lat, long, float(v.veh_app_lat), float(v.veh_gps_log))
+                v_data["distance_km"] = round(distance_km, 2)
+
+                # Calculate ETA (hours) assuming avg speed = 40 km/h
+                avg_speed = 40.0  # km/h
+                eta_hours = distance_km / avg_speed if avg_speed > 0 else 0
+                eta_minutes = eta_hours * 60
+                v_data["eta_minutes"] = round(eta_minutes, 1)
+            else:
+                v_data["distance_km"] = None
+                v_data["eta_minutes"] = None
+
+            veh_data.append(v_data)
+
+        return Response(veh_data, status=status.HTTP_200_OK)
+
+    def haversine(self, lat1, lon1, lat2, lon2):
+        """
+        Calculate great-circle distance between two points (lat1, lon1) and (lat2, lon2)
+        Returns distance in kilometers
+        """
+        R = 6371  # Earth radius in km
+        phi1, phi2 = math.radians(lat1), math.radians(lat2)
+        dphi = math.radians(lat2 - lat1)
+        dlambda = math.radians(lon2 - lon1)
+
+        a = math.sin(dphi / 2) ** 2 + math.cos(phi1) * math.cos(phi2) * math.sin(dlambda / 2) ** 2
+        c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
+
+        return R * c
     
 class emp_clockinout(APIView):
     def post(self, request):
@@ -290,7 +361,8 @@ def update_pcr_report(request):
 
 class get_assign_inc_calls(APIView):
     def get(self, request):
-        user_id = request.GET.get("userId")
+        user_id = request.user.user_id
+        print("user id in assign inc call", user_id)
         inc_veh = incident_vehicles.objects.filter(veh_id__user = user_id, status=1, jobclosure_status=2).order_by("-added_date")
         assign_inc_objs_arr = []
         for veh in inc_veh:
@@ -317,3 +389,71 @@ class get_assign_inc_calls(APIView):
             assign_inc_objs_arr.append(assign_inc_obj)
         # inc_veh_serializer = incident_veh_serializer(inc_veh, many=True)
         return Response({"data": assign_inc_objs_arr}, status=status.HTTP_200_OK)
+
+class vehicleotp(APIView):
+    def post(self, request):
+        vehicle_number = request.data.get('vehicleNumber')
+        password = request.data.get('password')  # This should be MD5 hashed from client
+
+        if not all([vehicle_number, password]):
+            return Response({
+                "data": None,
+                "error": {
+                    "code": 1,
+                    "message": 'Missing required fields'
+                }
+            }, status=status.HTTP_200_OK)
+        
+        try:
+            user = authenticate(user_username=vehicle_number, password=password)
+            if not user:
+                return Response({
+                    "data": None,
+                    "error": {
+                        "code": 1,
+                        "message": 'Invalid credentials'
+                    }
+                }, status=status.HTTP_200_OK)
+
+            user_obj = DMS_User.objects.filter(user_username=vehicle_number, user_is_deleted=False).last()
+            if not user_obj:
+                return Response({
+                    "data": None,
+                    "error": {
+                        "code": 1,
+                        "message": 'User not found'
+                    }
+                }, status=status.HTTP_200_OK)
+
+            return Response({
+                    "data": {
+                        "type": 1,
+                        "isGovtAmbulance": True
+                    },
+                    "error": None
+                }, status=status.HTTP_200_OK)
+            
+        except Exception as e:
+            return Response({
+                "data": None,
+                "error": {
+                    "code": 1,
+                    "message": 'Vehicle Number not registered'
+                }
+            }, status=status.HTTP_200_OK)
+
+class userlist(APIView):
+    def get(self, request):
+        users = DMS_Employee.objects.filter(emp_is_deleted=False,user_id__user_is_deleted=False)
+        user_data = []
+        for user in users:
+            user_data.append({
+                "id": user.emp_id,
+                "name": user.emp_name,
+                "clg_name": user.user_id.user_id,
+                
+            })
+        return Response({
+            "data": user_data,
+            "error": None
+        }, status=status.HTTP_200_OK)
