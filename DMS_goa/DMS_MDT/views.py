@@ -134,8 +134,11 @@ class add_device(APIView):
         data['date_time'] = request.data.get('deviceCurrentTimestamp')
         data['device_token'] = request.data.get('token')
         data['model_name'] = request.data.get('modelName')
-        
-        device = add_device_serializer(data=data)
+        if request.data['deviceId'] != 0:
+            device = Device_version.objects.filter(device_id=request.data['deviceId']).last()
+            device = add_device_serializer(device,data=data)
+        else:
+            device = add_device_serializer(data=data)
         if device.is_valid():
             device.save()
             if device.data['device_platform']== 'Android':
