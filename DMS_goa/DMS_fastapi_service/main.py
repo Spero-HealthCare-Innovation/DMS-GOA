@@ -11,10 +11,11 @@ import asyncio
 from kafka import KafkaProducer
 from kafka import KafkaConsumer
 import threading
+from asgiref.sync import sync_to_async
 # import subprocess
 # import pygetwindow as gw
 # import pyautogui
-from district_alerts import get_zone_wise_alerts, get_ward_wise_alerts
+# from district_alerts import get_zone_wise_alerts, get_ward_wise_alerts
 import os
 from screeninfo import get_monitors
 from fastapi.responses import JSONResponse
@@ -34,7 +35,7 @@ import pandas as pd
 import json
 from django_setup import *
 from asgiref.sync import sync_to_async
-from admin_web.models import Weather_alerts  # Django model
+from admin_web.models import Weather_alerts, DMS_Disaster_Severity  # Django model
 # from weather_alerts_utils import get_old_weather_alerts, listen_to_postgres, connected_clients, connected_clients_trigger2, get_user_id
 from contextlib import asynccontextmanager
 from starlette.applications import Starlette
@@ -131,11 +132,11 @@ async def lifespan(app: FastAPI):
     except Exception as e:
         print(f"❌ Failed to create weather_task: {e}")
 
-    try:
-        new_weather_task = asyncio.create_task(send_weather_to_kafka_periodically())
-        print("✅ send_weather_to_kafka_periodically task created")
-    except Exception as e:
-        print(f"❌ Failed to create new_weather_task: {e}")
+    # try:
+    #     new_weather_task = asyncio.create_task(send_weather_to_kafka_periodically())
+    #     print("✅ send_weather_to_kafka_periodically task created")
+    # except Exception as e:
+    #     print(f"❌ Failed to create new_weather_task: {e}")
 
     try:
         postgres_task = asyncio.create_task(listen_to_postgres())
@@ -145,9 +146,9 @@ async def lifespan(app: FastAPI):
 
     yield  # App runs while tasks are active
 
-    for task in [weather_task, new_weather_task, postgres_task]:
+    for task in [weather_task, postgres_task]:
         task.cancel()
-    for task in [weather_task, new_weather_task, postgres_task]:
+    for task in [weather_task, postgres_task]:
         try:
             await task
         except asyncio.CancelledError:
@@ -160,10 +161,10 @@ async def lifespan(app: FastAPI):
         await postgres_task
     except asyncio.CancelledError:
         pass
-    try:
-        await new_weather_task
-    except asyncio.CancelledError:
-        pass
+    # try:
+    #     await new_weather_task
+    # except asyncio.CancelledError:
+    #     pass
 
 
 app = FastAPI(lifespan=lifespan)
@@ -189,46 +190,46 @@ app.add_middleware(
 
 
 
-producer = KafkaProducer(
-    bootstrap_servers='192.168.1.133:9092',
-    # bootstrap_servers='122.176.232.35:9092',
+# producer = KafkaProducer(
+#     bootstrap_servers='192.168.1.133:9092',
+#     # bootstrap_servers='122.176.232.35:9092',
 
-    value_serializer=lambda v: json.dumps(v).encode('utf-8')
-)
+#     value_serializer=lambda v: json.dumps(v).encode('utf-8')
+# )
 
-API_KEY = '959e8b3d77615bcdb1659ff5bd74e791'
-# CITY = 'Goa'
-CITY = 'Pune'
-URL = f'https://api.openweathermap.org/data/2.5/weather?q={CITY}&appid={API_KEY}&units=metric'
+# API_KEY = '959e8b3d77615bcdb1659ff5bd74e791'
+# # CITY = 'Goa'
+# CITY = 'Pune'
+# URL = f'https://api.openweathermap.org/data/2.5/weather?q={CITY}&appid={API_KEY}&units=metric'
 
-async def fetch_and_send():
-    while True:
-        try:
-            response = requests.get(URL)
-            data = response.json()
-            temp = data['main']['temp']
+# async def fetch_and_send():
+#     while True:
+#         try:
+#             response = requests.get(URL)
+#             data = response.json()
+#             temp = data['main']['temp']
 
-            if temp > 20.0:
-                print(f"[✔] Temp is {temp}°C > 20°C — sending to Kafka")
-                producer.send('weather_alerts_test', data)
-            else:
-                print(f"[ ] Temp is {temp}°C ≤ 20°C — not sending")
+#             if temp > 20.0:
+#                 print(f"[✔] Temp is {temp}°C > 20°C — sending to Kafka")
+#                 producer.send('weather_alerts_test', data)
+#             else:
+#                 print(f"[ ] Temp is {temp}°C ≤ 20°C — not sending")
 
-        except Exception as e:
-            print("Error:", e)
-        await asyncio.sleep(120)  # 2 minutes
+#         except Exception as e:
+#             print("Error:", e)
+#         await asyncio.sleep(120)  # 2 minutes
 
-# @app.on_event("startup")
-# async def start_background_task():
-#     asyncio.create_task(fetch_and_send())
+# # @app.on_event("startup")
+# # async def start_background_task():
+# #     asyncio.create_task(fetch_and_send())
 
-from concurrent.futures import ThreadPoolExecutor
+# from concurrent.futures import ThreadPoolExecutor
 
-executor = ThreadPoolExecutor(max_workers=2)
+# executor = ThreadPoolExecutor(max_workers=2)
 
-def send_to_kafka_sync(topic, data):
-    producer.send(topic, data)
-    producer.flush()
+# def send_to_kafka_sync(topic, data):
+#     producer.send(topic, data)
+#     producer.flush()
     
     
 #============================ MAYANK(multiple Screen) =========================================================================#
@@ -282,14 +283,14 @@ def send_to_kafka_sync(topic, data):
 #     except Exception as e:
 #         return JSONResponse(content={"error": str(e)}, status_code=500)
 
-''' Note:- *This command should always remain at the end. Any new code must be added above it.* '''
+# ''' Note:- *This command should always remain at the end. Any new code must be added above it.* '''
 
-''' Run the FastAPI Project
-1. Navigate to the project directory:
-cd Spero-DMS\DMS_goa\DMS_fastapi_service
+# ''' Run the FastAPI Project
+# 1. Navigate to the project directory:
+# cd Spero-DMS\DMS_goa\DMS_fastapi_service
 
-2. Run the FastAPI server:
-uvicorn main:app --host 0.0.0.0 --port 8000 --reload '''
+# 2. Run the FastAPI server:
+# uvicorn main:app --host 0.0.0.0 --port 8000 --reload '''
 
 connected_clients: List[WebSocket] = []
 
@@ -315,66 +316,191 @@ async def websocket_endpoint(websocket: WebSocket):
 
 # ------------------------------------------------------------------------------------------------------------#
 
-EXCEL_PATH = "goa_latlong_points.xlsx"  # Update this with your file path
+# EXCEL_PATH = "goa_latlong_points.xlsx"  # Update this with your file path
 
 
-# Excel file se lat-long read karo
+# # Excel file se lat-long read karo
+# def extract_lat_lon_from_excel(file_path):
+#     df = pd.read_excel(file_path)
+#     latitudes = df['lat'].dropna().astype(str).tolist()
+#     longitudes = df['long'].dropna().astype(str).tolist()
+#     return ','.join(latitudes), ','.join(longitudes)
+
+
+# # Open-Meteo API ko call karo
+# # async def call_open_meteo_api():
+# #     latitudes, longitudes = extract_lat_lon_from_excel(EXCEL_PATH)
+
+# #     # url = (
+# #     #     f"https://api.open-meteo.com/v1/forecast?"
+# #     #     f"latitude={latitudes}&longitude={longitudes}"
+# #     #     f"&current=temperature_2m,rain,precipitation,weather_code"
+# #     # )
+
+# #     # url = (
+# #     #     "https://api.open-meteo.com/v1/forecast?latitude=15.5367,15.1261&longitude=73.9458,74.1848&current=temperature_2m,rain,precipitation,weather_code"
+# #     # )
+# #     # 18.5329846,73.8216998 PMC
+# #     # 18.635764, 73.801452  PCMC
+
+# #     # 18.635764, 73.801452  PCMC
+# #     # 18.6357, 73.801452  PCMC
+# #     # 18.528468, 73.847792 PMC
+# #     # 18.5284, 73.8477 PMC
+# #     # 18.15052868617488, 73.84245072042478
+# #     # url = (
+# #     #     "https://api.open-meteo.com/v1/forecast?latitude=18.1505,18.635764&longitude=73.8424,73.801452&current=temperature_2m,rain,precipitation,weather_code"
+# #     # )
+# #     url = (
+# #         "https://api.open-meteo.com/v1/forecast?latitude=18.52380565246535&longitude=73.85260317930653&current=temperature_2m,rain,precipitation,weather_code&timezone=Asia%2FKolkata"
+# #     )
+# #     # url = (
+# #     #     "https://api.open-meteo.com/v1/forecast?latitude=15.5367,15.1261&longitude=73.9458,74.1848&hourly=temperature_2m,rain,precipitation,weather_code&models=ecmwf_ifs025"
+# #     # )
+
+
+
+# #     async with httpx.AsyncClient() as client:
+# #         response = await client.get(url)
+
+# #     if response.status_code == 200:
+# #         data = response.json()
+# #         print("✅ Weather data fetched")
+# #         # print(f"[✔] Temp is {temp}°C > 20°C — sending to Kafka")
+# #         producer.send('weather_alerts_rain', data)
+# #         return data
+# #     else:
+# #         print("❌ Error fetching data")
+# #         return {"error": response.text}
+# def call_meteo_sync():
+#     url = "https://api.open-meteo.com/v1/forecast?latitude=18.52380565246535&longitude=73.85260317930653&current=temperature_2m,rain,precipitation,weather_code&timezone=Asia%2FKolkata"
+#     response = requests.get(url, timeout=20)
+#     return response.json()
+
+# async def call_open_meteo_api():
+#     print("🌧️ Calling Open Meteo via sync fallback...")
+#     loop = asyncio.get_event_loop()
+#     try:
+#         data = await loop.run_in_executor(None, call_meteo_sync)
+#         print("✅ Weather data fetched")
+#         producer.send('weather_alerts_rain', data)
+#         return data
+#     except Exception as e:
+#         print(f"❌ Sync fallback failed: {e}")
+
+# # Manual trigger route
+# @app.get("/fetch-weather")
+# async def fetch_weather():
+#     data = await call_open_meteo_api()
+#     return JSONResponse(content=data)
+
+# # async def call_open_meteo_api():
+# #     url = (
+# #         "https://api.open-meteo.com/v1/forecast?"
+# #         "latitude=18.52380565246535&longitude=73.85260317930653"
+# #         "&hourly=temperature_2m,rain,precipitation,weather_code"
+# #         "&timezone=Asia%2FKolkata"
+# #     )
+
+# #     async with httpx.AsyncClient() as client:
+# #         response = await client.get(url)
+
+# #     if response.status_code == 200:
+# #         data = response.json()
+# #         print("✅ Weather data fetched")
+
+# #         # Find current time + 1 hour (IST)
+# #         ist = pytz.timezone("Asia/Kolkata")
+# #         now = datetime.now(ist)
+# #         target_time = now + timedelta(hours=1)
+# #         target_str = target_time.strftime("%Y-%m-%dT%H:00")
+
+# #         # Match time in hourly forecast
+# #         hourly = data.get("hourly", {})
+# #         times = hourly.get("time", [])
+
+# #         if target_str in times:
+# #             i = times.index(target_str)
+# #             forecast = {
+# #                 "time": times[i],
+# #                 "temperature_2m": hourly["temperature_2m"][i],
+# #                 "rain": hourly["rain"][i],
+# #                 "precipitation": hourly["precipitation"][i],
+# #                 "weather_code": hourly["weather_code"][i]
+# #             }
+# #             print("➡️ 1-hour ahead forecast:", forecast)
+# #             producer.send('weather_alerts_rain', forecast)
+# #             return forecast
+# #         else:
+# #             print(f"❌ Forecast for time {target_str} not found")
+# #             return {"error": "1-hour ahead forecast not found"}
+# #     else:
+# #         print("❌ Error fetching data")
+# #         return {"error": response.text}
+
+
+# # @app.get("/fetch-weather")
+# # async def fetch_weather():
+# #     data = await call_open_meteo_api()
+# #     return JSONResponse(content=data)
+
+# # Background scheduler
+# async def scheduled_weather_fetch():
+#     print("🟡 scheduled_weather_fetch() started")
+#     while True:
+#         print("🔄 Calling Open Meteo API")
+#         await call_open_meteo_api()
+#         await asyncio.sleep(120)
+
+# # Start scheduler on app startup
+# @app.on_event("startup")
+# async def startup_event():
+#     asyncio.create_task(scheduled_weather_fetch())
+
+EXCEL_PATH = "goa_latlong_points.xlsx"  # agar multiple lat/long chahiye to ise loop me bhi use kar sakte ho
+
+
+# Excel file se lat-long read karo (agar chahiye)
 def extract_lat_lon_from_excel(file_path):
     df = pd.read_excel(file_path)
     latitudes = df['lat'].dropna().astype(str).tolist()
     longitudes = df['long'].dropna().astype(str).tolist()
     return ','.join(latitudes), ','.join(longitudes)
 
+@sync_to_async
+def get_severity():
+    return DMS_Disaster_Severity.objects.filter(
+        hazard_types="rainfall", is_deleted=False
+    ).first()
 
-# Open-Meteo API ko call karo
-# async def call_open_meteo_api():
-#     latitudes, longitudes = extract_lat_lon_from_excel(EXCEL_PATH)
+@sync_to_async
+def create_weather_alert(data, rainfall_value, alert_type):
+    current = data.get("current", {})
+    return Weather_alerts.objects.create(
+        latitude=data.get("latitude"),
+        longitude=data.get("longitude"),
+        elevation=data.get("elevation"),
+        timezone=data.get("timezone"),
+        timezone_abbreviation=data.get("timezone_abbreviation"),
+        utc_offset_seconds=data.get("utc_offset_seconds"),
+        alert_datetime=current.get("time", timezone.now()),
 
-#     # url = (
-#     #     f"https://api.open-meteo.com/v1/forecast?"
-#     #     f"latitude={latitudes}&longitude={longitudes}"
-#     #     f"&current=temperature_2m,rain,precipitation,weather_code"
-#     # )
+        temperature_2m=current.get("temperature_2m"),
+        rain=rainfall_value,
+        precipitation=current.get("precipitation"),
+        weather_code=current.get("weather_code"),
 
-#     # url = (
-#     #     "https://api.open-meteo.com/v1/forecast?latitude=15.5367,15.1261&longitude=73.9458,74.1848&current=temperature_2m,rain,precipitation,weather_code"
-#     # )
-#     # 18.5329846,73.8216998 PMC
-#     # 18.635764, 73.801452  PCMC
+        triger_status=1,
+        added_by="Weather API",
+        alert_type=alert_type,
+        disaster_id=1,
+    )
 
-#     # 18.635764, 73.801452  PCMC
-#     # 18.6357, 73.801452  PCMC
-#     # 18.528468, 73.847792 PMC
-#     # 18.5284, 73.8477 PMC
-#     # 18.15052868617488, 73.84245072042478
-#     # url = (
-#     #     "https://api.open-meteo.com/v1/forecast?latitude=18.1505,18.635764&longitude=73.8424,73.801452&current=temperature_2m,rain,precipitation,weather_code"
-#     # )
-#     url = (
-#         "https://api.open-meteo.com/v1/forecast?latitude=18.52380565246535&longitude=73.85260317930653&current=temperature_2m,rain,precipitation,weather_code&timezone=Asia%2FKolkata"
-#     )
-#     # url = (
-#     #     "https://api.open-meteo.com/v1/forecast?latitude=15.5367,15.1261&longitude=73.9458,74.1848&hourly=temperature_2m,rain,precipitation,weather_code&models=ecmwf_ifs025"
-#     # )
-
-
-
-#     async with httpx.AsyncClient() as client:
-#         response = await client.get(url)
-
-#     if response.status_code == 200:
-#         data = response.json()
-#         print("✅ Weather data fetched")
-#         # print(f"[✔] Temp is {temp}°C > 20°C — sending to Kafka")
-#         producer.send('weather_alerts_rain', data)
-#         return data
-#     else:
-#         print("❌ Error fetching data")
-#         return {"error": response.text}
 def call_meteo_sync():
-    url = "https://api.open-meteo.com/v1/forecast?latitude=18.52380565246535&longitude=73.85260317930653&current=temperature_2m,rain,precipitation,weather_code&timezone=Asia%2FKolkata"
+    url = "https://api.open-meteo.com/v1/forecast?latitude=13.3407&longitude=77.1193&current=temperature_2m,rain,precipitation,weather_code&timezone=Asia%2FKolkata"
     response = requests.get(url, timeout=20)
     return response.json()
+
 
 async def call_open_meteo_api():
     print("🌧️ Calling Open Meteo via sync fallback...")
@@ -382,10 +508,46 @@ async def call_open_meteo_api():
     try:
         data = await loop.run_in_executor(None, call_meteo_sync)
         print("✅ Weather data fetched")
-        producer.send('weather_alerts_rain', data)
+
+        # Save to DB with threshold check
+        await save_weather_to_db(data)
+
         return data
     except Exception as e:
         print(f"❌ Sync fallback failed: {e}")
+
+
+async def save_weather_to_db(data):
+    try:
+        current = data.get("current", {})
+        rainfall_value = current.get("rain", 0)
+
+        # Threshold fetch with async-safe ORM
+        severity = await get_severity()
+        if not severity:
+            print("⚠️ No severity thresholds found for rainfall.")
+            return
+
+        low = float(severity.hazard_rng_low)
+        medium = float(severity.hazard_rng_medium)
+        high = float(severity.hazard_rng_high)
+
+        if rainfall_value < low:
+            print(f"⚠️ Rainfall {rainfall_value} mm is below threshold {low} mm. No entry.")
+            return
+
+        if rainfall_value >= high:
+            alert_type = 1
+        elif rainfall_value >= medium:
+            alert_type = 2
+        else:
+            alert_type = 3
+
+        obj = await create_weather_alert(data, rainfall_value, alert_type)
+        print(f"✅ Weather alert saved (Alert Type {alert_type}) with ID: {obj.pk_id}")
+
+    except Exception as e:
+        print(f"❌ DB save failed: {e}")
 
 # Manual trigger route
 @app.get("/fetch-weather")
@@ -393,57 +555,7 @@ async def fetch_weather():
     data = await call_open_meteo_api()
     return JSONResponse(content=data)
 
-# async def call_open_meteo_api():
-#     url = (
-#         "https://api.open-meteo.com/v1/forecast?"
-#         "latitude=18.52380565246535&longitude=73.85260317930653"
-#         "&hourly=temperature_2m,rain,precipitation,weather_code"
-#         "&timezone=Asia%2FKolkata"
-#     )
 
-#     async with httpx.AsyncClient() as client:
-#         response = await client.get(url)
-
-#     if response.status_code == 200:
-#         data = response.json()
-#         print("✅ Weather data fetched")
-
-#         # Find current time + 1 hour (IST)
-#         ist = pytz.timezone("Asia/Kolkata")
-#         now = datetime.now(ist)
-#         target_time = now + timedelta(hours=1)
-#         target_str = target_time.strftime("%Y-%m-%dT%H:00")
-
-#         # Match time in hourly forecast
-#         hourly = data.get("hourly", {})
-#         times = hourly.get("time", [])
-
-#         if target_str in times:
-#             i = times.index(target_str)
-#             forecast = {
-#                 "time": times[i],
-#                 "temperature_2m": hourly["temperature_2m"][i],
-#                 "rain": hourly["rain"][i],
-#                 "precipitation": hourly["precipitation"][i],
-#                 "weather_code": hourly["weather_code"][i]
-#             }
-#             print("➡️ 1-hour ahead forecast:", forecast)
-#             producer.send('weather_alerts_rain', forecast)
-#             return forecast
-#         else:
-#             print(f"❌ Forecast for time {target_str} not found")
-#             return {"error": "1-hour ahead forecast not found"}
-#     else:
-#         print("❌ Error fetching data")
-#         return {"error": response.text}
-
-
-# @app.get("/fetch-weather")
-# async def fetch_weather():
-#     data = await call_open_meteo_api()
-#     return JSONResponse(content=data)
-
-# Background scheduler
 async def scheduled_weather_fetch():
     print("🟡 scheduled_weather_fetch() started")
     while True:
@@ -451,7 +563,7 @@ async def scheduled_weather_fetch():
         await call_open_meteo_api()
         await asyncio.sleep(120)
 
-# Start scheduler on app startup
+
 @app.on_event("startup")
 async def startup_event():
     asyncio.create_task(scheduled_weather_fetch())
@@ -776,9 +888,9 @@ async def websocket_trigger2(websocket: WebSocket):
     user_id = get_user_from_token(token)
     if user_id:
         user_obj = await get_user_by_emp_id(user_id)
-        user_exist = user_obj.emp_id
-        print("user obj-----", user_obj.emp_id)
-        user_IDdd = await get_user_id(user_obj.emp_id)
+        user_exist = user_obj.user_id
+        print("user obj-----", user_obj.user_id)
+        user_IDdd = await get_user_id(user_obj.user_id)
         print("MAIN.py user idd function called-----", user_IDdd)
 
     if user_exist == 0:
@@ -901,33 +1013,33 @@ async def websocket_disaster_alerts(websocket: WebSocket):
 
 
 
-#-----------------MAYANK-------------------
+# #-----------------MAYANK-------------------
 
-@app.get("/")
-def root():
-    return {"message": "🌧️ Pune District Weather Alert API Ready"}
+# @app.get("/")
+# def root():
+#     return {"message": "🌧️ Pune District Weather Alert API Ready"}
 
-@app.get("/pmc-zone-alerts")
-async def pmc_zone_alerts():
-    response = await get_ward_wise_alerts()
-    return response
+# @app.get("/pmc-zone-alerts")
+# async def pmc_zone_alerts():
+#     response = await get_ward_wise_alerts()
+#     return response
 
 
-async def send_weather_to_kafka_periodically():
-    loop = asyncio.get_event_loop()
-    while True:
-        try:
-            print("⏳ Fetching data and sending to Kafka (new)...")
-            data = await get_ward_wise_alerts()
-            await loop.run_in_executor(executor, send_to_kafka_sync, 'weather_alerts_new', data)
-            print("✅ Sent to Kafka (new)")
-        except Exception as e:
-            print(f"❌ Kafka error (new): {e}")
-        await asyncio.sleep(300)  # 5 minutes
+# async def send_weather_to_kafka_periodically():
+#     loop = asyncio.get_event_loop()
+#     while True:
+#         try:
+#             print("⏳ Fetching data and sending to Kafka (new)...")
+#             data = await get_ward_wise_alerts()
+#             await loop.run_in_executor(executor, send_to_kafka_sync, 'weather_alerts_new', data)
+#             print("✅ Sent to Kafka (new)")
+#         except Exception as e:
+#             print(f"❌ Kafka error (new): {e}")
+#         await asyncio.sleep(300)  # 5 minutes
 
-@app.on_event("startup")
-async def start_background_task():
-    asyncio.create_task(send_weather_to_kafka_periodically())
+# @app.on_event("startup")
+# async def start_background_task():
+#     asyncio.create_task(send_weather_to_kafka_periodically())
 
 
 

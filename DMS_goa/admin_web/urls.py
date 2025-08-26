@@ -42,6 +42,7 @@ urlpatterns = [
 
 
     path('closure_post_api/',closure_Post_api.as_view(),name='closure_post_api'),
+    path('closurecomplete/',closure_Post_api_app.as_view(),name='closure_post_api'),
     path('closure_post_api2/',closure_Post_api2.as_view(),name='closure_post_api2'),
 
 
