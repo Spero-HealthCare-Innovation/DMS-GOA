@@ -500,11 +500,13 @@ class closure_Post_api_app(APIView):
             invh_dtl = incident_vehicles.objects.filter(veh_id=vehicl_dtls,jobclosure_status=0)
             if invh_dtl.exists() and invh_dtl.exclude(jobclosure_status=1).exists():
                 vehicl_dtls.update(vehical_status=1)
-            return Response({"msg": f"Closure for {dpt_dtl.responder_name} - {vehicl_dtls.veh_number} is done",}, status=status.HTTP_201_CREATED)
+            # return Response({"msg": f"Closure for {dpt_dtl.responder_name} - {vehicl_dtls.veh_number} is done",}, status=status.HTTP_201_CREATED)
+            return Response({"data": {"code": 1,"message": "Case Closure Successfully"},"error": None})
         except DMS_Incident.DoesNotExist:
-            return Response({"error": "Incident not found."}, status=status.HTTP_404_NOT_FOUND)
+            return Response({"data": None,"error": {"code": 1,"message": "Case Closure Not Successfully"}})
         except DMS_Department.DoesNotExist:
-            return Response({"error": "Department not found."}, status=status.HTTP_404_NOT_FOUND)
+            return Response({"data": None,"error": {"code": 1,"message": "Case Closure Not Successfully"}})
         except Exception as e:
-            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            # return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response({"data": None,"error": {"code": 1,"message": "Case Closure Not Successfully"},"ex_error": str(e)})
         
