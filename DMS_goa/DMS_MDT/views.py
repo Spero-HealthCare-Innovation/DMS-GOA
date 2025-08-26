@@ -443,7 +443,7 @@ class vehicleotp(APIView):
             }, status=status.HTTP_200_OK)
 
 class userlist(APIView):
-    def get(self, request):
+    def post(self, request):
         users = DMS_Employee.objects.filter(emp_is_deleted=False,user_id__user_is_deleted=False)
         user_data = []
         for user in users:
