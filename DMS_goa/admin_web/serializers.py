@@ -439,6 +439,8 @@ class Incident_Serializer(serializers.ModelSerializer):
         for veh_id in vehicle_list:
             try:
                 veh = Vehical.objects.get(veh_id=veh_id)
+                veh.vehical_status = 2  # Mark vehicle as 'in use'
+                veh.save(update_fields=['vehical_status'])
                 incident_vehicles.objects.create(
                     incident_id=incident,
                     veh_id=veh,
