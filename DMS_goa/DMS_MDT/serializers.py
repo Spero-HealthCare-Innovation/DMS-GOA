@@ -72,6 +72,11 @@ class base_location_vehicle_serializer(serializers.ModelSerializer):
     class Meta:
         model = Vehical_base_location
         fields = "__all__"
+
+class incident_veh_serializer(serializers.ModelSerializer):
+    class Meta:
+        model = incident_vehicles
+        fields = "__all__"
         
 class vehicle_serializer(serializers.ModelSerializer):
     class Meta:
