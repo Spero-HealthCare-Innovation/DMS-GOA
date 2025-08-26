@@ -42,22 +42,52 @@ class VehicleLogin(APIView):
         # print(employee_photo, 'photos')
         user = authenticate(user_username=veh_number, password=password)
         if not user:
-            return Response({'status': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
+            return Response({
+                            "data": None,
+                            "error": {
+                                "code": 1,
+                                "message": 'Invalid credentials'
+                            }
+                        }, status=status.HTTP_401_UNAUTHORIZED)
         user_obj = DMS_User.objects.filter(user_username=veh_number, user_is_deleted=False).last()
         if not user_obj:
-            return Response({'status': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
+            return Response({
+                        "data": None,
+                        "error": {
+                            "code": 1,
+                            "message": 'User not found'
+                        }
+                    }, status=status.HTTP_200_OK)
         if user_obj.user_is_login:
-            return Response({'status': 'User already logged in'}, status=status.HTTP_200_OK)
+            return Response({
+                "data": None,
+                "error": {
+                    "code": 1,
+                    "message": 'User already logged in'
+                }
+            }, status=status.HTTP_200_OK)
         vehicle_obj = Vehical.objects.filter(user=user_obj).last()
         if not vehicle_obj:
-            return Response({'status': 'Vehicle not found'}, status=status.HTTP_404_NOT_FOUND)
+            return Response({
+                "data": None,
+                "error": {
+                    "code": 1,
+                    "message": 'Vehicle not found'
+                }
+            }, status=status.HTTP_404_NOT_FOUND)
         active_employees = employee_clockin_info.objects.filter(emp_id__in=employee_ids, clock_out_in_status =1,status=1)
         if active_employees.exists():
             conflict_messages = [
                 f"Employee '{e.emp_id.emp_name}' is already logged in on vehicle '{e.veh_id.veh_number}'"
                 for e in active_employees
             ]
-            return Response(conflict_messages, status=status.HTTP_400_BAD_REQUEST)
+            return Response({
+                    "data": None,
+                    "error": {
+                        "code": 1,
+                        "message": str(conflict_messages)
+                    }
+                }, status=status.HTTP_200_OK)
         # emp_data = [{'emp_clockin_time': now(),'emp_id': emp_id,'veh_id': vehicle_obj.veh_id} for emp_id in employee_ids]
         emp_data = [{'emp_clockin_time': timezone.now(),'emp_id': emp_id,'veh_id': vehicle_obj.veh_id, 'emp_image':emp_image} for emp_id, emp_image in zip(employee_ids,employee_photo)]
         # print(emp_data, 'datas')
@@ -84,7 +114,15 @@ class VehicleLogin(APIView):
             return Response(login_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         login_serializer.save()
         token = RefreshToken.for_user(user)
-        return Response({'refresh': str(token),'access': str(token.access_token)}, status=status.HTTP_200_OK)
+        return Response({
+                        "data": {
+                            "userName": "Pilot - Mr.Madhukar Narsing Kamble, Pilot - Mr.Israr Jabbar Khan",
+                            "message": "Successfully Login",
+                            'access': str(token.access_token),
+                            'refresh': str(token),
+                        },
+                        "error": None
+                        }, status=status.HTTP_200_OK)
     
 class VehicleLogout(APIView):
     def post(self, request):
@@ -134,8 +172,11 @@ class add_device(APIView):
         data['date_time'] = request.data.get('deviceCurrentTimestamp')
         data['device_token'] = request.data.get('token')
         data['model_name'] = request.data.get('modelName')
-        
-        device = add_device_serializer(data=data)
+        if request.data['deviceId'] != 0:
+            device = Device_version.objects.filter(device_id=request.data['deviceId']).last()
+            device = add_device_serializer(device,data=data)
+        else:
+            device = add_device_serializer(data=data)
         if device.is_valid():
             device.save()
             if device.data['device_platform']== 'Android':
@@ -211,7 +252,7 @@ class get_vehicle(APIView):
             v_data = {
                 "veh_id": v.veh_id,
                 "veh_number": v.veh_number,  
-                "veh_base_location": v.veh_base_location.bs_name,  
+                "veh_base_location": v.veh_base_location.bs_name if v.veh_base_location and v.veh_base_location.bs_name else None,  
                 "veh_app_lat": v.veh_app_lat,
                 "veh_app_log": v.veh_app_log,
                 "veh_gps_lat": v.veh_gps_lat,
@@ -519,11 +560,13 @@ class closure_Post_api_app(APIView):
             invh_dtl = incident_vehicles.objects.filter(veh_id=vehicl_dtls,jobclosure_status=0)
             if invh_dtl.exists() and invh_dtl.exclude(jobclosure_status=1).exists():
                 vehicl_dtls.update(vehical_status=1)
-            return Response({"msg": f"Closure for {dpt_dtl.responder_name} - {vehicl_dtls.veh_number} is done",}, status=status.HTTP_201_CREATED)
+            # return Response({"msg": f"Closure for {dpt_dtl.responder_name} - {vehicl_dtls.veh_number} is done",}, status=status.HTTP_201_CREATED)
+            return Response({"data": {"code": 1,"message": "Case Closure Successfully"},"error": None})
         except DMS_Incident.DoesNotExist:
-            return Response({"error": "Incident not found."}, status=status.HTTP_404_NOT_FOUND)
+            return Response({"data": None,"error": {"code": 1,"message": "Case Closure Not Successfully"}})
         except DMS_Department.DoesNotExist:
-            return Response({"error": "Department not found."}, status=status.HTTP_404_NOT_FOUND)
+            return Response({"data": None,"error": {"code": 1,"message": "Case Closure Not Successfully"}})
         except Exception as e:
-            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            # return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response({"data": None,"error": {"code": 1,"message": "Case Closure Not Successfully"},"ex_error": str(e)})
         
