@@ -15,6 +15,7 @@ urlpatterns = [
     path('vehical/',get_vehicle.as_view()),
     path('Spero_DMS/api/listassignincidentcalls/',get_assign_inc_calls.as_view()),
     path("parametersdetails/", update_pcr_report, name="update_pcr_report"),
+    path('closurecomplete/',closure_Post_api_app.as_view(),name='closure_post_api'),
     
 ]
  
