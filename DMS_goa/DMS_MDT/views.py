@@ -38,7 +38,7 @@ class VehicleLogin(APIView):
         password = request.data.get('password')
         employee_ids = list(request.data.get('pilotid[]').replace('[','').replace(']','').replace(',',''))
         # print(employee_ids, 'ids')
-        employee_photo = request.FILES.getlist('photo')
+        employee_photo = request.FILES.getlist('photo[]')
         # print(employee_photo, 'photos')
         user = authenticate(user_username=veh_number, password=password)
         if not user:
