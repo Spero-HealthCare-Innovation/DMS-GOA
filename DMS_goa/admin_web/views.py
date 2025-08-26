@@ -1320,7 +1320,9 @@ class closure_Post_api(APIView):
             )
             inc_vh = incident_vehicles.objects.filter(incident_id=inc_dtl, veh_id=vehicl_dtls, status=1)
             inc_vh.update(jobclosure_status=1)
-            vehicl_dtls.update(vehical_status=1)
+            invh_dtl = incident_vehicles.objects.filter(veh_id=vehicl_dtls,jobclosure_status=0)
+            if invh_dtl.exists() and invh_dtl.exclude(jobclosure_status=1).exists():
+                vehicl_dtls.update(vehical_status=1)
             return Response({"msg": f"Closure for {dpt_dtl.responder_name} - {vehicl_dtls.veh_number} is done",}, status=status.HTTP_201_CREATED)
         except DMS_Incident.DoesNotExist:
             return Response({"error": "Incident not found."}, status=status.HTTP_404_NOT_FOUND)
@@ -1330,6 +1332,54 @@ class closure_Post_api(APIView):
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
 
+
+
+
+
+
+class closure_Post_api_app(APIView):
+    def post(self, request):
+        try:
+            inccc = request.data.get('incident_id')
+            dpt = request.data.get('responder')
+            vehicle_no=request.data.get('vehicle_no')
+
+            vehicl_dtls = Vehical.objects.get(veh_id=vehicle_no)
+            inc_dtl = DMS_Incident.objects.get(incident_id=inccc)
+            dpt_dtl = DMS_Responder.objects.get(responder_name=dpt)  
+            ex_cl_dtl = DMS_incident_closure.objects.filter(incident_id=inc_dtl, responder=dpt_dtl,vehicle_no=vehicl_dtls, closure_is_deleted=False)
+            if ex_cl_dtl.exists():
+                return Response({"msg":f"Closure already done for incident {inc_dtl.incident_id} of that department/Responder {dpt_dtl.responder_name} with vehicle no {vehicle_no}"},
+                                 status=status.HTTP_200_OK)
+            cls_dtl_add = DMS_incident_closure.objects.create(
+                incident_id=inc_dtl,
+                responder=dpt_dtl,
+                vehicle_no=vehicl_dtls,
+                closure_acknowledge=request.data.get('closure_acknowledge'),
+                closure_start_base_location=request.data.get('closure_start_base_location'),
+                closure_at_scene=request.data.get('closure_at_scene'),
+                closure_from_scene=request.data.get('closure_from_scene'),
+                closure_back_to_base=request.data.get('closure_back_to_base'),
+                closure_responder_name=request.data.get('closure_responder_name'),
+                closure_is_deleted=False,
+                closure_added_by=request.data.get('closure_added_by'),
+                closure_modified_by=request.data.get('closure_modified_by'),
+                closure_modified_date=request.data.get('closure_modified_date'),
+                closure_remark=request.data.get('closure_remark')
+            )
+            inc_vh = incident_vehicles.objects.filter(incident_id=inc_dtl, veh_id=vehicl_dtls, status=1)
+            inc_vh.update(jobclosure_status=1)
+            invh_dtl = incident_vehicles.objects.filter(veh_id=vehicl_dtls,jobclosure_status=0)
+            if invh_dtl.exists() and invh_dtl.exclude(jobclosure_status=1).exists():
+                vehicl_dtls.update(vehical_status=1)
+            return Response({"msg": f"Closure for {dpt_dtl.responder_name} - {vehicl_dtls.veh_number} is done",}, status=status.HTTP_201_CREATED)
+        except DMS_Incident.DoesNotExist:
+            return Response({"error": "Incident not found."}, status=status.HTTP_404_NOT_FOUND)
+        except DMS_Department.DoesNotExist:
+            return Response({"error": "Department not found."}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
 
 
 

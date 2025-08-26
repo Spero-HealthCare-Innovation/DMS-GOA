@@ -186,142 +186,142 @@ zone_district_points = {
 #             }
 #         }]
 
-async def fetch_alert_and_weather(lat: float, lon: float, name: str):
-    ist = pytz.timezone("Asia/Kolkata")
-    try:
-        async with httpx.AsyncClient() as client:
-            # 🔔 Alert API
-            alert_url = f"https://api.openweathermap.org/data/3.0/onecall?lat={lat}&lon={lon}&appid={OPENWEATHER_API_KEY}"
-            alert_res = await client.get(alert_url)
-            alert_data = alert_res.json()
-            alerts = alert_data.get("alerts", [])
+# async def fetch_alert_and_weather(lat: float, lon: float, name: str):
+#     ist = pytz.timezone("Asia/Kolkata")
+#     try:
+#         async with httpx.AsyncClient() as client:
+#             # 🔔 Alert API
+#             alert_url = f"https://api.openweathermap.org/data/3.0/onecall?lat={lat}&lon={lon}&appid={OPENWEATHER_API_KEY}"
+#             alert_res = await client.get(alert_url)
+#             alert_data = alert_res.json()
+#             alerts = alert_data.get("alerts", [])
 
-            # 🌦️ Current Weather API
-            weather_url = f"https://api.openweathermap.org/data/2.5/weather?lat={lat}&lon={lon}&appid={OPENWEATHER_API_KEY}&units=metric"
-            weather_res = await client.get(weather_url)
-            weather_data = weather_res.json()
+#             # 🌦️ Current Weather API
+#             weather_url = f"https://api.openweathermap.org/data/2.5/weather?lat={lat}&lon={lon}&appid={OPENWEATHER_API_KEY}&units=metric"
+#             weather_res = await client.get(weather_url)
+#             weather_data = weather_res.json()
 
-            # 📅 Forecast API
-            forecast_url = f"https://api.openweathermap.org/data/2.5/forecast?lat={lat}&lon={lon}&appid={OPENWEATHER_API_KEY}&units=metric"
-            forecast_res = await client.get(forecast_url)
-            forecast_data = forecast_res.json()
+#             # 📅 Forecast API
+#             forecast_url = f"https://api.openweathermap.org/data/2.5/forecast?lat={lat}&lon={lon}&appid={OPENWEATHER_API_KEY}&units=metric"
+#             forecast_res = await client.get(forecast_url)
+#             forecast_data = forecast_res.json()
 
-            # ✅ Forecast time and rain
-            forecast_time = None
-            rain_forecast = 0.0
-            try:
-                next_forecast = forecast_data.get("list", [])[0]
-                rain_forecast = next_forecast.get("rain", {}).get("3h", 0.0)
-                forecast_time = datetime.fromtimestamp(next_forecast.get("dt")).astimezone(ist).isoformat()
-            except:
-                forecast_time = None
+#             # ✅ Forecast time and rain
+#             forecast_time = None
+#             rain_forecast = 0.0
+#             try:
+#                 next_forecast = forecast_data.get("list", [])[0]
+#                 rain_forecast = next_forecast.get("rain", {}).get("3h", 0.0)
+#                 forecast_time = datetime.fromtimestamp(next_forecast.get("dt")).astimezone(ist).isoformat()
+#             except:
+#                 forecast_time = None
 
-            # ✅ Weather time
-            weather_time = None
-            try:
-                weather_time = datetime.fromtimestamp(weather_data.get("dt")).astimezone(ist).isoformat()
-            except:
-                weather_time = None
+#             # ✅ Weather time
+#             weather_time = None
+#             try:
+#                 weather_time = datetime.fromtimestamp(weather_data.get("dt")).astimezone(ist).isoformat()
+#             except:
+#                 weather_time = None
 
-            main = weather_data.get("main", {})
-            wind = weather_data.get("wind", {})
-            clouds = weather_data.get("clouds", {})
-            rain = weather_data.get("rain", {}).get("1h", 0.0)
-            snow = weather_data.get("snow", {}).get("1h", 0.0)
-            weather_block = weather_data.get("weather", [{}])[0]
+#             main = weather_data.get("main", {})
+#             wind = weather_data.get("wind", {})
+#             clouds = weather_data.get("clouds", {})
+#             rain = weather_data.get("rain", {}).get("1h", 0.0)
+#             snow = weather_data.get("snow", {}).get("1h", 0.0)
+#             weather_block = weather_data.get("weather", [{}])[0]
 
-            return [{
-                "location": name,
-                "lat": lat,
-                "lon": lon,
-                "current_weather_time": weather_time,
-                "forecast_time": forecast_time,
-                "alerts": [
-                    {
-                        "sender_name": a.get("sender_name"),
-                        "event": a.get("event"),
-                        "start": datetime.fromtimestamp(a.get("start")).astimezone(ist).isoformat(),
-                        "end": datetime.fromtimestamp(a.get("end")).astimezone(ist).isoformat(),
-                        "description": a.get("description"),
-                        "tags": a.get("tags")
-                    }
-                    for a in alerts
-                ],
-                "parameters": {
-                    "temperature": main.get("temp"),
-                    "feels_like": main.get("feels_like"),
-                    "temp_min": main.get("temp_min"),
-                    "temp_max": main.get("temp_max"),
-                    "humidity": main.get("humidity"),
-                    "pressure": main.get("pressure"),
-                    "sea_level": main.get("sea_level"),
-                    "grnd_level": main.get("grnd_level"),
-                    "visibility": weather_data.get("visibility"),
-                    "wind_speed": wind.get("speed"),
-                    "wind_deg": wind.get("deg"),
-                    "wind_gust": wind.get("gust"),
-                    "cloud_coverage": clouds.get("all"),
-                    "weather_main": weather_block.get("main"),
-                    "weather_desc": weather_block.get("description"),
-                    "rain_past_1h": rain,
-                    "snow_past_1h": snow,
-                    "rain_forecast_3h": rain_forecast
-                }
-            }]
-    except Exception as e:
-        return [{
-            "location": name,
-            "lat": lat,
-            "lon": lon,
-            "alerts": [],
-            "parameters": {
-                "error": str(e)
-            }
-        }]
+#             return [{
+#                 "location": name,
+#                 "lat": lat,
+#                 "lon": lon,
+#                 "current_weather_time": weather_time,
+#                 "forecast_time": forecast_time,
+#                 "alerts": [
+#                     {
+#                         "sender_name": a.get("sender_name"),
+#                         "event": a.get("event"),
+#                         "start": datetime.fromtimestamp(a.get("start")).astimezone(ist).isoformat(),
+#                         "end": datetime.fromtimestamp(a.get("end")).astimezone(ist).isoformat(),
+#                         "description": a.get("description"),
+#                         "tags": a.get("tags")
+#                     }
+#                     for a in alerts
+#                 ],
+#                 "parameters": {
+#                     "temperature": main.get("temp"),
+#                     "feels_like": main.get("feels_like"),
+#                     "temp_min": main.get("temp_min"),
+#                     "temp_max": main.get("temp_max"),
+#                     "humidity": main.get("humidity"),
+#                     "pressure": main.get("pressure"),
+#                     "sea_level": main.get("sea_level"),
+#                     "grnd_level": main.get("grnd_level"),
+#                     "visibility": weather_data.get("visibility"),
+#                     "wind_speed": wind.get("speed"),
+#                     "wind_deg": wind.get("deg"),
+#                     "wind_gust": wind.get("gust"),
+#                     "cloud_coverage": clouds.get("all"),
+#                     "weather_main": weather_block.get("main"),
+#                     "weather_desc": weather_block.get("description"),
+#                     "rain_past_1h": rain,
+#                     "snow_past_1h": snow,
+#                     "rain_forecast_3h": rain_forecast
+#                 }
+#             }]
+#     except Exception as e:
+#         return [{
+#             "location": name,
+#             "lat": lat,
+#             "lon": lon,
+#             "alerts": [],
+#             "parameters": {
+#                 "error": str(e)
+#             }
+#         }]
 
 
-async def get_zone_wise_alerts() -> dict:
-    ist = pytz.timezone("Asia/Kolkata")
-    all_zones = {}
+# async def get_zone_wise_alerts() -> dict:
+#     ist = pytz.timezone("Asia/Kolkata")
+#     all_zones = {}
 
-    for zone_name, locations in zone_district_points.items():
-        zone_data = []
-        for location_name, lat, lon in locations:
-            data = await fetch_alert_and_weather(lat, lon, location_name)
-            zone_data.extend(data)
-        all_zones[zone_name] = zone_data
+#     for zone_name, locations in zone_district_points.items():
+#         zone_data = []
+#         for location_name, lat, lon in locations:
+#             data = await fetch_alert_and_weather(lat, lon, location_name)
+#             zone_data.extend(data)
+#         all_zones[zone_name] = zone_data
     
-    news_alerts = fetch_google_news_alerts()
+#     news_alerts = fetch_google_news_alerts()
 
-    return {
-        "count": sum(len(z) for z in all_zones.values()),
-        "last_updated": datetime.now(tz=ist).isoformat(),
-        "zones": all_zones,
-        "news_alerts": news_alerts
-    }
+#     return {
+#         "count": sum(len(z) for z in all_zones.values()),
+#         "last_updated": datetime.now(tz=ist).isoformat(),
+#         "zones": all_zones,
+#         "news_alerts": news_alerts
+#     }
     
     
-async def get_ward_wise_alerts() -> dict:
-    ist = pytz.timezone("Asia/Kolkata")
-    wards = load_ward_centroids("pune-2022-wa.geojson")
+# async def get_ward_wise_alerts() -> dict:
+#     ist = pytz.timezone("Asia/Kolkata")
+#     wards = load_ward_centroids("pune-2022-wa.geojson")
     
-    # Prepare async tasks for each ward
-    tasks = [
-        fetch_alert_and_weather(lat, lon, ward_name)
-        for ward_name, lat, lon in wards
-    ]
+#     # Prepare async tasks for each ward
+#     tasks = [
+#         fetch_alert_and_weather(lat, lon, ward_name)
+#         for ward_name, lat, lon in wards
+#     ]
 
-    # Run all tasks concurrently
-    results = await asyncio.gather(*tasks)
+#     # Run all tasks concurrently
+#     results = await asyncio.gather(*tasks)
 
-    # Flatten the list of lists
-    ward_data = [entry for sublist in results for entry in sublist]
+#     # Flatten the list of lists
+#     ward_data = [entry for sublist in results for entry in sublist]
 
-    # news_alerts = fetch_google_news_alerts()
+#     # news_alerts = fetch_google_news_alerts()
 
-    return {
-        "count": len(ward_data),
-        "last_updated": datetime.now(tz=ist).isoformat(),
-        "wards": ward_data
-        # "news_alerts": news_alerts
-    }
+#     return {
+#         "count": len(ward_data),
+#         "last_updated": datetime.now(tz=ist).isoformat(),
+#         "wards": ward_data
+#         # "news_alerts": news_alerts
+#     }
