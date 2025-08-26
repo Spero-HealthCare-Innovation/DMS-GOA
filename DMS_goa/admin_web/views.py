@@ -1965,3 +1965,6 @@ class UpdatePermissionAPIView(APIView):
 
 #     response = send_bulk_sms(mobile_numbers, message_content)
 #     return JsonResponse({"status": "success", "api_response": response})
+
+
+# s
