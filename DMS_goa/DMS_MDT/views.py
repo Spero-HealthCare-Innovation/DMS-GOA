@@ -192,7 +192,7 @@ class get_vehicle(APIView):
             v_data = {
                 "veh_id": v.veh_id,
                 "veh_number": v.veh_number,  
-                "veh_base_location": v.veh_base_location.bs_name,  
+                "veh_base_location": v.veh_base_location.bs_name if v.veh_base_location and v.veh_base_location.bs_name else None,  
                 "veh_app_lat": v.veh_app_lat,
                 "veh_app_log": v.veh_app_log,
                 "veh_gps_lat": v.veh_gps_lat,
