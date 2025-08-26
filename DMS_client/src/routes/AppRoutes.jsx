@@ -82,21 +82,23 @@ const AppRoutes = ({ darkMode, setIsLoggedIn }) => {
           }
         />
         <Route
-          path="/Alert---Panel"
+          path="/Alert-Panel"
           element={
             <PrivateRoute>
               <AlertPanel darkMode={darkMode} />
             </PrivateRoute>
           }
         />
-        <Route
-          path="/sop"
-          element={
-            <PrivateRoute>
-              <Sop darkMode={darkMode} />
-            </PrivateRoute>
-          }
-        />
+      <Route
+  path="/sop"
+  element={
+    <PrivateRoute>
+      <Box sx={{ ml: localStorage.getItem("user_group") === "1" ? "50px" : "0px" }}>
+        <Sop darkMode={darkMode} />
+      </Box>
+    </PrivateRoute>
+  }
+/>
         <Route
           path="/add-department"
           element={
