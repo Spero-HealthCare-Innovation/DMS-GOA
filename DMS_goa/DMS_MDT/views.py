@@ -417,7 +417,75 @@ def update_pcr_report(request):
             status=status.HTTP_400_BAD_REQUEST
         )
 
+class get_alldriverparameters(APIView):
+    def post(self, request):
+        user_id = request.user.user_id
+        print("user id in assign inc call", user_id)
+        inc_id = request.data["incidentId"]
+        print("inc id in assign inc call", inc_id)
+        pcr_rep = PcrReport.objects.get(incident_id = inc_id, amb_no__user = user_id)
+        assign_inc_objs_arr = []
+        assign_inc_obj = {
+            "id": pcr_rep.incident_id.inc_id,
+            "acknowledge": pcr_rep.acknowledge_time,
+            "startFromBaseLocation": pcr_rep.start_from_base_time,
+            "atScene": pcr_rep.at_scene_time,
+            "fromScene": pcr_rep.from_scene_time,
+            "backToBaseLocation": pcr_rep.back_to_base_time,
+            "inDateTime": pcr_rep.incident_id.inc_added_date
+        } 
+        assign_inc_objs_arr.append(assign_inc_obj)
+        return Response({"data": assign_inc_objs_arr, "error": None}, status=status.HTTP_200_OK)
 
+class get_assign_inc_calls(APIView):
+    def get(self, request):
+        user_id = request.user.user_id
+        print("user id in assign inc call", user_id)
+        inc_veh = incident_vehicles.objects.filter(veh_id__user = user_id, status=1, jobclosure_status=2).order_by("-added_date")
+        assign_inc_objs_arr = []
+        for veh in inc_veh:
+            assign_inc_obj = {
+                "incidentId": veh.incident_id.inc_id,
+                "incidentDate": veh.incident_id.inc_added_date,
+                "incidentTime": veh.incident_id.inc_added_date,
+                "callType": veh.incident_id.disaster_type.disaster_name,
+                "lat": veh.incident_id.latitude,
+                "long": veh.incident_id.longitude,
+                "incidentAddress": veh.incident_id.location,
+                "incidentStatus": veh.pcr_status,
+                "currentStatus": {
+                    "code": 5,
+                    "outOfSych": "false",
+                    "message": "Already back to base"
+                },
+                "incidentCallsStatus": "In-progress",
+                "clikable": "true",
+                "progress": "true",
+                "completed": "false",
+                "onsceneCare": None
+            }
+            assign_inc_objs_arr.append(assign_inc_obj)
+        # inc_veh_serializer = incident_veh_serializer(inc_veh, many=True)
+        return Response({"data": assign_inc_objs_arr, "error": None}, status=status.HTTP_200_OK)
+    
+
+class get_assign_completed_inc_calls(APIView):
+    def post(self, request):
+        user_id = request.user.user_id
+        print("user id in assign inc call", user_id)
+        inc_veh = incident_vehicles.objects.filter(veh_id__user = user_id, status=1, jobclosure_status=1).order_by("-added_date")
+        assign_inc_objs_arr = []
+        for veh in inc_veh:
+            assign_inc_obj = {
+                "incidentId": veh.incident_id.inc_id,
+                "incidentDate": veh.incident_id.inc_added_date,
+                "incidentTime": veh.incident_id.inc_added_date.time(),
+                "callType": None,
+                "CallerRelationName": "",
+                "incidentCallsStatus": "Completed"
+            } 
+            assign_inc_objs_arr.append(assign_inc_obj)
+        return Response({"data": assign_inc_objs_arr, "error": None}, status=status.HTTP_200_OK)
 
 class get_assign_inc_calls(APIView):
     def get(self, request):
