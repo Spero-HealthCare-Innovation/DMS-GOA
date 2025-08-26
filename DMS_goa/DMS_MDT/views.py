@@ -42,22 +42,52 @@ class VehicleLogin(APIView):
         # print(employee_photo, 'photos')
         user = authenticate(user_username=veh_number, password=password)
         if not user:
-            return Response({'status': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
+            return Response({
+                            "data": None,
+                            "error": {
+                                "code": 1,
+                                "message": 'Invalid credentials'
+                            }
+                        }, status=status.HTTP_401_UNAUTHORIZED)
         user_obj = DMS_User.objects.filter(user_username=veh_number, user_is_deleted=False).last()
         if not user_obj:
-            return Response({'status': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
+            return Response({
+                        "data": None,
+                        "error": {
+                            "code": 1,
+                            "message": 'User not found'
+                        }
+                    }, status=status.HTTP_200_OK)
         if user_obj.user_is_login:
-            return Response({'status': 'User already logged in'}, status=status.HTTP_200_OK)
+            return Response({
+                "data": None,
+                "error": {
+                    "code": 1,
+                    "message": 'User already logged in'
+                }
+            }, status=status.HTTP_200_OK)
         vehicle_obj = Vehical.objects.filter(user=user_obj).last()
         if not vehicle_obj:
-            return Response({'status': 'Vehicle not found'}, status=status.HTTP_404_NOT_FOUND)
+            return Response({
+                "data": None,
+                "error": {
+                    "code": 1,
+                    "message": 'Vehicle not found'
+                }
+            }, status=status.HTTP_404_NOT_FOUND)
         active_employees = employee_clockin_info.objects.filter(emp_id__in=employee_ids, clock_out_in_status =1,status=1)
         if active_employees.exists():
             conflict_messages = [
                 f"Employee '{e.emp_id.emp_name}' is already logged in on vehicle '{e.veh_id.veh_number}'"
                 for e in active_employees
             ]
-            return Response(conflict_messages, status=status.HTTP_400_BAD_REQUEST)
+            return Response({
+                    "data": None,
+                    "error": {
+                        "code": 1,
+                        "message": str(conflict_messages)
+                    }
+                }, status=status.HTTP_200_OK)
         # emp_data = [{'emp_clockin_time': now(),'emp_id': emp_id,'veh_id': vehicle_obj.veh_id} for emp_id in employee_ids]
         emp_data = [{'emp_clockin_time': timezone.now(),'emp_id': emp_id,'veh_id': vehicle_obj.veh_id, 'emp_image':emp_image} for emp_id, emp_image in zip(employee_ids,employee_photo)]
         # print(emp_data, 'datas')
@@ -84,7 +114,15 @@ class VehicleLogin(APIView):
             return Response(login_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         login_serializer.save()
         token = RefreshToken.for_user(user)
-        return Response({'refresh': str(token),'access': str(token.access_token)}, status=status.HTTP_200_OK)
+        return Response({
+                        "data": {
+                            "userName": "Pilot - Mr.Madhukar Narsing Kamble, Pilot - Mr.Israr Jabbar Khan",
+                            "message": "Successfully Login",
+                            'access': str(token.access_token),
+                            'refresh': str(token),
+                        },
+                        "error": None
+                        }, status=status.HTTP_200_OK)
     
 class VehicleLogout(APIView):
     def post(self, request):
