@@ -138,9 +138,28 @@ class add_device(APIView):
         device = add_device_serializer(data=data)
         if device.is_valid():
             device.save()
-            return Response(device.data, status=status.HTTP_201_CREATED)
+            if device.data['device_platform']== 'Android':
+                device_version=Device_version_info.objects.filter(os_name=1, status=1).last()
+            else:
+                device_version=Device_version_info.objects.filter(os_name=2, status=1).last()
+            return Response({
+                    "data": {
+                        "deviceId": device.data['device_id'],
+                        "versionInfo":{
+                                        "id": device_version.device_version_id,
+                                        "devicePlatform": "Android" if device_version.os_name == 1 else "iOS",
+                                        "currentVersion": int(device_version.app_current_version) if device_version.app_current_version else None,
+                                        "lastCompulsoryVersion": int(device_version.app_compulsory_version) if device_version.app_compulsory_version else None,
+                                        "locationPath": device_version.app_location
+                                    }
+                    },
+                    "error": None
+                }, status=status.HTTP_201_CREATED)
         else:
-            return Response (device.errors, status=status.HTTP_400_BAD_REQUEST)
+            return Response ({
+                    "data": None,
+                    "error": device.errors
+                }, status=status.HTTP_201_CREATED)
 class get_base_location_vehicle(APIView):
     def get(self, request):
         veh_base = Vehical_base_location.objects.filter(status=1)
