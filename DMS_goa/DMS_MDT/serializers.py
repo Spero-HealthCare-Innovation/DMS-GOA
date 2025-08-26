@@ -59,7 +59,7 @@ class add_device_serializer(serializers.ModelSerializer):
     #     fields = ['device_version_id','os_name','os_version','app_location','app_current_version','app_compulsory_version']
     class Meta:
         model = Device_version
-        fields = ['os_version', 'device_platform', 'app_version', 'device_timezone', 'date_time', 'device_token', 'model_name']
+        fields = ['device_id','os_version', 'device_platform', 'app_version', 'device_timezone', 'date_time', 'device_token', 'model_name']
      
 class inc_veh_serialiZers(serializers.ModelSerializer):
     class Meta:
