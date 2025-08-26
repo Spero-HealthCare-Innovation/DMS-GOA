@@ -448,9 +448,9 @@ class userlist(APIView):
         user_data = []
         for user in users:
             user_data.append({
-                "id": user.emp_id,
+                "id": str(user.emp_id),
                 "name": user.emp_name,
-                "clg_name": user.user_id.user_id,
+                "clg_name": str(user.user_id.user_id),
                 
             })
         return Response({
