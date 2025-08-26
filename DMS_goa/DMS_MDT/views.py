@@ -36,7 +36,7 @@ class VehicleLogin(APIView):
         print('12')
         veh_number = request.data.get('vehicleNumber')
         password = request.data.get('password')
-        employee_ids = list(request.data.get('pilotid').replace('[','').replace(']','').replace(',',''))
+        employee_ids = list(request.data.get('pilotid[]').replace('[','').replace(']','').replace(',',''))
         # print(employee_ids, 'ids')
         employee_photo = request.FILES.getlist('photo')
         # print(employee_photo, 'photos')
