@@ -41,6 +41,9 @@ from admin_web.utils.twitter_scraper import scrape_pune_ems_tweets
 from admin_web.constants import KEYWORDS, PUNE_LOCATIONS, query
 from admin_web.utils.news_scraper import news_dms_scraper
 from DMS_MDT.models import employee_clockin_info
+from admin_web.utils.rss_scrapper import scrape_rss_feeds
+from admin_web.utils.reddit_scraper import scrape_reddit_feeds
+
 
 class DMS_department_post_api(APIView):
     def post(self,request):
@@ -1714,7 +1717,9 @@ class Ward_get_API(APIView):
 
 class Ward_Officer_get_API(APIView):
     def get(self,request,ward_id):
-        ward = DMS_Employee.objects.filter(ward_id=ward_id,grp_id_id__grp_name='Ward Officer')
+        print("ward_id--",ward_id)
+        # ward = DMS_Employee.objects.filter(ward_id=ward_id,grp_id_id__grp_name='Ward Officer')
+        ward = DMS_Employee.objects.filter(ward_id=ward_id)
         serializer = Ward_officer_get_Serializer(ward,many=True)
         return Response(serializer.data,status=status.HTTP_200_OK)
     
@@ -1730,35 +1735,63 @@ class twitter_post_api(APIView):
         if error:
             return Response({"error": error}, status=status.HTTP_400_BAD_REQUEST)
 
-        saved = 0
-        for data in results:
-            serializer = TwitterDMSSerializer(data=data)
-            if serializer.is_valid():
-                serializer.save()
-                saved += 1
-            else:
-                print(serializer.errors)
+        saved_count = 0
+        for item in results:
+            # print(item['user'])
+            TwitterDMS.objects.create(
+                media_status=int(item['media_status']),
+                text=item['text'],
+                translated_text=item['translated_text'],
+                user=item['user'],
+                language=item['language'],
+                region=item['region'],
+                date_time=item['date_time'],
+                link=item['link']
+            )
+            saved_count += 1
+        # saved = 0
+        # for data in results:
+        #     serializer = TwitterDMSSerializer(data=data)
+        #     if serializer.is_valid():
+        #         serializer.save()
+        #         saved += 1
+        #     else:
+        #         print(serializer.errors)
 
         return Response({
             "message": "Tweets saved",
-            "saved_count": saved
+            "saved_count": saved_count
         }, status=status.HTTP_201_CREATED)
             
 class FacebookPostScrapeAPIView(APIView):
     def post(self, request):
         posts = scrape_facebook_posts()
 
-        saved = 0
-        for data in posts:
-            serializer = TwitterDMSSerializer(data=data)
-            if serializer.is_valid():
-                serializer.save()
-                saved += 1
-            else:
-                print(serializer.errors)
+        saved_count = 0
+        for item in posts:
+            # print(item['user'])
+            TwitterDMS.objects.create(
+                media_status=int(item['media_status']),
+                text=item['text'],
+                translated_text=item['translated_text'],
+                user=item['user'],
+                language=item['language'],
+                region=item['region'],
+                date_time=item['date_time'],
+                link=item['link']
+            )
+            saved_count += 1
+        # saved = 0
+        # for data in posts:
+        #     serializer = TwitterDMSSerializer(data=data)
+        #     if serializer.is_valid():
+        #         serializer.save()
+        #         saved += 1
+        #     else:
+        #         print(serializer.errors)
 
         return Response({
-            "message": f"{saved} posts saved to the database.",
+            "message": f"{saved_count} posts saved to the database.",
             "total_scraped": len(posts)
         }, status=status.HTTP_200_OK)
 
@@ -1767,13 +1800,13 @@ class NewsScraperAPIView(APIView):
         api_key = "6def2a5e5f1b470eb186cf10a7a3bc73"  # OR read from settings
 
         final_data, error = news_dms_scraper(api_key)
-        print(final_data)
+        # print(final_data)
         if error:
             return Response({"error": error}, status=status.HTTP_400_BAD_REQUEST)
 
         saved_count = 0
         for item in final_data:
-            print(item['user'])
+            # print(item['user'])
             TwitterDMS.objects.create(
                 media_status=int(item['media_status']),
                 text=item['text'],
@@ -1966,3 +1999,55 @@ class UpdatePermissionAPIView(APIView):
 
 
 # s
+        
+class FetchRssAPIView(APIView):
+    def post(self, request):
+        # urls = request.data.get('feeds')
+        # if not isinstance(urls, list):
+        #     return Response({'error': 'Provide a list of feed URLs'}, status=status.HTTP_400_BAD_REQUEST)
+
+        items = scrape_rss_feeds()
+        saved_count = 0
+        for item in items:
+            # print(item['user'])
+            TwitterDMS.objects.create(
+                media_status=int(item['media_status']),
+                text=item['summary'],
+                translated_text=item['translated_text'],
+                user=item['author'],
+                language=item['language'],
+                region=item['region'],
+                date_time=item['date_time'],
+                link=item['link']
+            )
+            saved_count += 1
+        # saved = 0
+        # for item in items:
+        #     obj, created = TwitterDMS.objects.update_or_create(
+        #         link=item['link'],
+        #         defaults=item
+        #     )
+        #     if created:
+        #         saved += 1
+
+        return Response({'saved_count': saved_count}, status=status.HTTP_200_OK)
+    
+class FetchRedditAPIView(APIView):
+    def post(self, request):
+        items = scrape_reddit_feeds()
+        # print(items)
+        saved_count = 0
+        for item in items:
+            # print(item['user'])
+            TwitterDMS.objects.create(
+                media_status=int(item['media_status']),
+                text=item['summary'],
+                translated_text=item['translated_text'],
+                user=item['author'],
+                language=item['language'],
+                region=item['region'],
+                date_time=item['date_time'],
+                link=item['link']
+            )
+            saved_count += 1
+        return Response({'saved_count': saved_count}, status=status.HTTP_200_OK)

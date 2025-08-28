@@ -10,6 +10,8 @@ from rest_framework.decorators import api_view
 from django.utils import timezone
 from admin_web.models import *
 import math
+from datetime import datetime
+
 
 class Register_veh(APIView):
     def post(self, request):
@@ -419,8 +421,10 @@ def update_pcr_report(request):
 
 class get_alldriverparameters(APIView):
     def post(self, request):
-        user_id = request.user.user_id
-        print("user id in assign inc call", user_id)
+        try:
+            user_id = request.user.user_id
+        except AttributeError:
+            return Response({"data": [],"error": None},status=status.HTTP_401_UNAUTHORIZED)
         inc_id = request.data["incidentId"]
         print("inc id in assign inc call", inc_id)
         pcr_rep = PcrReport.objects.get(incident_id = inc_id, amb_no__user = user_id)
@@ -439,8 +443,12 @@ class get_alldriverparameters(APIView):
 
 class get_assign_inc_calls(APIView):
     def get(self, request):
-        user_id = request.user.user_id
-        print("user id in assign inc call", user_id)
+        try:
+            user_id = request.user.user_id
+        except AttributeError:
+            return Response(
+                {"data": [],"error": None},status=status.HTTP_401_UNAUTHORIZED)
+        
         inc_veh = incident_vehicles.objects.filter(veh_id__user = user_id, status=1, jobclosure_status=2).order_by("-added_date")
         assign_inc_objs_arr = []
         for veh in inc_veh:
@@ -471,15 +479,23 @@ class get_assign_inc_calls(APIView):
 
 class get_assign_completed_inc_calls(APIView):
     def post(self, request):
-        user_id = request.user.user_id
+        try:
+            user_id = request.user.user_id
+        except AttributeError:
+            return Response(
+                {"data": [],"error": None},status=status.HTTP_401_UNAUTHORIZED)
+        
         print("user id in assign inc call", user_id)
         inc_veh = incident_vehicles.objects.filter(veh_id__user = user_id, status=1, jobclosure_status=1).order_by("-added_date")
         assign_inc_objs_arr = []
         for veh in inc_veh:
+            incident_datetime = veh.incident_id.inc_added_date  # already a datetime object
+            incidentDate = incident_datetime.strftime("%Y-%m-%d")   # e.g. "2025-08-25"
+            incidentTime = incident_datetime.strftime("%H:%M:%S")   # e.g. "12:13:20"
             assign_inc_obj = {
                 "incidentId": veh.incident_id.inc_id,
-                "incidentDate": veh.incident_id.inc_added_date,
-                "incidentTime": veh.incident_id.inc_added_date.time(),
+                "incidentDate": incidentDate,
+                "incidentTime": incidentTime,
                 "callType": None,
                 "CallerRelationName": "",
                 "incidentCallsStatus": "Completed"
