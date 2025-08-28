@@ -148,5 +148,7 @@ urlpatterns = [
     path('post_twitter_api/',twitter_post_api.as_view(),name='twitter_post_api'),
     path('post_scrape_facebook_api/',FacebookPostScrapeAPIView.as_view(),name='post_scrape_facebook_api'),
     path("scrape-news/", NewsScraperAPIView.as_view(), name="scrape-news"),
+    path('post_fetch-rss/', FetchRssAPIView.as_view(), name='fetch-rss'),
+    path('post_fetch-reddit/', FetchRedditAPIView.as_view(), name='fetch-reddit'),
     #=================================  Varsha =====================================================
 ]
