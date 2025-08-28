@@ -28,12 +28,9 @@ import CloseIcon from "@mui/icons-material/Close";
 import { styled } from "@mui/material/styles";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import TextSnippetIcon from "@mui/icons-material/TextSnippet";
-import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import { useLocation } from "react-router-dom";
 import { useState } from "react";
-import { useRef } from "react";
 import { useEffect } from "react";
-import { tasks } from "./dummydata";
 import { Tooltip } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import Snackbar from "@mui/material/Snackbar";
@@ -41,7 +38,6 @@ import Alert from "@mui/material/Alert";
 import CustomPagination from "../../../common/CustomPagination";
 import { Add } from "@mui/icons-material";
 import { useAuth } from "../../../Context/ContextAPI";
-import IncidentDetails from "./IncidentDetails";
 import axios from "axios";
 import { useSnackbar } from "../../../hooks/useSnackbar";
 
@@ -230,7 +226,7 @@ function SopTask({
       console.log("WebSocket closed");
     };
   });
-  
+
   // useEffect(() => {
   //   let socket;
   //   // const timer = setTimeout(() => {
@@ -374,6 +370,44 @@ function SopTask({
   //   sessionStorage.removeItem('isReloaded');
   // });
 
+  const [createIncident, setCreateIncident] = useState(false);
+  const [view, setView] = useState(false);
+  const [closure, setClosure] = useState(false);
+
+  useEffect(() => {
+    const storedPermissions = JSON.parse(localStorage.getItem("permissions"));
+
+    if (storedPermissions && storedPermissions.length > 0) {
+      const modules = storedPermissions[0].modules_submodule;
+
+      const sopModule = modules.find((mod) => mod.moduleName === "SOP");
+
+      if (sopModule) {
+        console.log("SOP Module:", sopModule);
+
+        sopModule.selectedSubmodules?.forEach((sub) => {
+          console.log("Submodule:", sub.submoduleName);
+
+          sub.selectedActions?.forEach((act) => {
+            console.log("Action:", act.actionName);
+
+            if (act.actionName === "Create Incident") {
+              setCreateIncident(true);
+            }
+            if (act.actionName === "View") {
+              setView(true);
+            }
+            if (act.actionName === "Closure") {
+              setClosure(true);
+            }
+          });
+        });
+      } else {
+        console.warn("SOP module not found in permissions");
+      }
+    }
+  }, []);
+
   return (
     <Paper
       elevation={3}
@@ -455,44 +489,41 @@ function SopTask({
           }}
         />
 
-        <IconButton
-          onClick={handleClick}
-          // onMouseEnter={() => setIsHovered(true)}
-          // onMouseLeave={() => setIsHovered(false)}
-          size="small"
-          sx={{
-            ml: "auto",
-            backgroundColor: "rgb(223, 76, 76)",
-            color: "black",
-            borderRadius: "18px",
-            "&:hover": {
-              backgroundColor: "rgb(223, 76, 76)",
-              border: `1px solid ${darkMode ? "#fff" : "#000"}`,
-            },
-            // width: isHovered ? 140 : 36,
-            height: 36,
-            transition: "width 0.3s ease",
-            overflow: "hidden",
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            // paddingRight: isHovered ? 1 : 1,
-          }}
-        >
-          <Add sx={{ color: darkMode ? "#fff" : "#000000" }} />
-          {/* {isHovered && ( */}
-          <Typography
-            variant="body2"
+        {createIncident && (
+          <IconButton
+            onClick={handleClick}
+            size="small"
             sx={{
-              marginLeft: 1,
-              color: "#fff",
-              whiteSpace: "nowrap",
+              ml: "auto",
+              backgroundColor: "rgb(223, 76, 76)",
+              color: "black",
+              borderRadius: "18px",
+              "&:hover": {
+                backgroundColor: "rgb(223, 76, 76)",
+                border: `1px solid ${darkMode ? "#fff" : "#000"}`,
+              },
+              height: 36,
+              transition: "width 0.3s ease",
+              overflow: "hidden",
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
             }}
           >
-            Create Incident
-          </Typography>
-          {/* )} */}
-        </IconButton>
+            <Add sx={{ color: darkMode ? "#fff" : "#000000" }} />
+            <Typography
+              variant="body2"
+              sx={{
+                marginLeft: 1,
+                color: "#fff",
+                whiteSpace: "nowrap",
+              }}
+            >
+              Create Incident
+            </Typography>
+          </IconButton>
+        )}
+
       </Box>
 
       {flag === 1 ? (
@@ -768,47 +799,54 @@ function SopTask({
                               display: "flex",
                             }}
                           >
-                            <Tooltip title="View Details">
-                              <IconButton
-                                onClick={() => {
-                                  setSelectedIncident(item);
-                                  setIncidentId(item.inc_id);
-                                  setSelectedIncidentFromSop(item);
-                                  setDisasterIdFromSop(item.disaster_name);
-                                  setHighlightedId(item.incident_id);
-                                  console.log("Incident idd", incidentId);
-                                  setFlag(0);
-                                  setViewmode("incident");
-                                }}
-                              >
-                                <Visibility
-                                  sx={{ color: "orange", fontSize: 28 }}
-                                />
-                              </IconButton>
-                            </Tooltip>
+                            {view ?
+                              (
+                                <Tooltip title="View Details">
+                                  <IconButton
+                                    onClick={() => {
+                                      setSelectedIncident(item);
+                                      setIncidentId(item.inc_id);
+                                      setSelectedIncidentFromSop(item);
+                                      setDisasterIdFromSop(item.disaster_name);
+                                      setHighlightedId(item.incident_id);
+                                      console.log("Incident idd", incidentId);
+                                      setFlag(0);
+                                      setViewmode("incident");
+                                    }}
+                                  >
+                                    <Visibility
+                                      sx={{ color: "orange", fontSize: 28 }}
+                                    />
+                                  </IconButton>
+                                </Tooltip>
+                              )
+                              :
+                              (
+                                <>-</>
+                              )
+                            }
 
-                            <Tooltip title="Closure Details">
-                              <IconButton
-                                onClick={() => {
-                                  setSelectedIncident(item);
-                                  // setIncidentId(item.inc_id);
-                                  setIncidentIdClosure(item.inc_id);
-                                  setSelectedIncidentFromSop(item);
-                                  setDisasterIdFromSop(item.disaster_name);
-                                  setHighlightedId(item.incident_id);
-                                  console.log("Closure idd", incidentIdClosure);
-                                  setFlag(0);
-                                  setViewmode("closure");
-                                  fetchIncidentDetails();
-                                }}
-                                size="large"
-                              >
-                                <TextSnippetIcon
-                                  // sx={{ color: "#ffccf2", fontSize: 20 }}
-                                  sx={{ color: "rgb(122 255 242)", fontSize: 20 }}
-                                />
-                              </IconButton>
-                            </Tooltip>
+                            {closure ? (
+                              <Tooltip title="Closure Details">
+                                <IconButton
+                                  onClick={() => {
+                                    setSelectedIncident(item);
+                                    setIncidentIdClosure(item.inc_id);
+                                    setSelectedIncidentFromSop(item);
+                                    setDisasterIdFromSop(item.disaster_name);
+                                    setHighlightedId(item.incident_id);
+                                    setFlag(0);
+                                    setViewmode("closure");
+                                    fetchIncidentDetails();
+                                  }}
+                                  size="large"
+                                >
+                                  <TextSnippetIcon sx={{ color: "rgb(122 255 242)", fontSize: 20 }} />
+                                </IconButton>
+                              </Tooltip>
+                            ) : (
+                              <>-</>
+                            )}
                           </StyledCardContent>
                         </EnquiryCardBody>
                       ))
@@ -819,25 +857,28 @@ function SopTask({
             </TableContainer>
           </Grid>
         </Grid>
-      )}
+      )
+      }
       {/* Pagination Component */}
-      {flag === 0 ? (
-        <Box mt={2}>
-          <CustomPagination
-            darkMode={darkMode}
-            page={page}
-            setPage={setPage}
-            rowsPerPage={rowsPerPage}
-            setRowsPerPage={setRowsPerPage}
-            totalPages={totalPages}
-            textColor={textColor}
-            borderColor={borderColor}
-            bgColor={bgColor}
-            inputBgColor={darkMode ? "#1e293b" : "#fff"}
-            rowsPerPageOptions={[3, 10, 20, 50]}
-          />
-        </Box>
-      ) : null}
+      {
+        flag === 0 ? (
+          <Box mt={2}>
+            <CustomPagination
+              darkMode={darkMode}
+              page={page}
+              setPage={setPage}
+              rowsPerPage={rowsPerPage}
+              setRowsPerPage={setRowsPerPage}
+              totalPages={totalPages}
+              textColor={textColor}
+              borderColor={borderColor}
+              bgColor={bgColor}
+              inputBgColor={darkMode ? "#1e293b" : "#fff"}
+              rowsPerPageOptions={[3, 10, 20, 50]}
+            />
+          </Box>
+        ) : null
+      }
 
       {/* SNACKBAR FOR ALERT SHOW */}
       <Snackbar
@@ -902,7 +943,7 @@ function SopTask({
           </Button>
         </DialogActions>
       </Dialog>
-    </Paper>
+    </Paper >
   );
 }
 

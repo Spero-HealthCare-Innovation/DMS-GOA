@@ -632,48 +632,46 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
   }, [selectedStateId, isNewEntry]);
 
   // localStorage se check karne ke liye function
-const hasPermission = (moduleName, submoduleName, actionName) => {
-  const stored = localStorage.getItem("permissions");
-  console.log("Stored permissions:", stored);
-  
-  if (!stored) {
-    console.log("No permissions found in localStorage.");
-    return false;
-  }
+  const hasPermission = (moduleName, submoduleName, actionName) => {
+    const stored = localStorage.getItem("permissions");
+    console.log("Stored permissions:", stored);
 
-  const permissions = JSON.parse(stored);
-  console.log("Parsed permissions:", permissions);
+    if (!stored) {
+      console.log("No permissions found in localStorage.");
+      return false;
+    }
 
-  // Module find karo
-  const module = permissions[0]?.modules_submodule.find(
-    (m) => m.moduleName === moduleName
-  );
-  console.log(`Looking for module "${moduleName}":`, module);
-  if (!module) {
-    console.log(`Module "${moduleName}" not found.`);
-    return false;
-  }
+    const permissions = JSON.parse(stored);
+    console.log("Parsed permissions:", permissions);
 
-  // Submodule find karo
-  const submodule = module.selectedSubmodules.find(
-    (s) => s.submoduleName === submoduleName
-  );
-  console.log(`Looking for submodule "${submoduleName}":`, submodule);
-  if (!submodule) {
-    console.log(`Submodule "${submoduleName}" not found.`);
-    return false;
-  }
+    // Module find karo
+    const module = permissions[0]?.modules_submodule.find(
+      (m) => m.moduleName === moduleName
+    );
+    console.log(`Looking for module "${moduleName}":`, module);
+    if (!module) {
+      console.log(`Module "${moduleName}" not found.`);
+      return false;
+    }
 
-  // Action find karo
-  const hasAction = submodule.selectedActions.some(
-    (a) => a.actionName === actionName
-  );
-  console.log(`Checking action "${actionName}":`, hasAction);
-  
-  return hasAction;
-};
+    // Submodule find karo
+    const submodule = module.selectedSubmodules.find(
+      (s) => s.submoduleName === submoduleName
+    );
+    console.log(`Looking for submodule "${submoduleName}":`, submodule);
+    if (!submodule) {
+      console.log(`Submodule "${submoduleName}" not found.`);
+      return false;
+    }
 
+    // Action find karo
+    const hasAction = submodule.selectedActions.some(
+      (a) => a.actionName === actionName
+    );
+    console.log(`Checking action "${actionName}":`, hasAction);
 
+    return hasAction;
+  };
 
   return (
     // ..
@@ -1083,54 +1081,54 @@ const hasPermission = (moduleName, submoduleName, actionName) => {
                               <CloseIcon  sx={{ fontSize: "14px" , alignItems: "center"}}/>
                             </IconButton> */}
                             {hasPermission("System User", "Add Department", "Edit") && (
-                            <Button
-                              fullWidth
-                              variant="outlined"
-                              color="warning"
-                              startIcon={
-                                <EditOutlined
-                                  sx={{
-                                    fontSize: "14px",
-                                    alignItems: "center",
-                                  }}
-                                />
-                              }
-                              onClick={() => handleEdit(selectedItem)}
-                              sx={{
-                                textTransform: "none",
-                                fontSize: "14px",
-                              }}
-                            >
-                              Edit
-                            </Button>
+                              <Button
+                                fullWidth
+                                variant="outlined"
+                                color="warning"
+                                startIcon={
+                                  <EditOutlined
+                                    sx={{
+                                      fontSize: "14px",
+                                      alignItems: "center",
+                                    }}
+                                  />
+                                }
+                                onClick={() => handleEdit(selectedItem)}
+                                sx={{
+                                  textTransform: "none",
+                                  fontSize: "14px",
+                                }}
+                              >
+                                Edit
+                              </Button>
                             )}
 
 
-                           {hasPermission("System User", "Add Department", "Delete") && (
-  <Button
-    fullWidth
-    variant="outlined"
-    color="error"
-    startIcon={
-      <DeleteOutline
-        sx={{
-          fontSize: "14px",
-          alignItems: "center",
-        }}
-      />
-    }
-    onClick={() => {
-      setDeleteDepId(selectedItem.dep_id);
-      setOpenDeleteDialog(true);
-    }}
-    sx={{
-      textTransform: "none",
-      fontSize: "14px",
-    }}
-  >
-    Delete
-  </Button>
-)}
+                            {hasPermission("System User", "Add Department", "Delete") && (
+                              <Button
+                                fullWidth
+                                variant="outlined"
+                                color="error"
+                                startIcon={
+                                  <DeleteOutline
+                                    sx={{
+                                      fontSize: "14px",
+                                      alignItems: "center",
+                                    }}
+                                  />
+                                }
+                                onClick={() => {
+                                  setDeleteDepId(selectedItem.dep_id);
+                                  setOpenDeleteDialog(true);
+                                }}
+                                sx={{
+                                  textTransform: "none",
+                                  fontSize: "14px",
+                                }}
+                              >
+                                Delete
+                              </Button>
+                            )}
 
                           </Popover>
                           <Snackbar
@@ -1257,7 +1255,7 @@ const hasPermission = (moduleName, submoduleName, actionName) => {
                 <Box
                   onClick={() =>
                     page <
-                      Math.ceil(filteredDepartments.length / rowsPerPage) &&
+                    Math.ceil(filteredDepartments.length / rowsPerPage) &&
                     setPage(page + 1)
                   }
                   sx={{
@@ -1292,30 +1290,30 @@ const hasPermission = (moduleName, submoduleName, actionName) => {
               alignItems="center"
               mb={2}
               flexWrap="wrap"
-              // sx={{backgroundColor: darkMode ? "rgb(88,92,99)" : "#FFFFFF"}}
+            // sx={{backgroundColor: darkMode ? "rgb(88,92,99)" : "#FFFFFF"}}
             >
               {hasPermission("System User", "Add Department", "Add New  Department") && (
-              <Button
-                variant="contained"
-                startIcon={<AddCircleOutline />}
-                disabled={!isEditMode}
-                onClick={handleAddNewDepartment}
-                sx={{
-                  backgroundColor: "rgba(223,76,76, 0.8)",
-                  color: "#fff",
-                  fontWeight: 600,
-                  fontFamily: "Roboto",
-                  textTransform: "none",
-                  px: 1,
-                  py: 1,
-                  fontSize: { xs: "0.75rem", sm: "0.875rem" },
-                  "&:hover": {
+                <Button
+                  variant="contained"
+                  startIcon={<AddCircleOutline />}
+                  disabled={!isEditMode}
+                  onClick={handleAddNewDepartment}
+                  sx={{
                     backgroundColor: "rgba(223,76,76, 0.8)",
-                  },
-                }}
-              >
-                Add New Department
-              </Button>
+                    color: "#fff",
+                    fontWeight: 600,
+                    fontFamily: "Roboto",
+                    textTransform: "none",
+                    px: 1,
+                    py: 1,
+                    fontSize: { xs: "0.75rem", sm: "0.875rem" },
+                    "&:hover": {
+                      backgroundColor: "rgba(223,76,76, 0.8)",
+                    },
+                  }}
+                >
+                  Add New Department
+                </Button>
               )}
             </Box>
 
