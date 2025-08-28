@@ -172,47 +172,90 @@ const Permission = () => {
     }
   };
 
-  const handleAllPermissionChange = (event) => {
-    const checked = event.target.checked;
-    setAllPermissionChecked(checked);
-    const updatedModules = {};
-    const updatedSubmodules = {};
-    moduleSubmodule.forEach((module) => {
-      updatedModules[module.module_id] = checked;
-      module.submodules.forEach((sub) => {
-        updatedSubmodules[sub.Permission_id] = checked;
-      });
+ const handleAllPermissionChange = (event) => {
+  const checked = event.target.checked;
+  setAllPermissionChecked(checked);
+
+  const updatedModules = {};
+  const updatedSubmodules = {};
+  const updatedActions = {};
+
+  moduleSubmodule.forEach((module) => {
+    updatedModules[module.module_id] = checked;
+
+    module.submodules.forEach((sub) => {
+      updatedSubmodules[sub.Permission_id] = checked;
     });
-    setModuleCheckboxes(updatedModules);
-    setSubmoduleCheckboxes(updatedSubmodules);
-  };
 
-  const handleModuleChange = (moduleId, checked) => {
-    setModuleCheckboxes((prev) => ({ ...prev, [moduleId]: checked }));
-    const module = moduleSubmodule.find((mod) => mod.module_id === moduleId);
-    if (module) {
-      const updatedSub = { ...submoduleCheckboxes };
-      module.submodules.forEach((sub) => {
-        updatedSub[sub.Permission_id] = checked;
-      });
-      setSubmoduleCheckboxes(updatedSub);
-    }
-  };
-
-  const handleSubmoduleChange = (subId, checked) => {
-    const updated = { ...submoduleCheckboxes, [subId]: checked };
-    setSubmoduleCheckboxes(updated);
-
-    moduleSubmodule.forEach((module) => {
-      const subIds = module.submodules.map((sub) => sub.Permission_id);
-      const allChecked = subIds.every((id) => updated[id]);
-      const anyChecked = subIds.some((id) => updated[id]);
-      setModuleCheckboxes((prev) => ({
-        ...prev,
-        [module.module_id]: allChecked ? true : anyChecked ? true : false,
-      }));
+    module.actions.forEach((action) => {
+      updatedActions[action.action_id] = checked;
     });
-  };
+  });
+
+  setModuleCheckboxes(updatedModules);
+  setSubmoduleCheckboxes(updatedSubmodules);
+  setActionCheckboxes(updatedActions); // ✅ add this
+};
+
+
+const handleModuleChange = (moduleId, checked) => {
+  //  Update module checkbox
+  setModuleCheckboxes((prev) => ({ ...prev, [moduleId]: checked }));
+
+  const module = moduleSubmodule.find((mod) => mod.module_id === moduleId);
+
+  if (module) {
+    //  Update submodules
+    const updatedSub = { ...submoduleCheckboxes };
+    module.submodules.forEach((sub) => {
+      updatedSub[sub.Permission_id] = checked;
+    });
+    setSubmoduleCheckboxes(updatedSub);
+
+    //  Update actions
+    const updatedActions = { ...actionCheckboxes };
+    module.actions.forEach((action) => {
+      updatedActions[action.action_id] = checked;
+    });
+    setActionCheckboxes(updatedActions);
+  }
+};
+
+
+const handleSubmoduleChange = (subId, checked) => {
+  // Submodule update
+  const updatedSubs = { ...submoduleCheckboxes, [subId]: checked };
+
+  // ✅ Actions update (agar submodule unchecked hai → uske actions bhi uncheck)
+  const updatedActions = { ...actionCheckboxes };
+  moduleSubmodule.forEach((module) => {
+    module.submodules.forEach((sub) => {
+      if (sub.Permission_id === subId) {
+        module.actions.forEach((action) => {
+          if (action.sub_module === subId) {
+            updatedActions[action.action_id] = checked; // sub ke hisaab se set
+          }
+        });
+      }
+    });
+  });
+
+  setSubmoduleCheckboxes(updatedSubs);
+  setActionCheckboxes(updatedActions);
+
+
+  moduleSubmodule.forEach((module) => {
+    const subIds = module.submodules.map((sub) => sub.Permission_id);
+    const allChecked = subIds.every((id) => updatedSubs[id]);
+    const anyChecked = subIds.some((id) => updatedSubs[id]);
+
+    setModuleCheckboxes((prev) => ({
+      ...prev,
+      [module.module_id]: allChecked ? true : anyChecked ? true : false,
+    }));
+  });
+};
+
 
   const handleSubmit = () => {
   const selectedData = {
@@ -612,11 +655,15 @@ const Permission = () => {
   mb={2}
   display="flex"
   flexDirection={{ xs: "column", md: "row" }}
-  gap={2}
+  gap={1} // 🔹 pehle 2 tha, ab 1 kar diya
   sx={{ borderBottom: "1px dashed #444", pb: 2 }}
 >
   {/* 1️⃣ Module Column */}
-  <Box minWidth={{ xs: "100%", md: "220px" }} display="flex" alignItems="center">
+  <Box
+    minWidth={{ xs: "100%", md: "220px" }}
+    display="flex"
+    alignItems="center"
+  >
     <Checkbox
       checked={moduleCheckboxes[module.module_id] || false}
       onChange={(e) => handleModuleChange(module.module_id, e.target.checked)}
@@ -628,19 +675,23 @@ const Permission = () => {
   </Box>
 
   {/* 2️⃣ Submodule Column */}
-  <Box flex={1} display="flex" flexDirection="column" gap={1}>
+  <Box flex={1} display="flex" flexDirection="column" gap={0.5}> {/* 🔹 gap 1 se kam */}
     {module.submodules.map((sub) => {
       const isSubChecked = submoduleCheckboxes[sub.Permission_id] || false;
       return (
         <Chip
           key={sub.Permission_id}
           label={sub.name}
-          onClick={() => handleSubmoduleChange(sub.Permission_id, !isSubChecked)}
+          onClick={() =>
+            handleSubmoduleChange(sub.Permission_id, !isSubChecked)
+          }
           variant="outlined"
           size="small"
           sx={{
             width: "fit-content",
-            backgroundColor: isSubChecked ? `${moduleColor}20` : "rgba(255,255,255,0.05)",
+            backgroundColor: isSubChecked
+              ? `${moduleColor}20`
+              : "rgba(255,255,255,0.05)",
             color: isSubChecked ? "#fff" : "#ccc",
             border: isSubChecked ? `1.5px solid ${moduleColor}` : "none",
             borderRadius: "8px",
@@ -653,33 +704,44 @@ const Permission = () => {
   </Box>
 
   {/* 3️⃣ Actions Column */}
-  <Box flex={1} display="flex" flexDirection="column" gap={1}>
+  <Box flex={1} display="flex" flexDirection="column" gap={0.5}> {/* 🔹 yahan bhi kam */}
     {module.submodules.map((sub) => {
       const actionsForSub = module.actions.filter(
         (action) => action.sub_module === sub.Permission_id
       );
 
       return (
-        <Box key={sub.Permission_id} display="flex" flexWrap="wrap" gap={1}>
+        <Box
+          key={sub.Permission_id}
+          display="flex"
+          flexWrap="wrap"
+          gap={0.5} // 🔹 chips ke beech bhi chhota gap
+        >
           {actionsForSub.map((action) => {
             const isActionChecked = actionCheckboxes[action.action_id] || false;
             return (
               <Chip
                 key={action.action_id}
                 label={action.name}
-                onClick={() => handleActionChange(action.action_id, !isActionChecked)}
+                onClick={() =>
+                  handleActionChange(action.action_id, !isActionChecked)
+                }
                 variant="outlined"
                 size="small"
                 sx={{
                   width: "fit-content",
-                  backgroundColor: isActionChecked ? `${moduleColor}20` : "rgba(255,255,255,0.05)",
+                  backgroundColor: isActionChecked
+                    ? `${moduleColor}20`
+                    : "rgba(255,255,255,0.05)",
                   color: isActionChecked ? "#fff" : "#ccc",
                   border: isActionChecked ? `1.5px solid ${moduleColor}` : "none",
                   borderRadius: "8px",
                   px: 1.5,
                   fontSize: "12px",
                   "&:hover": {
-                    backgroundColor: isActionChecked ? `${moduleColor}30` : "rgba(255,255,255,0.08)",
+                    backgroundColor: isActionChecked
+                      ? `${moduleColor}30`
+                      : "rgba(255,255,255,0.08)",
                     cursor: "pointer",
                   },
                 }}
@@ -692,41 +754,46 @@ const Permission = () => {
   </Box>
 </Box>
 
+
           );
         })}
+
+        
+            {/* ✅ Submit Button */}
+  <Box textAlign="center">
+  <Button
+    variant="contained"
+    color="primary"
+    size="medium" 
+    disabled={loading}
+    onClick={handleSubmit}
+    sx={{
+      px: 3,
+      py: 1,
+      borderRadius: 2,
+      fontWeight: "bold",
+      textTransform: "none",
+      fontSize: "14px",
+      background: loading
+        ? "#1976d2"
+        : "linear-gradient(to right, #00c6ff, #3fb5ecff)",
+      color: "#fff",
+      boxShadow: "0 3px 10px rgba(0, 114, 255, 0.4)",
+      "&:hover": {
+        background: "linear-gradient(to right, #00b0e3, #005ec4)",
+        boxShadow: "0 5px 14px rgba(0, 114, 255, 0.6)",
+        transform: "translateY(-1px)",
+      },
+      transition: "all 0.3s ease-in-out",
+    }}
+  >
+    {loading ? <CircularProgress size={20} color="inherit" /> : "Submit"}
+  </Button>
+</Box>
+
       </Paper>
 
-      {/* ✅ Submit Button */}
-      <Box textAlign="center" mt={4}>
-        <Button
-          variant="contained"
-          color="primary"
-          size="large"
-          disabled={loading}
-          onClick={handleSubmit}
-          sx={{
-            px: 4,
-            py: 1.5,
-            borderRadius: 3,
-            fontWeight: "bold",
-            textTransform: "none",
-            fontSize: "16px",
-            background: loading
-              ? "#1976d2"
-              : "linear-gradient(to right, #00c6ff, #3fb5ecff)",
-            color: "#fff",
-            boxShadow: "0 4px 14px rgba(0, 114, 255, 0.4)",
-            "&:hover": {
-              background: "linear-gradient(to right, #00b0e3, #005ec4)",
-              boxShadow: "0 6px 16px rgba(0, 114, 255, 0.6)",
-              transform: "translateY(-1px)",
-            },
-            transition: "all 0.3s ease-in-out",
-          }}
-        >
-          {loading ? <CircularProgress size={24} color="inherit" /> : "Submit"}
-        </Button>
-      </Box>
+  
     </Box>
   );
 };
