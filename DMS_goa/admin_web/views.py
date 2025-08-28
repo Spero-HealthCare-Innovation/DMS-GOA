@@ -1714,7 +1714,9 @@ class Ward_get_API(APIView):
 
 class Ward_Officer_get_API(APIView):
     def get(self,request,ward_id):
-        ward = DMS_Employee.objects.filter(ward_id=ward_id,grp_id_id__grp_name='Ward Officer')
+        print("ward_id--",ward_id)
+        # ward = DMS_Employee.objects.filter(ward_id=ward_id,grp_id_id__grp_name='Ward Officer')
+        ward = DMS_Employee.objects.filter(ward_id=ward_id)
         serializer = Ward_officer_get_Serializer(ward,many=True)
         return Response(serializer.data,status=status.HTTP_200_OK)
     
