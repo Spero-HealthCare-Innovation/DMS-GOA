@@ -747,6 +747,23 @@ class DMS_Ward(models.Model):
     ward_added_date = models.DateTimeField(auto_now=True)
     ward_modified_by = models.CharField(max_length=255, null=True, blank=True)
     ward_modified_date = models.DateTimeField(auto_now=True,null=True, blank=True)
+
+class DMS_Ward_Officers(models.Model):
+    officer_id = models.AutoField(primary_key=True)
+    ward_id = models.ManyToManyField(
+        'DMS_Ward',
+        blank=True,
+        null=True
+    )
+    officer_name = models.CharField(max_length=255,null=True,blank=True)
+    officer_contact = models.CharField(max_length=255,null=True,blank=True)
+    officer_dept = models.CharField(max_length=255,null=True,blank=True)
+    officer_designation = models.CharField(max_length=255,null=True,blank=True) 
+    officer_is_deleted = models.BooleanField(default=False)
+    officer_added_by = models.CharField(max_length=255, null=True, blank=True)
+    officer_added_date = models.DateTimeField(auto_now=True)
+    officer_modified_by = models.CharField(max_length=255, null=True, blank=True)
+    officer_modified_date = models.DateTimeField(auto_now=True,null=True, blank=True)
     
 
 

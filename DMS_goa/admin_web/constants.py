@@ -140,3 +140,28 @@ RSS_BLOCKLIST_KEYWORDS = [
     "movie", "film", "box office", "cinema", "festival", "celebrity", "reality show", "match",
     "job", "recruitment", "hostel", "education", "school", "result"
 ]
+
+# Maharashtra RSS feeds (state-level news sources)
+REDDIT_RSS_FEEDS = [
+    "https://www.lokmat.com/rss/maharashtra-news.xml",
+    "https://www.sakalmedia.in/rss.xml",
+    "https://www.esakal.com/rss-feed",
+    "https://www.abplive.com/rss/maharashtra.xml",
+    "https://www.loksatta.com/rss/maharashtra.xml",
+    "https://www.tv9marathi.com/feed",
+    "https://www.news18.com/rss/maharashtra.xml",
+]
+
+# EMS-specific keywords
+REDDIT_EMS_KEYWORDS = [
+    "accident", "ambulance", "emergency", "fire", "explosion", "rescue", "flood", "landslide",
+    "earthquake", "cyclone", "storm", "heavy rain", "warning", "red alert", "gas leak",
+    "building collapse", "tree fall", "waterlogging", "overflowing river", "burning",
+    "injured", "injury", "death", "crash", "blast", "burn", "chemical fire",
+]
+
+# Blocklist
+REDDIT_BLOCKLIST_KEYWORDS = [
+    "campus", "admission", "exam", "fees", "university", "education", 
+    "student", "result", "job", "recruitment", "ipl", "match"
+]
