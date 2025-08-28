@@ -13,6 +13,7 @@ import {
   InputAdornment,
   Autocomplete,
   Popper,
+  Button,
 } from "@mui/material";
 import CommentsPanel from "./CommentsPanel";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
@@ -26,6 +27,7 @@ import DialogContent from "@mui/material/DialogContent";
 import CloseIcon from "@mui/icons-material/Close";
 import { ArrowDropDownCircleOutlined } from "@mui/icons-material";
 import * as turf from "@turf/turf";
+import ResponderModal from "./ResponderModal";
 
 function IncidentDetails({
   darkMode,
@@ -89,6 +91,9 @@ function IncidentDetails({
   const [Latitude, setLatitude] = useState("");
   const [Longitude, setLongitude] = useState("");
   const [openDialog, setOpenDialog] = useState(false);
+
+const [activeResponder, setActiveResponder] = useState(null);
+const [openModal, setOpenModal] = useState(true);
 
   const [stateData, setStateData] = useState(null);
 
@@ -330,14 +335,21 @@ function IncidentDetails({
 
   // ================== RESPONDER & COMMENT DATA ========================
   // ============ SET DEFAULT RESPONDERS ===============================
+  // useEffect(() => {
+  //   if (Array.isArray(responderScope?.responder_scope)) {
+  //     const defaultSelected = responderScope.responder_scope.map(
+  //       (r) => r.res_id
+  //     );
+  //     setSelectedResponders(defaultSelected);
+  //   }
+  // }, [responderScope]);
+
   useEffect(() => {
-    if (Array.isArray(responderScope?.responder_scope)) {
-      const defaultSelected = responderScope.responder_scope.map(
-        (r) => r.res_id
-      );
-      setSelectedResponders(defaultSelected);
-    }
-  }, [responderScope]);
+  if (Array.isArray(responderScope?.responder_scope)) {
+    setSelectedResponders([]); // default empty → sab unchecked
+  }
+}, [responderScope]);
+
 
   // ================== FIELD VALIDATION LOGIC ==========================
 
@@ -1381,60 +1393,86 @@ function IncidentDetails({
                   )}
                 </Box>
 
-                <Box>
-                  <Typography
-                    variant="subtitle2"
-                    sx={{ color: labelColor, fontWeight: 500, fontFamily }}
-                  >
-                    Responder Scope
-                  </Typography>
-                  {responderScope?.responder_scope?.length > 0 ? (
-                    <Stack spacing={1} mt={1}>
-                      <Box display="flex" flexWrap="wrap" gap={1}>
-                        {responderScope.responder_scope.map(
-                          ({ res_id, responder_name }) => (
-                            <FormControlLabel
-                              key={res_id}
-                              control={
-                                <Checkbox
-                                  checked={selectedResponders.includes(res_id)}
-                                  onChange={(e) => {
-                                    if (e.target.checked) {
-                                      setSelectedResponders((prev) => [
-                                        ...prev,
-                                        res_id,
-                                      ]);
-                                    } else {
-                                      setSelectedResponders((prev) =>
-                                        prev.filter((id) => id !== res_id)
-                                      );
-                                    }
-                                  }}
-                                  sx={{ color: labelColor }}
-                                />
-                              }
-                              label={
-                                <Typography
-                                  variant="subtitle2"
-                                  sx={{ fontFamily }}
-                                >
-                                  {responder_name}
-                                </Typography>
-                              }
-                            />
-                          )
-                        )}
-                      </Box>
-                    </Stack>
-                  ) : (
-                    <Box display="flex" alignItems="center" gap={1} mt={1}>
-                      {/* <InfoOutlinedIcon color="disabled" /> */}
-                      <Typography variant="subtitle2" sx={{ fontFamily }}>
-                        Responder scope data not available.
-                      </Typography>
-                    </Box>
-                  )}
-                </Box>
+ <Box>
+  <Typography
+    variant="subtitle2"
+    sx={{ color: labelColor, fontWeight: 500, fontFamily }}
+  >
+    Responder Scope
+  </Typography>
+  {responderScope?.responder_scope?.length > 0 ? (
+    <Stack spacing={1} mt={1}>
+      <Box display="flex" flexWrap="wrap" gap={1}>
+        {responderScope.responder_scope.map(
+          ({ res_id, responder_name }) => (
+            <FormControlLabel
+              key={res_id}
+              control={
+                <Checkbox
+                  checked={selectedResponders.includes(res_id)}
+                  onChange={(e) => {
+                    if (e.target.checked) {
+                      // add responder
+                      setSelectedResponders((prev) => [...prev, res_id]);
+                      setActiveResponder({ res_id, responder_name });
+                    } else {
+                      // remove responder
+                      setSelectedResponders((prev) =>
+                        prev.filter((id) => id !== res_id)
+                      );
+                      if (activeResponder?.res_id === res_id) {
+                        setActiveResponder(null);
+                      }
+                    }
+                  }}
+                  sx={{ color: labelColor }}
+                />
+              }
+              label={
+                <Typography variant="subtitle2" sx={{ fontFamily }}>
+                  {responder_name}
+                </Typography>
+              }
+            />
+          )
+        )}
+      </Box>
+
+      {/* View Responder Button */}
+      <Box mt={2}>
+        <Button
+          variant="contained"
+          size="small"
+          disabled={selectedResponders.length === 0} // ✅ at least 1 responder select hona chahiye
+          onClick={() => setOpenModal(true)}
+        >
+          View Responder
+        </Button>
+      </Box>
+    </Stack>
+  ) : (
+    <Box display="flex" alignItems="center" gap={1} mt={1}>
+      <Typography variant="subtitle2" sx={{ fontFamily }}>
+        Responder scope data not available.
+      </Typography>
+    </Box>
+  )}
+
+  {openModal && (
+    <ResponderModal
+      open={openModal}
+      responderList={selectedResponders} // ✅ array of selected responders
+      responder={activeResponder}        // ✅ last active responder (single)
+      onClose={() => setOpenModal(false)}
+      onSave={(data) => {
+        console.log("Saved Data:", data);
+        setOpenModal(false);
+      }}
+    />
+  )}
+</Box>
+
+
               </>
             ) : (
               <>
