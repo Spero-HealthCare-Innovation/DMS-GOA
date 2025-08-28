@@ -233,6 +233,7 @@ class get_vehicle(APIView):
         responder = request.GET.get("responder")
         lat = request.GET.get("lat")
         long = request.GET.get("long")
+        veh_num = request.GET.get("veh_num")
 
         veh = Vehical.objects.filter(status=1)
 
@@ -241,6 +242,8 @@ class get_vehicle(APIView):
 
         if responder:
             veh = veh.filter(responder=responder)
+        if veh_num:
+            veh = veh.filter(veh_number=veh_num)
 
         # Convert to float (only if lat/long provided)
         try:
