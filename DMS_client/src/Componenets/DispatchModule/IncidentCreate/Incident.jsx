@@ -701,7 +701,7 @@ const Incident = ({ darkMode }) => {
                       select
                       fullWidth
                       size="small"
-                      label="Alert Received From"
+                      label="Call Received From"
                       variant="outlined"
                       sx={inputStyle}
                     >
