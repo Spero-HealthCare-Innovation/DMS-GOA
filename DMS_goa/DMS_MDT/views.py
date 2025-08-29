@@ -10,6 +10,8 @@ from rest_framework.decorators import api_view
 from django.utils import timezone
 from admin_web.models import *
 import math
+from datetime import datetime
+
 
 class Register_veh(APIView):
     def post(self, request):
@@ -36,28 +38,58 @@ class VehicleLogin(APIView):
         print('12')
         veh_number = request.data.get('vehicleNumber')
         password = request.data.get('password')
-        employee_ids = list(request.data.get('pilotid').replace('[','').replace(']','').replace(',',''))
+        employee_ids = list(request.data.get('pilotid[]').replace('[','').replace(']','').replace(',',''))
         # print(employee_ids, 'ids')
-        employee_photo = request.FILES.getlist('photo')
+        employee_photo = request.FILES.getlist('photo[]')
         # print(employee_photo, 'photos')
         user = authenticate(user_username=veh_number, password=password)
         if not user:
-            return Response({'status': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
+            return Response({
+                            "data": None,
+                            "error": {
+                                "code": 1,
+                                "message": 'Invalid credentials'
+                            }
+                        }, status=status.HTTP_401_UNAUTHORIZED)
         user_obj = DMS_User.objects.filter(user_username=veh_number, user_is_deleted=False).last()
         if not user_obj:
-            return Response({'status': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
+            return Response({
+                        "data": None,
+                        "error": {
+                            "code": 1,
+                            "message": 'User not found'
+                        }
+                    }, status=status.HTTP_200_OK)
         if user_obj.user_is_login:
-            return Response({'status': 'User already logged in'}, status=status.HTTP_200_OK)
+            return Response({
+                "data": None,
+                "error": {
+                    "code": 1,
+                    "message": 'User already logged in'
+                }
+            }, status=status.HTTP_200_OK)
         vehicle_obj = Vehical.objects.filter(user=user_obj).last()
         if not vehicle_obj:
-            return Response({'status': 'Vehicle not found'}, status=status.HTTP_404_NOT_FOUND)
+            return Response({
+                "data": None,
+                "error": {
+                    "code": 1,
+                    "message": 'Vehicle not found'
+                }
+            }, status=status.HTTP_404_NOT_FOUND)
         active_employees = employee_clockin_info.objects.filter(emp_id__in=employee_ids, clock_out_in_status =1,status=1)
         if active_employees.exists():
             conflict_messages = [
                 f"Employee '{e.emp_id.emp_name}' is already logged in on vehicle '{e.veh_id.veh_number}'"
                 for e in active_employees
             ]
-            return Response(conflict_messages, status=status.HTTP_400_BAD_REQUEST)
+            return Response({
+                    "data": None,
+                    "error": {
+                        "code": 1,
+                        "message": str(conflict_messages)
+                    }
+                }, status=status.HTTP_200_OK)
         # emp_data = [{'emp_clockin_time': now(),'emp_id': emp_id,'veh_id': vehicle_obj.veh_id} for emp_id in employee_ids]
         emp_data = [{'emp_clockin_time': timezone.now(),'emp_id': emp_id,'veh_id': vehicle_obj.veh_id, 'emp_image':emp_image} for emp_id, emp_image in zip(employee_ids,employee_photo)]
         # print(emp_data, 'datas')
@@ -84,7 +116,15 @@ class VehicleLogin(APIView):
             return Response(login_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         login_serializer.save()
         token = RefreshToken.for_user(user)
-        return Response({'refresh': str(token),'access': str(token.access_token)}, status=status.HTTP_200_OK)
+        return Response({
+                        "data": {
+                            "userName": "Pilot - Mr.Madhukar Narsing Kamble, Pilot - Mr.Israr Jabbar Khan",
+                            "message": "Successfully Login",
+                            'access': str(token.access_token),
+                            'refresh': str(token),
+                        },
+                        "error": None
+                        }, status=status.HTTP_200_OK)
     
 class VehicleLogout(APIView):
     def post(self, request):
@@ -193,6 +233,7 @@ class get_vehicle(APIView):
         responder = request.GET.get("responder")
         lat = request.GET.get("lat")
         long = request.GET.get("long")
+        veh_num = request.GET.get("veh_num")
 
         veh = Vehical.objects.filter(status=1)
 
@@ -201,6 +242,8 @@ class get_vehicle(APIView):
 
         if responder:
             veh = veh.filter(responder=responder)
+        if veh_num:
+            veh = veh.filter(veh_number=veh_num)
 
         # Convert to float (only if lat/long provided)
         try:
@@ -379,7 +422,89 @@ def update_pcr_report(request):
             status=status.HTTP_400_BAD_REQUEST
         )
 
+class get_alldriverparameters(APIView):
+    def post(self, request):
+        try:
+            user_id = request.user.user_id
+        except AttributeError:
+            return Response({"data": [],"error": None},status=status.HTTP_401_UNAUTHORIZED)
+        inc_id = request.data["incidentId"]
+        print("inc id in assign inc call", inc_id)
+        pcr_rep = PcrReport.objects.get(incident_id = inc_id, amb_no__user = user_id)
+        assign_inc_objs_arr = []
+        assign_inc_obj = {
+            "id": pcr_rep.incident_id.inc_id,
+            "acknowledge": pcr_rep.acknowledge_time,
+            "startFromBaseLocation": pcr_rep.start_from_base_time,
+            "atScene": pcr_rep.at_scene_time,
+            "fromScene": pcr_rep.from_scene_time,
+            "backToBaseLocation": pcr_rep.back_to_base_time,
+            "inDateTime": pcr_rep.incident_id.inc_added_date
+        } 
+        assign_inc_objs_arr.append(assign_inc_obj)
+        return Response({"data": assign_inc_objs_arr, "error": None}, status=status.HTTP_200_OK)
 
+class get_assign_inc_calls(APIView):
+    def get(self, request):
+        try:
+            user_id = request.user.user_id
+        except AttributeError:
+            return Response(
+                {"data": [],"error": None},status=status.HTTP_401_UNAUTHORIZED)
+        
+        inc_veh = incident_vehicles.objects.filter(veh_id__user = user_id, status=1, jobclosure_status=2).order_by("-added_date")
+        assign_inc_objs_arr = []
+        for veh in inc_veh:
+            assign_inc_obj = {
+                "incidentId": veh.incident_id.inc_id,
+                "incidentDate": veh.incident_id.inc_added_date,
+                "incidentTime": veh.incident_id.inc_added_date,
+                "callType": veh.incident_id.disaster_type.disaster_name,
+                "lat": veh.incident_id.latitude,
+                "long": veh.incident_id.longitude,
+                "incidentAddress": veh.incident_id.location,
+                "incidentStatus": veh.pcr_status,
+                "currentStatus": {
+                    "code": 5,
+                    "outOfSych": "false",
+                    "message": "Already back to base"
+                },
+                "incidentCallsStatus": "In-progress",
+                "clikable": "true",
+                "progress": "true",
+                "completed": "false",
+                "onsceneCare": None
+            }
+            assign_inc_objs_arr.append(assign_inc_obj)
+        # inc_veh_serializer = incident_veh_serializer(inc_veh, many=True)
+        return Response({"data": assign_inc_objs_arr, "error": None}, status=status.HTTP_200_OK)
+    
+
+class get_assign_completed_inc_calls(APIView):
+    def post(self, request):
+        try:
+            user_id = request.user.user_id
+        except AttributeError:
+            return Response(
+                {"data": [],"error": None},status=status.HTTP_401_UNAUTHORIZED)
+        
+        print("user id in assign inc call", user_id)
+        inc_veh = incident_vehicles.objects.filter(veh_id__user = user_id, status=1, jobclosure_status=1).order_by("-added_date")
+        assign_inc_objs_arr = []
+        for veh in inc_veh:
+            incident_datetime = veh.incident_id.inc_added_date  # already a datetime object
+            incidentDate = incident_datetime.strftime("%Y-%m-%d")   # e.g. "2025-08-25"
+            incidentTime = incident_datetime.strftime("%H:%M:%S")   # e.g. "12:13:20"
+            assign_inc_obj = {
+                "incidentId": veh.incident_id.inc_id,
+                "incidentDate": incidentDate,
+                "incidentTime": incidentTime,
+                "callType": None,
+                "CallerRelationName": "",
+                "incidentCallsStatus": "Completed"
+            } 
+            assign_inc_objs_arr.append(assign_inc_obj)
+        return Response({"data": assign_inc_objs_arr, "error": None}, status=status.HTTP_200_OK)
 
 class get_assign_inc_calls(APIView):
     def get(self, request):
