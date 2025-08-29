@@ -443,7 +443,7 @@ def update_pcr_report(request):
             report.acknowledge_time = timezone.now()
             report.acknowledge_lat = lat
             report.acknowledge_lng = lng
-            report.status = 2
+            report.status = 1
             code = 2
             message = "Acknowledged and inserted successfully."
 
@@ -451,7 +451,7 @@ def update_pcr_report(request):
             report.start_from_base_time = timezone.now()
             report.start_fr_bs_loc_lat = lat
             report.start_fr_bs_loc_lng = lng
-            report.status = 3
+            report.status = 2
             code = 3
             message = "Status updated successfully."
 
@@ -463,7 +463,7 @@ def update_pcr_report(request):
                 report.at_scene_remark = at_scene_remark
             if at_scene_photo:
                 report.at_scene_photo = at_scene_photo
-            report.status = 4
+            report.status = 3
             code = 4
             message = "Status updated successfully."
             
@@ -475,7 +475,7 @@ def update_pcr_report(request):
                 report.from_scene_remark = from_scene_remark
             if from_scene_photo:
                 report.from_scene_photo = from_scene_photo
-            report.status = 5
+            report.status = 4
             code = 5
             message = "Status updated successfully."
             
@@ -483,7 +483,7 @@ def update_pcr_report(request):
             report.back_to_base_time = timezone.now()
             report.back_to_bs_loc_lat = lat
             report.back_to_bs_loc_lng = lng
-            report.status = 6
+            report.status = 5
             code = 6
             message = "Status updated successfully."
             
@@ -647,7 +647,7 @@ class get_assign_inc_calls(APIView):
         # print("incident vehicles:", inc_veh)
         assign_inc_objs_arr = []
         for veh in inc_veh:
-            pcr_exists = PcrReport.objects.filter(incident_id=veh.incident_id).last()
+            pcr_exists = PcrReport.objects.filter(amb_no=veh.veh_id).last()
             print(pcr_exists)
             assign_inc_obj = {
                 "incidentId": str(veh.incident_id.inc_id),
@@ -667,7 +667,7 @@ class get_assign_inc_calls(APIView):
                 "incidentCallsStatus": "In-progress",
                 "clikable": "true",
                 "progress": "true",
-                "completed": "false",
+                "completed": veh.jobclosure_status,
                 "onsceneCare": None
             }
             assign_inc_objs_arr.append(assign_inc_obj)
