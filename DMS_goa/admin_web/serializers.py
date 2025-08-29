@@ -726,3 +726,9 @@ class action_sub_Serializer(serializers.ModelSerializer):
     class Meta:
         model = permission_action
         fields = '__all__'
+
+
+class CallTypeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CallType
+        fields = '__all__'
