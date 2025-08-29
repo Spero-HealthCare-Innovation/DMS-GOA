@@ -10,8 +10,9 @@ from rest_framework.decorators import api_view
 from django.utils import timezone
 from admin_web.models import *
 import math
-from datetime import datetime
+# from datetime import datetime
 
+from datetime import datetime
 
 class Register_veh(APIView):
     def post(self, request):
