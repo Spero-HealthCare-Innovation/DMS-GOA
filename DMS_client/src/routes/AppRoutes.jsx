@@ -89,16 +89,16 @@ const AppRoutes = ({ darkMode, setIsLoggedIn }) => {
             </PrivateRoute>
           }
         />
-      <Route
-  path="/sop"
-  element={
-    <PrivateRoute>
-      <Box sx={{ ml: localStorage.getItem("user_group") === "1" ? "50px" : "0px" }}>
-        <Sop darkMode={darkMode} />
-      </Box>
-    </PrivateRoute>
-  }
-/>
+        <Route
+          path="/sop"
+          element={
+            <PrivateRoute>
+              <Box sx={{ ml: localStorage.getItem("user_group") === "1" ? "50px" : "0px" }}>
+                <Sop darkMode={darkMode} />
+              </Box>
+            </PrivateRoute>
+          }
+        />
         <Route
           path="/add-department"
           element={
@@ -127,7 +127,9 @@ const AppRoutes = ({ darkMode, setIsLoggedIn }) => {
           path="/create-incident"
           element={
             <PrivateRoute>
-              <Incident darkMode={darkMode} />
+              <Box sx={{ ml: localStorage.getItem("user_group") === "1" ? "50px" : "0px" }}>
+                <Incident darkMode={darkMode} />
+              </Box>
             </PrivateRoute>
           }
         />
@@ -155,7 +157,7 @@ const AppRoutes = ({ darkMode, setIsLoggedIn }) => {
             </PrivateRoute>
           }
         />
-         <Route
+        <Route
           path="/Incident-Report"
           element={
             <PrivateRoute>
@@ -163,7 +165,7 @@ const AppRoutes = ({ darkMode, setIsLoggedIn }) => {
             </PrivateRoute>
           }
         />
-         <Route
+        <Route
           path="/Permission"
           element={
             <PrivateRoute>

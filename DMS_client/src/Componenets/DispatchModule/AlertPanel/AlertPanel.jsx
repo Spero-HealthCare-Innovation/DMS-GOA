@@ -345,7 +345,7 @@ const AlertPanel = ({ darkMode }) => {
                     sub.selectedActions?.forEach((act) => {
                         console.log("Action:", act.actionName);
 
-                        if (act.actionName === "Alert-Panel") {
+                        if (act.actionName === "Trigged") {
                             setAlertPanel(true);
                         }
                     });
@@ -359,7 +359,9 @@ const AlertPanel = ({ darkMode }) => {
 
     return (
         <Box sx={{ flexGrow: 1, mt: 1, ml: '5em', mr: 1, mb: 2 }}>
-            <Sidebar darkMode={darkMode} />
+            {
+                localStorage.getItem("user_group") !== "1" && <Sidebar darkMode={darkMode} />
+            }
             <Grid container spacing={2}>
                 <Grid item xs={12} md={7}>
                     <Grid container spacing={2} alignItems="center">
