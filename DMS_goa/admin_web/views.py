@@ -929,7 +929,7 @@ class Manual_Call_Incident_api(APIView):
             'inc_type', 'disaster_type', 'alert_type', 'location', 'summary',
             'responder_scope', 'latitude', 'longitude', 'caller_id',
             'inc_added_by', 'inc_modified_by', 'incident_id', 'inc_id', 'time', 'mode',
-            'ward','district','ward_officer','tahsil',
+            'ward','district','ward_officer','tahsil'
         ]
         caller_fields = ['caller_no', 'caller_name', 'caller_added_by', 'caller_modified_by']
         comments_fields = ['comments', 'comm_added_by', 'comm_modified_by']
@@ -1041,6 +1041,7 @@ class Manual_Call_Incident_api(APIView):
         "dms_lat": str(incident_instance.latitude),
         "dms_lng": str(incident_instance.longitude),
         "alert_type": ("High" if incident_instance.alert_type == 1 else"Medium" if incident_instance.alert_type == 2 else"Low" if incident_instance.alert_type == 3 else"Very Low" if incident_instance.alert_type == 4 else""
+        ""
 )
     }
         print("ssssssssssssssssssssssssss",external_api_payload)
@@ -1074,7 +1075,14 @@ class Manual_Call_Incident_api(APIView):
             "comments": comments_serializer.data,
             "weather_alert": weather_alert_serializer.data,
             "dms_notify": dms_notify_serializer.data,
-            "external_api_response": external_api_result
+            "external_api_response": external_api_result,
+
+            "response": {
+                "call_received_from": caller_instance.call_recieved_from.value if caller_instance.call_recieved_from else None,
+                "call_type": incident_instance.disaster_type.disaster_parent.call_type_id.call_type_id if incident_instance.disaster_type and incident_instance.disaster_type.disaster_parent and incident_instance.disaster_type.disaster_parent.call_type_id else None,  
+                "parent_complaint": incident_instance.disaster_type.disaster_parent.pc_id if incident_instance.disaster_type and incident_instance.disaster_type.disaster_parent else None,
+                }
+
         }, status=status.HTTP_201_CREATED)
 
 
