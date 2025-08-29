@@ -92,7 +92,7 @@ urlpatterns = [
     
     path('DMS_Disaster_Type_Get/',DMS_Disaster_Type_Get_API.as_view(), name='DMS_Disaster_Type_Get'),
     path('DMS_Disaster_Type_Get_Idwise/<int:disaster_id>/',DMS_Disaster_Type_Idwise_Get_API.as_view(), name='DMS_Disaster_Type_Get_Idwise'),
-    
+       
     path('DMS_Incident_Post/',DMS_Incident_Post_api.as_view(), name='DMS_Incident_Post'),
     path('DMS_Comments_Post/',DMS_Comments_Post_api.as_view(), name='DMS_Comments_Post'),
     
@@ -154,6 +154,7 @@ urlpatterns = [
 
     path('call_type/', Call_TypeAPIView.as_view(), name='call_type'),
     # path('parent_complaint_get/', parentcomplaint.as_view(), name='parent_complaint'),
-    path('parent_complaint_get_calltypewise/<int:call_type_id>/', ParentComplaintByCallType.as_view(), name='parent_complaint')
+    path('parent_complaint_get_calltypewise/<int:call_type_id>/', ParentComplaintByCallType.as_view(), name='parent_complaint'),
+    path('disaster_type_disaster_parent/<int:disaster_parent>/',DMS_Disaster_Type_disaster_parent_Get_API.as_view(), name='DMS_Disaster_Type_Get'),
 ]
 
