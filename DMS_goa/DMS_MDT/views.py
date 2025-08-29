@@ -603,10 +603,10 @@ class get_assign_inc_calls(APIView):
         user_id = request.user.user_id
         # print("user id in assign inc call", user_id)
         inc_veh = incident_vehicles.objects.filter(veh_id__user = user_id, status=1, jobclosure_status=2).order_by("-added_date")
-        # print("incident vehicles:", inc_veh)
+        print("incident vehicles:", inc_veh)
         assign_inc_objs_arr = []
         for veh in inc_veh:
-            pcr_exists = PcrReport.objects.filter(incident_id=veh.incident_id).last()
+            pcr_exists = PcrReport.objects.filter(amb_no=veh.veh_id).last()
             print(pcr_exists)
             assign_inc_obj = {
                 "incidentId": str(veh.incident_id.inc_id),
