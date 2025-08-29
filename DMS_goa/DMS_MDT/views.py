@@ -531,7 +531,7 @@ class get_alldriverparameters(APIView):
         inc_id = request.data["incidentId"]
         print("inc id in assign inc call", inc_id)
         pcr_rep = PcrReport.objects.get(incident_id = inc_id, amb_no__user = user_id)
-        assign_inc_objs_arr = []
+        # assign_inc_objs_arr = []
         assign_inc_obj = {
             "id": str(pcr_rep.incident_id.inc_id),
             "acknowledge": pcr_rep.acknowledge_time,
@@ -541,8 +541,8 @@ class get_alldriverparameters(APIView):
             "backToBaseLocation": pcr_rep.back_to_base_time,
             "inDateTime": pcr_rep.incident_id.inc_added_date
         } 
-        assign_inc_objs_arr.append(assign_inc_obj)
-        return Response({"data": assign_inc_objs_arr, "error": None}, status=status.HTTP_200_OK)
+        # assign_inc_objs_arr.append(assign_inc_obj)
+        return Response({"data": assign_inc_obj, "error": None}, status=status.HTTP_200_OK)
 
 class get_assign_inc_calls(APIView):
     # def get(self, request):
