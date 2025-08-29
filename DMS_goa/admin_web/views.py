@@ -2075,6 +2075,12 @@ class ParentComplaintByCallType(APIView):
         else:
             return Response({"message": "No complaints found for this call_type"}, status=status.HTTP_404_NOT_FOUND)
 
+# class DMS_Disaster_Type_disaster_parent_Get_API(APIView):
+#     def get(self,request,disaster_parent):
+#         snippet = DMS_Disaster_Type.objects.filter(disaster_parent=disaster_parent,disaster_is_deleted=False)
+#         serializers = DMS_Disaster_Type_Serializer(snippet,many=True)
+#         return Response(serializers.data,status=status.HTTP_200_OK)
+
 class DMS_Disaster_Type_disaster_parent_Get_API(APIView):
     def get(self,request,disaster_parent):
         snippet = DMS_Disaster_Type.objects.filter(disaster_parent=disaster_parent,disaster_is_deleted=False)
