@@ -17,6 +17,7 @@ import LockIcon from "@mui/icons-material/Lock";
 import AddBoxIcon from "@mui/icons-material/AddBox";
 import AddCircleOutlineOutlinedIcon from "@mui/icons-material/AddCircleOutlineOutlined";
 import TextSnippetOutlinedIcon from "@mui/icons-material/TextSnippetOutlined";
+import DashboardIcon from "@mui/icons-material/Dashboard";
 import { useNavigate, useLocation } from "react-router-dom";
 
 // Icon mapping
@@ -26,6 +27,7 @@ const iconMap = {
   Responder: <AddCircleOutlineOutlinedIcon />,
   Reports: <TextSnippetOutlinedIcon />,
   Permission: <LockIcon />,
+  Dashboard: <DashboardIcon />,
 };
 
 const buildScreenConfig = (permissions) => {
