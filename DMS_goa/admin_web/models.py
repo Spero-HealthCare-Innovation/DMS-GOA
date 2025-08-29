@@ -968,6 +968,7 @@ class ParentComplaint(models.Model):
     pc_type = models.CharField(max_length=100, null=True, blank=True)
     pc_name = models.CharField(max_length=100, null=True, blank=True)
     parent_is_deleted = models.BooleanField(default=False)
+    call_type_id = models.ForeignKey(CallType, on_delete=models.CASCADE,null=False, blank=True)
     added_date = models.DateTimeField(auto_now=True, null=True, blank=True)
     added_by = models.CharField(max_length=255, null=True, blank=True)
     modified_by = models.CharField(max_length=255, null=True, blank=True)
