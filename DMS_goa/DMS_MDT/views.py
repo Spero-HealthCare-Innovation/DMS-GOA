@@ -445,7 +445,8 @@ class get_alldriverparameters(APIView):
         return Response({"data": assign_inc_objs_arr, "error": None}, status=status.HTTP_200_OK)
 
 class get_assign_inc_calls(APIView):
-    def get(self, request):
+    # def get(self, request):
+    def post(self, request):
         try:
             user_id = request.user.user_id
         except AttributeError:
