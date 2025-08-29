@@ -411,7 +411,7 @@ class Vehical_department_wise(APIView):
 def update_pcr_report(request):
     data = request.data
 
-    inc_id = data.get("inc_id")
+    inc_id = int(data.get("inc_id"))
     status_code = int(data.get("status"))
     ambulance_no = data.get("ambulance_no")
     lat = data.get("lat")
@@ -421,6 +421,9 @@ def update_pcr_report(request):
     at_scene_photo = request.FILES.get("at_scene_photo")
     from_scene_photo = request.FILES.get("from_scene_photo")
 
+    inc_id = DMS_Incident.objects.filter(inc_id=inc_id).last()
+    ambulance_no = Vehical.objects.filter(veh_number=ambulance_no).last()
+    
     try:
         # ✅ record get or create (based on incident id)
         report, created = PcrReport.objects.get_or_create(
