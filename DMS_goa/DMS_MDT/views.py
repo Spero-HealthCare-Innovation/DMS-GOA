@@ -736,3 +736,26 @@ class closure_Post_api_app(APIView):
             # return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
             return Response({"data": None,"error": {"code": 1,"message": "Case Closure Not Successfully"},"ex_error": str(e)})
         
+
+
+
+
+class Userlistambvise(APIView):
+    def post(self, request):
+        try:
+            vehical_no=request.data.get("vehicleNumber")
+            vehicl_dtls = Vehical.objects.get(veh_number=vehical_no)
+            emp_cl_dtls = employee_clockin_info.objects.filter(veh_id=vehicl_dtls,clock_out_in_status=1,status=1)
+            data = []
+            for emp in emp_cl_dtls:
+                data.append({
+                    "id": emp.emp_id.emp_id,
+                    "name": emp.emp_id.emp_name,
+                    "clg_name": str(emp.emp_id.user_id.user_id),
+                    "in_out_status": "In" if emp.clock_out_in_status == 1 else "out",
+                    "clock_in_time": emp.emp_clockin_time,
+                    "clock_out_time": emp.emp_clockout_time
+                })
+            return Response({"data": data,"error": None}, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({"data": [],"error": {"code": 1,"message": "Vehicle not found"}, "ex_error":str(e)}, status=status.HTTP_200_OK)  
