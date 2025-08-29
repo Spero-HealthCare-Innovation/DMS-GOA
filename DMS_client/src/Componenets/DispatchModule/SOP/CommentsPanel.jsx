@@ -42,7 +42,9 @@ function CommentsPanel({
   validateFields,
   fieldErrors,
   setFieldErrors,
+  vehicleIds,
 }) {
+  console.log(vehicleIds, "vehicleIds");
   const port = import.meta.env.VITE_APP_API_KEY;
   const userName = localStorage.getItem("userId");
   const { newToken, commentText, setCommentText } = useAuth();
@@ -55,9 +57,9 @@ function CommentsPanel({
   });
 
   console.log(selectedIncident, "selectedIncident in Comment");
-  window.addEventListener('storage', (e) => {
-    if (e.key === 'logout') {
-      location.href = '/login';
+  window.addEventListener("storage", (e) => {
+    if (e.key === "logout") {
+      location.href = "/login";
     }
   });
 
@@ -120,7 +122,8 @@ function CommentsPanel({
     if (!selectedDistrictId) errors.district = "District is required";
     if (!selectedTehsilId) errors.tehsil = "Tehsil is required";
     if (!selectedWard) errors.ward = "Ward is required";
-    if (!selectedWardOfficer || selectedWardOfficer.length === 0) errors.wardOfficer = "Ward Officer is required";
+    if (!selectedWardOfficer || selectedWardOfficer.length === 0)
+      errors.wardOfficer = "Ward Officer is required";
     if (!selectedSummary) errors.summary = "Summary is required";
     if (!query) errors.location = "Location is required";
 
@@ -154,7 +157,10 @@ function CommentsPanel({
       ward_officer: selectedWardOfficer.map(Number),
       summary: selectedSummary,
       location: query,
+      vehicle: vehicleIds || [] ,
+      
     };
+    console.log("Payload to be sent:", payload);
 
     try {
       const response = await fetch(`${port}/admin_web/DMS_Incident_Post/`, {
@@ -370,15 +376,15 @@ function CommentsPanel({
                         >
                           {comm_added_date
                             ? new Date(comm_added_date).toLocaleString(
-                              "en-IN",
-                              {
-                                day: "2-digit",
-                                month: "short",
-                                year: "numeric",
-                                hour: "2-digit",
-                                minute: "2-digit",
-                              }
-                            )
+                                "en-IN",
+                                {
+                                  day: "2-digit",
+                                  month: "short",
+                                  year: "numeric",
+                                  hour: "2-digit",
+                                  minute: "2-digit",
+                                }
+                              )
                             : "N/A"}
                         </Typography>
                       </Box>
@@ -423,19 +429,17 @@ function CommentsPanel({
               },
             }}
           />
-          {saveButton &&
-            (
-              <Button
-                variant="contained"
-                color="primary"
-                onClick={handlealertSaveClick}
-                disabled={!commentText.trim()}
-                sx={{ alignSelf: "flex-end", px: 4, textTransform: "none" }}
-              >
-                Save
-              </Button>
-            )
-          }
+          {saveButton && (
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={handlealertSaveClick}
+              disabled={!commentText.trim()}
+              sx={{ alignSelf: "flex-end", px: 4, textTransform: "none" }}
+            >
+              Save
+            </Button>
+          )}
         </Box>
       ) : selectedIncident?.inc_id ? (
         <Box

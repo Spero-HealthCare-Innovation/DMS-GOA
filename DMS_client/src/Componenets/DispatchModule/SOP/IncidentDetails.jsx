@@ -14,6 +14,7 @@ import {
   Autocomplete,
   Popper,
   Button,
+  DialogActions,
 } from "@mui/material";
 import CommentsPanel from "./CommentsPanel";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
@@ -88,12 +89,11 @@ function IncidentDetails({
   const [selectedWardOfficer, setSelectedWardOfficer] = useState([]);
   const [wardOfficerList, setWardOfficerList] = useState([]);
   const [selectedResponders, setSelectedResponders] = useState([]);
-  const [Latitude, setLatitude] = useState("");
+  const [lattitude, setLatitude] = useState("");
   const [Longitude, setLongitude] = useState("");
   const [openDialog, setOpenDialog] = useState(false);
 
-const [activeResponder, setActiveResponder] = useState(null);
-const [openModal, setOpenModal] = useState(true);
+
 
   const [stateData, setStateData] = useState(null);
 
@@ -101,6 +101,22 @@ const [openModal, setOpenModal] = useState(true);
   const [districtManual, setDistrictManual] = useState(false);
   const [tehsilManual, setTehsilManual] = useState(false);
   const [wardManual, setWardManual] = useState(false);
+
+
+ //responder modal
+  const [activeResponder, setActiveResponder] = useState(null);
+  const [openModal, setOpenModal] = useState(false);
+  const [assignedMap, setAssignedMap] = useState({});
+const [vehicleIds, setVehicleIds] = useState([]);
+const [openAmbulanceModal, setOpenAmbulanceModal] = useState(false);
+
+  // ✅ Button click pe modal open
+  const handleOpenModal = () => {
+    setActiveResponder(selectedResponders[0]); // default tab first responder
+    setOpenModal(true);
+  };
+
+  
 
   // =================== CONTEXT (useAuth) VARIABLES ========================
 
@@ -216,7 +232,7 @@ const [openModal, setOpenModal] = useState(true);
     }
   }, [selectedIncident]);
 
-  console.log(`Latitude: ${Latitude}, Longitude: ${Longitude}`);
+  console.log(`Latitude: ${lattitude}, Longitude: ${Longitude}`);
 
   // ==================== GIS CODE START ================================
 
@@ -1458,18 +1474,24 @@ const [openModal, setOpenModal] = useState(true);
     </Box>
   )}
 
-  {openModal && (
-    <ResponderModal
-      open={openModal}
-      responderList={selectedResponders} // ✅ array of selected responders
-      responder={activeResponder}        // ✅ last active responder (single)
-      onClose={() => setOpenModal(false)}
-      onSave={(data) => {
-        console.log("Saved Data:", data);
-        setOpenModal(false);
-      }}
-    />
-  )}
+{openModal && (
+  <ResponderModal
+    open={openModal}
+    responderList={responderScope.responder_scope} // 👉 saare responders bhejo
+    selectedResponders={selectedResponders}        // 👉 checkbox se selected list bhejo
+    responder={activeResponder}
+    lattitude={lattitude}
+    longitude={longitude}
+    assignedMap={assignedMap}
+    onClose={() => setOpenModal(false)}
+  onSave={(data) => {
+  console.log("Saved Data:", data);
+  setAssignedMap(data.assignedVehicles);
+  setVehicleIds(data.assignedVehicles || []); 
+  setOpenModal(false);
+}}
+  />
+)}
 </Box>
 
 
@@ -1633,6 +1655,22 @@ const [openModal, setOpenModal] = useState(true);
                     </Box>
                   )}
                 </Box>
+                <Box mt={1}>
+  <Button
+    variant="contained"
+    size="small"
+    onClick={() => setOpenAmbulanceModal(true)}
+    disabled={!selectedIncident}   // <-- disable if no incident selected
+    sx={{ 
+      textTransform: "none", 
+      borderRadius: "8px",
+      opacity: !selectedIncident ? 0.6 : 1  // thoda faded look when disabled
+    }}
+  >
+    View Assigned Ambulance
+  </Button>
+</Box>
+
               </>
             )}
           </Grid>
@@ -1672,6 +1710,7 @@ const [openModal, setOpenModal] = useState(true);
                 validateFields={validateFields}
                 fieldErrors={fieldErrors}
                 setFieldErrors={setFieldErrors}
+                 savedResponderData={vehicleIds}
               />
             ) : (
               <Typography
@@ -1683,6 +1722,52 @@ const [openModal, setOpenModal] = useState(true);
             )}
           </Grid>
         </Grid>
+        
+
+
+{/* ASSIGND AMBULANCE MODAL */}
+
+   <Dialog
+  open={openAmbulanceModal}
+  onClose={() => setOpenAmbulanceModal(false)}
+  maxWidth="sm"
+  fullWidth
+>
+  <DialogTitle>Assigned Ambulances</DialogTitle>
+  <DialogContent dividers>
+    {Array.isArray(incidentDetails?.["responders scope"]) &&
+    incidentDetails["responders scope"].length > 0 ? (
+      incidentDetails["responders scope"].map(
+        ({ responder_id, responder_name, vehicles }) => (
+          <Box key={responder_id} mb={2}>
+            <Typography
+              variant="subtitle1"
+              sx={{ fontWeight: 600, mb: 1 }}
+            >
+              {responder_name}
+            </Typography>
+            {Array.isArray(vehicles) && vehicles.length > 0 ? (
+              <Stack spacing={1}>
+                {vehicles.map((veh, idx) => (
+                  <Typography key={idx} variant="body2">
+                    🚑 {veh.vehicle_name}
+                  </Typography>
+                ))}
+              </Stack>
+            ) : (
+              <Typography variant="body2" color="text.secondary">
+                No ambulances assigned
+              </Typography>
+            )}
+          </Box>
+        )
+      )
+    ) : (
+      <Typography>No responder scope available.</Typography>
+    )}
+  </DialogContent>
+</Dialog>
+
       </Paper>
     </>
   );
