@@ -450,7 +450,7 @@ def update_pcr_report(request):
             report.start_fr_bs_loc_lat = lat
             report.start_fr_bs_loc_lng = lng
             code = 3
-            message = "Acknowledged and inserted successfully."
+            message = "Status updated successfully."
 
         elif status_code == PcrStatusEnum.AtScene.value:
             report.at_scene_time = timezone.now()
@@ -474,7 +474,7 @@ def update_pcr_report(request):
                 report.from_scene_photo = from_scene_photo
 
             code = 5
-            message = "Acknowledged and inserted successfully."
+            message = "Status updated successfully."
             
         elif status_code == PcrStatusEnum.BackToBase.value:
             report.back_to_base_time = timezone.now()
@@ -482,7 +482,7 @@ def update_pcr_report(request):
             report.back_to_bs_loc_lng = lng
             
             code = 6
-            message = "Acknowledged and inserted successfully."
+            message = "Status updated successfully."
             
 
         elif status_code == PcrStatusEnum.Abandoned.value:
@@ -491,7 +491,7 @@ def update_pcr_report(request):
             report.abandoned_lng = lng
             
             code = 7
-            message = "Acknowledged and inserted successfully."
+            message = "Status updated successfully."
 
         # ✅ Extra handling for incident_vehicles
         if status_code == 1:  # Acknowledge
@@ -501,7 +501,6 @@ def update_pcr_report(request):
             incident_vehicles.objects.filter(incident_id=inc_id).update(pcr_status=3)
 
         report.save()
-
         # return Response(
         #     {"message": "PCR Report updated successfully", "status": "success"},
         #     status=status.HTTP_200_OK
