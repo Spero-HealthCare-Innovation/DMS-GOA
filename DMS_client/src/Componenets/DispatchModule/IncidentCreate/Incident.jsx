@@ -69,7 +69,6 @@ const Incident = ({ darkMode }) => {
   const [assignedMap, setAssignedMap] = useState({});
   // const [responderList, setResponderList] = useState([]);
 
-
   const handleSaveFromModal = (data) => {
     setAssignedMap(data.assignedVehicles); // ✅ parent update
   };
@@ -86,7 +85,16 @@ const Incident = ({ darkMode }) => {
     setSelectedTehsilId,
     setSelectedCityId,
     fetchTehsilsByDistrict,
-    setQuery
+    setQuery,
+    callType,
+    selectedcallType,
+    setselectedcallType,
+    selectedSubchiefComplaint,
+    setselectedSubchiefComplaint,
+    subChiefComplaint,
+    selectedChiefComplaint,
+    ChiefComplaint,
+    setselectedChiefComplaint,
   } = useAuth();
 
   useEffect(() => {
@@ -341,8 +349,9 @@ const Incident = ({ darkMode }) => {
       return;
     }
 
-
-    const vehicleIds = Object.keys(assignedMap).filter((key) => assignedMap[key]);
+    const vehicleIds = Object.keys(assignedMap).filter(
+      (key) => assignedMap[key]
+    );
 
     const payload = {
       inc_type: selectedEmergencyValue,
@@ -368,6 +377,9 @@ const Incident = ({ darkMode }) => {
       ward: selectedWard,
       ward_officer: selectedWardOfficer,
       vehicle: vehicleIds,
+      call_type: selectedcallType,
+      parent_complaint: selectedChiefComplaint,
+      call_recieved_from:null,
     };
 
     try {
@@ -576,7 +588,7 @@ const Incident = ({ darkMode }) => {
             </Box>
 
             <Grid container spacing={1.6}>
-              <Grid item xs={12} sm={ 4}>
+              <Grid item xs={12} sm={4}>
                 <TextField
                   select
                   fullWidth
@@ -604,20 +616,20 @@ const Incident = ({ darkMode }) => {
                       label="Select Call Type"
                       variant="outlined"
                       sx={inputStyle}
-                      value={selectedDisaster}
-                      onChange={(e) => setSelectedDisaster(e.target.value)}
+                      value={selectedcallType}
+                      onChange={(e) => setselectedcallType(e.target.value)}
                       error={!!errors.disaster_type}
                       helperText={errors.disaster_type}
                     >
                       <MenuItem disabled value="">
                         Select Call Type
                       </MenuItem>
-                      {disaster.map((item) => (
+                      {callType.map((item) => (
                         <MenuItem
-                          key={item.disaster_id}
-                          value={item.disaster_id}
+                          key={item.call_type_id}
+                          value={item.call_type_id}
                         >
-                          {item.disaster_name}
+                          {item.call_type_name}
                         </MenuItem>
                       ))}
                     </TextField>
@@ -631,20 +643,20 @@ const Incident = ({ darkMode }) => {
                       label="Select Chief Complaint"
                       variant="outlined"
                       sx={inputStyle}
-                      value={selectedDisaster}
-                      onChange={(e) => setSelectedDisaster(e.target.value)}
+                      value={selectedChiefComplaint}
+                      onChange={(e) => setselectedChiefComplaint(e.target.value)}
                       error={!!errors.disaster_type}
                       helperText={errors.disaster_type}
                     >
                       <MenuItem disabled value="">
                         Select Chief Complaint
                       </MenuItem>
-                      {disaster.map((item) => (
+                      {ChiefComplaint.map((item) => (
                         <MenuItem
-                          key={item.disaster_id}
-                          value={item.disaster_id}
+                          key={item.pc_id}
+                          value={item.pc_id}
                         >
-                          {item.disaster_name}
+                          {item.pc_name}
                         </MenuItem>
                       ))}
                     </TextField>
@@ -658,15 +670,15 @@ const Incident = ({ darkMode }) => {
                       label="Sub Chief Complaint"
                       variant="outlined"
                       sx={inputStyle}
-                      value={selectedDisaster}
-                      onChange={(e) => setSelectedDisaster(e.target.value)}
+                      value={selectedSubchiefComplaint}
+                      onChange={(e) => setselectedSubchiefComplaint(e.target.value)}
                       error={!!errors.disaster_type}
                       helperText={errors.disaster_type}
                     >
                       <MenuItem disabled value="">
                         Sub Chief Complaint
                       </MenuItem>
-                      {disaster.map((item) => (
+                      {subChiefComplaint.map((item) => (
                         <MenuItem
                           key={item.disaster_id}
                           value={item.disaster_id}
@@ -779,16 +791,16 @@ const Incident = ({ darkMode }) => {
                     id="district-select"
                     value={
                       districtName &&
-                        districts.find(
-                          (d) =>
-                            d.dis_name.toLowerCase() ===
-                            districtName.toLowerCase()
-                        )
+                      districts.find(
+                        (d) =>
+                          d.dis_name.toLowerCase() ===
+                          districtName.toLowerCase()
+                      )
                         ? districts.find(
-                          (d) =>
-                            d.dis_name.toLowerCase() ===
-                            districtName.toLowerCase()
-                        ).dis_id
+                            (d) =>
+                              d.dis_name.toLowerCase() ===
+                              districtName.toLowerCase()
+                          ).dis_id
                         : selectedDistrictId || ""
                     }
                     label="District"
@@ -812,15 +824,15 @@ const Incident = ({ darkMode }) => {
                   variant="outlined"
                   value={
                     tehsilName &&
-                      Tehsils.find(
-                        (t) =>
-                          t.tah_name.toLowerCase() === tehsilName.toLowerCase()
-                      )
+                    Tehsils.find(
+                      (t) =>
+                        t.tah_name.toLowerCase() === tehsilName.toLowerCase()
+                    )
                       ? Tehsils.find(
-                        (t) =>
-                          t.tah_name.toLowerCase() ===
-                          tehsilName.toLowerCase()
-                      ).tah_id
+                          (t) =>
+                            t.tah_name.toLowerCase() ===
+                            tehsilName.toLowerCase()
+                        ).tah_id
                       : selectedTehsilId || ""
                   }
                   onChange={(e) => setSelectedTehsilId(e.target.value)}
@@ -1032,10 +1044,10 @@ const Incident = ({ darkMode }) => {
                       {alertType === 1
                         ? "High"
                         : alertType === 2
-                          ? "Medium"
-                          : alertType === 2
-                            ? "Low"
-                            : "-"}
+                        ? "Medium"
+                        : alertType === 2
+                        ? "Low"
+                        : "-"}
                     </Typography>
                   </Box>
                   <Box>
@@ -1291,7 +1303,7 @@ const Incident = ({ darkMode }) => {
           onClose={() => setOpenModal(false)}
           onSave={(data) => {
             console.log("Saved Data:", data);
-            setAssignedMap(data.assignedVehicles); 
+            setAssignedMap(data.assignedVehicles);
             setOpenModal(false);
           }}
         />
