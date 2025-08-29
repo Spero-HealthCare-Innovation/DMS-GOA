@@ -445,7 +445,8 @@ class get_alldriverparameters(APIView):
         return Response({"data": assign_inc_objs_arr, "error": None}, status=status.HTTP_200_OK)
 
 class get_assign_inc_calls(APIView):
-    def get(self, request):
+    # def get(self, request):
+    def post(self, request):
         try:
             user_id = request.user.user_id
         except AttributeError:
@@ -456,7 +457,7 @@ class get_assign_inc_calls(APIView):
         assign_inc_objs_arr = []
         for veh in inc_veh:
             assign_inc_obj = {
-                "incidentId": veh.incident_id.inc_id,
+                "incidentId": str(veh.incident_id.inc_id),
                 "incidentDate": veh.incident_id.inc_added_date,
                 "incidentTime": veh.incident_id.inc_added_date,
                 "callType": veh.incident_id.disaster_type.disaster_name,
@@ -496,25 +497,26 @@ class get_assign_completed_inc_calls(APIView):
             incidentDate = incident_datetime.strftime("%Y-%m-%d")   # e.g. "2025-08-25"
             incidentTime = incident_datetime.strftime("%H:%M:%S")   # e.g. "12:13:20"
             assign_inc_obj = {
-                "incidentId": veh.incident_id.inc_id,
+                "incidentId": str(veh.incident_id.inc_id),
                 "incidentDate": incidentDate,
                 "incidentTime": incidentTime,
-                "callType": None,
+                "callType": "Emergency",
                 "CallerRelationName": "",
-                "incidentCallsStatus": "Completed"
+                "incidentCallsStatus": "Completed",
+                "callerName":"Vinayak"
             } 
             assign_inc_objs_arr.append(assign_inc_obj)
         return Response({"data": assign_inc_objs_arr, "error": None}, status=status.HTTP_200_OK)
 
 class get_assign_inc_calls(APIView):
-    def get(self, request):
+    def post(self, request):
         user_id = request.user.user_id
         print("user id in assign inc call", user_id)
         inc_veh = incident_vehicles.objects.filter(veh_id__user = user_id, status=1, jobclosure_status=2).order_by("-added_date")
         assign_inc_objs_arr = []
         for veh in inc_veh:
             assign_inc_obj = {
-                "incidentId": veh.incident_id.inc_id,
+                "incidentId": str(veh.incident_id.inc_id),
                 "incidentDate": veh.incident_id.inc_added_date,
                 "incidentTime": veh.incident_id.inc_added_date,
                 "callType": veh.incident_id.disaster_type.disaster_name,
