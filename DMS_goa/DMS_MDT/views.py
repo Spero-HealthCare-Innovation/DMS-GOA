@@ -438,9 +438,14 @@ class get_alldriverparameters(APIView):
         return Response({"data": assign_inc_objs_arr, "error": None}, status=status.HTTP_200_OK)
 
 class get_assign_inc_calls(APIView):
-    def get(self, request):
-        user_id = request.user.user_id
-        print("user id in assign inc call", user_id)
+    # def get(self, request):
+    def post(self, request):
+        try:
+            user_id = request.user.user_id
+        except AttributeError:
+            return Response(
+                {"data": [],"error": None},status=status.HTTP_401_UNAUTHORIZED)
+        
         inc_veh = incident_vehicles.objects.filter(veh_id__user = user_id, status=1, jobclosure_status=2).order_by("-added_date")
         assign_inc_objs_arr = []
         for veh in inc_veh:
