@@ -52,6 +52,12 @@ class PcrStatusEnum(enum.Enum):
     Abandoned = 6
 
     __default__ = Acknowledge
+    
+    
+class yesno_enum(enum.Enum):
+    Yes = 1
+    No = 2
+    __default__ = Yes
 
 class Vehical_base_location(models.Model):
     bs_id = models.AutoField(primary_key=True)
@@ -134,9 +140,13 @@ class vehicle_login_info(models.Model):
     status = enum.EnumField(status_enum, null=True)
     veh_id = models.ForeignKey(Vehical, on_delete=models.CASCADE, null=True)
     clock_out_in_status = enum.EnumField(check_in_out_status, null=True)
-    latitude = models.FloatField(null = True)
-    longitude = models.FloatField(null = True)
-    device_id = models.IntegerField(null = True)
+    latitude = models.FloatField(null=True)
+    longitude = models.FloatField(null=True)
+    device_id = models.IntegerField(null=True)
+    login_odometer = models.IntegerField(null=True)
+    logout_odometer = models.IntegerField(null=True)
+    logout_question = enum.EnumField(yesno_enum, null=True)
+    logout_image = models.FileField(upload_to='media_files/vehicle_logout/', null=True)
     
 class employee_clockin_info(models.Model):
     emp_clockin_id = models.AutoField(primary_key=True)

@@ -2051,3 +2051,10 @@ class FetchRedditAPIView(APIView):
             )
             saved_count += 1
         return Response({'saved_count': saved_count}, status=status.HTTP_200_OK)
+
+
+class Call_TypeAPIView(APIView):
+    def get(self, request):
+        call_types = CallType.objects.filter(call_type_is_deleted=False)
+        serializer = CallTypeSerializer(call_types, many=True)
+        return Response(serializer.data)
