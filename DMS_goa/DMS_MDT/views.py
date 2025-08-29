@@ -128,35 +128,77 @@ class VehicleLogin(APIView):
     
 class VehicleLogout(APIView):
     def post(self, request):
+        from .models import yesno_enum
         refresh_token = request.data.get('refresh_token')
         veh_number = request.data.get('veh_number')
-        user_obj = DMS_User.objects.filter(user_username=veh_number).last()
-        if not user_obj:
-            return Response({'status': 'User does not exist'}, status=404)
-        if not user_obj.user_is_login:
-            return Response({'status': 'User already logged out'}, status=200)
-        try:
-            token_obj = RefreshToken(refresh_token)
-            token_obj.blacklist()
-        except TokenError:
-            return Response({'status': 'Invalid or expired refresh token'}, status=400)
-        vehicle_obj = Vehical.objects.filter(veh_number=veh_number).last()
-        if not vehicle_obj:
-            return Response({'status': 'Vehicle not found'}, status=404)
-        active_vehicle_sessions = vehicle_login_info.objects.filter(veh_id=vehicle_obj.veh_id, status=1)
-        for session in active_vehicle_sessions:
-            session.clock_out_in_status = 2
-            session.veh_logout_time = timezone.now()
-            session.save()
-        active_employee_sessions = employee_clockin_info.objects.filter(veh_id=vehicle_obj.veh_id, clock_out_in_status=1, status=1)
-        for emp in active_employee_sessions:
-            emp.clock_out_in_status = 2
-            emp.emp_clockout_time = timezone.now()
-            emp.save()
-        user_obj.user_is_login = False
-        user_obj.save()
+        logout_odometer = request.data.get('logoutOdometer')
+        logout_question = request.data.get('logoutquestion')
+        uploaded_image = request.FILES.get('uploadedimage')
+        # login_odometer = request.data.get('loginOdometer') # If you want to update login odometer as well
 
-        return Response({'status': 'User logged out successfully'}, status=200)
+        try:
+            user_obj = DMS_User.objects.filter(user_username=veh_number).last()
+            if not user_obj:
+                return Response({
+                    "data": {"code": 1, "message": "Not Logout"},
+                    "error": None
+                }, status=status.HTTP_200_OK)
+            if not user_obj.user_is_login:
+                return Response({
+                    "data": {"code": 1, "message": "Not Logout"},
+                    "error": None
+                }, status=status.HTTP_200_OK)
+            try:
+                token_obj = RefreshToken(refresh_token)
+                token_obj.blacklist()
+            except TokenError:
+                return Response({
+                    "data": {"code": 1, "message": "Not Logout"},
+                    "error": None
+                }, status=status.HTTP_200_OK)
+            vehicle_obj = Vehical.objects.filter(veh_number=veh_number).last()
+            if not vehicle_obj:
+                return Response({
+                    "data": {"code": 1, "message": "Not Logout"},
+                    "error": None
+                }, status=status.HTTP_200_OK)
+
+            # Update active vehicle sessions
+            active_vehicle_sessions = vehicle_login_info.objects.filter(veh_id=vehicle_obj.veh_id, status=1)
+            for session in active_vehicle_sessions:
+                session.clock_out_in_status = 2
+                session.veh_logout_time = timezone.now()
+                if logout_odometer:
+                    session.logout_odometer = logout_odometer
+                if logout_question:
+                    # Convert Yes/No string to enum value
+                    if str(logout_question).strip().lower() == 'yes':
+                        session.logout_question = yesno_enum.Yes
+                    elif str(logout_question).strip().lower() == 'no':
+                        session.logout_question = yesno_enum.No
+                if uploaded_image:
+                    session.logout_image = uploaded_image
+                session.save()
+
+            # Update employee sessions
+            active_employee_sessions = employee_clockin_info.objects.filter(veh_id=vehicle_obj.veh_id, clock_out_in_status=1, status=1)
+            for emp in active_employee_sessions:
+                emp.clock_out_in_status = 2
+                emp.emp_clockout_time = timezone.now()
+                emp.save()
+
+            user_obj.user_is_login = False
+            user_obj.save()
+
+            return Response({
+                "data": {"code": 1, "message": "Successfully Logout"},
+                "error": None
+            }, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({
+                "data": {"code": 1, "message": "Not Logout"},
+                "error": None
+            }, status=status.HTTP_200_OK)
         
 class employee_list(APIView):
     def get(self,request):
