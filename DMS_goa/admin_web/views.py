@@ -1079,8 +1079,8 @@ class Manual_Call_Incident_api(APIView):
 
             "response": {
                 "call_received_from": caller_instance.call_recieved_from.value if caller_instance.call_recieved_from else None,
-                "call_type": incident_instance.inc_type if incident_instance.inc_type else None,  # You can use your incident type here
-                "parent_complaint": incident_instance.disaster_type.disaster_parent_id if incident_instance.disaster_type and incident_instance.disaster_type.disaster_parent else None,
+                "call_type": incident_instance.disaster_type.disaster_parent.call_type_id.call_type_id if incident_instance.disaster_type and incident_instance.disaster_type.disaster_parent and incident_instance.disaster_type.disaster_parent.call_type_id else None,  
+                "parent_complaint": incident_instance.disaster_type.disaster_parent.pc_id if incident_instance.disaster_type and incident_instance.disaster_type.disaster_parent else None,
                 }
 
         }, status=status.HTTP_201_CREATED)
