@@ -53,6 +53,7 @@ class PcrStatusEnum(enum.Enum):
 
     __default__ = Acknowledge
     
+    
 class yesno_enum(enum.Enum):
     Yes = 1
     No = 2
