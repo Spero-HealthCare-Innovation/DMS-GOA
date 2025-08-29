@@ -507,6 +507,11 @@ class DMS_SOP(models.Model):
     sop_modified_by = models.CharField(max_length=255, null=True, blank=True)
     sop_modified_date = models.DateTimeField(null=True, blank=True)
 
+
+class call_recieved_enum(enum.Enum):
+    WhatsApp=1
+    Social_Media=2
+    
 class DMS_Caller(models.Model):
     caller_pk_id = models.AutoField(primary_key=True)
     caller_no = models.BigIntegerField(null=True,blank=True)
@@ -514,6 +519,7 @@ class DMS_Caller(models.Model):
     caller_is_deleted = models.BooleanField(default=False)
     caller_added_by = models.CharField(max_length=255,null=True,blank=True)
     caller_added_date = models.DateTimeField(auto_now=True)
+    call_recieved_from = enum.EnumField(call_recieved_enum,null=True,blank=True)
     caller_modified_by = models.CharField(max_length=255, null=True, blank=True)
     caller_modified_date = models.DateTimeField(auto_now=True,null=True, blank=True)
 
