@@ -423,7 +423,6 @@ def update_pcr_report(request):
 
     inc_id = DMS_Incident.objects.filter(inc_id=inc_id).last()
     ambulance_no = Vehical.objects.filter(veh_number=ambulance_no).last()
-    
     try:
         # ✅ record get or create (based on incident id)
         report, created = PcrReport.objects.get_or_create(
@@ -439,11 +438,15 @@ def update_pcr_report(request):
             report.acknowledge_time = timezone.now()
             report.acknowledge_lat = lat
             report.acknowledge_lng = lng
+            code = 2
+            message = "Acknowledged and inserted successfully."
 
         elif status_code == PcrStatusEnum.StartedFromBase.value:
             report.start_from_base_time = timezone.now()
             report.start_fr_bs_loc_lat = lat
             report.start_fr_bs_loc_lng = lng
+            code = 3
+            message = "Acknowledged and inserted successfully."
 
         elif status_code == PcrStatusEnum.AtScene.value:
             report.at_scene_time = timezone.now()
@@ -453,7 +456,10 @@ def update_pcr_report(request):
                 report.at_scene_remark = at_scene_remark
             if at_scene_photo:
                 report.at_scene_photo = at_scene_photo
-
+            
+            code = 4
+            message = "Status updated successfully."
+            
         elif status_code == PcrStatusEnum.DepartedFromScene.value:
             report.from_scene_time = timezone.now()
             report.from_scene_lat = lat
@@ -463,15 +469,25 @@ def update_pcr_report(request):
             if from_scene_photo:
                 report.from_scene_photo = from_scene_photo
 
+            code = 5
+            message = "Acknowledged and inserted successfully."
+            
         elif status_code == PcrStatusEnum.BackToBase.value:
             report.back_to_base_time = timezone.now()
             report.back_to_bs_loc_lat = lat
             report.back_to_bs_loc_lng = lng
+            
+            code = 6
+            message = "Acknowledged and inserted successfully."
+            
 
         elif status_code == PcrStatusEnum.Abandoned.value:
             report.abandoned_time = timezone.now()
             report.abandoned_lat = lat
             report.abandoned_lng = lng
+            
+            code = 7
+            message = "Acknowledged and inserted successfully."
 
         # ✅ Extra handling for incident_vehicles
         if status_code == 1:  # Acknowledge
@@ -482,10 +498,18 @@ def update_pcr_report(request):
 
         report.save()
 
-        return Response(
-            {"message": "PCR Report updated successfully", "status": "success"},
-            status=status.HTTP_200_OK
-        )
+        # return Response(
+        #     {"message": "PCR Report updated successfully", "status": "success"},
+        #     status=status.HTTP_200_OK
+        # )
+    
+        return Response({
+            "data": {
+                "code": code,
+                "message": message
+            },
+            "error": None
+        })
 
     except Exception as e:
         return Response(
@@ -502,7 +526,7 @@ class get_alldriverparameters(APIView):
         pcr_rep = PcrReport.objects.get(incident_id = inc_id, amb_no__user = user_id)
         assign_inc_objs_arr = []
         assign_inc_obj = {
-            "id": pcr_rep.incident_id.inc_id,
+            "id": str(pcr_rep.incident_id.inc_id),
             "acknowledge": pcr_rep.acknowledge_time,
             "startFromBaseLocation": pcr_rep.start_from_base_time,
             "atScene": pcr_rep.at_scene_time,
@@ -684,7 +708,7 @@ class closure_Post_api_app(APIView):
             vehicle_no=request.user
             print(vehicle_no)
             vehicl_dtls = Vehical.objects.get(veh_number=vehicle_no)
-            inc_dtl = DMS_Incident.objects.get(incident_id=inccc)
+            inc_dtl = DMS_Incident.objects.get(inc_id=inccc)
             dpt_dtl = vehicl_dtls.responder
             ex_cl_dtl = DMS_incident_closure.objects.filter(incident_id=inc_dtl, responder=dpt_dtl,vehicle_no=vehicl_dtls, closure_is_deleted=False)
             if ex_cl_dtl.exists():
