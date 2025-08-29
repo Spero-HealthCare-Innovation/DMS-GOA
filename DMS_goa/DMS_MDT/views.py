@@ -446,7 +446,7 @@ def update_pcr_report(request):
             report.start_fr_bs_loc_lat = lat
             report.start_fr_bs_loc_lng = lng
             code = 3
-            message = "Acknowledged and inserted successfully."
+            message = "Status updated successfully."
 
         elif status_code == PcrStatusEnum.AtScene.value:
             report.at_scene_time = timezone.now()
@@ -470,7 +470,7 @@ def update_pcr_report(request):
                 report.from_scene_photo = from_scene_photo
 
             code = 5
-            message = "Acknowledged and inserted successfully."
+            message = "Status updated successfully."
             
         elif status_code == PcrStatusEnum.BackToBase.value:
             report.back_to_base_time = timezone.now()
@@ -478,7 +478,7 @@ def update_pcr_report(request):
             report.back_to_bs_loc_lng = lng
             
             code = 6
-            message = "Acknowledged and inserted successfully."
+            message = "Status updated successfully."
             
 
         elif status_code == PcrStatusEnum.Abandoned.value:
@@ -487,7 +487,7 @@ def update_pcr_report(request):
             report.abandoned_lng = lng
             
             code = 7
-            message = "Acknowledged and inserted successfully."
+            message = "Status updated successfully."
 
         # ✅ Extra handling for incident_vehicles
         if status_code == 1:  # Acknowledge
@@ -748,3 +748,4 @@ class closure_Post_api_app(APIView):
             # return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
             return Response({"data": None,"error": {"code": 1,"message": "Case Closure Not Successfully"},"ex_error": str(e)})
         
+
