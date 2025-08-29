@@ -583,7 +583,7 @@ const Incident = ({ darkMode }) => {
             </Box>
 
             <Grid container spacing={1.6}>
-              <Grid item xs={12} sm={6}>
+              <Grid item xs={12} sm={ 4}>
                 <TextField
                   select
                   fullWidth
@@ -603,7 +603,7 @@ const Incident = ({ darkMode }) => {
 
               {selectedEmergencyValue === 1 && (
                 <>
-                  <Grid item xs={12} sm={6}>
+                  <Grid item xs={12} sm={4}>
                     <TextField
                       select
                       fullWidth
@@ -635,7 +635,7 @@ const Incident = ({ darkMode }) => {
                       select
                       fullWidth
                       size="small"
-                      label="Chief Complaint"
+                      label="Select Chief Complaint"
                       variant="outlined"
                       sx={inputStyle}
                       value={selectedDisaster}
@@ -644,7 +644,7 @@ const Incident = ({ darkMode }) => {
                       helperText={errors.disaster_type}
                     >
                       <MenuItem disabled value="">
-                        Select Call Type
+                        Select Chief Complaint
                       </MenuItem>
                       {disaster.map((item) => (
                         <MenuItem
@@ -662,7 +662,7 @@ const Incident = ({ darkMode }) => {
                       select
                       fullWidth
                       size="small"
-                      label="Sub Chief Compalint"
+                      label="Sub Chief Complaint"
                       variant="outlined"
                       sx={inputStyle}
                       value={selectedDisaster}
@@ -671,7 +671,7 @@ const Incident = ({ darkMode }) => {
                       helperText={errors.disaster_type}
                     >
                       <MenuItem disabled value="">
-                        Select Call Type
+                        Sub Chief Complaint
                       </MenuItem>
                       {disaster.map((item) => (
                         <MenuItem
@@ -702,10 +702,24 @@ const Incident = ({ darkMode }) => {
                       <MenuItem value={3}>Low</MenuItem>
                     </TextField>
                   </Grid>
+
+                  <Grid item xs={12} sm={4}>
+                    <TextField
+                      select
+                      fullWidth
+                      size="small"
+                      label="Alert Received From"
+                      variant="outlined"
+                      sx={inputStyle}
+                    >
+                      <MenuItem value={1}>Social Media</MenuItem>
+                      <MenuItem value={2}>WhatsApp</MenuItem>
+                    </TextField>
+                  </Grid>
                 </>
               )}
 
-              <Grid item xs={12} sm={6}>
+              <Grid item xs={12} sm={selectedEmergencyValue === 1 ? 6 : 4}>
                 <TextField
                   fullWidth
                   size="small"
@@ -729,7 +743,7 @@ const Incident = ({ darkMode }) => {
                 />
               </Grid>
 
-              <Grid item xs={12} sm={6}>
+              <Grid item xs={12} sm={selectedEmergencyValue === 1 ? 6 : 4}>
                 <TextField
                   fullWidth
                   size="small"
@@ -764,7 +778,7 @@ const Incident = ({ darkMode }) => {
                 />
               </Grid>
 
-              <Grid item xs={12} sm={6}>
+              <Grid item xs={12} sm={3}>
                 <FormControl fullWidth size="small" sx={inputStyle}>
                   <InputLabel id="district-label">District</InputLabel>
                   <Select
@@ -796,7 +810,7 @@ const Incident = ({ darkMode }) => {
                 </FormControl>
               </Grid>
 
-              <Grid item xs={12} sm={4}>
+              <Grid item xs={12} sm={3}>
                 <TextField
                   fullWidth
                   size="small"
@@ -827,7 +841,7 @@ const Incident = ({ darkMode }) => {
                 </TextField>
               </Grid>
 
-              <Grid item xs={12} sm={4}>
+              <Grid item xs={12} sm={6}>
                 <TextField
                   fullWidth
                   size="small"
@@ -874,7 +888,7 @@ const Incident = ({ darkMode }) => {
                 </TextField>
               </Grid>
 
-              <Grid item xs={12} sm={4}>
+              <Grid item xs={12} sm={6}>
                 <FormControl fullWidth size="small">
                   <InputLabel>Ward Officer</InputLabel>
                   <Select
@@ -923,6 +937,25 @@ const Incident = ({ darkMode }) => {
                   ))}
                 </TextField>
               </Grid>
+
+              {selectedEmergencyValue === 2 && (
+                <Grid item xs={12} md={12}>
+                  <TextField
+                    fullWidth
+                    size="small"
+                    placeholder="Comments"
+                    multiline
+                    className="textarea"
+                    rows={3}
+                    variant="outlined"
+                    sx={{ ...inputStyle }}
+                    value={comments}
+                    onChange={(e) => setComments(e.target.value)}
+                    error={!!errors.comments}
+                    helperText={errors.comments}
+                  />
+                </Grid>
+              )}
             </Grid>
           </Paper>
         </Grid>
@@ -953,14 +986,6 @@ const Incident = ({ darkMode }) => {
                     mt: 1.5,
                   }}
                 >
-                  {/* <Box sx={boxStyle}>
-                                        <Typography sx={{ color: labelColor, fontWeight: 500, fontFamily }}>
-                                            Incident Type
-                                        </Typography>
-                                        <Typography variant="subtitle2" sx={{ fontFamily }}>
-                                            {selectedEmergencyValue === 1 ? "Emergency" : "Non-Emergency"}
-                                        </Typography>
-                                    </Box> */}
                   <Box>
                     <Typography
                       variant="subtitle2"
