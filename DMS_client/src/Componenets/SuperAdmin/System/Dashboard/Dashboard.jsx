@@ -382,9 +382,9 @@ function Dashboard() {
                 }}
               >
 
-                <Tab label="Today" onClick={() => handleFilterClick('today')} />
                 <Tab label="This Month" onClick={() => handleFilterClick('this_month')} />
-                <Tab label="Till Date" onClick={() => handleFilterClick('till_date')} />
+                <Tab label="Today" onClick={() => handleFilterClick('today')} />
+                
 
               </Tabs>
             </Box>
@@ -864,11 +864,11 @@ function Dashboard() {
                         onClick={() => handleClick(index)}
                         sx={{
                           cursor: 'pointer',
-                          backgroundColor: "#464545ff",
+                          backgroundColor: "#31373D",
                           borderRadius: 1,
                           mb: 0.5,
                           '&:hover': {
-                            backgroundColor: '#656262ff', // light hover effect only
+                            backgroundColor: '#323030ff', // light hover effect only
                           },
 
                           display: 'flex',
@@ -897,7 +897,7 @@ function Dashboard() {
                           <Typography
                             variant="caption"
                             sx={{
-                              color: '#fff',
+                              color: '#010101ff',
                               fontWeight: 'bold'
                             }}
                           >
@@ -914,7 +914,7 @@ function Dashboard() {
                               key={subIndex}
                               sx={{
                                 pl: 4,
-                                backgroundColor: '#f9f6f6ff',
+                                backgroundColor: '#31373D',
                                 borderRadius: 1,
                                 mb: 0.3,
                                 mr: 1,
@@ -930,16 +930,16 @@ function Dashboard() {
                               <ListItemText
                                 primary={subItem.name}
                                 primaryTypographyProps={{
-                                  color: '#666',
+                                  color: '#ffffffff',
                                   fontSize: '14px'
                                 }}
                               />
                               <Typography
                                 variant="caption"
                                 sx={{
-                                  color: '#e3dfdfff',
+                                  color: '#000000ff',
                                   fontWeight: 'bold',
-                                  backgroundColor: '#454242ff',
+                                  backgroundColor: item.color,
                                   borderRadius: '8px',
                                   padding: '2px 6px',
                                   marginRight: "10"
