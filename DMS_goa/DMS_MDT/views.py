@@ -482,12 +482,13 @@ class get_assign_completed_inc_calls(APIView):
         assign_inc_objs_arr = []
         for veh in inc_veh:
             assign_inc_obj = {
-                "incidentId": veh.incident_id.inc_id,
-                "incidentDate": veh.incident_id.inc_added_date,
-                "incidentTime": veh.incident_id.inc_added_date.time(),
-                "callType": None,
+                "incidentId": str(veh.incident_id.inc_id),
+                "incidentDate": incidentDate,
+                "incidentTime": incidentTime,
+                "callType": "Emergency",
                 "CallerRelationName": "",
-                "incidentCallsStatus": "Completed"
+                "incidentCallsStatus": "Completed",
+                "callerName":"Vinayak"
             } 
             assign_inc_objs_arr.append(assign_inc_obj)
         return Response({"data": assign_inc_objs_arr, "error": None}, status=status.HTTP_200_OK)
