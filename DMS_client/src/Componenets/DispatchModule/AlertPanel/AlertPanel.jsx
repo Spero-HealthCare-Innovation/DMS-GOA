@@ -213,31 +213,6 @@ const AlertPanel = ({ darkMode }) => {
         };
     }, [initialData]);
 
-    // useEffect(() => {
-    //     const socket = new WebSocket(`${socketUrl}/ws/weather_alerts`);
-
-    //     socket.onmessage = (event) => {
-    //         try {
-    //             const newData = JSON.parse(event.data);
-    //             console.log('Received:', newData);
-    //             setAlertData(prevData => {
-    //                 const incoming = Array.isArray(newData) ? newData[0] : newData;
-    //                 const filteredData = prevData.filter(item => item.pk_id !== incoming.pk_id);
-    //                 return [...filteredData, incoming]
-    //                 // return [incoming, ...filteredData];
-    //             });
-    //         } catch (error) {
-    //             console.error('Invalid JSON:', event.data);
-    //         }
-    //     };
-    //     socket.onerror = (error) => {
-    //         console.error('WebSocket error:', error);
-    //     };
-    //     socket.onclose = () => {
-    //         console.log('WebSocket closed');
-    //     };
-    // }, []);
-
     const handleTriggerClick = async (id, triggerStatus) => {
         try {
             const response = await fetch(`${port}/admin_web/alert/?id=${id}`, {
@@ -316,16 +291,6 @@ const AlertPanel = ({ darkMode }) => {
 
     const [searchText, setSearchText] = useState("");
 
-    // const filteredData = alertData.filter(item =>
-    //     item.pk_id.toString().toLowerCase().includes(searchText.toLowerCase())
-    // );
-
-    // const combinedData = [...initialData, ...liveData];
-
-    // const filteredData = combinedData.filter(item =>
-    //     item.pk_id.toString().toLowerCase().includes(searchText.toLowerCase())
-    // );
-
     const combinedRaw = [...initialData, ...liveData];
 
     const uniqueCombined = combinedRaw.filter(
@@ -361,9 +326,42 @@ const AlertPanel = ({ darkMode }) => {
         setPage(1);
     }, [searchText])
 
+    const [alertPanel, setAlertPanel] = useState(false);
+
+    useEffect(() => {
+        const storedPermissions = JSON.parse(localStorage.getItem("permissions"));
+
+        if (storedPermissions && storedPermissions.length > 0) {
+            const modules = storedPermissions[0].modules_submodule;
+
+            const sopModule = modules.find((mod) => mod.moduleName === "Alert-Panel");
+
+            if (sopModule) {
+                console.log("SOP Module:", sopModule);
+
+                sopModule.selectedSubmodules?.forEach((sub) => {
+                    console.log("Submodule:", sub.submoduleName);
+
+                    sub.selectedActions?.forEach((act) => {
+                        console.log("Action:", act.actionName);
+
+                        if (act.actionName === "Trigged") {
+                            setAlertPanel(true);
+                        }
+                    });
+                });
+            } else {
+                console.warn("SOP module not found in permissions");
+            }
+        }
+    }, []);
+
+
     return (
         <Box sx={{ flexGrow: 1, mt: 1, ml: '5em', mr: 1, mb: 2 }}>
-            <Sidebar darkMode={darkMode} />
+            {
+                localStorage.getItem("user_group") !== "1" && <Sidebar darkMode={darkMode} />
+            }
             <Grid container spacing={2}>
                 <Grid item xs={12} md={7}>
                     <Grid container spacing={2} alignItems="center">
@@ -531,48 +529,36 @@ const AlertPanel = ({ darkMode }) => {
                                                         })()}
                                                     </Typography>
                                                 </StyledCardContent>
-                                                {/* <StyledCardContent style={{ flex: 1 }}>
-                                                    <Button
-                                                        onClick={(e) => {
-                                                            e.stopPropagation();
-                                                            handleTriggerClick(item.pk_id, item.triger_status);
-                                                        }}
-                                                        style={{
-                                                            width: '70%',
-                                                            backgroundColor: item.triger_status === 1 ? 'rgb(223,76,76)' : "rgb(18,166,95)",
-                                                            color: 'black',
-                                                            borderRadius: '10px',
-                                                            height: '30px',
-                                                            marginTop: '15px',
-                                                            fontSize: '11px',
-                                                        }}
-                                                    >
-                                                        {(item.triger_status === 1 ? "trigger" : "triggered")
-                                                            .charAt(0).toUpperCase() + (item.triger_status === 1 ? "trigger" : "triggered").slice(1).toLowerCase()}
-                                                    </Button>
-                                                </StyledCardContent> */}
                                                 <StyledCardContent style={{ flex: 1 }}>
-                                                    <Button
-                                                        onClick={(e) => {
-                                                            e.stopPropagation();
-                                                            handleTriggerClick(item.pk_id, item.triger_status);
-                                                        }}
-                                                        style={{
-                                                            width: '70%',
-                                                            backgroundColor: item.triger_status === 1 ? 'rgb(223,76,76)' : "rgb(18,166,95)",
-                                                            color: 'white',
-                                                            borderRadius: '10px',
-                                                            height: '30px',
-                                                            marginTop: '15px',
-                                                            fontSize: '13px',
-                                                            textTransform: 'none'
-                                                        }}
-                                                    >
-                                                        {(() => {
-                                                            const label = item.triger_status === 1 ? "trigger" : "triggered";
-                                                            return label.charAt(0).toUpperCase() + label.slice(1).toLowerCase();
-                                                        })()}
-                                                    </Button>
+                                                    {alertPanel ?
+                                                        (
+                                                            <Button
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    handleTriggerClick(item.pk_id, item.triger_status);
+                                                                }}
+                                                                style={{
+                                                                    width: '70%',
+                                                                    backgroundColor: item.triger_status === 1 ? 'rgb(223,76,76)' : "rgb(18,166,95)",
+                                                                    color: 'white',
+                                                                    borderRadius: '10px',
+                                                                    height: '30px',
+                                                                    marginTop: '15px',
+                                                                    fontSize: '13px',
+                                                                    textTransform: 'none'
+                                                                }}
+                                                            >
+                                                                {(() => {
+                                                                    const label = item.triger_status === 1 ? "trigger" : "triggered";
+                                                                    return label.charAt(0).toUpperCase() + label.slice(1).toLowerCase();
+                                                                })()}
+                                                            </Button>
+                                                        )
+                                                        :
+                                                        (
+                                                            <>-</>
+                                                        )
+                                                    }
                                                 </StyledCardContent>
                                             </EnquiryCardBody>
                                         ))

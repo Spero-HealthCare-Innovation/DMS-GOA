@@ -60,8 +60,8 @@ function Add_group({ darkMode }) {
   const [selectedGroup, setSelectedGroup] = useState(null);
   const [groupNameError, setGroupNameError] = useState("");
   const [departmentError, setDepartmentError] = useState("");
-   const [editSelectedRowId, setEditSelectedRowId] = useState(null);
-   const [depName, setDepName]= useState([]);
+  const [editSelectedRowId, setEditSelectedRowId] = useState(null);
+  const [depName, setDepName] = useState([]);
 
 
   const userName = localStorage.getItem("userId");
@@ -104,7 +104,7 @@ function Add_group({ darkMode }) {
 
   const textColor = darkMode ? "#ffffff" : "#000000";
   const bgColor = "linear-gradient(to bottom, #53bce1, rgb(173, 207, 216))";
-  const paper = darkMode ? "202328":"#FFFFFF";
+  const paper = darkMode ? "202328" : "#FFFFFF";
   const tableRow = "rgb(53 53 53)";
   const labelColor = darkMode ? "#5FECC8" : "#1976d2";
   const fontFamily = "Roboto, sans-serif";
@@ -301,33 +301,33 @@ function Add_group({ darkMode }) {
   }, []);
 
   // Handle Edit functionality
- const handleEdit = async (group) => {
-  setIsEditing(true);
-  setEditingGroupId(group.id);
-  setEditSelectedRowId(group.id);
+  const handleEdit = async (group) => {
+    setIsEditing(true);
+    setEditingGroupId(group.id);
+    setEditSelectedRowId(group.id);
 
-  try {
-    const url = `${port}/admin_web/Group_get_idwise/${group.id}/`;
-    const response = await axios.get(url, {
-      headers: {
-        Authorization: `Bearer ${effectiveToken}`,
-      },
-    });
+    try {
+      const url = `${port}/admin_web/Group_get_idwise/${group.id}/`;
+      const response = await axios.get(url, {
+        headers: {
+          Authorization: `Bearer ${effectiveToken}`,
+        },
+      });
 
-    const data = response.data?.[0];
+      const data = response.data?.[0];
 
-    if (data) {
-      setGroupName(data.grp_name || "");
-      setDepartmentId(data.dep_id?.toString() || ""); // यहाँ departmentId set करें
-      // setDepName को हटा दें, इसकी जरूरत नहीं है
+      if (data) {
+        setGroupName(data.grp_name || "");
+        setDepartmentId(data.dep_id?.toString() || ""); // यहाँ departmentId set करें
+        // setDepName को हटा दें, इसकी जरूरत नहीं है
+      }
+
+    } catch (err) {
+      console.error("Error fetching group data:", err);
     }
 
-  } catch (err) {
-    console.error("Error fetching group data:", err);
-  }
-
-  handleClose();
-};
+    handleClose();
+  };
 
 
   // Delete functionality
@@ -385,6 +385,43 @@ function Add_group({ darkMode }) {
     return isValid;
   };
 
+  const [newGroup, setNewGroup] = useState(false);
+  const [deleteGroups, setDeleteGroups] = useState(false);
+  const [editGroup, setEditGroup] = useState(false);
+
+  useEffect(() => {
+    const storedPermissions = JSON.parse(localStorage.getItem("permissions"));
+
+    if (storedPermissions && storedPermissions.length > 0) {
+      const modules = storedPermissions[0].modules_submodule;
+      console.log("modules_submodule:", modules);
+
+      const systemUserModule = modules.find(
+        (mod) => mod.moduleName === "System User"
+      );
+
+      if (systemUserModule) {
+        const addGroupSubmodule = systemUserModule.selectedSubmodules.find(
+          (sub) => sub.submoduleName === "Add Group"
+        );
+
+        if (addGroupSubmodule) {
+          addGroupSubmodule.selectedActions?.forEach((act) => {
+            if (act.actionName === "Add New group") {
+              setNewGroup(true);
+            }
+            if (act.actionName === "Delete") {
+              setDeleteGroups(true);
+            }
+            if (act.actionName === "Edit") {
+              setEditGroup(true);
+            }
+          });
+        }
+      }
+    }
+  }, []);
+
   return (
     <div style={{ marginLeft: "3.5rem" }}>
       <Snackbar
@@ -419,7 +456,7 @@ function Add_group({ darkMode }) {
 
         {/* Label */}
         <Typography variant="h6" sx={{
-        color: "#5FC8EC",
+          color: "#5FC8EC",
           fontWeight: 600,
           fontFamily,
           fontSize: 18,
@@ -467,7 +504,7 @@ function Add_group({ darkMode }) {
 
       <Grid container spacing={2}>
         <Grid item xs={12} md={7}>
-          <Paper elevation={3} sx={{ padding: 3, borderRadius: 3, backgroundColor:paper, mt: 1, mb: 5,ml:1 }}>
+          <Paper elevation={3} sx={{ padding: 3, borderRadius: 3, backgroundColor: paper, mt: 1, mb: 5, ml: 1 }}>
             <TableContainer>
               <Table>
                 <TableHead>
@@ -478,17 +515,17 @@ function Add_group({ darkMode }) {
                       display: "flex",
                       width: "100%",
                       borderRadius: 2,
-                       position: "sticky",
+                      position: "sticky",
                       p: 3,
                       fontFamily: "Roboto",
-                      fontSize:"14px",
+                      fontSize: "14px",
                     }}>
                       <StyledCardContent
                         sx={{
                           flex: 0.6,
                           borderRight: "1px solid black",
                           justifyContent: "center",
-                          
+
                         }}
                       >
                         <Typography variant="subtitle2" sx={fontsTableHeading}>
@@ -536,7 +573,7 @@ function Add_group({ darkMode }) {
                 </TableHead>
 
                 <TableBody
-                sx={{
+                  sx={{
                     display: "block",
                     maxHeight: "50vh",
                     overflowY: "auto",
@@ -576,7 +613,7 @@ function Add_group({ darkMode }) {
                       <EnquiryCardBody
                         key={index}
                         sx={{
-                         backgroundColor: tableRow,
+                          backgroundColor: tableRow,
                           p: 2,
                           borderRadius: 2,
                           color: textColor,
@@ -584,7 +621,7 @@ function Add_group({ darkMode }) {
                           width: "100%",
                           mb: 1,
                           fontFamily: "Roboto",
-                          border : editSelectedRowId === item.id ? "2px solid #5FC8EC" : "none",
+                          border: editSelectedRowId === item.id ? "2px solid #5FC8EC" : "none",
                         }}
                       >
                         <StyledCardContent sx={{ flex: 0.6, justifyContent: "center" }}>
@@ -679,7 +716,7 @@ function Add_group({ darkMode }) {
                     borderColor: borderColor,
                     height: "30px",
                     minWidth: "70px",
-                    backgroundColor:darkMode ? "#202328":"#FFFFFF",
+                    backgroundColor: darkMode ? "#202328" : "#FFFFFF",
                     "& .MuiOutlinedInput-notchedOutline": {
                       borderColor: borderColor,
                     },
@@ -697,7 +734,7 @@ function Add_group({ darkMode }) {
               {/* Page Navigation - Updated to use filteredGroups */}
               <Box
                 sx={{
-              backgroundColor:darkMode ? "#202328":"#FFFFFF",
+                  backgroundColor: darkMode ? "#202328" : "#FFFFFF",
                   border: "1px solid #ffffff",
                   borderRadius: "6px",
                   px: 2,
@@ -740,100 +777,90 @@ function Add_group({ darkMode }) {
           </Paper>
         </Grid>
 
-        <Popover
-          open={open}
-          anchorEl={anchorEl}
-          onClose={handleClose}
-          anchorOrigin={{
-            vertical: "center",
-            horizontal: "right",
-          }}
-          transformOrigin={{
-            vertical: "center",
-            horizontal: "left",
-          }}
-          PaperProps={{
-            sx: {
-              p: 2,
-              display: "flex",
-              flexDirection: "column",
-              gap: 1.5,
-              borderRadius: 2,
-              minWidth: 120,
-            },
-          }}
-        >
-
-          <Button
-            fullWidth
-            variant="outlined"
-            color="warning"
-            startIcon={<EditOutlined />}
-            onClick={() => handleEdit(selectedGroup)}
-          >
-            Edit
-          </Button>
-
-          <Button
-            fullWidth
-            variant="outlined"
-            color="error"
-            startIcon={<DeleteOutline />}
-            onClick={() => {
-              if (selectedGroup) {
-                deleteGroup(selectedGroup.id);
-              }
+        {(editGroup || deleteGroups) && (
+          <Popover
+            open={open}
+            anchorEl={anchorEl}
+            onClose={handleClose}
+            anchorOrigin={{
+              vertical: "center",
+              horizontal: "right",
+            }}
+            transformOrigin={{
+              vertical: "center",
+              horizontal: "left",
+            }}
+            PaperProps={{
+              sx: {
+                p: 2,
+                display: "flex",
+                flexDirection: "column",
+                gap: 1.5,
+                borderRadius: 2,
+                minWidth: 120,
+              },
             }}
           >
-            Delete
-          </Button>
-        </Popover>
+            {editGroup && (
+              <Button
+                fullWidth
+                variant="outlined"
+                color="warning"
+                startIcon={<EditOutlined />}
+                onClick={() => handleEdit(selectedGroup)}
+              >
+                Edit
+              </Button>
+            )}
+
+            {deleteGroups && (
+              <Button
+                fullWidth
+                variant="outlined"
+                color="error"
+                startIcon={<DeleteOutline />}
+                onClick={() => {
+                  if (selectedGroup) {
+                    deleteGroup(selectedGroup.id);
+                  }
+                }}
+              >
+                Delete
+              </Button>
+            )}
+          </Popover>
+        )}
 
         <Grid item xs={12} md={4.9}>
-          <Paper elevation={3} sx={{ padding: 2, borderRadius: 3,backgroundColor:paper, mt: 1, mb: 5 }}>
-
-           <Box
-                         display="flex"
-                         justifyContent={{ xs: "center", md: "flex-end" }}
-                         alignItems="center"
-                         mb={2}
-                         flexWrap="wrap"
-                       >
-              {/* <Typography
-                sx={{
-                  color: labelColor,
-                  fontWeight: 600,
-                  fontSize: 18,
-
-                  fontFamily,
-                }}
+          <Paper elevation={3} sx={{ padding: 2, borderRadius: 3, backgroundColor: paper, mt: 1, mb: 5 }}>
+            {newGroup && (
+              <Box
+                display="flex"
+                justifyContent={{ xs: "center", md: "flex-end" }}
+                alignItems="center"
+                mb={2}
+                flexWrap="wrap"
               >
-                {isEditing ? 'Edit Group' : 'Add Group'}
-              </Typography> */}
-
-              <Button
-                variant="contained"
-                startIcon={<AddCircleOutline />}
-                onClick={handleAddNewGroup}
-                disabled={!isEditing} // Show only when in edit mode
-                sx={{
-                  backgroundColor: "rgb(223,76,76)",
-                  color: "#fff",
-                  fontWeight: 600,
-                  fontFamily: "Roboto",
-                  textTransform: "none",
-                  "&:hover": {
-                    backgroundColor:"rgb(223,76,76)",
-                  },
-                }}
-              >
-                Add New Group
-              </Button>
-
-
-
-            </Box>
-
+                <Button
+                  variant="contained"
+                  startIcon={<AddCircleOutline />}
+                  onClick={handleAddNewGroup}
+                  disabled={!isEditing}
+                  sx={{
+                    backgroundColor: "rgb(223,76,76)",
+                    color: "#fff",
+                    fontWeight: 600,
+                    fontFamily: "Roboto",
+                    textTransform: "none",
+                    "&:hover": {
+                      backgroundColor: "rgb(223,76,76)",
+                    },
+                  }}
+                >
+                  Add New Group
+                </Button>
+              </Box>
+            )}
 
             <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
               {/* Group Name TextField with Box wrapper */}
@@ -844,7 +871,7 @@ function Add_group({ darkMode }) {
                   label={groupName ? "" : "Group Name"}
                   InputLabelProps={{ shrink: false }}
                   sx={{
-                        backgroundColor: darkMode ? "rgb(88,92,99)" : "#FFFFFF",
+                    backgroundColor: darkMode ? "rgb(88,92,99)" : "#FFFFFF",
                     fontFamily: "Roboto",
                     ...inputStyle,
                     ...(groupNameError && {
@@ -886,38 +913,38 @@ function Add_group({ darkMode }) {
 
               {/* Department Select with Box wrapper */}
               <Box sx={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
-               <Select
-  fullWidth
-  displayEmpty
-  placeholder="Select Department"
-  value={departmentId} // यहाँ departmentId use करें, depName नहीं
-  onChange={(e) => {
-    setDepartmentId(e.target.value);
-    if (departmentError) setDepartmentError(""); // Clear error on change
-  }}
-  inputProps={{
-    "aria-label": "Select Department",
-  }}
-  sx={{
-    fontFamily: "Roboto",
-    ...selectStyles,
-    ...(departmentError && {
-      "& .MuiOutlinedInput-notchedOutline": {
-        borderColor: "#d32f2f !important",
-      },
-    }),
-  }}
-  IconComponent={KeyboardArrowDownIcon}
->
-  <MenuItem value="" disabled>
-    Select Department
-  </MenuItem>
-  {departmentList.map((department) => (
-    <MenuItem key={department.dep_id} value={department.dep_id.toString()}>
-      {department.dep_name}
-    </MenuItem>
-  ))}
-</Select>
+                <Select
+                  fullWidth
+                  displayEmpty
+                  placeholder="Select Department"
+                  value={departmentId} // यहाँ departmentId use करें, depName नहीं
+                  onChange={(e) => {
+                    setDepartmentId(e.target.value);
+                    if (departmentError) setDepartmentError(""); // Clear error on change
+                  }}
+                  inputProps={{
+                    "aria-label": "Select Department",
+                  }}
+                  sx={{
+                    fontFamily: "Roboto",
+                    ...selectStyles,
+                    ...(departmentError && {
+                      "& .MuiOutlinedInput-notchedOutline": {
+                        borderColor: "#d32f2f !important",
+                      },
+                    }),
+                  }}
+                  IconComponent={KeyboardArrowDownIcon}
+                >
+                  <MenuItem value="" disabled>
+                    Select Department
+                  </MenuItem>
+                  {departmentList.map((department) => (
+                    <MenuItem key={department.dep_id} value={department.dep_id.toString()}>
+                      {department.dep_name}
+                    </MenuItem>
+                  ))}
+                </Select>
                 {departmentError && (
                   <Typography
                     sx={{
@@ -934,55 +961,33 @@ function Add_group({ darkMode }) {
               </Box>
             </Box>
 
-            <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, mt: 3, mb: 1 }}>
-              <Button
-                variant="contained"
-                onClick={handleSubmit}
-                disabled={loading}
-                sx={{
-                  mt: 2,
-                  width: "40%",
-                  backgroundColor: "rgb(18,166,95,0.8) !important",
-                  color: "#ffff",
-                  fontWeight: "bold",
-                  borderRadius: "12px",
-                  fontFamily: "Roboto",
-                     textTransform: 'none',
-                  "&:hover": {
-                    backgroundColor: "rgb(18,166,95,0.8)",
-                    color: "white !important",
-                    fontFamily: "Roboto",
-                    textTransform: 'none'
-                  },
-                }}
-              >
-                {loading ? 'Loading...' : (isEditing ? 'Update' : 'Submit')}
-              </Button>
-
-              {/* {isEditing && (
+            {newGroup && (
+              <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, mt: 3, mb: 1 }}>
                 <Button
-                  variant="outlined"
-                  onClick={resetForm}
+                  variant="contained"
+                  onClick={handleSubmit}
+                  disabled={loading}
                   sx={{
                     mt: 2,
                     width: "40%",
-                    borderColor: "rgb(223,76,76)",
-                    color:darkMode ?"#fff":"rgb(223,76,76)",
+                    backgroundColor: "rgb(18,166,95,0.8) !important",
+                    color: "#ffff",
                     fontWeight: "bold",
                     borderRadius: "12px",
                     fontFamily: "Roboto",
+                    textTransform: 'none',
                     "&:hover": {
-                      borderColor: "rgb(223,76,76)",
-                       backgroundColor: "rgb(223,76,76)",
-                       color:"#fff",
-                       fontFamily: "Roboto",
+                      backgroundColor: "rgb(18,166,95,0.8)",
+                      color: "white !important",
+                      fontFamily: "Roboto",
+                      textTransform: 'none'
                     },
                   }}
                 >
-                  Cancel
+                  {loading ? 'Loading...' : (isEditing ? 'Update' : 'Submit')}
                 </Button>
-              )} */}
-            </Box>
+              </Box>
+            )}
           </Paper>
         </Grid>
       </Grid>

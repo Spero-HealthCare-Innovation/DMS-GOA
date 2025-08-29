@@ -63,8 +63,8 @@ export const AuthProvider = ({ children }) => {
   // console.log(responderScopeForDispatch, "disasterIncident");
   const [enhancedIncidentData, setEnhancedIncidentData] = useState(null);
   const [selectedIncidentFromSop, setSelectedIncidentFromSop] = useState(null);
-  console.log(selectedIncidentFromSop,'selectedIncidentFromSopselectedIncidentFromSop');
-  
+  console.log(selectedIncidentFromSop, 'selectedIncidentFromSopselectedIncidentFromSop');
+
   const [isNewEntry, setIsNewEntry] = useState(false);
   // To fetch the ward,tehsil, district from the map
   const [wardName, setWardName] = useState("");
@@ -362,7 +362,7 @@ export const AuthProvider = ({ children }) => {
   // ✅ useEffect for selectedTehsilId change (fetch cities)
   useEffect(() => {
     if (selectedTehsilId) {
-      fetchCitysByTehshil(selectedTehsilId);fetchDistrictsByState 
+      fetchCitysByTehshil(selectedTehsilId); fetchDistrictsByState
       fetchWardsByTehshil(selectedTehsilId);
       setSelectedCityId("");
     } else {
@@ -449,7 +449,7 @@ export const AuthProvider = ({ children }) => {
         setDistrictName,
         selectedDisasterId,
         setSelectedDisasterId,
-        selectedDisasterName,        
+        selectedDisasterName,
         setSelectedDisasterName,
       }}
     >

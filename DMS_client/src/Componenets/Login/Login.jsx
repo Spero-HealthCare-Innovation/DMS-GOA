@@ -194,7 +194,7 @@ function Login() {
       localStorage.setItem("user", JSON.stringify(data.token.colleague));
       localStorage.setItem("user_group", data.token.user_group);
       localStorage.setItem("userId", data.token.colleague.emp_name);
-         localStorage.setItem("permissions", JSON.stringify(data.token.permissions));
+      localStorage.setItem("permissions", JSON.stringify(data.token.permissions));
 
       console.log("Access Token:", data.token.access);
       console.log("Refresh Token:", data.token.refresh);

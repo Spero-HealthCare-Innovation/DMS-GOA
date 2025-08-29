@@ -72,7 +72,7 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
 
   const port = import.meta.env.VITE_APP_API_KEY;
   const { newToken } = useAuth();
-  const group = localStorage.getItem("user_group");
+  const Department = localStorage.getItem("user_Department");
   const token = localStorage.getItem("access_token");
   const {
     states,
@@ -632,51 +632,85 @@ const AddDepartment = ({ darkMode, flag, setFlag, setSelectedIncident }) => {
   }, [selectedStateId, isNewEntry]);
 
   // localStorage se check karne ke liye function
-const hasPermission = (moduleName, submoduleName, actionName) => {
-  const stored = localStorage.getItem("permissions");
-  console.log("Stored permissions:", stored);
-  
-  if (!stored) {
-    console.log("No permissions found in localStorage.");
-    return false;
-  }
+  const hasPermission = (moduleName, submoduleName, actionName) => {
+    const stored = localStorage.getItem("permissions");
+    console.log("Stored permissions:", stored);
 
-  const permissions = JSON.parse(stored);
-  console.log("Parsed permissions:", permissions);
+    if (!stored) {
+      console.log("No permissions found in localStorage.");
+      return false;
+    }
 
-  // Module find karo
-  const module = permissions[0]?.modules_submodule.find(
-    (m) => m.moduleName === moduleName
-  );
-  console.log(`Looking for module "${moduleName}":`, module);
-  if (!module) {
-    console.log(`Module "${moduleName}" not found.`);
-    return false;
-  }
+    const permissions = JSON.parse(stored);
+    console.log("Parsed permissions:", permissions);
 
-  // Submodule find karo
-  const submodule = module.selectedSubmodules.find(
-    (s) => s.submoduleName === submoduleName
-  );
-  console.log(`Looking for submodule "${submoduleName}":`, submodule);
-  if (!submodule) {
-    console.log(`Submodule "${submoduleName}" not found.`);
-    return false;
-  }
+    // Module find karo
+    const module = permissions[0]?.modules_submodule.find(
+      (m) => m.moduleName === moduleName
+    );
+    console.log(`Looking for module "${moduleName}":`, module);
+    if (!module) {
+      console.log(`Module "${moduleName}" not found.`);
+      return false;
+    }
 
-  // Action find karo
-  const hasAction = submodule.selectedActions.some(
-    (a) => a.actionName === actionName
-  );
-  console.log(`Checking action "${actionName}":`, hasAction);
-  
-  return hasAction;
-};
+    // Submodule find karo
+    const submodule = module.selectedSubmodules.find(
+      (s) => s.submoduleName === submoduleName
+    );
+    console.log(`Looking for submodule "${submoduleName}":`, submodule);
+    if (!submodule) {
+      console.log(`Submodule "${submoduleName}" not found.`);
+      return false;
+    }
 
+    // Action find karo
+    const hasAction = submodule.selectedActions.some(
+      (a) => a.actionName === actionName
+    );
+    console.log(`Checking action "${actionName}":`, hasAction);
 
+    return hasAction;
+  };
+
+  const [newDepartment, setNewDepartment] = useState(false);
+  const [deleteDepartments, setDeleteDepartments] = useState(false);
+  const [editDepartment, setEditDepartment] = useState(false);
+
+  useEffect(() => {
+    const storedPermissions = JSON.parse(localStorage.getItem("permissions"));
+
+    if (storedPermissions && storedPermissions.length > 0) {
+      const modules = storedPermissions[0].modules_submodule;
+      console.log("modules_submodule:", modules);
+
+      const systemUserModule = modules.find(
+        (mod) => mod.moduleName === "System User"
+      );
+
+      if (systemUserModule) {
+        const addDepartmentSubmodule = systemUserModule.selectedSubmodules.find(
+          (sub) => sub.submoduleName === "Add Department"
+        );
+
+        if (addDepartmentSubmodule) {
+          addDepartmentSubmodule.selectedActions?.forEach((act) => {
+            if (act.actionName === "Add New Department") {
+              setNewDepartment(true);
+            }
+            if (act.actionName === "Delete") {
+              setDeleteDepartments(true);
+            }
+            if (act.actionName === "Edit") {
+              setEditDepartment(true);
+            }
+          });
+        }
+      }
+    }
+  }, []);
 
   return (
-    // ..
     <Box sx={{ p: 2, marginLeft: "3rem" }}>
       <Snackbar
         open={Boolean(snackbarmsgAddDept)}
@@ -686,22 +720,6 @@ const hasPermission = (moduleName, submoduleName, actionName) => {
         message={snackbarmsgAddDept}
       />
       <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
-        {/* <Box
-          sx={{
-            width: 30,
-            height: 30,
-            borderRadius: "50%",
-            backgroundColor: "#5FECC8",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            mr: 2,
-          }}
-        >
-          <ArrowBackIosIcon
-            sx={{ fontSize: 20, color: darkMode ? "#fff" : "#000" }}
-          />{" "}
-        </Box> */}
         <Box
           sx={{
             display: "flex",
@@ -1050,89 +1068,82 @@ const hasPermission = (moduleName, submoduleName, actionName) => {
                               }}
                             />
                           </StyledCardContent>
-                          <Popover
-                            open={open}
-                            anchorEl={anchorEl}
-                            onClose={handleClose}
-                            anchorOrigin={{
-                              vertical: "center",
-                              horizontal: "right",
-                            }}
-                            transformOrigin={{
-                              vertical: "center",
-                              horizontal: "left",
-                            }}
-                            PaperProps={{
-                              sx: {
-                                p: 2,
-                                display: "flex",
-                                flexDirection: "column",
-                                gap: 1.5,
-                                borderRadius: 2,
-                                minWidth: 120,
-                              },
-                            }}
-                          >
-                            {/* <IconButton
-                              onClick={handleClose}
-                              sx={{
-                                alignSelf: "flex-end",
-                                color: textColor,
+
+                          {(editDepartment || deleteDepartments) && (
+                            <Popover
+                              open={open}
+                              anchorEl={anchorEl}
+                              onClose={handleClose}
+                              anchorOrigin={{
+                                vertical: "center",
+                                horizontal: "right",
+                              }}
+                              transformOrigin={{
+                                vertical: "center",
+                                horizontal: "left",
+                              }}
+                              PaperProps={{
+                                sx: {
+                                  p: 2,
+                                  display: "flex",
+                                  flexDirection: "column",
+                                  gap: 1.5,
+                                  borderRadius: 2,
+                                  minWidth: 120,
+                                },
                               }}
                             >
-                              <CloseIcon  sx={{ fontSize: "14px" , alignItems: "center"}}/>
-                            </IconButton> */}
-                            {hasPermission("System User", "Add Department", "Edit") && (
-                            <Button
-                              fullWidth
-                              variant="outlined"
-                              color="warning"
-                              startIcon={
-                                <EditOutlined
+                              {editDepartment && (
+                                <Button
+                                  fullWidth
+                                  variant="outlined"
+                                  color="warning"
+                                  startIcon={
+                                    <EditOutlined
+                                      sx={{
+                                        fontSize: "14px",
+                                        alignItems: "center",
+                                      }}
+                                    />
+                                  }
+                                  onClick={() => handleEdit(selectedItem)}
                                   sx={{
+                                    textTransform: "none",
                                     fontSize: "14px",
-                                    alignItems: "center",
                                   }}
-                                />
-                              }
-                              onClick={() => handleEdit(selectedItem)}
-                              sx={{
-                                textTransform: "none",
-                                fontSize: "14px",
-                              }}
-                            >
-                              Edit
-                            </Button>
-                            )}
+                                >
+                                  Edit
+                                </Button>
+                              )}
 
+                              {deleteDepartments && (
+                                <Button
+                                  fullWidth
+                                  variant="outlined"
+                                  color="error"
+                                  startIcon={
+                                    <DeleteOutline
+                                      sx={{
+                                        fontSize: "14px",
+                                        alignItems: "center",
+                                      }}
+                                    />
+                                  }
+                                  onClick={() => {
+                                    setDeleteDepId(selectedItem.dep_id);
+                                    setOpenDeleteDialog(true);
+                                  }}
+                                  sx={{
+                                    textTransform: "none",
+                                    fontSize: "14px",
+                                  }}
+                                >
+                                  Delete
+                                </Button>
+                              )}
+                            </Popover>
+                          )}
 
-                           {hasPermission("System User", "Add Department", "Delete") && (
-  <Button
-    fullWidth
-    variant="outlined"
-    color="error"
-    startIcon={
-      <DeleteOutline
-        sx={{
-          fontSize: "14px",
-          alignItems: "center",
-        }}
-      />
-    }
-    onClick={() => {
-      setDeleteDepId(selectedItem.dep_id);
-      setOpenDeleteDialog(true);
-    }}
-    sx={{
-      textTransform: "none",
-      fontSize: "14px",
-    }}
-  >
-    Delete
-  </Button>
-)}
-
-                          </Popover>
                           <Snackbar
                             open={snackbarOpen}
                             autoHideDuration={3000}
@@ -1257,7 +1268,7 @@ const hasPermission = (moduleName, submoduleName, actionName) => {
                 <Box
                   onClick={() =>
                     page <
-                      Math.ceil(filteredDepartments.length / rowsPerPage) &&
+                    Math.ceil(filteredDepartments.length / rowsPerPage) &&
                     setPage(page + 1)
                   }
                   sx={{
@@ -1275,7 +1286,6 @@ const hasPermission = (moduleName, submoduleName, actionName) => {
           </Paper>
         </Grid>
 
-        {/* Department Registration Form */}
         <Grid item xs={12} md={5}>
           <Paper
             sx={{
@@ -1286,38 +1296,39 @@ const hasPermission = (moduleName, submoduleName, actionName) => {
               transition: "all 0.3s ease-in-out",
             }}
           >
-            <Box
-              display="flex"
-              justifyContent={{ xs: "center", md: "flex-end" }}
-              alignItems="center"
-              mb={2}
-              flexWrap="wrap"
-              // sx={{backgroundColor: darkMode ? "rgb(88,92,99)" : "#FFFFFF"}}
-            >
-              {hasPermission("System User", "Add Department", "Add New  Department") && (
-              <Button
-                variant="contained"
-                startIcon={<AddCircleOutline />}
-                disabled={!isEditMode}
-                onClick={handleAddNewDepartment}
-                sx={{
-                  backgroundColor: "rgba(223,76,76, 0.8)",
-                  color: "#fff",
-                  fontWeight: 600,
-                  fontFamily: "Roboto",
-                  textTransform: "none",
-                  px: 1,
-                  py: 1,
-                  fontSize: { xs: "0.75rem", sm: "0.875rem" },
-                  "&:hover": {
-                    backgroundColor: "rgba(223,76,76, 0.8)",
-                  },
-                }}
+            {newDepartment && (
+              <Box
+                display="flex"
+                justifyContent={{ xs: "center", md: "flex-end" }}
+                alignItems="center"
+                mb={2}
+                flexWrap="wrap"
               >
-                Add New Department
-              </Button>
-              )}
-            </Box>
+                {hasPermission("System User", "Add Department", "Add New  Department") && (
+                  <Button
+                    variant="contained"
+                    startIcon={<AddCircleOutline />}
+                    disabled={!isEditMode}
+                    onClick={handleAddNewDepartment}
+                    sx={{
+                      backgroundColor: "rgba(223,76,76, 0.8)",
+                      color: "#fff",
+                      fontWeight: 600,
+                      fontFamily: "Roboto",
+                      textTransform: "none",
+                      px: 1,
+                      py: 1,
+                      fontSize: { xs: "0.75rem", sm: "0.875rem" },
+                      "&:hover": {
+                        backgroundColor: "rgba(223,76,76, 0.8)",
+                      },
+                    }}
+                  >
+                    Add New Department
+                  </Button>
+                )}
+              </Box>
+            )}
 
             <Grid container spacing={2}>
               <Grid item xs={12} sm={6}>
@@ -1544,29 +1555,10 @@ const hasPermission = (moduleName, submoduleName, actionName) => {
                 )}
               </Grid>
 
-              {/* Submit Button */}
-
               <Grid item xs={12}>
                 {isEditMode ? (
                   <Box display="flex" gap={2} mt={2}>
-                    {/* <Button
-                      variant="outlined"
-                      color="error"
-                      sx={{
-                        width: "40%",
-                        fontWeight: "bold",
-                        borderRadius: "12px",
-                      }}
-                      onClick={() => {
-                        setIsEditMode(false);
-                        setEditId(null);
-                        resetForm(); // Clear the form function, reset all fields
-                      }}
-                    >
-                      Cancel
-                    </Button> */}
                     <Button
-                      // variant="outlined"
                       color="warning"
                       sx={{
                         mt: 1,
@@ -1577,34 +1569,37 @@ const hasPermission = (moduleName, submoduleName, actionName) => {
                         fontWeight: "600",
                         fontFamily: "Roboto",
                         borderRadius: "12px",
-                        mx: "auto", // centers the button horizontally
+                        mx: "auto",
                         display: "block",
                       }}
-                      onClick={() => handleUpdate(editId)} // Pass the editId here
+                      onClick={() => handleUpdate(editId)}
                     >
                       Update
                     </Button>
                   </Box>
                 ) : (
-                  <Button
-                    // variant="outlined"
-                    color="warning"
-                    sx={{
-                      mt: 2,
-                      width: "40%",
-                      backgroundColor: "rgba(18,166,95, 0.8)",
-                      color: "#fff",
-                      fontWeight: "600",
-                      fontFamily: "Roboto",
-                      textTransform: "none",
-                      borderRadius: "12px",
-                      mx: "auto", // centers the button horizontally
-                      display: "block",
-                    }}
-                    onClick={saveDepartment}
-                  >
-                    Submit
-                  </Button>
+                  <>
+                    {newDepartment && (
+                      <Button
+                        color="warning"
+                        sx={{
+                          mt: 2,
+                          width: "40%",
+                          backgroundColor: "rgba(18,166,95, 0.8)",
+                          color: "#fff",
+                          fontWeight: "600",
+                          fontFamily: "Roboto",
+                          textTransform: "none",
+                          borderRadius: "12px",
+                          mx: "auto",
+                          display: "block",
+                        }}
+                        onClick={saveDepartment}
+                      >
+                        Submit
+                      </Button>
+                    )}
+                  </>
                 )}
               </Grid>
               <Snackbar

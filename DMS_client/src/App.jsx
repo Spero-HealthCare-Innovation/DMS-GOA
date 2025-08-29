@@ -61,7 +61,7 @@ function App() {
                 darkMode={darkMode}
                 toggleDarkMode={() => setDarkMode((prev) => !prev)}
               />
-              {(userGroup === "1" || userGroup === "4") && <Departmentsidebar darkMode={darkMode} />}
+              {(userGroup === "1") && <Departmentsidebar darkMode={darkMode} />}
             </>
           )}
           <div>
