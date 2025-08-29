@@ -532,7 +532,7 @@ class get_alldriverparameters(APIView):
         pcr_rep = PcrReport.objects.get(incident_id = inc_id, amb_no__user = user_id)
         assign_inc_objs_arr = []
         assign_inc_obj = {
-            "id": pcr_rep.incident_id.inc_id,
+            "id": str(pcr_rep.incident_id.inc_id),
             "acknowledge": pcr_rep.acknowledge_time,
             "startFromBaseLocation": pcr_rep.start_from_base_time,
             "atScene": pcr_rep.at_scene_time,
@@ -721,7 +721,7 @@ class closure_Post_api_app(APIView):
             vehicle_no=request.user
             print(vehicle_no)
             vehicl_dtls = Vehical.objects.get(veh_number=vehicle_no)
-            inc_dtl = DMS_Incident.objects.get(incident_id=inccc)
+            inc_dtl = DMS_Incident.objects.get(inc_id=inccc)
             dpt_dtl = vehicl_dtls.responder
             ex_cl_dtl = DMS_incident_closure.objects.filter(incident_id=inc_dtl, responder=dpt_dtl,vehicle_no=vehicl_dtls, closure_is_deleted=False)
             if ex_cl_dtl.exists():
