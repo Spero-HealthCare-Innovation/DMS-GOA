@@ -626,7 +626,7 @@ class get_assign_inc_calls(APIView):
                 "incidentCallsStatus": "In-progress",
                 "clikable": "true",
                 "progress": "true",
-                "completed": "false",
+                "completed": veh.jobclosure_status,
                 "onsceneCare": None
             }
             assign_inc_objs_arr.append(assign_inc_obj)
