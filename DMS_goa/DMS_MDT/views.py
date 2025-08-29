@@ -128,35 +128,107 @@ class VehicleLogin(APIView):
     
 class VehicleLogout(APIView):
     def post(self, request):
-        refresh_token = request.data.get('refresh_token')
-        veh_number = request.data.get('veh_number')
-        user_obj = DMS_User.objects.filter(user_username=veh_number).last()
-        if not user_obj:
-            return Response({'status': 'User does not exist'}, status=404)
-        if not user_obj.user_is_login:
-            return Response({'status': 'User already logged out'}, status=200)
         try:
-            token_obj = RefreshToken(refresh_token)
-            token_obj.blacklist()
-        except TokenError:
-            return Response({'status': 'Invalid or expired refresh token'}, status=400)
-        vehicle_obj = Vehical.objects.filter(veh_number=veh_number).last()
-        if not vehicle_obj:
-            return Response({'status': 'Vehicle not found'}, status=404)
-        active_vehicle_sessions = vehicle_login_info.objects.filter(veh_id=vehicle_obj.veh_id, status=1)
-        for session in active_vehicle_sessions:
-            session.clock_out_in_status = 2
-            session.veh_logout_time = timezone.now()
-            session.save()
-        active_employee_sessions = employee_clockin_info.objects.filter(veh_id=vehicle_obj.veh_id, clock_out_in_status=1, status=1)
-        for emp in active_employee_sessions:
-            emp.clock_out_in_status = 2
-            emp.emp_clockout_time = timezone.now()
-            emp.save()
-        user_obj.user_is_login = False
-        user_obj.save()
+            refresh_token = request.data.get('refresh_token')
+            veh_number = request.data.get('veh_number')
+            logout_odometer = request.data.get('logoutOdometer')
+            logout_question = request.data.get('logoutquestion')
+            uploaded_image = request.FILES.get('uploadedimage')
+            type_val = request.data.get('type')
 
-        return Response({'status': 'User logged out successfully'}, status=200)
+            if not all([refresh_token, veh_number]):
+                return Response({
+                    "data": {
+                        "code": 1,
+                        "message": "Not Logout"
+                    },
+                    "error": None
+                }, status=status.HTTP_200_OK)
+
+            user_obj = DMS_User.objects.filter(user_username=veh_number).last()
+            if not user_obj:
+                return Response({
+                    "data": {
+                        "code": 1,
+                        "message": "User does not exist"
+                    },
+                    "error": None
+                }, status=status.HTTP_200_OK)
+
+            if not user_obj.user_is_login:
+                return Response({
+                    "data": {
+                        "code": 1,
+                        "message": "User already logged out"
+                    },
+                    "error": None
+                }, status=status.HTTP_200_OK)
+
+            try:
+                token_obj = RefreshToken(refresh_token)
+                token_obj.blacklist()
+            except TokenError:
+                return Response({
+                    "data": {
+                        "code": 1,
+                        "message": "Invalid or expired refresh token"
+                    },
+                    "error": None
+                }, status=status.HTTP_200_OK)
+
+            vehicle_obj = Vehical.objects.filter(veh_number=veh_number).last()
+            if not vehicle_obj:
+                return Response({
+                    "data": {
+                        "code": 1,
+                        "message": "Vehicle not found"
+                    },
+                    "error": None
+                }, status=status.HTTP_200_OK)
+
+            # Update active vehicle sessions
+            active_vehicle_sessions = vehicle_login_info.objects.filter(veh_id=vehicle_obj.veh_id, status=1)
+            for session in active_vehicle_sessions:
+                session.clock_out_in_status = 2
+                session.veh_logout_time = timezone.now()
+                if logout_odometer:
+                    session.logout_odometer = logout_odometer
+                if logout_question:
+                    session.logout_question = logout_question
+                if uploaded_image:
+                    session.logout_image = uploaded_image
+                session.save()
+
+            # Update employee sessions
+            active_employee_sessions = employee_clockin_info.objects.filter(
+                veh_id=vehicle_obj.veh_id, 
+                clock_out_in_status=1, 
+                status=1
+            )
+            for emp in active_employee_sessions:
+                emp.clock_out_in_status = 2
+                emp.emp_clockout_time = timezone.now()
+                emp.save()
+
+            user_obj.user_is_login = False
+            user_obj.save()
+
+            return Response({
+                "data": {
+                    "code": 1,
+                    "message": "Successfully Logout"
+                },
+                "error": None
+            }, status=status.HTTP_200_OK)
+
+        except Exception as e:
+            return Response({
+                "data": {
+                    "code": 1,
+                    "message": "Not Logout"
+                },
+                "error": None
+            }, status=status.HTTP_200_OK)
         
 class employee_list(APIView):
     def get(self,request):
@@ -343,7 +415,7 @@ class Vehical_department_wise(APIView):
 def update_pcr_report(request):
     data = request.data
 
-    inc_id = data.get("inc_id")
+    inc_id = int(data.get("inc_id"))
     status_code = int(data.get("status"))
     ambulance_no = data.get("ambulance_no")
     lat = data.get("lat")
@@ -353,6 +425,8 @@ def update_pcr_report(request):
     at_scene_photo = request.FILES.get("at_scene_photo")
     from_scene_photo = request.FILES.get("from_scene_photo")
 
+    inc_id = DMS_Incident.objects.filter(inc_id=inc_id).last()
+    ambulance_no = Vehical.objects.filter(veh_number=ambulance_no).last()
     try:
         # ✅ record get or create (based on incident id)
         report, created = PcrReport.objects.get_or_create(
@@ -433,7 +507,7 @@ class get_alldriverparameters(APIView):
         pcr_rep = PcrReport.objects.get(incident_id = inc_id, amb_no__user = user_id)
         assign_inc_objs_arr = []
         assign_inc_obj = {
-            "id": pcr_rep.incident_id.inc_id,
+            "id": str(pcr_rep.incident_id.inc_id),
             "acknowledge": pcr_rep.acknowledge_time,
             "startFromBaseLocation": pcr_rep.start_from_base_time,
             "atScene": pcr_rep.at_scene_time,
@@ -445,7 +519,8 @@ class get_alldriverparameters(APIView):
         return Response({"data": assign_inc_objs_arr, "error": None}, status=status.HTTP_200_OK)
 
 class get_assign_inc_calls(APIView):
-    def get(self, request):
+    # def get(self, request):
+    def post(self, request):
         try:
             user_id = request.user.user_id
         except AttributeError:
@@ -456,14 +531,14 @@ class get_assign_inc_calls(APIView):
         assign_inc_objs_arr = []
         for veh in inc_veh:
             assign_inc_obj = {
-                "incidentId": veh.incident_id.inc_id,
+                "incidentId": str(veh.incident_id.inc_id),
                 "incidentDate": veh.incident_id.inc_added_date,
                 "incidentTime": veh.incident_id.inc_added_date,
                 "callType": veh.incident_id.disaster_type.disaster_name,
                 "lat": veh.incident_id.latitude,
                 "long": veh.incident_id.longitude,
                 "incidentAddress": veh.incident_id.location,
-                "incidentStatus": veh.pcr_status,
+                "incidentStatus": str(veh.pcr_status),
                 "currentStatus": {
                     "code": 5,
                     "outOfSych": "false",
@@ -490,40 +565,44 @@ class get_assign_completed_inc_calls(APIView):
         
         print("user id in assign inc call", user_id)
         inc_veh = incident_vehicles.objects.filter(veh_id__user = user_id, status=1, jobclosure_status=1).order_by("-added_date")
+        print("incident vehicles:", inc_veh)
         assign_inc_objs_arr = []
         for veh in inc_veh:
             incident_datetime = veh.incident_id.inc_added_date  # already a datetime object
             incidentDate = incident_datetime.strftime("%Y-%m-%d")   # e.g. "2025-08-25"
             incidentTime = incident_datetime.strftime("%H:%M:%S")   # e.g. "12:13:20"
             assign_inc_obj = {
-                "incidentId": veh.incident_id.inc_id,
+                "incidentId": str(veh.incident_id.inc_id),
                 "incidentDate": incidentDate,
                 "incidentTime": incidentTime,
-                "callType": None,
+                "callType": "Emergency",
                 "CallerRelationName": "",
-                "incidentCallsStatus": "Completed"
+                "incidentCallsStatus": "Completed",
+                "callerName":"Vinayak"
             } 
             assign_inc_objs_arr.append(assign_inc_obj)
         return Response({"data": assign_inc_objs_arr, "error": None}, status=status.HTTP_200_OK)
 
 class get_assign_inc_calls(APIView):
-    def get(self, request):
+    def post(self, request):
         user_id = request.user.user_id
         print("user id in assign inc call", user_id)
         inc_veh = incident_vehicles.objects.filter(veh_id__user = user_id, status=1, jobclosure_status=2).order_by("-added_date")
+        print("incident vehicles:", inc_veh)
         assign_inc_objs_arr = []
         for veh in inc_veh:
             assign_inc_obj = {
-                "incidentId": veh.incident_id.inc_id,
+                "incidentId": str(veh.incident_id.inc_id),
                 "incidentDate": veh.incident_id.inc_added_date,
                 "incidentTime": veh.incident_id.inc_added_date,
                 "callType": veh.incident_id.disaster_type.disaster_name,
+                "callerName":"vishal",
                 "lat": veh.incident_id.latitude,
                 "long": veh.incident_id.longitude,
                 "incidentAddress": veh.incident_id.location,
-                "incidentStatus": veh.pcr_status,
+                "incidentStatus": str(veh.pcr_status),
                 "currentStatus": {
-                    "code": 5,
+                    "code": 0,
                     "outOfSych": "false",
                     "message": "Already back to base"
                 },
@@ -617,7 +696,7 @@ class closure_Post_api_app(APIView):
             vehicle_no=request.user
             print(vehicle_no)
             vehicl_dtls = Vehical.objects.get(veh_number=vehicle_no)
-            inc_dtl = DMS_Incident.objects.get(incident_id=inccc)
+            inc_dtl = DMS_Incident.objects.get(inc_id=inccc)
             dpt_dtl = vehicl_dtls.responder
             ex_cl_dtl = DMS_incident_closure.objects.filter(incident_id=inc_dtl, responder=dpt_dtl,vehicle_no=vehicl_dtls, closure_is_deleted=False)
             if ex_cl_dtl.exists():

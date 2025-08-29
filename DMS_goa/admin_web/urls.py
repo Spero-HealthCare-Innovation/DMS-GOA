@@ -151,4 +151,6 @@ urlpatterns = [
     path('post_fetch-rss/', FetchRssAPIView.as_view(), name='fetch-rss'),
     path('post_fetch-reddit/', FetchRedditAPIView.as_view(), name='fetch-reddit'),
     #=================================  Varsha =====================================================
+
+    path('call_type/', Call_TypeAPIView.as_view(), name='call_type'),
 ]

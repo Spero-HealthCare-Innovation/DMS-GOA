@@ -167,6 +167,7 @@ class DMS_Disaster_Type(models.Model):
     disaster_added_by = models.CharField(max_length=255, null=True, blank=True)
     disaster_modified_by = models.CharField(max_length=255, null=True, blank=True)
     disaster_modified_date = models.DateTimeField(null=True, blank=True)
+    disaster_parent = models.ForeignKey("ParentComplaint", on_delete=models.CASCADE, null=True, blank=True)
     
 
 
@@ -944,6 +945,30 @@ class DMS_Disaster_Severity2(models.Model):
     unit = models.CharField(max_length=255,null=True,blank=True)
     is_deleted = models.BooleanField(default=False)
     added_date = models.DateTimeField(auto_now=True,null=True, blank=True)
+    added_by = models.CharField(max_length=255, null=True, blank=True)
+    modified_by = models.CharField(max_length=255, null=True, blank=True)
+    modified_date = models.DateTimeField(null=True, blank=True)
+
+
+
+
+
+class CallType(models.Model):
+    call_type_id = models.AutoField(primary_key=True)
+    call_type_name = models.CharField(max_length=100, null=True, blank=True)
+    call_type_code = models.CharField(max_length=50, null=True, blank=True)
+    call_type_is_deleted = models.BooleanField(default=False)
+    added_date = models.DateTimeField(auto_now=True, null=True, blank=True)
+    added_by = models.CharField(max_length=255, null=True, blank=True)
+    modified_by = models.CharField(max_length=255, null=True, blank=True)
+    modified_date = models.DateTimeField(null=True, blank=True)
+ 
+class ParentComplaint(models.Model):
+    pc_id = models.AutoField(primary_key=True)
+    pc_type = models.CharField(max_length=100, null=True, blank=True)
+    pc_name = models.CharField(max_length=100, null=True, blank=True)
+    parent_is_deleted = models.BooleanField(default=False)
+    added_date = models.DateTimeField(auto_now=True, null=True, blank=True)
     added_by = models.CharField(max_length=255, null=True, blank=True)
     modified_by = models.CharField(max_length=255, null=True, blank=True)
     modified_date = models.DateTimeField(null=True, blank=True)
