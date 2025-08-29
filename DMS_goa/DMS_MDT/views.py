@@ -578,6 +578,35 @@ class get_assign_inc_calls(APIView):
         return Response({"data": assign_inc_objs_arr, "error": None}, status=status.HTTP_200_OK)
     
 
+# class get_assign_completed_inc_calls(APIView):
+#     def post(self, request):
+#         try:
+#             user_id = request.user.user_id
+#         except AttributeError:
+#             return Response(
+#                 {"data": [],"error": None},status=status.HTTP_401_UNAUTHORIZED)
+        
+#         print("user id in assign inc call", user_id)
+#         inc_veh = incident_vehicles.objects.filter(veh_id__user = user_id, status=1, jobclosure_status=1).order_by("-added_date")
+#         print("incident vehicles:", inc_veh)
+#         assign_inc_objs_arr = []
+#         for veh in inc_veh:
+#             incident_datetime = veh.incident_id.inc_added_date  # already a datetime object
+#             incidentDate = incident_datetime.strftime("%Y-%m-%d")   # e.g. "2025-08-25"
+#             incidentTime = incident_datetime.strftime("%H:%M:%S")   # e.g. "12:13:20"
+#             assign_inc_obj = {
+#                 "incidentId": str(veh.incident_id.inc_id),
+#                 "incidentDate": incidentDate,
+#                 "incidentTime": incidentTime,
+#                 "callType": "Emergency",
+#                 "CallerRelationName": "",
+#                 "incidentCallsStatus": "Completed",
+#                 "callerName":"Vinayak"
+#             } 
+#             assign_inc_objs_arr.append(assign_inc_obj)
+#         return Response({"data": assign_inc_objs_arr, "error": None}, status=status.HTTP_200_OK)
+
+
 class get_assign_completed_inc_calls(APIView):
     def post(self, request):
         user_id = request.user.user_id
@@ -741,7 +770,7 @@ class closure_Post_api_app(APIView):
             )
             inc_vh = incident_vehicles.objects.filter(incident_id=inc_dtl, veh_id=vehicl_dtls, status=1)
             inc_vh.update(jobclosure_status=1)
-            invh_dtl = incident_vehicles.objects.filter(veh_id=vehicl_dtls,jobclosure_status=0)
+            invh_dtl = incident_vehicles.objects.filter(veh_id=vehicl_dtls,jobclosure_status=2)
             if invh_dtl.exists() and invh_dtl.exclude(jobclosure_status=1).exists():
                 vehicl_dtls.update(vehical_status=1)
             # return Response({"msg": f"Closure for {dpt_dtl.responder_name} - {vehicl_dtls.veh_number} is done",}, status=status.HTTP_201_CREATED)
