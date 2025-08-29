@@ -612,11 +612,13 @@ class get_assign_completed_inc_calls(APIView):
 class get_assign_inc_calls(APIView):
     def post(self, request):
         user_id = request.user.user_id
-        print("user id in assign inc call", user_id)
+        # print("user id in assign inc call", user_id)
         inc_veh = incident_vehicles.objects.filter(veh_id__user = user_id, status=1, jobclosure_status=2).order_by("-added_date")
-        print("incident vehicles:", inc_veh)
+        # print("incident vehicles:", inc_veh)
         assign_inc_objs_arr = []
         for veh in inc_veh:
+            pcr_exists = PcrReport.objects.filter(incident_id=veh.incident_id).last()
+            print(pcr_exists)
             assign_inc_obj = {
                 "incidentId": str(veh.incident_id.inc_id),
                 "incidentDate": veh.incident_id.inc_added_date,
@@ -628,7 +630,7 @@ class get_assign_inc_calls(APIView):
                 "incidentAddress": veh.incident_id.location,
                 "incidentStatus": str(veh.pcr_status),
                 "currentStatus": {
-                    "code": 0,
+                    "code": pcr_exists.status if pcr_exists else 1,
                     "outOfSych": "false",
                     "message": "Already back to base"
                 },
@@ -785,3 +787,51 @@ class Userlistambvise(APIView):
             return Response({"data": data,"error": None}, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({"data": [],"error": {"code": 1,"message": "Vehicle not found"}, "ex_error":str(e)}, status=status.HTTP_200_OK)  
+
+
+
+
+
+
+
+
+class Clockinout(APIView):
+    def post(self, request):
+        try:
+            vehical_no=request.data.get("vehicleNumber")
+            emp_id=request.data.get("userId")
+            clock_time=request.data.get("clockTime")
+            clock_out_in_status=request.data.get("clock_out_in_status")
+            emp_image = request.FILES.get('photo')
+            lat=request.data.get("lat")
+            lng=request.data.get("lng")
+            
+            vh_dtl = Vehical.objects.get(veh_number=vehical_no)
+            if clock_out_in_status  == 'in' :
+                dtd = employee_clockin_info.objects.create(
+                    emp_clockin_time=clock_time or None,
+                    emp_clockout_time= None,
+                    emp_id=DMS_Employee.objects.get(emp_id=emp_id),
+                    veh_id=vh_dtl,
+                    clock_out_in_status=1 if clock_out_in_status == 'in' else 2,
+                    status=1,
+                    latitude=lat if lat else None,
+                    longitude=lng if lng else None,
+                    emp_image=emp_image if emp_image else None,
+                )
+                return Response({"data": {"code": 1,"message": "Clock-in successful"},"error": None}, status=status.HTTP_201_CREATED)
+            else:
+                clin_dt = employee_clockin_info.objects.filter(emp_id=emp_id,veh_id=vh_dtl,clock_out_in_status=1,status=1).last()
+                if clin_dt:
+                    clin_dt.emp_clockout_time=clock_time if clock_time else None
+                    clin_dt.clock_out_in_status=2 if clock_out_in_status == 'out' else 1
+                    clin_dt.latitude=lat if lat else None
+                    clin_dt.longitude=lng if lng else None
+                    clin_dt.save()
+                    return Response({"data": {"code": 1,"message": "Clock-out successful"},"error": None}, status=status.HTTP_201_CREATED)
+                else:
+                    return Response({"data": None,"error": {"code": 1,"message": "Employee not found or already clocked out"}}, status=status.HTTP_200_OK)  
+        except Exception as e:
+            return Response({"data": None,"error": {"code": 1,"message": "Clock in/out Not Successfully"},"ex_error": str(e)}, status=status.HTTP_200_OK)
+			
+			

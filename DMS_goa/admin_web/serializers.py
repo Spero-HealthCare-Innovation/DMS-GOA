@@ -729,6 +729,11 @@ class action_sub_Serializer(serializers.ModelSerializer):
 
 
 class CallTypeSerializer(serializers.ModelSerializer):
-    class Meta:
+    class Meta: 
         model = CallType
-        fields = '__all__'
+        fields = '__all__' 
+
+class ParentComplaintSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ParentComplaint
+        fields= '__all__'
