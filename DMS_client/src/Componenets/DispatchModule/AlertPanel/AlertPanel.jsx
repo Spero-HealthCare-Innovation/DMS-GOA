@@ -530,8 +530,8 @@ const AlertPanel = ({ darkMode }) => {
                                                     </Typography>
                                                 </StyledCardContent>
                                                 <StyledCardContent style={{ flex: 1 }}>
-                                                    {alertPanel ?
-                                                        (
+                                                    {/* {alertPanel ?
+                                                        ( */}
                                                             <Button
                                                                 onClick={(e) => {
                                                                     e.stopPropagation();
@@ -553,12 +553,12 @@ const AlertPanel = ({ darkMode }) => {
                                                                     return label.charAt(0).toUpperCase() + label.slice(1).toLowerCase();
                                                                 })()}
                                                             </Button>
-                                                        )
+                                                        {/* )
                                                         :
                                                         (
                                                             <>-</>
                                                         )
-                                                    }
+                                                    } */}
                                                 </StyledCardContent>
                                             </EnquiryCardBody>
                                         ))
