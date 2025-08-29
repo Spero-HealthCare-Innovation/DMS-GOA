@@ -167,6 +167,7 @@ class DMS_Disaster_Type(models.Model):
     disaster_added_by = models.CharField(max_length=255, null=True, blank=True)
     disaster_modified_by = models.CharField(max_length=255, null=True, blank=True)
     disaster_modified_date = models.DateTimeField(null=True, blank=True)
+    disaster_parent = models.ForeignKey("ParentComplaint", on_delete=models.CASCADE, null=True, blank=True)
     
 
 
