@@ -457,7 +457,7 @@ class get_assign_inc_calls(APIView):
         assign_inc_objs_arr = []
         for veh in inc_veh:
             assign_inc_obj = {
-                "incidentId": veh.incident_id.inc_id,
+                "incidentId": str(veh.incident_id.inc_id),
                 "incidentDate": veh.incident_id.inc_added_date,
                 "incidentTime": veh.incident_id.inc_added_date,
                 "callType": veh.incident_id.disaster_type.disaster_name,
@@ -515,7 +515,7 @@ class get_assign_inc_calls(APIView):
         assign_inc_objs_arr = []
         for veh in inc_veh:
             assign_inc_obj = {
-                "incidentId": veh.incident_id.inc_id,
+                "incidentId": str(veh.incident_id.inc_id),
                 "incidentDate": veh.incident_id.inc_added_date,
                 "incidentTime": veh.incident_id.inc_added_date,
                 "callType": veh.incident_id.disaster_type.disaster_name,
