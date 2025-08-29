@@ -530,7 +530,7 @@ class get_assign_inc_calls(APIView):
                 "lat": veh.incident_id.latitude,
                 "long": veh.incident_id.longitude,
                 "incidentAddress": veh.incident_id.location,
-                "incidentStatus": veh.pcr_status,
+                "incidentStatus": str(veh.pcr_status),
                 "currentStatus": {
                     "code": 5,
                     "outOfSych": "false",
@@ -580,12 +580,13 @@ class get_assign_inc_calls(APIView):
                 "incidentDate": veh.incident_id.inc_added_date,
                 "incidentTime": veh.incident_id.inc_added_date,
                 "callType": veh.incident_id.disaster_type.disaster_name,
+                "callerName":"vishal",
                 "lat": veh.incident_id.latitude,
                 "long": veh.incident_id.longitude,
                 "incidentAddress": veh.incident_id.location,
-                "incidentStatus": veh.pcr_status,
+                "incidentStatus": str(veh.pcr_status),
                 "currentStatus": {
-                    "code": 5,
+                    "code": 0,
                     "outOfSych": "false",
                     "message": "Already back to base"
                 },
