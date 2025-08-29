@@ -71,8 +71,8 @@ const Incident = ({ darkMode }) => {
 
 
   const handleSaveFromModal = (data) => {
-  setAssignedMap(data.assignedVehicles); // ✅ parent update
-};
+    setAssignedMap(data.assignedVehicles); // ✅ parent update
+  };
 
 
 
@@ -350,7 +350,7 @@ const Incident = ({ darkMode }) => {
     }
 
 
-      const vehicleIds = Object.keys(assignedMap).filter((key) => assignedMap[key]);
+    const vehicleIds = Object.keys(assignedMap).filter((key) => assignedMap[key]);
 
     const payload = {
       inc_type: selectedEmergencyValue,
@@ -375,7 +375,7 @@ const Incident = ({ darkMode }) => {
       tahsil: selectedTehsilId,
       ward: selectedWard,
       ward_officer: selectedWardOfficer,
-         vehicle: vehicleIds,
+      vehicle: vehicleIds,
     };
 
     try {
@@ -580,26 +580,6 @@ const Incident = ({ darkMode }) => {
                   </span>
                 </Box>
               </Typography>
-              {/* <Typography
-                                variant="h6"
-                                sx={{
-                                    fontSize: '15px',
-                                    borderRadius: '2em',
-                                    p: 1.5,
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    gap: 0.3,
-                                    width: 'fit-content',
-                                }}
-                                gutterBottom
-                            >
-                                <CalendarTodayIcon sx={{ fontSize: 18, color: '#009688' }} />
-                                {formattedDate}
-                                <AccessTimeIcon sx={{ fontSize: 18, ml: 1.3, color: '#009688' }} />
-                                {formattedTime}
-                                <TimerIcon  sx={{ fontSize: 18, ml: 1.3, color: '#009688' }} />
-                                {formattedTime}
-                            </Typography> */}
             </Box>
 
             <Grid container spacing={1.6}>
@@ -628,7 +608,7 @@ const Incident = ({ darkMode }) => {
                       select
                       fullWidth
                       size="small"
-                      label="Disaster Type"
+                      label="Select Call Type"
                       variant="outlined"
                       sx={inputStyle}
                       value={selectedDisaster}
@@ -637,7 +617,7 @@ const Incident = ({ darkMode }) => {
                       helperText={errors.disaster_type}
                     >
                       <MenuItem disabled value="">
-                        Select Disaster Type
+                        Select Call Type
                       </MenuItem>
                       {disaster.map((item) => (
                         <MenuItem
@@ -650,7 +630,61 @@ const Incident = ({ darkMode }) => {
                     </TextField>
                   </Grid>
 
-                  <Grid item xs={12} sm={6}>
+                  <Grid item xs={12} sm={4}>
+                    <TextField
+                      select
+                      fullWidth
+                      size="small"
+                      label="Chief Complaint"
+                      variant="outlined"
+                      sx={inputStyle}
+                      value={selectedDisaster}
+                      onChange={(e) => setSelectedDisaster(e.target.value)}
+                      error={!!errors.disaster_type}
+                      helperText={errors.disaster_type}
+                    >
+                      <MenuItem disabled value="">
+                        Select Call Type
+                      </MenuItem>
+                      {disaster.map((item) => (
+                        <MenuItem
+                          key={item.disaster_id}
+                          value={item.disaster_id}
+                        >
+                          {item.disaster_name}
+                        </MenuItem>
+                      ))}
+                    </TextField>
+                  </Grid>
+
+                  <Grid item xs={12} sm={4}>
+                    <TextField
+                      select
+                      fullWidth
+                      size="small"
+                      label="Sub Chief Compalint"
+                      variant="outlined"
+                      sx={inputStyle}
+                      value={selectedDisaster}
+                      onChange={(e) => setSelectedDisaster(e.target.value)}
+                      error={!!errors.disaster_type}
+                      helperText={errors.disaster_type}
+                    >
+                      <MenuItem disabled value="">
+                        Select Call Type
+                      </MenuItem>
+                      {disaster.map((item) => (
+                        <MenuItem
+                          key={item.disaster_id}
+                          value={item.disaster_id}
+                        >
+                          {item.disaster_name}
+                        </MenuItem>
+                      ))}
+                    </TextField>
+                  </Grid>
+
+                  <Grid item xs={12} sm={4}>
                     <TextField
                       select
                       fullWidth
@@ -738,16 +772,16 @@ const Incident = ({ darkMode }) => {
                     id="district-select"
                     value={
                       districtName &&
-                      districts.find(
-                        (d) =>
-                          d.dis_name.toLowerCase() ===
-                          districtName.toLowerCase()
-                      )
+                        districts.find(
+                          (d) =>
+                            d.dis_name.toLowerCase() ===
+                            districtName.toLowerCase()
+                        )
                         ? districts.find(
-                            (d) =>
-                              d.dis_name.toLowerCase() ===
-                              districtName.toLowerCase()
-                          ).dis_id
+                          (d) =>
+                            d.dis_name.toLowerCase() ===
+                            districtName.toLowerCase()
+                        ).dis_id
                         : selectedDistrictId || ""
                     }
                     label="District"
@@ -762,7 +796,7 @@ const Incident = ({ darkMode }) => {
                 </FormControl>
               </Grid>
 
-              <Grid item xs={12} sm={6}>
+              <Grid item xs={12} sm={4}>
                 <TextField
                   fullWidth
                   size="small"
@@ -771,15 +805,15 @@ const Incident = ({ darkMode }) => {
                   variant="outlined"
                   value={
                     tehsilName &&
-                    Tehsils.find(
-                      (t) =>
-                        t.tah_name.toLowerCase() === tehsilName.toLowerCase()
-                    )
+                      Tehsils.find(
+                        (t) =>
+                          t.tah_name.toLowerCase() === tehsilName.toLowerCase()
+                      )
                       ? Tehsils.find(
-                          (t) =>
-                            t.tah_name.toLowerCase() ===
-                            tehsilName.toLowerCase()
-                        ).tah_id
+                        (t) =>
+                          t.tah_name.toLowerCase() ===
+                          tehsilName.toLowerCase()
+                      ).tah_id
                       : selectedTehsilId || ""
                   }
                   onChange={(e) => setSelectedTehsilId(e.target.value)}
@@ -793,7 +827,7 @@ const Incident = ({ darkMode }) => {
                 </TextField>
               </Grid>
 
-              <Grid item xs={12} sm={6}>
+              <Grid item xs={12} sm={4}>
                 <TextField
                   fullWidth
                   size="small"
@@ -840,7 +874,7 @@ const Incident = ({ darkMode }) => {
                 </TextField>
               </Grid>
 
-              <Grid item xs={12} sm={6}>
+              <Grid item xs={12} sm={4}>
                 <FormControl fullWidth size="small">
                   <InputLabel>Ward Officer</InputLabel>
                   <Select
@@ -980,10 +1014,10 @@ const Incident = ({ darkMode }) => {
                       {alertType === 1
                         ? "High"
                         : alertType === 2
-                        ? "Medium"
-                        : alertType === 2
-                        ? "Low"
-                        : "-"}
+                          ? "Medium"
+                          : alertType === 2
+                            ? "Low"
+                            : "-"}
                     </Typography>
                   </Box>
                   <Box>
@@ -1170,7 +1204,7 @@ const Incident = ({ darkMode }) => {
                       disabled={sopId.length === 0} // sirf tab enable hoga jab koi checkbox selected ho
                       sx={{ mt: 2 }}
                     >
-                      Assign Ambulance 
+                      Assign Ambulance
                     </Button>
                   </Box>
                 </Grid>
@@ -1231,16 +1265,16 @@ const Incident = ({ darkMode }) => {
       {openModal && (
         <ResponderModal
           open={openModal}
-          responderList={selectedResponders} 
+          responderList={selectedResponders}
           responder={activeResponder}
           lattitude={lattitude}
           longitude={longitude}
-          assignedMap={assignedMap} 
+          assignedMap={assignedMap}
           onClose={() => setOpenModal(false)}
           onSave={(data) => {
-      console.log("Saved Data:", data);
-      setAssignedMap(data.assignedVehicles); // ✅ persist assignments
-      setOpenModal(false);
+            console.log("Saved Data:", data);
+            setAssignedMap(data.assignedVehicles); // ✅ persist assignments
+            setOpenModal(false);
           }}
         />
       )}
