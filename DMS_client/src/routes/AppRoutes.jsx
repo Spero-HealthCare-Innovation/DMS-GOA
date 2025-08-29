@@ -8,6 +8,7 @@ import RegisterResponder from "../Componenets/SuperAdmin/Responder/RegisterRespo
 import ProtectedLoginRoute from "../Componenets/Login/ProtectedLoginRoute";
 import IncidentReport from "../Componenets/SuperAdmin/Incident/IncidentReport";
 import Permission from "../Componenets/SuperAdmin/System/Permission/Permission";
+import Dashboard from "../Componenets/SuperAdmin/System/Dashboard/Dashboard";
 const Login = lazy(() => import("../Componenets/Login/Login"));
 const Sop = lazy(() => import("../Componenets/DispatchModule/SOP/Sop"));
 const AlertPanel = lazy(() => import("../Componenets/DispatchModule/AlertPanel/AlertPanel"));
@@ -171,7 +172,14 @@ const AppRoutes = ({ darkMode, setIsLoggedIn }) => {
             </PrivateRoute>
           }
         />
-
+         <Route
+          path="/Dashboard"
+          element={
+            <PrivateRoute>
+              <Dashboard darkMode={darkMode} />
+            </PrivateRoute>
+          }
+        />
         <Route path="*" element={<Unauthorized />} />
       </Routes>
     </Suspense>
