@@ -153,4 +153,7 @@ urlpatterns = [
     #=================================  Varsha =====================================================
 
     path('call_type/', Call_TypeAPIView.as_view(), name='call_type'),
+    # path('parent_complaint_get/', parentcomplaint.as_view(), name='parent_complaint'),
+    path('parent_complaint_get_calltypewise/<int:call_type_id>/', ParentComplaintByCallType.as_view(), name='parent_complaint')
 ]
+

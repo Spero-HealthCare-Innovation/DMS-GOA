@@ -2058,3 +2058,19 @@ class Call_TypeAPIView(APIView):
         call_types = CallType.objects.filter(call_type_is_deleted=False)
         serializer = CallTypeSerializer(call_types, many=True)
         return Response(serializer.data)
+
+# class parentcomplaint(APIView):
+#     def get(self, request):
+#         complaint = ParentComplaint.objects.filter(parent_is_deleted=False)
+#         serializer = ParentComplaintSerializer(complaint, many=True)
+#         return Response(serializer.data)
+
+class ParentComplaintByCallType(APIView):
+    def get(self, request, call_type_id):
+        complaints = ParentComplaint.objects.filter(call_type_id=call_type_id, parent_is_deleted=False)
+        
+        if complaints.exists():
+            serializer = ParentComplaintSerializer(complaints, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        else:
+            return Response({"message": "No complaints found for this call_type"}, status=status.HTTP_404_NOT_FOUND)
