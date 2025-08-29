@@ -74,12 +74,6 @@ const Incident = ({ darkMode }) => {
     setAssignedMap(data.assignedVehicles); // ✅ parent update
   };
 
-
-
-
-
-
-
   const {
     districts,
     fetchDistrictsByState,
@@ -92,6 +86,7 @@ const Incident = ({ darkMode }) => {
     setSelectedTehsilId,
     setSelectedCityId,
     fetchTehsilsByDistrict,
+    setQuery
   } = useAuth();
 
   useEffect(() => {
@@ -322,13 +317,10 @@ const Incident = ({ darkMode }) => {
 
     if (!selectedEmergencyValue)
       newErrors.inc_type = "Incident Type is required";
-    // if (selectedEmergencyValue === 1 && !selectedDisaster) newErrors.disaster_type = "Disaster Type is required";
-    // if (selectedEmergencyValue === 1 && !alertType) newErrors.alert_type = "Alert Type is required";
     if (!callerNumber) newErrors.caller_no = "Caller Number is required";
     if (!callerName) newErrors.caller_name = "Caller Name is required";
     if (!query && !popupText) newErrors.location = "Location is required";
     if (!summaryId) newErrors.summary = "Summary is required";
-    // Only validate these if selectedEmergencyValue === 1 (Emergency)
     if (selectedEmergencyValue === 1) {
       if (!selectedDisaster)
         newErrors.disaster_type = "Disaster Type is required";
@@ -405,6 +397,7 @@ const Incident = ({ darkMode }) => {
         setSelectedWardOfficer([]);
         setErrors({});
         setPopupText("");
+        setQuery("");
         setLattitude("");
         setLongitude("");
         setTimeout(() => {
@@ -1298,7 +1291,7 @@ const Incident = ({ darkMode }) => {
           onClose={() => setOpenModal(false)}
           onSave={(data) => {
             console.log("Saved Data:", data);
-            setAssignedMap(data.assignedVehicles); // ✅ persist assignments
+            setAssignedMap(data.assignedVehicles); 
             setOpenModal(false);
           }}
         />
