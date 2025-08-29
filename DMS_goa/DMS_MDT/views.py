@@ -497,12 +497,13 @@ class get_assign_completed_inc_calls(APIView):
             incidentDate = incident_datetime.strftime("%Y-%m-%d")   # e.g. "2025-08-25"
             incidentTime = incident_datetime.strftime("%H:%M:%S")   # e.g. "12:13:20"
             assign_inc_obj = {
-                "incidentId": veh.incident_id.inc_id,
+                "incidentId": str(veh.incident_id.inc_id),
                 "incidentDate": incidentDate,
                 "incidentTime": incidentTime,
-                "callType": None,
+                "callType": "Emergency",
                 "CallerRelationName": "",
-                "incidentCallsStatus": "Completed"
+                "incidentCallsStatus": "Completed",
+                "callerName":"Vinayak"
             } 
             assign_inc_objs_arr.append(assign_inc_obj)
         return Response({"data": assign_inc_objs_arr, "error": None}, status=status.HTTP_200_OK)
