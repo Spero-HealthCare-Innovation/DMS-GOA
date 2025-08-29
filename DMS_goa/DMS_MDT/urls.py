@@ -13,9 +13,9 @@ urlpatterns = [
     path('Vehical_department_wise/',Vehical_department_wise.as_view()),
     path('vehical_base_loc/',get_base_location_vehicle.as_view()),
     path('vehical/',get_vehicle.as_view()),
-    path('Spero_DMS/api/listassignincidentcalls',get_assign_inc_calls.as_view()),
-    path('Spero_DMS/api/compincidentinfo',get_assign_completed_inc_calls.as_view()),
-    path('Spero_DMS/api/alldriverparameters',get_alldriverparameters.as_view()),
+    path('listassignincidentcalls',get_assign_inc_calls.as_view()),
+    path('compincidentinfo',get_assign_completed_inc_calls.as_view()),
+    path('alldriverparameters',get_alldriverparameters.as_view()),
     path("parametersdetails/", update_pcr_report, name="update_pcr_report"),
     path('closurecomplete/',closure_Post_api_app.as_view(),name='closure_post_api'),
     
