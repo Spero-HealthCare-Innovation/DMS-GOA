@@ -170,13 +170,14 @@ class VehicleLogout(APIView):
                 token_obj = RefreshToken(refresh_token)
                 token_obj.blacklist()
             except TokenError:
-                return Response({
-                    "data": {
-                        "code": 1,
-                        "message": "Invalid or expired refresh token"
-                    },
-                    "error": None
-                }, status=status.HTTP_200_OK)
+                # return Response({
+                #     "data": {
+                #         "code": 1,
+                #         "message": "Invalid or expired refresh token"
+                #     },
+                #     "error": None
+                # }, status=status.HTTP_200_OK)
+                pass
 
             vehicle_obj = Vehical.objects.filter(veh_number=veh_number).last()
             if not vehicle_obj:
