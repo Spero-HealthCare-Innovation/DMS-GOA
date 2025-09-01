@@ -95,11 +95,13 @@ const Incident = ({ darkMode }) => {
     selectedChiefComplaint,
     ChiefComplaint,
     setselectedChiefComplaint,
-    fetchResponderScope
+    fetchResponderScope,
   } = useAuth();
 
-  console.log(selectedChiefComplaint, 'selectedChiefComplaintselectedChiefComplaintselectedChiefComplaint');
-
+  console.log(
+    selectedChiefComplaint,
+    "selectedChiefComplaintselectedChiefComplaintselectedChiefComplaint"
+  );
 
   useEffect(() => {
     fetchDistrictsByState();
@@ -220,12 +222,20 @@ const Incident = ({ darkMode }) => {
     return () => clearInterval(intervalId);
   }, [timerActive]);
 
+  const hours = Math.floor(secondsElapsed / 3600);
   const minutes = Math.floor(secondsElapsed / 60);
   const seconds = secondsElapsed % 60;
-  const formattedTime = `${minutes.toString().padStart(2, "0")}:${seconds
+  const formattedTime = `${hours.toString().padStart(2, "0")}:${minutes
     .toString()
-    .padStart(2, "0")}`;
+    .padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
 
+  // useEffect(() => {
+  //   const interval = setInterval(() => {
+  //     setSecondsElapsed((prev) => prev + 1);
+  //   }, 1000);
+
+  //   return () => clearInterval(interval); // cleanup
+  // }, []);
   // console.log(googleKey, 'googleKey');
   const navigate = useNavigate();
   const token = localStorage.getItem("access_token");
@@ -318,6 +328,16 @@ const Incident = ({ darkMode }) => {
 
   const [errors, setErrors] = useState({});
 
+  // time duration
+  const [hrs = 0, min = 0, sec = 0] = (formattedTime || "00:00:00")
+    .split(":")
+    .map((v) => Number(v) || 0);
+
+  // Pad with leading zeros
+  const pad = (n) => String(n).padStart(2, "0");
+
+  // Final HH:MM:SS string
+  const TimeDuration = `${pad(hrs)}:${pad(min)}:${pad(sec)}`;
   const handleSubmit = async () => {
     const newErrors = {};
 
@@ -347,18 +367,18 @@ const Incident = ({ darkMode }) => {
       return;
     }
 
-  const vehicleIds = Object.keys(assignedMap).filter(
-    (key) => assignedMap[key]
-  );
-if (vehicleIds.length === 0) {
-  newErrors.assignAmbulance = "At least one vehicle must be assigned";
-}
+    const vehicleIds = Object.keys(assignedMap).filter(
+      (key) => assignedMap[key]
+    );
+    if (vehicleIds.length === 0) {
+      newErrors.assignAmbulance = "At least one vehicle must be assigned";
+    }
 
-  // Agar koi bhi error hai to wahi return kar do
-  if (Object.keys(newErrors).length > 0) {
-    setErrors(newErrors);
-    return;
-  }
+    // Agar koi bhi error hai to wahi return kar do
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
+    }
 
     const payload = {
       inc_type: selectedEmergencyValue,
@@ -371,7 +391,7 @@ if (vehicleIds.length === 0) {
       caller_no: callerNumber,
       caller_name: callerName,
       comments: comments,
-      responder_scope: sopId,       
+      responder_scope: sopId,
       inc_added_by: "admin",
       inc_modified_by: "admin",
       caller_added_by: "admin",
@@ -387,7 +407,10 @@ if (vehicleIds.length === 0) {
       call_type: selectedcallType,
       parent_complaint: selectedChiefComplaint,
       call_recieved_from: null,
+      disaster_type: selectedSubchiefComplaint,
+      time: formattedTime,
     };
+    console.log(payload, "payload");
 
     try {
       const response = await fetch(`${port}/admin_web/manual_call_incident/`, {
@@ -653,8 +676,8 @@ if (vehicleIds.length === 0) {
                       value={selectedChiefComplaint}
                       onChange={(e) => {
                         const value = e.target.value;
-                        setselectedChiefComplaint(value);   // update context state
-                        fetchResponderScope(value);         // call API with selected chief complaint
+                        setselectedChiefComplaint(value); // update context state
+                        fetchResponderScope(value); // call API with selected chief complaint
                       }}
                       // onChange={(e) => setselectedChiefComplaint(e.target.value)}
                       // error={!!errors.disaster_type}
@@ -664,10 +687,7 @@ if (vehicleIds.length === 0) {
                         Select Chief Complaint
                       </MenuItem>
                       {ChiefComplaint.map((item) => (
-                        <MenuItem
-                          key={item.pc_id}
-                          value={item.pc_id}
-                        >
+                        <MenuItem key={item.pc_id} value={item.pc_id}>
                           {item.pc_name}
                         </MenuItem>
                       ))}
@@ -683,7 +703,9 @@ if (vehicleIds.length === 0) {
                       variant="outlined"
                       sx={inputStyle}
                       value={selectedSubchiefComplaint}
-                      onChange={(e) => setselectedSubchiefComplaint(e.target.value)}
+                      onChange={(e) =>
+                        setselectedSubchiefComplaint(e.target.value)
+                      }
                       // error={!!errors.disaster_type}
                       // helperText={errors.disaster_type}
                     >
@@ -803,16 +825,16 @@ if (vehicleIds.length === 0) {
                     id="district-select"
                     value={
                       districtName &&
-                        districts.find(
-                          (d) =>
-                            d.dis_name.toLowerCase() ===
-                            districtName.toLowerCase()
-                        )
+                      districts.find(
+                        (d) =>
+                          d.dis_name.toLowerCase() ===
+                          districtName.toLowerCase()
+                      )
                         ? districts.find(
-                          (d) =>
-                            d.dis_name.toLowerCase() ===
-                            districtName.toLowerCase()
-                        ).dis_id
+                            (d) =>
+                              d.dis_name.toLowerCase() ===
+                              districtName.toLowerCase()
+                          ).dis_id
                         : selectedDistrictId || ""
                     }
                     label="District"
@@ -836,15 +858,15 @@ if (vehicleIds.length === 0) {
                   variant="outlined"
                   value={
                     tehsilName &&
-                      Tehsils.find(
-                        (t) =>
-                          t.tah_name.toLowerCase() === tehsilName.toLowerCase()
-                      )
+                    Tehsils.find(
+                      (t) =>
+                        t.tah_name.toLowerCase() === tehsilName.toLowerCase()
+                    )
                       ? Tehsils.find(
-                        (t) =>
-                          t.tah_name.toLowerCase() ===
-                          tehsilName.toLowerCase()
-                      ).tah_id
+                          (t) =>
+                            t.tah_name.toLowerCase() ===
+                            tehsilName.toLowerCase()
+                        ).tah_id
                       : selectedTehsilId || ""
                   }
                   onChange={(e) => setSelectedTehsilId(e.target.value)}
@@ -943,12 +965,33 @@ if (vehicleIds.length === 0) {
                   onChange={(e) => setSummaryId(e.target.value)}
                   error={!!errors.summary}
                   helperText={errors.summary}
+                  SelectProps={{
+                    MenuProps: {
+                      PaperProps: {
+                        sx: {
+                          width: "400px", // <-- force dropdown menu width
+                          maxWidth: "none", // prevent auto max-width behaviour
+                          // optional: limit height and allow scroll
+                          maxHeight: 400,
+                        },
+                      },
+                    },
+                  }}
                 >
                   <MenuItem disabled value="">
                     Select Summary
                   </MenuItem>
                   {summary.map((item) => (
-                    <MenuItem key={item.sum_id} value={item.sum_id}>
+                    <MenuItem
+                      key={item.sum_id}
+                      value={item.sum_id}
+                      sx={{
+                        whiteSpace: "normal", // allow wrapping
+                        // overflowWrap: "anywhere", // break long words if needed
+                        wordBreak: "break-word",
+                        maxWidth: "100%",
+                      }}
+                    >
                       {item.summary}
                     </MenuItem>
                   ))}
@@ -1056,10 +1099,10 @@ if (vehicleIds.length === 0) {
                       {alertType === 1
                         ? "High"
                         : alertType === 2
-                          ? "Medium"
-                          : alertType === 2
-                            ? "Low"
-                            : "-"}
+                        ? "Medium"
+                        : alertType === 2
+                        ? "Low"
+                        : "-"}
                     </Typography>
                   </Box>
                   {/* <Box>
@@ -1248,11 +1291,11 @@ if (vehicleIds.length === 0) {
                     >
                       Assign Ambulance
                     </Button>
-                     {errors?.assignAmbulance && (
-    <Typography color="error" variant="body2" mt={1}>
-      {errors.assignAmbulance}
-    </Typography>
-  )}
+                    {errors?.assignAmbulance && (
+                      <Typography color="error" variant="body2" mt={1}>
+                        {errors.assignAmbulance}
+                      </Typography>
+                    )}
                   </Box>
                 </Grid>
 
