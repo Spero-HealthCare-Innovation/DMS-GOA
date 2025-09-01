@@ -649,7 +649,7 @@ class get_assign_inc_calls(APIView):
                 "incidentAddress": veh.incident_id.location,
                 "incidentStatus": str(veh.pcr_status),
                 "currentStatus": {
-                    "code": pcr_exists.status if pcr_exists else 1,
+                    "code": pcr_exists.status if pcr_exists else 0,
                     "outOfSych": "false",
                     "message": "Already back to base"
                 },
