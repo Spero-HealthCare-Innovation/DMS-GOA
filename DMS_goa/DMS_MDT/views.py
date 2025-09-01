@@ -799,7 +799,7 @@ class closure_Post_api_app(APIView):
             return Response({"data": None,"error": {"code": 1,"message": "Case Closure Not Successfully"}})
         except Exception as e:
             # return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-            return Response({"data": None,"error": {"code": 1,"message": "Case Closure Not Successfully"},"ex_error": str(e)})
+            return Response({"data": None,"error": {"code": 1,"message": "Case Closure Not Successfully"}})
         
 
 
