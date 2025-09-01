@@ -1680,30 +1680,33 @@ class UpdateTriggerStatusAPIView(APIView):
 class incident_wise_responder_list(APIView):
     def get(self, request,inc_id):
         nid = DMS_Notify.objects.filter(incident_id=inc_id, not_is_deleted=False).last()
-        res_lst = list(nid.alert_type_id.values_list('responder_id', flat=True))
-        kk=[]
-        ll = sorted(set(int(x) for x in res_lst))
-        for m in ll:
-            mm=DMS_Responder.objects.get(responder_id=int(m))
-            resp_vhcl=Vehical.objects.filter(responder=mm.responder_id,status=1)
-            vhcl_dtl = []
-            for vh in resp_vhcl:
-                cl_vhcl_dtl = DMS_incident_closure.objects.filter(incident_id=inc_id,vehicle_no=vh.veh_id, closure_is_deleted=False)
-                if cl_vhcl_dtl.exists():
-                    continue
-                else:
-                    vhcl_dtl.append({
-                    'veh_id': vh.veh_id,
-                    'vehicle_no': vh.veh_number
-                })
+        if nid:
+            res_lst = list(nid.alert_type_id.values_list('responder_id', flat=True))
+            kk=[]
+            ll = sorted(set(int(x) for x in res_lst))
+            for m in ll:
+                mm=DMS_Responder.objects.get(responder_id=int(m))
+                resp_vhcl=Vehical.objects.filter(responder=mm.responder_id,status=1)
+                vhcl_dtl = []
+                for vh in resp_vhcl:
+                    cl_vhcl_dtl = DMS_incident_closure.objects.filter(incident_id=inc_id,vehicle_no=vh.veh_id, closure_is_deleted=False)
+                    if cl_vhcl_dtl.exists():
+                        continue
+                    else:
+                        vhcl_dtl.append({
+                        'veh_id': vh.veh_id,
+                        'vehicle_no': vh.veh_number
+                    })
 
-            dt={
-                'responder_id':mm.responder_id,
-                'responder_name':mm.responder_name,
-                'vehicle':vhcl_dtl
-                 }
-            kk.append(dt)
-        return Response(kk)
+                dt={
+                    'responder_id':mm.responder_id,
+                    'responder_name':mm.responder_name,
+                    'vehicle':vhcl_dtl
+                    }
+                kk.append(dt)
+            return Response(kk)
+        else:
+            return Response([])
 
 
 
