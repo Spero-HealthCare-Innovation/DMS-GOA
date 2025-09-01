@@ -371,7 +371,7 @@ if (vehicleIds.length === 0) {
       caller_no: callerNumber,
       caller_name: callerName,
       comments: comments,
-      responder_scope: sopId,
+      responder_scope: sopId,       
       inc_added_by: "admin",
       inc_modified_by: "admin",
       caller_added_by: "admin",
