@@ -654,7 +654,7 @@ class get_assign_inc_calls(APIView):
                 "incidentId": str(veh.incident_id.inc_id),
                 "incidentDate": veh.incident_id.inc_added_date,
                 "incidentTime": veh.incident_id.inc_added_date,
-                "callType": veh.incident_id.disaster_type.disaster_name,
+                "callType": veh.incident_id.disaster_type.disaster_name if veh.incident_id.disaster_type else None,
                 "callerName":"vishal",
                 "lat": veh.incident_id.latitude,
                 "long": veh.incident_id.longitude,
