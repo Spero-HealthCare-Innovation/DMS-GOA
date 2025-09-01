@@ -624,10 +624,10 @@ class get_assign_completed_inc_calls(APIView):
                 "incidentId": str(veh.incident_id.inc_id),
                 "incidentDate": incidentDate,
                 "incidentTime": incidentTime,
-                "callType": "Emergency",
+                "callType": veh.incident_id.call_type.call_type_name if veh.incident_id.call_type else None,
                 "CallerRelationName": "",
                 "incidentCallsStatus": "Completed",
-                "callerName":"Vinayak"
+                "callerName":veh.incident_id.caller_id.caller_name if veh.incident_id.caller_id else None
             } 
             assign_inc_objs_arr.append(assign_inc_obj)
         return Response({"data": assign_inc_objs_arr, "error": None}, status=status.HTTP_200_OK)
