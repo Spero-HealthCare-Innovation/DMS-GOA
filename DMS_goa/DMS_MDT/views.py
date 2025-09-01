@@ -171,13 +171,14 @@ class VehicleLogout(APIView):
                 token_obj = RefreshToken(refresh_token)
                 token_obj.blacklist()
             except TokenError:
-                return Response({
-                    "data": {
-                        "code": 1,
-                        "message": "Invalid or expired refresh token"
-                    },
-                    "error": None
-                }, status=status.HTTP_200_OK)
+                # return Response({
+                #     "data": {
+                #         "code": 1,
+                #         "message": "Invalid or expired refresh token"
+                #     },
+                #     "error": None
+                # }, status=status.HTTP_200_OK)
+                pass
 
             vehicle_obj = Vehical.objects.filter(veh_number=veh_number).last()
             if not vehicle_obj:
@@ -642,7 +643,7 @@ class get_assign_inc_calls(APIView):
                 "incidentId": str(veh.incident_id.inc_id),
                 "incidentDate": veh.incident_id.inc_added_date,
                 "incidentTime": veh.incident_id.inc_added_date,
-                "callType": veh.incident_id.disaster_type.disaster_name,
+                "callType": veh.incident_id.disaster_type.disaster_name if veh.incident_id.disaster_type else None,
                 "callerName":"vishal",
                 "lat": veh.incident_id.latitude,
                 "long": veh.incident_id.longitude,
