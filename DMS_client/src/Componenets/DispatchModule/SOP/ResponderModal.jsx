@@ -180,18 +180,21 @@ export default function ResponderModal({
     fetchVehicles("", "", "");
   };
 const handleSave = () => {
-  // Extract only vehicle IDs where assigned === true
   const selectedVehicleIds = Object.keys(assignedVehicles)
     .filter((vehId) => assignedVehicles[vehId])
-    .map(Number); 
+    .map(Number);
+
   onSave({
     selectedResponders,
     res_id: selectedResponder,
     baseLocation: selectedBaseLocation,
     vehicleNo,
-    vehicleIds: selectedVehicleIds, // ✅ now sending an array
+    vehicleIds: selectedVehicleIds,  
+    assignedVehicles,                 
   });
 };
+
+
   const handleAssignChange = (index, checked) => {
     const updated = [...tableData];
     updated[index].assigned = checked;
