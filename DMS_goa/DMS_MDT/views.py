@@ -666,7 +666,7 @@ class get_assign_inc_calls(APIView):
                     "outOfSych": "false",
                     "message": "Already back to base"
                 },
-                "incidentCallsStatus": pcr_exists.status if pcr_exists else 0,
+                "incidentCallsStatus": "In-progress" if not pcr_exists else "Acknowledge" if pcr_exists.status==1 else "StartedFromBase" if pcr_exists.status==2 else "AtScene" if pcr_exists.status==3 else "DepartedFromScene" if pcr_exists.status==4 else "BackToBase" if pcr_exists.status==5 else "Abandoned" if pcr_exists.status==6 else "In-progress",
                 "clikable": "true",
                 "progress": "true",
                 "completed": "true" if veh.jobclosure_status==1 else "false",
