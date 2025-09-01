@@ -125,6 +125,9 @@ urlpatterns = [
     path('permissions/', CreatePermissionAPIView.as_view(), name='create_permission'),#Added Authuntication & Authorization Token
     path('permissions/<int:id>/', UpdatePermissionAPIView.as_view(), name='update_permission'),#Added Authuntication & Authorization Token
     # path('sources/', AggSourceListAPIView.as_view(), name='agg-source-list'),
+    path("call_dashboard/", IncidentDashboardCount.as_view(), name="incident-dashboard-count"),
+    path("dispatch_closure/", DispatchClosureDashboardCount.as_view(), name="dispatch-closure-dashboard"),
+    path("average_dispatch_time/", AverageCallTimeDashboard.as_view(), name="average-dispatch-time"),
 
     #=============================== Mayank =========================================================
 
