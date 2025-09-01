@@ -159,11 +159,7 @@ const AppRoutes = ({ darkMode, setIsLoggedIn }) => {
           }
         />
         <Route
-<<<<<<< HEAD
-          path="/Incident Report"
-=======
           path="/Incident-Report"
->>>>>>> Frontend
           element={
             <PrivateRoute>
               <IncidentReport darkMode={darkMode} />
@@ -178,20 +174,11 @@ const AppRoutes = ({ darkMode, setIsLoggedIn }) => {
             </PrivateRoute>
           }
         />
-<<<<<<< HEAD
-
-        <Route
-          path="/roles"
-          element={
-            <PrivateRoute>
-              <Permission darkMode={darkMode} />
-=======
          <Route
           path="/Dashboard"
           element={
             <PrivateRoute>
               <Dashboard darkMode={darkMode} />
->>>>>>> Frontend
             </PrivateRoute>
           }
         />
