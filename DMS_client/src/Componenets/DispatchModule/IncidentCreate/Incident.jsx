@@ -95,17 +95,15 @@ const Incident = ({ darkMode }) => {
     selectedChiefComplaint,
     ChiefComplaint,
     setselectedChiefComplaint,
+    fetchResponderScope
   } = useAuth();
+
+  console.log(selectedChiefComplaint, 'selectedChiefComplaintselectedChiefComplaintselectedChiefComplaint');
+
 
   useEffect(() => {
     fetchDistrictsByState();
   }, []);
-
-  // useEffect(() => {
-  //     if (districts.length > 0) {
-  //         console.log("All districts:", districts);
-  //     }
-  // }, [districts]);
 
   useEffect(() => {
     if (districts.length > 0 && districtName) {
@@ -330,8 +328,8 @@ const Incident = ({ darkMode }) => {
     if (!query && !popupText) newErrors.location = "Location is required";
     if (!summaryId) newErrors.summary = "Summary is required";
     if (selectedEmergencyValue === 1) {
-      if (!selectedDisaster)
-        newErrors.disaster_type = "Disaster Type is required";
+      // if (!selectedDisaster)
+      //   newErrors.disaster_type = "Disaster Type is required";
       if (!alertType) newErrors.alert_type = "Alert Type is required";
       if (!comments) newErrors.comments = "Comment is required";
       if (!sopId || sopId.length === 0) {
@@ -379,7 +377,7 @@ const Incident = ({ darkMode }) => {
       vehicle: vehicleIds,
       call_type: selectedcallType,
       parent_complaint: selectedChiefComplaint,
-      call_recieved_from:null,
+      call_recieved_from: null,
     };
 
     try {
@@ -618,8 +616,8 @@ const Incident = ({ darkMode }) => {
                       sx={inputStyle}
                       value={selectedcallType}
                       onChange={(e) => setselectedcallType(e.target.value)}
-                      error={!!errors.disaster_type}
-                      helperText={errors.disaster_type}
+                      // error={!!errors.disaster_type}
+                      // helperText={errors.disaster_type}
                     >
                       <MenuItem disabled value="">
                         Select Call Type
@@ -644,9 +642,14 @@ const Incident = ({ darkMode }) => {
                       variant="outlined"
                       sx={inputStyle}
                       value={selectedChiefComplaint}
-                      onChange={(e) => setselectedChiefComplaint(e.target.value)}
-                      error={!!errors.disaster_type}
-                      helperText={errors.disaster_type}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        setselectedChiefComplaint(value);   // update context state
+                        fetchResponderScope(value);         // call API with selected chief complaint
+                      }}
+                      // onChange={(e) => setselectedChiefComplaint(e.target.value)}
+                      // error={!!errors.disaster_type}
+                      // helperText={errors.disaster_type}
                     >
                       <MenuItem disabled value="">
                         Select Chief Complaint
@@ -672,8 +675,8 @@ const Incident = ({ darkMode }) => {
                       sx={inputStyle}
                       value={selectedSubchiefComplaint}
                       onChange={(e) => setselectedSubchiefComplaint(e.target.value)}
-                      error={!!errors.disaster_type}
-                      helperText={errors.disaster_type}
+                      // error={!!errors.disaster_type}
+                      // helperText={errors.disaster_type}
                     >
                       <MenuItem disabled value="">
                         Sub Chief Complaint
@@ -791,16 +794,16 @@ const Incident = ({ darkMode }) => {
                     id="district-select"
                     value={
                       districtName &&
-                      districts.find(
-                        (d) =>
-                          d.dis_name.toLowerCase() ===
-                          districtName.toLowerCase()
-                      )
+                        districts.find(
+                          (d) =>
+                            d.dis_name.toLowerCase() ===
+                            districtName.toLowerCase()
+                        )
                         ? districts.find(
-                            (d) =>
-                              d.dis_name.toLowerCase() ===
-                              districtName.toLowerCase()
-                          ).dis_id
+                          (d) =>
+                            d.dis_name.toLowerCase() ===
+                            districtName.toLowerCase()
+                        ).dis_id
                         : selectedDistrictId || ""
                     }
                     label="District"
@@ -824,15 +827,15 @@ const Incident = ({ darkMode }) => {
                   variant="outlined"
                   value={
                     tehsilName &&
-                    Tehsils.find(
-                      (t) =>
-                        t.tah_name.toLowerCase() === tehsilName.toLowerCase()
-                    )
+                      Tehsils.find(
+                        (t) =>
+                          t.tah_name.toLowerCase() === tehsilName.toLowerCase()
+                      )
                       ? Tehsils.find(
-                          (t) =>
-                            t.tah_name.toLowerCase() ===
-                            tehsilName.toLowerCase()
-                        ).tah_id
+                        (t) =>
+                          t.tah_name.toLowerCase() ===
+                          tehsilName.toLowerCase()
+                      ).tah_id
                       : selectedTehsilId || ""
                   }
                   onChange={(e) => setSelectedTehsilId(e.target.value)}
@@ -1044,13 +1047,13 @@ const Incident = ({ darkMode }) => {
                       {alertType === 1
                         ? "High"
                         : alertType === 2
-                        ? "Medium"
-                        : alertType === 2
-                        ? "Low"
-                        : "-"}
+                          ? "Medium"
+                          : alertType === 2
+                            ? "Low"
+                            : "-"}
                     </Typography>
                   </Box>
-                  <Box>
+                  {/* <Box>
                     <Typography
                       variant="subtitle2"
                       sx={{
@@ -1076,7 +1079,7 @@ const Incident = ({ darkMode }) => {
                         (item) => item.disaster_id === selectedDisaster
                       )?.disaster_name || "-"}
                     </Typography>
-                  </Box>
+                  </Box> */}
                 </Grid>
 
                 {/* SOP Section */}

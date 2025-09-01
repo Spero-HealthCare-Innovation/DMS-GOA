@@ -76,8 +76,8 @@ export const AuthProvider = ({ children }) => {
 
   // const [disasterIdFromSop, setDisasterIdFromSop] = useState(null);
   useEffect(() => {
-    const disasterValue = disaterid || disasterIncident || disasterIdFromSop;
-    // console.log(disasterValue, "passingValue");
+    const disasterValue = disaterid || disasterIncident || disasterIdFromSop || selectedChiefComplaint;
+    console.log(disasterValue, "passingValue");
 
     if (disasterValue) {
       fetchResponderScope(disasterValue);
@@ -226,12 +226,12 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const fetchResponderScope = async (disasterValue) => {
-    if (!disasterValue) return;
+  const fetchResponderScope = async (selectedChiefComplaint) => {
+    if (!selectedChiefComplaint) return;
     try {
       setLoading(true);
       const res = await axios.get(
-        `${port}/admin_web/Responder_Scope_Get/${disasterValue}/`,
+        `${port}/admin_web/Responder_Scope_Get/${selectedChiefComplaint}`,
         {
           headers: {
             Authorization: `Bearer ${newToken || token}`,
@@ -395,7 +395,7 @@ export const AuthProvider = ({ children }) => {
   // chief complaint
 
   const [disaster, setDisaster] = useState([]);
-  const [selectedChiefComplaint, setselectedChiefComplaint] = useState([]);
+  const [selectedChiefComplaint, setselectedChiefComplaint] = useState(null);
   const [ChiefComplaint, setChiefComplaint] = useState([]);
   useEffect(() => {
     const fetchChiefComplaint = async () => {
