@@ -493,12 +493,12 @@ class Alert_Type_Serializer(serializers.ModelSerializer):
 class Manual_call_incident_dispatch_Serializer(serializers.ModelSerializer):
     class Meta:
         model = DMS_Incident
-        fields = ['inc_type','disaster_type','alert_type','location','summary','responder_scope','latitude','longitude','caller_id','inc_added_by','inc_modified_by','time','mode','ward','district','ward_officer','tahsil','ward','district','ward_officer','tahsil']   
+        fields = ['inc_type','disaster_type','alert_type','location','summary','responder_scope','latitude','longitude','caller_id','inc_added_by','inc_modified_by','time','mode','ward','district','ward_officer','tahsil','ward','district','ward_officer','tahsil','call_recieved_from','parent_complaint','call_type']   
 
 class Manual_call_data_Serializer(serializers.ModelSerializer):
     class Meta:
         model = DMS_Caller
-        fields = ['caller_no','caller_name','caller_added_by','caller_modified_by']
+        fields = ['caller_no','caller_name','caller_added_by','caller_modified_by','call_recieved_from']
         
 class manual_Comments_Serializer(serializers.ModelSerializer):
     class Meta:
