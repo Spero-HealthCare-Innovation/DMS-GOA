@@ -783,9 +783,11 @@ class closure_Post_api_app(APIView):
                 closure_remark=request.data.get('remark')
             )
             inc_vh = incident_vehicles.objects.filter(incident_id=inc_dtl, veh_id=vehicl_dtls, status=1)
-            inc_vh.update(jobclosure_status=1)
+            if inc_vh.exists():
+                inc_vh.update(jobclosure_status=1,pcr_status=3)
+                
             invh_dtl = incident_vehicles.objects.filter(veh_id=vehicl_dtls,jobclosure_status=2)
-            if invh_dtl.exists() and invh_dtl.exclude(jobclosure_status=1).exists():
+            if invh_dtl.exists() and invh_dtl.exclude(jobclosure_status=1).exists() and vehicl_dtls:
                 vehicl_dtls.update(vehical_status=1)
             # return Response({"msg": f"Closure for {dpt_dtl.responder_name} - {vehicl_dtls.veh_number} is done",}, status=status.HTTP_201_CREATED)
             return Response({"data": {"code": 1,"message": "Case Closure Successfully"},"error": None})
