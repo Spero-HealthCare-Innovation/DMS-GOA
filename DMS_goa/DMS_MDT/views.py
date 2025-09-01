@@ -11,6 +11,7 @@ from django.utils import timezone
 from admin_web.models import *
 import math
 # from datetime import datetime
+from datetime import datetime, timedelta
 
 from datetime import datetime
 
@@ -647,7 +648,7 @@ class get_assign_inc_calls(APIView):
         # print("incident vehicles:", inc_veh)
         assign_inc_objs_arr = []
         for veh in inc_veh:
-            pcr_exists = PcrReport.objects.filter(amb_no=veh.veh_id).last()
+            pcr_exists = PcrReport.objects.filter(incident_id=veh.incident_id).last()
             print(pcr_exists)
             assign_inc_obj = {
                 "incidentId": str(veh.incident_id.inc_id),
@@ -667,7 +668,7 @@ class get_assign_inc_calls(APIView):
                 "incidentCallsStatus": "In-progress",
                 "clikable": "true",
                 "progress": "true",
-                "completed": veh.jobclosure_status,
+                "completed": "true" if veh.jobclosure_status==1 else "false",
                 "onsceneCare": None
             }
             assign_inc_objs_arr.append(assign_inc_obj)
@@ -865,3 +866,33 @@ class Clockinout(APIView):
             return Response({"data": None,"error": {"code": 1,"message": "Clock in/out Not Successfully"},"ex_error": str(e)}, status=status.HTTP_200_OK)
 			
 			
+#Dashboard---------------------Mayank
+
+class VehicalDashboardCount(APIView):
+    def get(self, request):
+        today = now().date()
+
+        # Total Vehicles
+        total_vehicle = Vehical.objects.count()
+
+        # Today Added Vehicles
+        today_vehicle = Vehical.objects.filter(veh_added_date__date=today).count()
+
+        # Last Month Vehicles
+        first_day_this_month = today.replace(day=1)
+        last_month_end = first_day_this_month - timedelta(days=1)
+        last_month_start = last_month_end.replace(day=1)
+
+        last_month_vehicle = Vehical.objects.filter(
+            veh_added_date__date__gte=last_month_start,
+            veh_added_date__date__lte=last_month_end,
+            status=1
+        ).count()
+
+        data = {
+            "total_vehicle_today": total_vehicle,
+            # "today_vehicle": today_vehicle,
+            "last_month_vehicle": last_month_vehicle,
+        }
+
+        return Response(data)

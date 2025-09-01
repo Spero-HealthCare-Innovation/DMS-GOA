@@ -20,6 +20,6 @@ urlpatterns = [
     path('closurecomplete',closure_Post_api_app.as_view(),name='closure_post_api'),
     path('Userlistambvise', Userlistambvise.as_view(),name='Userlistambvise'),
     path('clockinout',Clockinout.as_view(),name='clockinout'),
-    
+    path("vehical_dashboard/", VehicalDashboardCount.as_view(), name="vehical-dashboard-count"),    
 ]
  

@@ -546,7 +546,7 @@ class DMS_Incident(models.Model):
     alert_division=enum.EnumField(division_enum,null=True,blank=True)
     # inc_datetime = models.DateTimeField(auto_now=True)
     mode = models.IntegerField(null=True,blank=True)
-    time = models.CharField(max_length=255,null=True,blank=True)
+    time = models.TimeField(null=True,blank=True)
     ward = models.ForeignKey('DMS_Ward',on_delete=models.CASCADE,null=True,blank=True)
     # ward_officer = models.ManyToManyField(
     #     'DMS_Ward',
@@ -971,6 +971,7 @@ class CallType(models.Model):
  
 class ParentComplaint(models.Model):
     pc_id = models.AutoField(primary_key=True)
+    pc_code = models.CharField(max_length=100, null=True, blank=True)
     pc_type = models.CharField(max_length=100, null=True, blank=True)
     pc_name = models.CharField(max_length=100, null=True, blank=True)
     parent_is_deleted = models.BooleanField(default=False)

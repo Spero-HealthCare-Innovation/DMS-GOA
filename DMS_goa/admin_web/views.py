@@ -31,7 +31,7 @@ from django.http import JsonResponse
 import ast
 import tweepy
 import json
-from datetime import datetime
+from datetime import datetime, timedelta
 from langdetect import detect
 from deep_translator import GoogleTranslator
 import re
@@ -40,7 +40,7 @@ from admin_web.utils.facebook_scraper import scrape_facebook_posts
 from admin_web.utils.twitter_scraper import scrape_pune_ems_tweets
 from admin_web.constants import KEYWORDS, PUNE_LOCATIONS, query
 from admin_web.utils.news_scraper import news_dms_scraper
-from DMS_MDT.models import employee_clockin_info
+from DMS_MDT.models import employee_clockin_info, incident_vehicles
 from admin_web.utils.rss_scrapper import scrape_rss_feeds
 from admin_web.utils.reddit_scraper import scrape_reddit_feeds
 
@@ -929,7 +929,7 @@ class Manual_Call_Incident_api(APIView):
             'inc_type', 'disaster_type', 'alert_type', 'location', 'summary',
             'responder_scope', 'latitude', 'longitude', 'caller_id',
             'inc_added_by', 'inc_modified_by', 'incident_id', 'inc_id', 'time', 'mode',
-            'ward','district','ward_officer','tahsil',
+            'ward','district','ward_officer','tahsil'
         ]
         caller_fields = ['caller_no', 'caller_name', 'caller_added_by', 'caller_modified_by']
         comments_fields = ['comments', 'comm_added_by', 'comm_modified_by']
@@ -1041,6 +1041,7 @@ class Manual_Call_Incident_api(APIView):
         "dms_lat": str(incident_instance.latitude),
         "dms_lng": str(incident_instance.longitude),
         "alert_type": ("High" if incident_instance.alert_type == 1 else"Medium" if incident_instance.alert_type == 2 else"Low" if incident_instance.alert_type == 3 else"Very Low" if incident_instance.alert_type == 4 else""
+        ""
 )
     }
         print("ssssssssssssssssssssssssss",external_api_payload)
@@ -1074,7 +1075,14 @@ class Manual_Call_Incident_api(APIView):
             "comments": comments_serializer.data,
             "weather_alert": weather_alert_serializer.data,
             "dms_notify": dms_notify_serializer.data,
-            "external_api_response": external_api_result
+            "external_api_response": external_api_result,
+
+            "response": {
+                "call_received_from": caller_instance.call_recieved_from.value if caller_instance.call_recieved_from else None,
+                "call_type": incident_instance.disaster_type.disaster_parent.call_type_id.call_type_id if incident_instance.disaster_type and incident_instance.disaster_type.disaster_parent and incident_instance.disaster_type.disaster_parent.call_type_id else None,  
+                "parent_complaint": incident_instance.disaster_type.disaster_parent.pc_id if incident_instance.disaster_type and incident_instance.disaster_type.disaster_parent else None,
+                }
+
         }, status=status.HTTP_201_CREATED)
 
 
@@ -2089,3 +2097,231 @@ class DMS_Disaster_Type_disaster_parent_Get_API(APIView):
         snippet = DMS_Disaster_Type.objects.filter(disaster_parent=disaster_parent,disaster_is_deleted=False)
         serializers = DMS_Disaster_Type_Serializer(snippet,many=True)
         return Response(serializers.data,status=status.HTTP_200_OK)
+    
+    
+    
+class IncidentDashboardCount(APIView):
+    def get(self, request):
+        today = now().date()
+
+        # Last month range
+        first_day_this_month = today.replace(day=1)
+        last_month_end = first_day_this_month - timedelta(days=1)
+        last_month_start = last_month_end.replace(day=1)
+
+        # --- Total Calls ---
+        total_calls = DMS_Incident.objects.filter(inc_is_deleted=False).count()
+        total_emergency = DMS_Incident.objects.filter(inc_is_deleted=False, inc_type=1).count()
+        total_non_emergency = DMS_Incident.objects.filter(inc_is_deleted=False, inc_type=2).count()
+
+        # --- Today Calls ---
+        today_calls = DMS_Incident.objects.filter(inc_is_deleted=False, inc_added_date__date=today).count()
+        today_emergency = DMS_Incident.objects.filter(inc_is_deleted=False, inc_type=1, inc_added_date__date=today).count()
+        today_non_emergency = DMS_Incident.objects.filter(inc_is_deleted=False, inc_type=2, inc_added_date__date=today).count()
+
+        # --- Last Month Calls ---
+        last_month_calls = DMS_Incident.objects.filter(
+            inc_is_deleted=False,
+            inc_added_date__date__gte=last_month_start,
+            inc_added_date__date__lte=last_month_end
+        ).count()
+
+        last_month_emergency = DMS_Incident.objects.filter(
+            inc_is_deleted=False,
+            inc_type=1,
+            inc_added_date__date__gte=last_month_start,
+            inc_added_date__date__lte=last_month_end
+        ).count()
+
+        last_month_non_emergency = DMS_Incident.objects.filter(
+            inc_is_deleted=False,
+            inc_type=2,
+            inc_added_date__date__gte=last_month_start,
+            inc_added_date__date__lte=last_month_end
+        ).count()
+
+        data = {
+            "total": {
+                "all": total_calls,
+                "emergency": total_emergency,
+                "non_emergency": total_non_emergency,
+            },
+            "today": {
+                "all": today_calls,
+                "emergency": today_emergency,
+                "non_emergency": today_non_emergency,
+            },
+            "last_month": {
+                "all": last_month_calls,
+                "emergency": last_month_emergency,
+                "non_emergency": last_month_non_emergency,
+            }
+        }
+
+        return Response(data)
+    
+    
+class DispatchClosureDashboardCount(APIView):
+    def get(self, request):
+        today = now().date()
+
+        # Last month range
+        first_day_this_month = today.replace(day=1)
+        last_month_end = first_day_this_month - timedelta(days=1)
+        last_month_start = last_month_end.replace(day=1)
+
+        # ---------------- Total Dispatch ----------------
+        total_dispatch = DMS_Incident.objects.filter(
+            inc_type=1,
+            inc_is_deleted=False,
+            incident_vehicles__isnull=False   # Join with incident_vehicles
+        ).distinct().count()
+
+        # ---------------- Today Dispatch ----------------
+        today_dispatch = DMS_Incident.objects.filter(
+            inc_type=1,
+            inc_is_deleted=False,
+            incident_vehicles__isnull=False,
+            inc_added_date__date=today
+        ).distinct().count()
+
+        # ---------------- Last Month Dispatch ----------------
+        last_month_dispatch = DMS_Incident.objects.filter(
+            inc_type=1,
+            inc_is_deleted=False,
+            incident_vehicles__isnull=False,
+            inc_added_date__date__gte=last_month_start,
+            inc_added_date__date__lte=last_month_end
+        ).distinct().count()
+
+        # ---------------- Total Closure ----------------
+        total_closure = DMS_incident_closure.objects.filter(
+            closure_is_deleted=False
+        ).count()
+
+        # ---------------- Today Closure ----------------
+        today_closure = DMS_incident_closure.objects.filter(
+            closure_is_deleted=False,
+            closure_added_date__date=today
+        ).count()
+
+        # ---------------- Last Month Closure ----------------
+        last_month_closure = DMS_incident_closure.objects.filter(
+            closure_is_deleted=False,
+            closure_added_date__date__gte=last_month_start,
+            closure_added_date__date__lte=last_month_end
+        ).count()
+
+        data = {
+            "dispatch": {
+                "total": total_dispatch,
+                "today": today_dispatch,
+                "last_month": last_month_dispatch,
+            },
+            "closure": {
+                "total": total_closure,
+                "today": today_closure,
+                "last_month": last_month_closure,
+            }
+        }
+
+        return Response(data)
+
+
+
+def average_time(queryset):
+    """Convert queryset of time objects into average time"""
+    times = [t.time for t in queryset if t.time]  # Filter out null values
+    if not times:
+        return None
+
+    total_seconds = 0
+    for t in times:
+        total_seconds += t.hour * 3600 + t.minute * 60 + t.second
+
+    avg_seconds = total_seconds // len(times)
+
+    hours = avg_seconds // 3600
+    minutes = (avg_seconds % 3600) // 60
+    seconds = avg_seconds % 60
+
+    return f"{hours:02d}:{minutes:02d}:{seconds:02d}"
+
+
+def average_response_time(queryset):
+    """Calculate average response time (closure - created)"""
+    durations = []
+    for closure in queryset:
+        if closure.incident_id and closure.incident_id.inc_added_date and closure.closure_added_date:
+            diff = closure.closure_added_date - closure.incident_id.inc_added_date
+            durations.append(diff.total_seconds())
+
+    if not durations:
+        return None
+
+    avg_seconds = sum(durations) // len(durations)
+    return str(timedelta(seconds=avg_seconds))
+
+class AverageCallTimeDashboard(APIView):
+    def get(self, request):
+        today = now().date()
+
+        # Last month range
+        first_day_this_month = today.replace(day=1)
+        last_month_end = first_day_this_month - timedelta(days=1)
+        last_month_start = last_month_end.replace(day=1)
+
+        # --- Total Avg ---
+        total_avg = average_time(DMS_Incident.objects.filter(
+            inc_is_deleted=False,
+            inc_type=1,
+            time__isnull=False
+        ).only("time"))
+
+        # --- Today Avg ---
+        today_avg = average_time(DMS_Incident.objects.filter(
+            inc_is_deleted=False,
+            inc_type=1,
+            time__isnull=False,
+            inc_added_date__date=today
+        ).only("time"))
+
+        # --- Last Month Avg ---
+        last_month_avg = average_time(DMS_Incident.objects.filter(
+            inc_is_deleted=False,
+            inc_type=1,
+            time__isnull=False,
+            inc_added_date__date__gte=last_month_start,
+            inc_added_date__date__lte=last_month_end
+        ).only("time"))
+        
+        # --- Average Response Time ---
+        total_response = average_response_time(DMS_incident_closure.objects.filter(
+            closure_is_deleted=False
+        ).select_related("incident_id"))
+
+        today_response = average_response_time(DMS_incident_closure.objects.filter(
+            closure_is_deleted=False,
+            closure_added_date__date=today
+        ).select_related("incident_id"))
+
+        last_month_response = average_response_time(DMS_incident_closure.objects.filter(
+            closure_is_deleted=False,
+            closure_added_date__date__gte=last_month_start,
+            closure_added_date__date__lte=last_month_end
+        ).select_related("incident_id"))
+
+        data = {
+            "average_dispatch_time": {
+                "total": total_avg,
+                "today": today_avg,
+                "last_month": last_month_avg,
+            },
+            "average_response_time": {
+                "total": total_response,
+                "today": today_response,
+                "last_month": last_month_response,
+            }
+        }
+
+        return Response(data)
