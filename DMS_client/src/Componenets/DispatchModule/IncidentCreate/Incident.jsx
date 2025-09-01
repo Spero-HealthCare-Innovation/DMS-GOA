@@ -347,9 +347,18 @@ const Incident = ({ darkMode }) => {
       return;
     }
 
-    const vehicleIds = Object.keys(assignedMap).filter(
-      (key) => assignedMap[key]
-    );
+  const vehicleIds = Object.keys(assignedMap).filter(
+    (key) => assignedMap[key]
+  );
+if (vehicleIds.length === 0) {
+  newErrors.assignAmbulance = "At least one vehicle must be assigned";
+}
+
+  // Agar koi bhi error hai to wahi return kar do
+  if (Object.keys(newErrors).length > 0) {
+    setErrors(newErrors);
+    return;
+  }
 
     const payload = {
       inc_type: selectedEmergencyValue,
@@ -1234,11 +1243,16 @@ const Incident = ({ darkMode }) => {
                     <Button
                       variant="contained"
                       onClick={handleOpenModal}
-                      disabled={sopId.length === 0} // sirf tab enable hoga jab koi checkbox selected ho
+                      disabled={sopId.length === 0}
                       sx={{ mt: 2 }}
                     >
                       Assign Ambulance
                     </Button>
+                     {errors?.assignAmbulance && (
+    <Typography color="error" variant="body2" mt={1}>
+      {errors.assignAmbulance}
+    </Typography>
+  )}
                   </Box>
                 </Grid>
 
