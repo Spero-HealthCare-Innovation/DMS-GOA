@@ -27,6 +27,8 @@ from django.core.mail import send_mail
 from rest_framework_simplejwt.tokens import AccessToken
 from geopy.geocoders import Nominatim
 from django.http import JsonResponse
+from django.db.models import Count, Q
+from django.db.models.functions import TruncDate
 
 import ast
 import tweepy
@@ -2325,3 +2327,103 @@ class AverageCallTimeDashboard(APIView):
         }
 
         return Response(data)
+
+
+class CallTypeWiseCount(APIView):
+    def get(self, request):
+        today = now().date()
+        start_of_month = today.replace(day=1)
+        last_month_start = (start_of_month - timedelta(days=1)).replace(day=1)
+        last_month_end = start_of_month - timedelta(days=1)
+
+        call_type_counts = (
+            CallType.objects.filter(call_type_is_deleted=False)
+            .annotate(
+                total=Count(
+                    "dms_incident",
+                    filter=Q(dms_incident__inc_is_deleted=False),
+                ),
+                today_count=Count(
+                    "dms_incident",
+                    filter=Q(
+                        dms_incident__inc_is_deleted=False,
+                        dms_incident__inc_added_date__gte=today,
+                        dms_incident__inc_added_date__lt=today + timedelta(days=1),
+                    ),
+                ),
+                last_month_count=Count(
+                    "dms_incident",
+                    filter=Q(
+                        dms_incident__inc_is_deleted=False,
+                        dms_incident__inc_added_date__gte=last_month_start,
+                        dms_incident__inc_added_date__lte=last_month_end,
+                    ),
+                ),
+            )
+            .values("call_type_id", "call_type_name", "total", "today_count", "last_month_count")
+        )
+
+        result = [
+            {
+                "id": item["call_type_id"],
+                "name": item["call_type_name"],
+                "total": item["total"],
+                "today": item["today_count"],
+                "last_month": item["last_month_count"],
+            }
+            for item in call_type_counts
+        ]
+
+        return Response({"call_type_counts": result})
+    
+    
+    
+class ChiefComplaintWiseCount(APIView):
+    def get(self, request, call_type_id):
+        today = now().date()
+        start_of_month = today.replace(day=1)
+        last_month_start = (start_of_month - timedelta(days=1)).replace(day=1)
+        last_month_end = start_of_month - timedelta(days=1)
+
+        complaints = (
+            ParentComplaint.objects.filter(
+                parent_is_deleted=False,
+                call_type_id=call_type_id
+            )
+            .annotate(
+                total=Count(
+                    "dms_incident",
+                    filter=Q(dms_incident__inc_is_deleted=False),
+                ),
+                today_count=Count(
+                    "dms_incident",
+                    filter=Q(
+                        dms_incident__inc_is_deleted=False,
+                        dms_incident__inc_added_date__gte=today,
+                        dms_incident__inc_added_date__lt=today + timedelta(days=1),
+                    ),
+                ),
+                last_month_count=Count(
+                    "dms_incident",
+                    filter=Q(
+                        dms_incident__inc_is_deleted=False,
+                        dms_incident__inc_added_date__gte=last_month_start,
+                        dms_incident__inc_added_date__lte=last_month_end,
+                    ),
+                ),
+            )
+            .values("pc_id", "pc_name", "total", "today_count", "last_month_count")
+        )
+
+        result = [
+            {
+                "id": item["pc_id"],
+                "name": item["pc_name"],
+                "total": item["total"],
+                "today": item["today_count"],
+                "last_month": item["last_month_count"],
+            }
+            for item in complaints
+        ]
+
+        return Response({"chief_complaints": result})
