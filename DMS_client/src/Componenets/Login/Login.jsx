@@ -20,30 +20,29 @@ import { useNavigate } from "react-router-dom";
 import CachedIcon from "@mui/icons-material/Cached";
 
 function Login() {
-    const port = import.meta.env.VITE_APP_API_KEY;
-    const socketUrl = import.meta.env.VITE_SOCKET_API_KEY;
-    console.log(socketUrl,'socketUrlsocketUrlsocketUrl');
-    
-    const theme = useTheme();
-    const isSmallScreen = useMediaQuery(theme.breakpoints.down('sm'));
-    const navigate = useNavigate();
-    const [emp_username, setEmp_Username] = useState('');
-    const [password, setPassword] = useState('');
-    const [usernameError, setUsernameError] = useState('');
-    const [passwordError, setPasswordError] = useState('');
-    const [loading, setLoading] = useState(false);
-    const [captchaKey, setCaptchaKey] = useState('');
-    const [captchaImageUrl, setCaptchaImageUrl] = useState('');
-    const [captchaValue, setCaptchaValue] = useState('');
-    const [captchaLoading, setCaptchaLoading] = useState(true);
-    const [captchaError, setCaptchaError] = useState(false);
-    const [captchaTextError, setCaptchaTextError] = useState('');
-    const [openForgotDialog, setOpenForgotDialog] = useState(false);
-    const [username, setUsername] = useState('');
-    const [contact, setContact] = useState('');
-    useEffect(() => {
-        document.title = "DMS|Login";
-    }, []);
+  const port = import.meta.env.VITE_APP_API_KEY;
+  const socketUrl = import.meta.env.VITE_SOCKET_API_KEY;
+  console.log(socketUrl, "socketUrlsocketUrlsocketUrl");
+  const theme = useTheme();
+  const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
+  const navigate = useNavigate();
+  const [emp_username, setEmp_Username] = useState("");
+  const [password, setPassword] = useState("");
+  const [usernameError, setUsernameError] = useState("");
+  const [passwordError, setPasswordError] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [captchaKey, setCaptchaKey] = useState("");
+  const [captchaImageUrl, setCaptchaImageUrl] = useState("");
+  const [captchaValue, setCaptchaValue] = useState("");
+  const [captchaLoading, setCaptchaLoading] = useState(true);
+  const [captchaError, setCaptchaError] = useState(false);
+  const [captchaTextError, setCaptchaTextError] = useState("");
+  const [openForgotDialog, setOpenForgotDialog] = useState(false);
+  const [username, setUsername] = useState("");
+  const [contact, setContact] = useState("");
+  useEffect(() => {
+    document.title = "DMS|Login";
+  }, []);
 
   const fetchCaptcha = async () => {
     try {
@@ -150,13 +149,18 @@ function Login() {
       console.log("Login response:", data);
 
       if (!response.ok) {
-        if (data.errors?.non_field_errors?.[0]?.toLowerCase().includes("captcha")) {
+        if (
+          data.errors?.non_field_errors?.[0]?.toLowerCase().includes("captcha")
+        ) {
           setCaptchaTextError("Invalid captcha. Please try again.");
           fetchCaptcha();
         } else if (data.msg && data.msg.toLowerCase().includes("captcha")) {
           setCaptchaTextError("Invalid captcha. Please try again.");
           fetchCaptcha();
-        } else if (data.msg && data.msg.toLowerCase().includes("already logged in")) {
+        } else if (
+          data.msg &&
+          data.msg.toLowerCase().includes("already logged in")
+        ) {
           setPasswordError("User already logged in on another device/session.");
         } else if (data.errors?.non_field_errors?.[0]) {
           setPasswordError(data.errors.non_field_errors[0]);
@@ -168,10 +172,12 @@ function Login() {
         return;
       }
 
-
       if (data.token) {
         // Success block continues below
-      } else if (data.msg && data.msg.toLowerCase().includes("already logged in")) {
+      } else if (
+        data.msg &&
+        data.msg.toLowerCase().includes("already logged in")
+      ) {
         setPasswordError("User already logged in!");
         return;
       } else if (data.msg) {
@@ -188,12 +194,14 @@ function Login() {
       localStorage.setItem("user", JSON.stringify(data.token.colleague));
       localStorage.setItem("user_group", data.token.user_group);
       localStorage.setItem("userId", data.token.colleague.emp_name);
+      localStorage.setItem("permissions", JSON.stringify(data.token.permissions));
 
       console.log("Access Token:", data.token.access);
       console.log("Refresh Token:", data.token.refresh);
       console.log("User Group:", data.token.user_group);
       console.log("User Info:", data.token.colleague);
       console.log("Iddddd:", data.token.colleague?.emp_name);
+      console.log("Permissions:", data.token.permissions);
 
       const group = data.token.user_group;
 
@@ -203,6 +211,8 @@ function Login() {
         navigate("/Map");
       } else if (group === "3") {
         navigate("/multiscreen");
+      } else if (group === "4") {
+        navigate("/add-group");
       } else {
         console.warn("Unhandled user group:", group);
         navigate("/not-authorized");
@@ -233,6 +243,9 @@ function Login() {
       } else if (group === "2") {
         console.log("GROUP 2 DETECTED - Navigating to /Map");
         navigate("/Map");
+      } else if (group === "4") {
+        console.log("GROUP 4 DETECTED - Navigating to /add-group");
+        navigate("/add-group");
       } else {
         console.warn("Unhandled user group:", group);
         navigate("/not-authorized");
@@ -242,7 +255,9 @@ function Login() {
       if (err.name === "AbortError") {
         setPasswordError("Login request timed out. Server might be down.");
       } else if (err.message?.includes("Failed to fetch")) {
-        setPasswordError("Cannot connect to server. Please check if backend is running.");
+        setPasswordError(
+          "Cannot connect to server. Please check if backend is running."
+        );
       } else {
         setPasswordError("Login failed. Please try again.");
       }
@@ -250,7 +265,6 @@ function Login() {
       setLoading(false);
     }
   };
-
 
   const handleForgotPasswordSubmit = () => {
     console.log("Username:", username);
@@ -307,8 +321,8 @@ function Login() {
             justifyContent: "center",
             // background:
             //   "radial-gradient(6035.71% 72.44% at 0% 50%, rgba(95, 236, 200, 0.7) 0%, rgba(95, 236, 200, 0.035) 100%)",
-           background:"linear-gradient(rgb(83, 188, 225), rgb(19, 26, 28))",
-              backdropFilter: "blur(10px)",
+            background: "linear-gradient(rgb(83, 188, 225), rgb(19, 26, 28))",
+            backdropFilter: "blur(10px)",
           }}
         >
           <Box
@@ -702,7 +716,7 @@ function Login() {
                 },
               }}
             >
-            Change
+              Change
             </Button>
           </DialogActions>
         </Dialog>

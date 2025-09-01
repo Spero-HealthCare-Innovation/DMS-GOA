@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect} from "react";
 import AppBar from "@mui/material/AppBar";
 import Box from "@mui/material/Box";
 import Toolbar from "@mui/material/Toolbar";
@@ -96,9 +96,10 @@ const Navbar = ({ darkMode, toggleDarkMode }) => {
   const user = JSON.parse(localStorage.getItem("user"));
   const [logoutConfirmOpen, setLogoutConfirmOpen] = useState(false);
   const [oldPassword, setOldPassword] = useState('');
-const [newPassword, setNewPassword] = useState('');
-const [confirmPassword, setConfirmPassword] = useState('');
-const [newPasswordError, setNewPasswordError] = useState("");
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [newPasswordError, setNewPasswordError] = useState("");
+
 
 
   // Determine effective token (context token takes priority)
@@ -157,6 +158,8 @@ const [newPasswordError, setNewPasswordError] = useState("");
       localStorage.removeItem("refresh_token");
       localStorage.removeItem("user");
       localStorage.removeItem("user_group");
+      localStorage.removeItem("user_id");
+      localStorage.removeItem("permissions");
 
       if (response.ok) {
         console.log("Logged out successfully");
@@ -288,65 +291,72 @@ const [newPasswordError, setNewPasswordError] = useState("");
   // }, []);
 
   const validatePassword = (password) => {
-  const regex = /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/;
-  return regex.test(password);
-};
+    const regex = /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/;
+    return regex.test(password);
+  };
 
 
- const handleChangePassword = async () => {
-  if (!validatePassword(newPassword)) {
-  setSnackbar({
-    open: true,
-    message: "Password must be at least 8 characters, include 1 uppercase, 1 lowercase, 1 number, and 1 special character.",
-    severity: "error",
-  });
-  return;
-}
-
-
-  try {
-    const response = await fetch(`${port}/admin_web/emp_changepassword/`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${effectiveToken}`,
-      },
-      body: JSON.stringify({
-        old_password: oldPassword,
-        new_password: newPassword,
-      }),
-    });
-
-    const data = await response.json();
-
-    if (!response.ok) {
+  const handleChangePassword = async () => {
+    if (!validatePassword(newPassword)) {
       setSnackbar({
         open: true,
-        message: data.message || "Failed to change password.",
+        message: "Password must be at least 8 characters, include 1 uppercase, 1 lowercase, 1 number, and 1 special character.",
         severity: "error",
       });
       return;
     }
 
-    setSnackbar({
-      open: true,
-      message: "Password changed successfully!",
-      severity: "success",
-    });
 
-    handleClose();
-    setOldPassword('');
-    setNewPassword('');
-    setConfirmPassword('');
-  } catch (error) {
-    setSnackbar({
-      open: true,
-      message: "An error occurred. Please try again.",
-      severity: "error",
-    });
-    console.error("Change password error:", error);
+    try {
+      const response = await fetch(`${port}/admin_web/emp_changepassword/`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${effectiveToken}`,
+        },
+        body: JSON.stringify({
+          old_password: oldPassword,
+          new_password: newPassword,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        setSnackbar({
+          open: true,
+          message: data.message || "Failed to change password.",
+          severity: "error",
+        });
+        return;
+      }
+
+      setSnackbar({
+        open: true,
+        message: "Password changed successfully!",
+        severity: "success",
+      });
+
+      handleClose();
+      setOldPassword('');
+      setNewPassword('');
+      setConfirmPassword('');
+
+      // Redirect to login after 1 second
+setTimeout(() => {
+  localStorage.removeItem("access_token"); // optional: logout
+  navigate('/login');
+}, 500);
+
+    } catch (error) {
+      setSnackbar({
+        open: true,
+        message: "An error occurred. Please try again.",
+        severity: "error",
+      });
+      console.error("Change password error:", error);
+    }
   }
-}
 
   const [open, setOpen] = React.useState(false);
 
@@ -359,15 +369,15 @@ const [newPasswordError, setNewPasswordError] = useState("");
   };
 
   const [snackbar, setSnackbar] = useState({
-  open: false,
-  message: "",
-  severity: "success", // "success" | "error"
-});
+    open: false,
+    message: "",
+    severity: "success", // "success" | "error"
+  });
 
 
 
   return (
-    
+
     <AppBar
       position="static"
       sx={{
@@ -441,7 +451,7 @@ const [newPasswordError, setNewPasswordError] = useState("");
               fontFamily: "Poppins",
             }}
           >
-            PMC EMERGENCY OPERATIONS CENTER
+            TSC EMERGENCY OPERATIONS CENTER
           </Typography>
         </Box>
 
@@ -707,8 +717,8 @@ const [newPasswordError, setNewPasswordError] = useState("");
                           type="password"
                           fullWidth
                           size="small"
-                           value={oldPassword}
-  onChange={(e) => setOldPassword(e.target.value)}
+                          value={oldPassword}
+                          onChange={(e) => setOldPassword(e.target.value)}
                           InputLabelProps={{
                             sx: { fontSize: '13px' } // set your desired size
                           }}
@@ -721,15 +731,15 @@ const [newPasswordError, setNewPasswordError] = useState("");
                           type="password"
                           fullWidth
                           size="small"
-                            value={newPassword}
-  onChange={(e) => {
-  setNewPassword(e.target.value);
-  if (!validatePassword(e.target.value)) {
-    setNewPasswordError("Weak password. Use 8+ chars, A-Z, 0-9, and symbol.");
-  } else {
-    setNewPasswordError("");
-  }
-}}
+                          value={newPassword}
+                          onChange={(e) => {
+                            setNewPassword(e.target.value);
+                            if (!validatePassword(e.target.value)) {
+                              setNewPasswordError("Weak password. Use 8+ chars, A-Z, 0-9, and symbol.");
+                            } else {
+                              setNewPasswordError("");
+                            }
+                          }}
 
                           InputLabelProps={{
                             sx: { fontSize: '13px' } // set your desired size
@@ -743,19 +753,19 @@ const [newPasswordError, setNewPasswordError] = useState("");
                           type="password"
                           fullWidth
                           size="small"
-                            value={confirmPassword}
-  onChange={(e) => setConfirmPassword(e.target.value)}
+                          value={confirmPassword}
+                          onChange={(e) => setConfirmPassword(e.target.value)}
                           InputLabelProps={{
                             sx: { fontSize: '13px' } // set your desired size
                           }}
                         />
                       </Grid>
-                      
+
                     </Grid>
                   </DialogContent>
                   <DialogActions sx={{ justifyContent: "center", }}>
                     <Button
-                  onClick={handleChangePassword}
+                      onClick={handleChangePassword}
                       sx={{
                         backgroundColor: "rgb(18,166,95,0.8)",
                         color: "white",
@@ -810,20 +820,20 @@ const [newPasswordError, setNewPasswordError] = useState("");
       </Toolbar>
 
       <Snackbar
-  open={snackbar.open}
-  autoHideDuration={3000}
-  onClose={() => setSnackbar({ ...snackbar, open: false })}
-  anchorOrigin={{ vertical: "top", horizontal: "center" }}
->
-  <Alert
-    severity={snackbar.severity}
-    variant="filled"
-    onClose={() => setSnackbar({ ...snackbar, open: false })}
-    sx={{ width: "100%" }}
-  >
-    {snackbar.message}
-  </Alert>
-</Snackbar>
+        open={snackbar.open}
+        autoHideDuration={3000}
+        onClose={() => setSnackbar({ ...snackbar, open: false })}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+      >
+        <Alert
+          severity={snackbar.severity}
+          variant="filled"
+          onClose={() => setSnackbar({ ...snackbar, open: false })}
+          sx={{ width: "100%" }}
+        >
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
 
     </AppBar>
   );

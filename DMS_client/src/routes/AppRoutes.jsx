@@ -8,6 +8,7 @@ import RegisterResponder from "../Componenets/SuperAdmin/Responder/RegisterRespo
 import ProtectedLoginRoute from "../Componenets/Login/ProtectedLoginRoute";
 import IncidentReport from "../Componenets/SuperAdmin/Incident/IncidentReport";
 import Permission from "../Componenets/SuperAdmin/System/Permission/Permission";
+import Dashboard from "../Componenets/SuperAdmin/System/Dashboard/Dashboard";
 const Login = lazy(() => import("../Componenets/Login/Login"));
 const Sop = lazy(() => import("../Componenets/DispatchModule/SOP/Sop"));
 const AlertPanel = lazy(() => import("../Componenets/DispatchModule/AlertPanel/AlertPanel"));
@@ -82,7 +83,7 @@ const AppRoutes = ({ darkMode, setIsLoggedIn }) => {
           }
         />
         <Route
-          path="/alert-panel"
+          path="/Alert-Panel"
           element={
             <PrivateRoute>
               <AlertPanel darkMode={darkMode} />
@@ -93,7 +94,9 @@ const AppRoutes = ({ darkMode, setIsLoggedIn }) => {
           path="/sop"
           element={
             <PrivateRoute>
-              <Sop darkMode={darkMode} />
+              <Box sx={{ ml: localStorage.getItem("user_group") === "1" ? "50px" : "0px" }}>
+                <Sop darkMode={darkMode} />
+              </Box>
             </PrivateRoute>
           }
         />
@@ -125,12 +128,14 @@ const AppRoutes = ({ darkMode, setIsLoggedIn }) => {
           path="/create-incident"
           element={
             <PrivateRoute>
-              <Incident darkMode={darkMode} />
+              <Box sx={{ ml: localStorage.getItem("user_group") === "1" ? "50px" : "0px" }}>
+                <Incident darkMode={darkMode} />
+              </Box>
             </PrivateRoute>
           }
         />
         <Route
-          path="/Register Sop"
+          path="/Register-Sop"
           element={
             <PrivateRoute>
               <SopRegister darkMode={darkMode} />
@@ -146,7 +151,7 @@ const AppRoutes = ({ darkMode, setIsLoggedIn }) => {
           }
         />
         <Route
-          path="/Closure Report"
+          path="/Closure-Report"
           element={
             <PrivateRoute>
               <ClosureDetail darkMode={darkMode} />
@@ -154,27 +159,39 @@ const AppRoutes = ({ darkMode, setIsLoggedIn }) => {
           }
         />
         <Route
+<<<<<<< HEAD
           path="/Incident Report"
+=======
+          path="/Incident-Report"
+>>>>>>> Frontend
           element={
             <PrivateRoute>
               <IncidentReport darkMode={darkMode} />
             </PrivateRoute>
           }
         />
-         <Route
-          path="/Manage Roles"
+        <Route
+          path="/Permission"
           element={
             <PrivateRoute>
               <Permission darkMode={darkMode} />
             </PrivateRoute>
           }
         />
+<<<<<<< HEAD
 
         <Route
           path="/roles"
           element={
             <PrivateRoute>
               <Permission darkMode={darkMode} />
+=======
+         <Route
+          path="/Dashboard"
+          element={
+            <PrivateRoute>
+              <Dashboard darkMode={darkMode} />
+>>>>>>> Frontend
             </PrivateRoute>
           }
         />

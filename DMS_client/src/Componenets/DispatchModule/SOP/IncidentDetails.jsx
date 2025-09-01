@@ -13,6 +13,8 @@ import {
   InputAdornment,
   Autocomplete,
   Popper,
+  Button,
+  DialogActions,
 } from "@mui/material";
 import CommentsPanel from "./CommentsPanel";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
@@ -26,6 +28,7 @@ import DialogContent from "@mui/material/DialogContent";
 import CloseIcon from "@mui/icons-material/Close";
 import { ArrowDropDownCircleOutlined } from "@mui/icons-material";
 import * as turf from "@turf/turf";
+import ResponderModal from "./ResponderModal";
 
 function IncidentDetails({
   darkMode,
@@ -86,9 +89,11 @@ function IncidentDetails({
   const [selectedWardOfficer, setSelectedWardOfficer] = useState([]);
   const [wardOfficerList, setWardOfficerList] = useState([]);
   const [selectedResponders, setSelectedResponders] = useState([]);
-  const [Latitude, setLatitude] = useState("");
+  const [lattitude, setLatitude] = useState("");
   const [Longitude, setLongitude] = useState("");
   const [openDialog, setOpenDialog] = useState(false);
+
+
 
   const [stateData, setStateData] = useState(null);
 
@@ -96,6 +101,22 @@ function IncidentDetails({
   const [districtManual, setDistrictManual] = useState(false);
   const [tehsilManual, setTehsilManual] = useState(false);
   const [wardManual, setWardManual] = useState(false);
+
+
+ //responder modal
+  const [activeResponder, setActiveResponder] = useState(null);
+  const [openModal, setOpenModal] = useState(false);
+  const [assignedMap, setAssignedMap] = useState({});
+const [vehicleIds, setVehicleIds] = useState([]);
+const [openAmbulanceModal, setOpenAmbulanceModal] = useState(false);
+
+  // ✅ Button click pe modal open
+  const handleOpenModal = () => {
+    setActiveResponder(selectedResponders[0]); // default tab first responder
+    setOpenModal(true);
+  };
+
+  
 
   // =================== CONTEXT (useAuth) VARIABLES ========================
 
@@ -211,7 +232,7 @@ function IncidentDetails({
     }
   }, [selectedIncident]);
 
-  console.log(`Latitude: ${Latitude}, Longitude: ${Longitude}`);
+  console.log(`Latitude: ${lattitude}, Longitude: ${Longitude}`);
 
   // ==================== GIS CODE START ================================
 
@@ -330,14 +351,21 @@ function IncidentDetails({
 
   // ================== RESPONDER & COMMENT DATA ========================
   // ============ SET DEFAULT RESPONDERS ===============================
+  // useEffect(() => {
+  //   if (Array.isArray(responderScope?.responder_scope)) {
+  //     const defaultSelected = responderScope.responder_scope.map(
+  //       (r) => r.res_id
+  //     );
+  //     setSelectedResponders(defaultSelected);
+  //   }
+  // }, [responderScope]);
+
   useEffect(() => {
-    if (Array.isArray(responderScope?.responder_scope)) {
-      const defaultSelected = responderScope.responder_scope.map(
-        (r) => r.res_id
-      );
-      setSelectedResponders(defaultSelected);
-    }
-  }, [responderScope]);
+  if (Array.isArray(responderScope?.responder_scope)) {
+    setSelectedResponders([]); // default empty → sab unchecked
+  }
+}, [responderScope]);
+
 
   // ================== FIELD VALIDATION LOGIC ==========================
 
@@ -1381,60 +1409,92 @@ function IncidentDetails({
                   )}
                 </Box>
 
-                <Box>
-                  <Typography
-                    variant="subtitle2"
-                    sx={{ color: labelColor, fontWeight: 500, fontFamily }}
-                  >
-                    Responder Scope
-                  </Typography>
-                  {responderScope?.responder_scope?.length > 0 ? (
-                    <Stack spacing={1} mt={1}>
-                      <Box display="flex" flexWrap="wrap" gap={1}>
-                        {responderScope.responder_scope.map(
-                          ({ res_id, responder_name }) => (
-                            <FormControlLabel
-                              key={res_id}
-                              control={
-                                <Checkbox
-                                  checked={selectedResponders.includes(res_id)}
-                                  onChange={(e) => {
-                                    if (e.target.checked) {
-                                      setSelectedResponders((prev) => [
-                                        ...prev,
-                                        res_id,
-                                      ]);
-                                    } else {
-                                      setSelectedResponders((prev) =>
-                                        prev.filter((id) => id !== res_id)
-                                      );
-                                    }
-                                  }}
-                                  sx={{ color: labelColor }}
-                                />
-                              }
-                              label={
-                                <Typography
-                                  variant="subtitle2"
-                                  sx={{ fontFamily }}
-                                >
-                                  {responder_name}
-                                </Typography>
-                              }
-                            />
-                          )
-                        )}
-                      </Box>
-                    </Stack>
-                  ) : (
-                    <Box display="flex" alignItems="center" gap={1} mt={1}>
-                      {/* <InfoOutlinedIcon color="disabled" /> */}
-                      <Typography variant="subtitle2" sx={{ fontFamily }}>
-                        Responder scope data not available.
-                      </Typography>
-                    </Box>
-                  )}
-                </Box>
+ <Box>
+  <Typography
+    variant="subtitle2"
+    sx={{ color: labelColor, fontWeight: 500, fontFamily }}
+  >
+    Responder Scope
+  </Typography>
+  {responderScope?.responder_scope?.length > 0 ? (
+    <Stack spacing={1} mt={1}>
+      <Box display="flex" flexWrap="wrap" gap={1}>
+        {responderScope.responder_scope.map(
+          ({ res_id, responder_name }) => (
+            <FormControlLabel
+              key={res_id}
+              control={
+                <Checkbox
+                  checked={selectedResponders.includes(res_id)}
+                  onChange={(e) => {
+                    if (e.target.checked) {
+                      // add responder
+                      setSelectedResponders((prev) => [...prev, res_id]);
+                      setActiveResponder({ res_id, responder_name });
+                    } else {
+                      // remove responder
+                      setSelectedResponders((prev) =>
+                        prev.filter((id) => id !== res_id)
+                      );
+                      if (activeResponder?.res_id === res_id) {
+                        setActiveResponder(null);
+                      }
+                    }
+                  }}
+                  sx={{ color: labelColor }}
+                />
+              }
+              label={
+                <Typography variant="subtitle2" sx={{ fontFamily }}>
+                  {responder_name}
+                </Typography>
+              }
+            />
+          )
+        )}
+      </Box>
+
+      {/* View Responder Button */}
+      <Box mt={2}>
+        <Button
+          variant="contained"
+          size="small"
+          disabled={selectedResponders.length === 0} // ✅ at least 1 responder select hona chahiye
+          onClick={() => setOpenModal(true)}
+        >
+          View Responder
+        </Button>
+      </Box>
+    </Stack>
+  ) : (
+    <Box display="flex" alignItems="center" gap={1} mt={1}>
+      <Typography variant="subtitle2" sx={{ fontFamily }}>
+        Responder scope data not available.
+      </Typography>
+    </Box>
+  )}
+
+{openModal && (
+  <ResponderModal
+    open={openModal}
+    responderList={responderScope.responder_scope} // 👉 saare responders bhejo
+    selectedResponders={selectedResponders}        // 👉 checkbox se selected list bhejo
+    responder={activeResponder}
+    lattitude={lattitude}
+    longitude={longitude}
+    assignedMap={assignedMap}
+    onClose={() => setOpenModal(false)}
+  onSave={(data) => {
+  console.log("Saved Data:", data);
+  setAssignedMap(data.assignedVehicles);
+  setVehicleIds(data.assignedVehicles || []); 
+  setOpenModal(false);
+}}
+  />
+)}
+</Box>
+
+
               </>
             ) : (
               <>
@@ -1595,6 +1655,22 @@ function IncidentDetails({
                     </Box>
                   )}
                 </Box>
+                <Box mt={1}>
+  <Button
+    variant="contained"
+    size="small"
+    onClick={() => setOpenAmbulanceModal(true)}
+    disabled={!selectedIncident}   // <-- disable if no incident selected
+    sx={{ 
+      textTransform: "none", 
+      borderRadius: "8px",
+      opacity: !selectedIncident ? 0.6 : 1  // thoda faded look when disabled
+    }}
+  >
+    View Assigned Ambulance
+  </Button>
+</Box>
+
               </>
             )}
           </Grid>
@@ -1634,6 +1710,7 @@ function IncidentDetails({
                 validateFields={validateFields}
                 fieldErrors={fieldErrors}
                 setFieldErrors={setFieldErrors}
+                 savedResponderData={vehicleIds}
               />
             ) : (
               <Typography
@@ -1645,6 +1722,52 @@ function IncidentDetails({
             )}
           </Grid>
         </Grid>
+        
+
+
+{/* ASSIGND AMBULANCE MODAL */}
+
+   <Dialog
+  open={openAmbulanceModal}
+  onClose={() => setOpenAmbulanceModal(false)}
+  maxWidth="sm"
+  fullWidth
+>
+  <DialogTitle>Assigned Ambulances</DialogTitle>
+  <DialogContent dividers>
+    {Array.isArray(incidentDetails?.["responders scope"]) &&
+    incidentDetails["responders scope"].length > 0 ? (
+      incidentDetails["responders scope"].map(
+        ({ responder_id, responder_name, vehicles }) => (
+          <Box key={responder_id} mb={2}>
+            <Typography
+              variant="subtitle1"
+              sx={{ fontWeight: 600, mb: 1 }}
+            >
+              {responder_name}
+            </Typography>
+            {Array.isArray(vehicles) && vehicles.length > 0 ? (
+              <Stack spacing={1}>
+                {vehicles.map((veh, idx) => (
+                  <Typography key={idx} variant="body2">
+                    🚑 {veh.vehicle_name}
+                  </Typography>
+                ))}
+              </Stack>
+            ) : (
+              <Typography variant="body2" color="text.secondary">
+                No ambulances assigned
+              </Typography>
+            )}
+          </Box>
+        )
+      )
+    ) : (
+      <Typography>No responder scope available.</Typography>
+    )}
+  </DialogContent>
+</Dialog>
+
       </Paper>
     </>
   );

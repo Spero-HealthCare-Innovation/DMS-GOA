@@ -735,6 +735,7 @@ function Add_employee({ darkMode }) {
       showAlertMessage("Failed to update password.", "error");
     }
   };
+  
 
   return (
     <div style={{ marginLeft: "4rem" }}>
@@ -1215,7 +1216,7 @@ function Add_employee({ darkMode }) {
 
                 // Set editing flags
                 setIsEditing(true);
-                setEditingEmployeeId(empData.emp_id);
+                setEditingEmployeeId(empData.emp_id );
                 setEditSelectedRowId(empData.emp_id);
 
                 // Set location data directly - make sure the context has this data loaded

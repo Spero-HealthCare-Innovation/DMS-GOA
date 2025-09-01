@@ -63,8 +63,11 @@ export const AuthProvider = ({ children }) => {
   // console.log(responderScopeForDispatch, "disasterIncident");
   const [enhancedIncidentData, setEnhancedIncidentData] = useState(null);
   const [selectedIncidentFromSop, setSelectedIncidentFromSop] = useState(null);
-  console.log(selectedIncidentFromSop,'selectedIncidentFromSopselectedIncidentFromSop');
-  
+  console.log(
+    selectedIncidentFromSop,
+    "selectedIncidentFromSopselectedIncidentFromSop"
+  );
+
   const [isNewEntry, setIsNewEntry] = useState(false);
   // To fetch the ward,tehsil, district from the map
   const [wardName, setWardName] = useState("");
@@ -73,8 +76,8 @@ export const AuthProvider = ({ children }) => {
 
   // const [disasterIdFromSop, setDisasterIdFromSop] = useState(null);
   useEffect(() => {
-    const disasterValue = disaterid || disasterIncident || disasterIdFromSop;
-    // console.log(disasterValue, "passingValue");
+    const disasterValue = disaterid || disasterIncident || disasterIdFromSop || selectedChiefComplaint;
+    console.log(disasterValue, "passingValue");
 
     if (disasterValue) {
       fetchResponderScope(disasterValue);
@@ -223,12 +226,12 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const fetchResponderScope = async (disasterValue) => {
-    if (!disasterValue) return;
+  const fetchResponderScope = async (selectedChiefComplaint) => {
+    if (!selectedChiefComplaint) return;
     try {
       setLoading(true);
       const res = await axios.get(
-        `${port}/admin_web/Responder_Scope_Get/${disasterValue}/`,
+        `${port}/admin_web/Responder_Scope_Get/${selectedChiefComplaint}`,
         {
           headers: {
             Authorization: `Bearer ${newToken || token}`,
@@ -362,7 +365,8 @@ export const AuthProvider = ({ children }) => {
   // ✅ useEffect for selectedTehsilId change (fetch cities)
   useEffect(() => {
     if (selectedTehsilId) {
-      fetchCitysByTehshil(selectedTehsilId);fetchDistrictsByState 
+      fetchCitysByTehshil(selectedTehsilId);
+      fetchDistrictsByState;
       fetchWardsByTehshil(selectedTehsilId);
       setSelectedCityId("");
     } else {
@@ -372,19 +376,76 @@ export const AuthProvider = ({ children }) => {
   }, [selectedTehsilId]);
 
   // DISASTER GET API
-  const [disaster, setDisaster] = useState([]);
+
+  const [callType, setCallType] = useState([]);
+  const [selectedcallType, setselectedcallType] = useState([]);
   useEffect(() => {
-    const fetchDisaster = async () => {
-      const disaster = await fetch(`${port}/admin_web/DMS_Disaster_Type_Get/`, {
+    const FetchcallType = async () => {
+      const res = await fetch(`${port}/admin_web/call_type/`, {
         headers: {
           Authorization: `Bearer ${token || newToken}`,
         },
       });
-      const disasterData = await disaster.json();
-      setDisaster(disasterData);
+      const data = await res.json();
+      setCallType(data);
     };
-    fetchDisaster();
+    FetchcallType();
   }, []);
+
+  // chief complaint
+
+  const [disaster, setDisaster] = useState([]);
+  const [selectedChiefComplaint, setselectedChiefComplaint] = useState(null);
+  const [ChiefComplaint, setChiefComplaint] = useState([]);
+  useEffect(() => {
+    const fetchChiefComplaint = async () => {
+      if (!selectedcallType) return;
+      // const disaster = await fetch(`${port}/admin_web/DMS_Disaster_Type_Get/`,
+      const ChiefComplaint = await fetch(
+        `${port}/admin_web/parent_complaint_get_calltypewise/${selectedcallType}/`,
+
+        {
+          headers: {
+            Authorization: `Bearer ${token || newToken}`,
+          },
+        }
+      );
+      const chiefComplaintData = await ChiefComplaint.json();
+      setChiefComplaint(chiefComplaintData);
+    };
+    fetchChiefComplaint();
+  }, [selectedcallType]);
+
+  const [subChiefComplaint, setSubChiefComplaint] = useState([]);
+  const [selectedSubchiefComplaint, setselectedSubchiefComplaint] = useState(
+    []
+  );
+
+ // Fetch Sub Chief Complaints when Chief Complaint changes
+useEffect(() => {
+  const fetchSubChiefComplaint = async () => {
+    if (!selectedChiefComplaint) return;
+
+    try {
+      const res = await fetch(
+        `${port}/admin_web/disaster_type_disaster_parent/${selectedChiefComplaint}/`,
+        {
+          headers: {
+            Authorization: `Bearer ${token || newToken}`,
+          },
+        }
+      );
+      if (!res.ok) throw new Error("Failed to fetch sub chief complaints");
+      const data = await res.json();
+      setSubChiefComplaint(data); 
+    } catch (err) {
+      console.error("Error fetching sub chief complaints:", err);
+    }
+  };
+
+  fetchSubChiefComplaint();
+}, [selectedChiefComplaint, port, token, newToken]); // ✅ Correct dependency
+
 
   return (
     <AuthContext.Provider
@@ -394,17 +455,28 @@ export const AuthProvider = ({ children }) => {
         Tehsils,
         Citys,
         Wards,
+        subChiefComplaint,
+        ChiefComplaint,
+        callType,
+        selectedSubchiefComplaint,
         departments,
         selectedStateId,
         selectedDistrictId,
         selectedTehsilId,
+        selectedcallType,
+        selectedChiefComplaint,
         selectedCityID,
         selectedWardId,
         setSelectedStateId,
+        setselectedSubchiefComplaint,
+        setSubChiefComplaint,
         setSelectedDistrictId,
+        setChiefComplaint,
+        setselectedChiefComplaint,
         setSelectedTehsilId,
         setSelectedCityId,
         setSelectedWardId,
+        setselectedcallType,
         loading,
         error,
         newToken,
@@ -424,6 +496,7 @@ export const AuthProvider = ({ children }) => {
         selectedPosition,
         popupText,
         setPopupText,
+        setCallType,
         setQuery,
         selectedIncidentFromSop,
         setSelectedIncidentFromSop,
@@ -449,7 +522,7 @@ export const AuthProvider = ({ children }) => {
         setDistrictName,
         selectedDisasterId,
         setSelectedDisasterId,
-        selectedDisasterName,        
+        selectedDisasterName,
         setSelectedDisasterName,
       }}
     >
