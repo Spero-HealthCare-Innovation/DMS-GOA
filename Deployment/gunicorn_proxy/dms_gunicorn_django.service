@@ -11,6 +11,7 @@ ExecStart=/var/www/html/DMS_goa/vvenv/bin/gunicorn \
         --error-logfile /var/www/html/DMS_goa/Deployment/logs/error.log \
         --access-logfile /var/www/html/DMS_goa/Deployment/logs/access.log \
         --workers 3 \
+        --timeout 300 \   
         --capture-output --log-level debug \
         --bind unix:/run/dms_gunicorn.sock \
         DMS_goa.wsgi:application

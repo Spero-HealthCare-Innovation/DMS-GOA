@@ -562,6 +562,11 @@ class DMS_Incident(models.Model):
     inc_added_date = models.DateTimeField(auto_now=True)
     inc_modified_by = models.CharField(max_length=255, null=True, blank=True)
     inc_modified_date = models.DateTimeField(auto_now=True,null=True, blank=True)
+    call_recieved_from = enum.EnumField(call_recieved_enum,null=True,blank=True)
+    call_type = models.ForeignKey('CallType',on_delete=models.CASCADE,null=True,blank=True)
+    parent_complaint = models.ForeignKey('ParentComplaint',on_delete=models.CASCADE,null=True,blank=True)
+ 
+ 
     
     
     def save(self, *args, **kwargs):
