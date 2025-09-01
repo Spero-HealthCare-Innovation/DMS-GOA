@@ -971,6 +971,7 @@ class CallType(models.Model):
  
 class ParentComplaint(models.Model):
     pc_id = models.AutoField(primary_key=True)
+    pc_code = models.CharField(max_length=100, null=True, blank=True)
     pc_type = models.CharField(max_length=100, null=True, blank=True)
     pc_name = models.CharField(max_length=100, null=True, blank=True)
     parent_is_deleted = models.BooleanField(default=False)
