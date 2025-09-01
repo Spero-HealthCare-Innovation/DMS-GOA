@@ -867,7 +867,7 @@ class Clockinout(APIView):
                 else:
                     return Response({"data": None,"error": {"code": 1,"message": "Employee not found or already clocked out"}}, status=status.HTTP_200_OK)  
         except Exception as e:
-            return Response({"data": None,"error": {"code": 1,"message": "Clock in/out Not Successfully"},"ex_error": str(e)}, status=status.HTTP_200_OK)
+            return Response({"data": None,"error": {"code": 1,"message": "Clock in/out Not Successfully"}}, status=status.HTTP_200_OK)
 			
 			
 #Dashboard---------------------Mayank
