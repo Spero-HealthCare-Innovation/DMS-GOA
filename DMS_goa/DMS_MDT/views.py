@@ -170,13 +170,14 @@ class VehicleLogout(APIView):
                 token_obj = RefreshToken(refresh_token)
                 token_obj.blacklist()
             except TokenError:
-                return Response({
-                    "data": {
-                        "code": 1,
-                        "message": "Invalid or expired refresh token"
-                    },
-                    "error": None
-                }, status=status.HTTP_200_OK)
+                # return Response({
+                #     "data": {
+                #         "code": 1,
+                #         "message": "Invalid or expired refresh token"
+                #     },
+                #     "error": None
+                # }, status=status.HTTP_200_OK)
+                pass
 
             vehicle_obj = Vehical.objects.filter(veh_number=veh_number).last()
             if not vehicle_obj:
@@ -661,11 +662,11 @@ class get_assign_inc_calls(APIView):
                 "incidentAddress": veh.incident_id.location,
                 "incidentStatus": str(veh.pcr_status),
                 "currentStatus": {
-                    "code": pcr_exists.status if pcr_exists else 1,
+                    "code": pcr_exists.status if pcr_exists else 0,
                     "outOfSych": "false",
                     "message": "Already back to base"
                 },
-                "incidentCallsStatus": "In-progress",
+                "incidentCallsStatus": pcr_exists.status if pcr_exists else 0,
                 "clikable": "true",
                 "progress": "true",
                 "completed": "true" if veh.jobclosure_status==1 else "false",
