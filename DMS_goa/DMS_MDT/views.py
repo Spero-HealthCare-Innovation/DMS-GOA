@@ -11,6 +11,7 @@ from django.utils import timezone
 from admin_web.models import *
 import math
 # from datetime import datetime
+from datetime import datetime, timedelta
 
 from datetime import datetime
 
@@ -865,3 +866,33 @@ class Clockinout(APIView):
             return Response({"data": None,"error": {"code": 1,"message": "Clock in/out Not Successfully"},"ex_error": str(e)}, status=status.HTTP_200_OK)
 			
 			
+#Dashboard---------------------Mayank
+
+class VehicalDashboardCount(APIView):
+    def get(self, request):
+        today = now().date()
+
+        # Total Vehicles
+        total_vehicle = Vehical.objects.count()
+
+        # Today Added Vehicles
+        today_vehicle = Vehical.objects.filter(veh_added_date__date=today).count()
+
+        # Last Month Vehicles
+        first_day_this_month = today.replace(day=1)
+        last_month_end = first_day_this_month - timedelta(days=1)
+        last_month_start = last_month_end.replace(day=1)
+
+        last_month_vehicle = Vehical.objects.filter(
+            veh_added_date__date__gte=last_month_start,
+            veh_added_date__date__lte=last_month_end,
+            status=1
+        ).count()
+
+        data = {
+            "total_vehicle_today": total_vehicle,
+            # "today_vehicle": today_vehicle,
+            "last_month_vehicle": last_month_vehicle,
+        }
+
+        return Response(data)

@@ -546,7 +546,7 @@ class DMS_Incident(models.Model):
     alert_division=enum.EnumField(division_enum,null=True,blank=True)
     # inc_datetime = models.DateTimeField(auto_now=True)
     mode = models.IntegerField(null=True,blank=True)
-    time = models.CharField(max_length=255,null=True,blank=True)
+    time = models.TimeField(null=True,blank=True)
     ward = models.ForeignKey('DMS_Ward',on_delete=models.CASCADE,null=True,blank=True)
     # ward_officer = models.ManyToManyField(
     #     'DMS_Ward',
