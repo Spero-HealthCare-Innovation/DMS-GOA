@@ -42,7 +42,9 @@ function CommentsPanel({
   validateFields,
   fieldErrors,
   setFieldErrors,
+  vehicleIds,
 }) {
+  console.log(vehicleIds, "vehicleIds");
   const port = import.meta.env.VITE_APP_API_KEY;
   const userName = localStorage.getItem("userId");
   const { newToken, commentText, setCommentText } = useAuth();
@@ -55,13 +57,11 @@ function CommentsPanel({
   });
 
   console.log(selectedIncident, "selectedIncident in Comment");
- window.addEventListener('storage', (e) => {
-        if (e.key === 'logout') {
-            location.href = '/login';
-        }
-    });
-
-  // const [commentText, setCommentText] = useState("");
+  window.addEventListener("storage", (e) => {
+    if (e.key === "logout") {
+      location.href = "/login";
+    }
+  });
 
   const [placeholderVisible, setPlaceholderVisible] = useState(true);
   const [allComments, setAllComments] = useState([]);
@@ -122,7 +122,8 @@ function CommentsPanel({
     if (!selectedDistrictId) errors.district = "District is required";
     if (!selectedTehsilId) errors.tehsil = "Tehsil is required";
     if (!selectedWard) errors.ward = "Ward is required";
-    if (!selectedWardOfficer || selectedWardOfficer.length === 0) errors.wardOfficer = "Ward Officer is required";
+    if (!selectedWardOfficer || selectedWardOfficer.length === 0)
+      errors.wardOfficer = "Ward Officer is required";
     if (!selectedSummary) errors.summary = "Summary is required";
     if (!query) errors.location = "Location is required";
 
@@ -156,7 +157,10 @@ function CommentsPanel({
       ward_officer: selectedWardOfficer.map(Number),
       summary: selectedSummary,
       location: query,
+      vehicle: vehicleIds || [] ,
+      
     };
+    console.log("Payload to be sent:", payload);
 
     try {
       const response = await fetch(`${port}/admin_web/DMS_Incident_Post/`, {
@@ -200,133 +204,6 @@ function CommentsPanel({
       });
     }
   };
-  //   const handlealertSaveClick = async () => {
-  //     if (!commentText.trim()) return;
-
-  //     const payload = {
-  //       responder_scope: selectedResponders.map(String),
-  //       alert_id: selectedIncident?.pk_id,
-  //       disaster_type: selectedIncident?.disaster_id_id,
-  //       comments: commentText,
-  //       comm_added_by: userName,
-  //       inc_added_by: userName,
-  //       latitude: selectedIncident?.latitude,
-  //       longitude: selectedIncident?.longitude,
-  //       alert_type: selectedIncident?.alert_type,
-  //       mode: "2",
-  //       district: selectedDistrictId,
-  //       tahsil: selectedTehsilId,
-  //       ward: selectedWard,
-  // ward_officer: selectedWardOfficer.map(Number),
-  //       summary: selectedSummary,
-  //      location: query,
-  //     };
-
-  //     console.log(location)
-  //     try {
-  //       const response = await fetch(`${port}/admin_web/DMS_Incident_Post/`, {
-  //         method: "POST",
-  //         headers: {
-  //           "Content-Type": "application/json",
-  //           Authorization: `Bearer ${Token || newToken}`,
-  //         },
-  //         body: JSON.stringify(payload),
-  //       });
-
-  //       if (response.ok) {
-  //         setSnackbar({
-  //           open: true,
-  //           message: "Dispatch alert sent successfully!",
-  //           severity: "success",
-  //         });
-  //         setCommentText("");
-  //         setSelectedResponders([]);
-  //         setFlag(0);
-
-  //         setHighlightedId(null);
-
-  //         setSelectedDistrictId("");
-  //         setSelectedTehsilId("");
-  //         setSelectedWard("");
-  //         setSelectedWardOfficer("");
-  //         setSelectedSummary("");
-  //         setQuery("");
-  //         await fetchDispatchList();
-  //       } else {
-  //         throw new Error("API Error");
-  //       }
-  //     } catch (err) {
-  //       console.error(err);
-  //       setSnackbar({
-  //         open: true,
-  //         message: "Failed to send dispatch alert.",
-  //         severity: "error",
-  //       });
-  //     }
-  //   };
-
-  // const handleCommentSendClick = async () => {
-  //   if (!commentText.trim()) return;
-
-  //   try {
-  //     const response = await fetch(
-  //       `${port}/admin_web/comments_post/${selectedIncident?.inc_id}/`,
-  //       {
-  //         method: "POST",
-  //         headers: {
-  //           "Content-Type": "application/json",
-  //           Authorization: `Bearer ${Token || newToken}`,
-  //         },
-  //         body: JSON.stringify({
-  //           comments: commentText,
-  //           comm_added_by: userName,
-  //         }),
-  //       }
-  //     );
-
-  //     // if (!response.ok) throw new Error("Failed to send comment.");
-
-  //     // const secondResponse = await fetch(`http://210.212.165.119/Spero_DMS/dms/alert_details`, {
-  //     //   method: "POST",
-  //     //   headers: {
-  //     //     "Content-Type": "application/json",
-  //     //     Authorization: `Bearer ${Token || newToken}`,
-  //     //   },
-  //     //   body: JSON.stringify({
-  //     //     caller_name: selectedIncident?.incident_details[0]?.caller_name || null,
-  //     //     caller_no: selectedIncident?.incident_details[0]?.caller_no || null,
-  //     //     disaster_name: selectedIncident?.incident_details[0]?.disaster_name || null,
-  //     //     location: selectedIncident?.incident_details[0]?.location || null,
-  //     //     summary: selectedIncident?.incident_details[0]?.summary || null,
-  //     //     units: "1",
-  //     //     inc_type: selectedIncident?.incident_details[0]?.inc_type || null,
-  //     //     incident_id: selectedIncident?.incident_id || null,
-  //     //     latitude: selectedIncident?.incident_details[0]?.latitude || null,
-  //     //     longitude: selectedIncident?.incident_details[0]?.longitude || null,
-  //     //     // alert_type: selectedIncident?.alert_type || null,
-  //     //   }),
-  //     // });
-
-  //     if (!response.ok)
-  //       throw new Error("Failed to log comment activity.");
-  //     setSnackbar({
-  //       open: true,
-  //       message: "Comment sent successfully!",
-  //       severity: "success",
-  //     });
-
-  //     setCommentText("");
-  //     await fetchDispatchList();
-  //     fetchIncidentDetails();
-  //   } catch (err) {
-  //     console.error(err);
-  //     setSnackbar({
-  //       open: true,
-  //       message: "Failed to send comment.",
-  //       severity: "error",
-  //     });
-  //   }
-  // };
 
   const handleCommentSendClick = async () => {
     if (!commentText.trim()) return;
@@ -368,57 +245,6 @@ function CommentsPanel({
     }
   };
 
-  // const handleCommentSendClick = async () => {
-  //   if (!commentText.trim()) return;
-
-  //   try {
-  //     const response = await fetch(
-  //       `${port}/admin_web/comments_post/${selectedIncident?.inc_id}/`,
-  //       {
-  //         method: "POST",
-  //         headers: {
-  //           "Content-Type": "application/json",
-  //           Authorization: `Bearer ${Token || newToken}`,
-  //         },
-  //         body: JSON.stringify({
-  //           comments: commentText,
-  //           comm_added_by: userName,
-  //         }),
-  //       }
-  //     );
-
-  //     if (response.ok) {
-  //       const newComment = {
-  //         comments: commentText,
-  //         comm_added_by: userName,
-  //         comm_id: Date.now(),
-  //         incident_id: selectedIncident?.inc_id,
-  //          comm_created_at: new Date().toISOString(),
-  //       };
-
-  //       setAllComments((prev) => [...prev, newComment]);
-
-  //       setSnackbar({
-  //         open: true,
-  //         message: "Comment sent successfully!",
-  //         severity: "success",
-  //       });
-
-  //       setCommentText("");
-  //       fetchDispatchList();
-  //     } else {
-  //       throw new Error("Failed to send comment.");
-  //     }
-  //   } catch (err) {
-  //     console.error(err);
-  //     setSnackbar({
-  //       open: true,
-  //       message: "Failed to send comment.",
-  //       severity: "error",
-  //     });
-  //   }
-  // };
-
   const getInitials = (name) => name?.charAt(0)?.toUpperCase() || "?";
   const incidentComments = useMemo(() => {
     if (
@@ -434,6 +260,36 @@ function CommentsPanel({
     }
     return [];
   }, [incidentDetails, allComments, selectedIncident]);
+
+  const [saveButton, setSaveButton] = useState(false);
+
+  useEffect(() => {
+    const storedPermissions = JSON.parse(localStorage.getItem("permissions"));
+
+    if (storedPermissions && storedPermissions.length > 0) {
+      const modules = storedPermissions[0].modules_submodule;
+
+      const sopModule = modules.find((mod) => mod.moduleName === "SOP");
+
+      if (sopModule) {
+        console.log("SOP Module:", sopModule);
+
+        sopModule.selectedSubmodules?.forEach((sub) => {
+          console.log("Submodule:", sub.submoduleName);
+
+          sub.selectedActions?.forEach((act) => {
+            console.log("Action:", act.actionName);
+
+            if (act.actionName === "Save") {
+              setSaveButton(true);
+            }
+          });
+        });
+      } else {
+        console.warn("SOP module not found in permissions");
+      }
+    }
+  }, []);
 
   return (
     <Paper elevation={1} sx={paperStyle}>
@@ -520,15 +376,15 @@ function CommentsPanel({
                         >
                           {comm_added_date
                             ? new Date(comm_added_date).toLocaleString(
-                              "en-IN",
-                              {
-                                day: "2-digit",
-                                month: "short",
-                                year: "numeric",
-                                hour: "2-digit",
-                                minute: "2-digit",
-                              }
-                            )
+                                "en-IN",
+                                {
+                                  day: "2-digit",
+                                  month: "short",
+                                  year: "numeric",
+                                  hour: "2-digit",
+                                  minute: "2-digit",
+                                }
+                              )
                             : "N/A"}
                         </Typography>
                       </Box>
@@ -546,15 +402,12 @@ function CommentsPanel({
         </Box>
       )}
 
-      {/* Input + Button */}
       {flag === 1 ? (
-        // ALERT UI
         <Box
           sx={{
             display: "flex",
             flexDirection: "column",
             gap: 1,
-            // backgroundColor: darkMode ? "rgb(53, 51, 51)" : "#f1f5f9",
             borderRadius: 2,
             px: 2,
             py: 1.5,
@@ -576,18 +429,19 @@ function CommentsPanel({
               },
             }}
           />
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={handlealertSaveClick}
-            disabled={!commentText.trim()}
-            sx={{ alignSelf: "flex-end", px: 4, textTransform: "none" }}
-          >
-            Save
-          </Button>
+          {saveButton && (
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={handlealertSaveClick}
+              disabled={!commentText.trim()}
+              sx={{ alignSelf: "flex-end", px: 4, textTransform: "none" }}
+            >
+              Save
+            </Button>
+          )}
         </Box>
       ) : selectedIncident?.inc_id ? (
-        // COMMENT UI
         <Box
           sx={{
             display: "flex",
