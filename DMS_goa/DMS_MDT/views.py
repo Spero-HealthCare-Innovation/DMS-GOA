@@ -617,6 +617,9 @@ class get_assign_completed_inc_calls(APIView):
         print("incident vehicles:", inc_veh)
         assign_inc_objs_arr = []
         for veh in inc_veh:
+            incident_datetime = veh.incident_id.inc_modified_date  # already a datetime object
+            incidentDate = incident_datetime.strftime("%Y-%m-%d")   # e.g. "2025-08-25"
+            incidentTime = incident_datetime.strftime("%H:%M:%S")   # e.g. "12:13:20"
             assign_inc_obj = {
                 "incidentId": str(veh.incident_id.inc_id),
                 "incidentDate": incidentDate,
@@ -643,8 +646,9 @@ class get_assign_inc_calls(APIView):
                 "incidentId": str(veh.incident_id.inc_id),
                 "incidentDate": veh.incident_id.inc_added_date,
                 "incidentTime": veh.incident_id.inc_added_date,
-                "callType": veh.incident_id.disaster_type.disaster_name if veh.incident_id.disaster_type else None,
-                "callerName":"vishal",
+                # "callType": veh.incident_id.disaster_type.disaster_name if veh.incident_id.disaster_type else None,
+                "callType": veh.incident_id.call_type.call_type_name if veh.incident_id.call_type else None,
+                "callerName":veh.incident_id.caller_id.caller_name if veh.incident_id.caller_id else None,
                 "lat": veh.incident_id.latitude,
                 "long": veh.incident_id.longitude,
                 "incidentAddress": veh.incident_id.location,
