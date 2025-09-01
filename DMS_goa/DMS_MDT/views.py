@@ -501,8 +501,8 @@ def update_pcr_report(request):
         if status_code == 1:  # Acknowledge
             incident_vehicles.objects.filter(incident_id=inc_id).update(pcr_status=2)
 
-        elif status_code == 6:  # Back to Base
-            incident_vehicles.objects.filter(incident_id=inc_id).update(pcr_status=3)
+        # elif status_code == 6:  # Back to Base
+        #     incident_vehicles.objects.filter(incident_id=inc_id).update(pcr_status=3)
 
         report.save()
         # return Response(
@@ -665,7 +665,7 @@ class get_assign_inc_calls(APIView):
                     "outOfSych": "false",
                     "message": "Already back to base"
                 },
-                "incidentCallsStatus": "In-progress" if not pcr_exists else "Acknowledge" if pcr_exists.status==1 else "StartedFromBase" if pcr_exists.status==2 else "AtScene" if pcr_exists.status==3 else "DepartedFromScene" if pcr_exists.status==4 else "BackToBase" if pcr_exists.status==5 else "Abandoned" if pcr_exists.status==6 else "In-progress",
+                "incidentCallsStatus": "Pending" if veh.pcr_status==1 else "In-progress" if veh.pcr_status == 2 else "Complete",
                 "clikable": "true",
                 "progress": "true",
                 "completed": "true" if veh.jobclosure_status==1 else "false",
@@ -867,7 +867,7 @@ class Clockinout(APIView):
                 else:
                     return Response({"data": None,"error": {"code": 1,"message": "Employee not found or already clocked out"}}, status=status.HTTP_200_OK)  
         except Exception as e:
-            return Response({"data": None,"error": {"code": 1,"message": "Clock in/out Not Successfully"},"ex_error": str(e)}, status=status.HTTP_200_OK)
+            return Response({"data": None,"error": {"code": 1,"message": "Clock in/out Not Successfully"}}, status=status.HTTP_200_OK)
 			
 			
 #Dashboard---------------------Mayank
