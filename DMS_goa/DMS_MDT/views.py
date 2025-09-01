@@ -665,7 +665,7 @@ class get_assign_inc_calls(APIView):
                     "outOfSych": "false",
                     "message": "Already back to base"
                 },
-                "incidentCallsStatus": pcr_exists.status if pcr_exists else 0,
+                "incidentCallsStatus": "In-progress" if not pcr_exists else "Acknowledge" if pcr_exists.status==1 else "StartedFromBase" if pcr_exists.status==2 else "AtScene" if pcr_exists.status==3 else "DepartedFromScene" if pcr_exists.status==4 else "BackToBase" if pcr_exists.status==5 else "Abandoned" if pcr_exists.status==6 else "In-progress",
                 "clikable": "true",
                 "progress": "true",
                 "completed": "true" if veh.jobclosure_status==1 else "false",
@@ -760,8 +760,9 @@ class closure_Post_api_app(APIView):
             dpt_dtl = vehicl_dtls.responder
             ex_cl_dtl = DMS_incident_closure.objects.filter(incident_id=inc_dtl, responder=dpt_dtl,vehicle_no=vehicl_dtls, closure_is_deleted=False)
             if ex_cl_dtl.exists():
-                return Response({"msg":f"Closure already done for incident {inc_dtl.incident_id} of that department/Responder {dpt_dtl.responder_name} with vehicle no {vehicle_no}"},
-                                 status=status.HTTP_200_OK)
+                # return Response({"msg":f"Closure already done for incident {inc_dtl.incident_id} of that department/Responder {dpt_dtl.responder_name} with vehicle no {vehicle_no}"},
+                                #  status=status.HTTP_200_OK)
+                return Response({"data": {"code": 1,"message": "Case Closure Successfully"},"error": None})
             log_in_user = employee_clockin_info.objects.filter(veh_id=vehicl_dtls,clock_out_in_status=1,status=1)
             print(vehicle_no)
             cls_dtl_add = DMS_incident_closure.objects.create(
