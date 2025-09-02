@@ -348,8 +348,8 @@ const Incident = ({ darkMode }) => {
     if (!query && !popupText) newErrors.location = "Location is required";
     if (!summaryId) newErrors.summary = "Summary is required";
     if (selectedEmergencyValue === 1) {
-      // if (!selectedDisaster)
-      //   newErrors.disaster_type = "Disaster Type is required";
+      // if (!selectedcallType)
+      //   newErrors.Call_Type = "Call Type is required";
       if (!alertType) newErrors.alert_type = "Alert Type is required";
       if (!comments) newErrors.comments = "Comment is required";
       if (!sopId || sopId.length === 0) {
@@ -638,7 +638,6 @@ const Incident = ({ darkMode }) => {
                   <MenuItem value={2}>Non Emergency</MenuItem>
                 </TextField>
               </Grid>
-
               {selectedEmergencyValue === 1 && (
                 <>
                   <Grid item xs={12} sm={4}>
@@ -760,7 +759,6 @@ const Incident = ({ darkMode }) => {
                   </Grid>
                 </>
               )}
-
               <Grid item xs={12} sm={selectedEmergencyValue === 1 ? 6 : 4}>
                 <TextField
                   fullWidth
@@ -784,7 +782,6 @@ const Incident = ({ darkMode }) => {
                   helperText={errors.caller_no}
                 />
               </Grid>
-
               <Grid item xs={12} sm={selectedEmergencyValue === 1 ? 6 : 4}>
                 <TextField
                   fullWidth
@@ -804,7 +801,6 @@ const Incident = ({ darkMode }) => {
                   helperText={errors.caller_name}
                 />
               </Grid>
-
               <Grid item xs={12} sm={6}>
                 <TextField
                   fullWidth
@@ -819,7 +815,6 @@ const Incident = ({ darkMode }) => {
                   helperText={errors.location}
                 />
               </Grid>
-
               <Grid item xs={12} sm={3}>
                 <FormControl fullWidth size="small" sx={inputStyle}>
                   <InputLabel id="district-label">District</InputLabel>
@@ -851,7 +846,6 @@ const Incident = ({ darkMode }) => {
                   </Select>
                 </FormControl>
               </Grid>
-
               <Grid item xs={12} sm={3}>
                 <TextField
                   fullWidth
@@ -882,7 +876,6 @@ const Incident = ({ darkMode }) => {
                   ))}
                 </TextField>
               </Grid>
-
               <Grid item xs={12} sm={6}>
                 <TextField
                   fullWidth
@@ -929,7 +922,6 @@ const Incident = ({ darkMode }) => {
                   ))}
                 </TextField>
               </Grid>
-
               <Grid item xs={12} sm={6}>
                 <FormControl fullWidth size="small">
                   <InputLabel>Ward Officer</InputLabel>
@@ -955,15 +947,21 @@ const Incident = ({ darkMode }) => {
                   </Select>
                 </FormControl>
               </Grid>
-
               <Grid item xs={12}>
                 <TextField
                   select
-                  fullWidth
                   size="small"
                   label="Summary"
                   variant="outlined"
-                  sx={inputStyle}
+                  sx={{
+                    ...inputStyle,
+                    width: {
+                      xs: "100%", // 📱 mobile full width
+                      sm: "300px", // 📲 tablet
+                      md: "675px", // 💻 desktop
+                      // lg: "800px",
+                    },
+                  }}
                   value={summaryId}
                   onChange={(e) => setSummaryId(e.target.value)}
                   error={!!errors.summary}
@@ -972,9 +970,13 @@ const Incident = ({ darkMode }) => {
                     MenuProps: {
                       PaperProps: {
                         sx: {
-                          width: "400px", // <-- force dropdown menu width
-                          maxWidth: "none", // prevent auto max-width behaviour
-                          // optional: limit height and allow scroll
+                          width: {
+                            xs: "100%", // 📱 mobile
+                            sm: "300px", // 📲 tablet
+                            md: "675px", // 💻 desktop
+                            // lg: "800px",
+                          },
+                          maxWidth: "none",
                           maxHeight: 400,
                         },
                       },
@@ -989,8 +991,7 @@ const Incident = ({ darkMode }) => {
                       key={item.sum_id}
                       value={item.sum_id}
                       sx={{
-                        whiteSpace: "normal", // allow wrapping
-                        // overflowWrap: "anywhere", // break long words if needed
+                        whiteSpace: "normal",
                         wordBreak: "break-word",
                         maxWidth: "100%",
                       }}
