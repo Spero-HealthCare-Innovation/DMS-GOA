@@ -1624,8 +1624,36 @@ class incident_get_Api(APIView):
             responder_ids = [int(rid) for rid in raw_ids if str(rid).isdigit()]
 
         # Get responder details
-        responders = DMS_Responder.objects.filter(responder_id__in=responder_ids).values('responder_id', 'responder_name')
-        responder_details = list(responders)
+        veh_data = incident_vehicles.objects.filter(incident_id=inc_id, status=1)
+        print("veh_data--", veh_data)
+
+        responders = DMS_Responder.objects.filter(
+            responder_id__in=responder_ids
+        ).values('responder_id', 'responder_name')
+
+        responder_details = []
+        for responder in responders:
+            veh_data = incident_vehicles.objects.filter(
+                incident_id=inc_id,
+                status=1
+            ).values(
+                'veh_id__veh_id',
+                'veh_id__veh_number'
+            )
+
+            vehicles = [
+                {
+                    "vehicle_id": v["veh_id__veh_id"],
+                    "vehicle_number": v["veh_id__veh_number"]
+                }
+                for v in veh_data
+            ]
+
+            responder_details.append({
+                "responder_id": responder["responder_id"],
+                "vehicles": vehicles
+            })
+        
 
         # Get related comments
         comments_qs = DMS_Comments.objects.filter(incident_id=inc_id, comm_is_deleted=False)
