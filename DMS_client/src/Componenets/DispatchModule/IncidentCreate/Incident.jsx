@@ -435,6 +435,8 @@ const Incident = ({ darkMode }) => {
         setSummaryId("");
         setComments("");
         setSopId([]);
+        setSelectedDistrictId("");
+        setSelectedDistrictId("");
         setSelectedWard("");
         setSelectedWardOfficer([]);
         setErrors({});
@@ -442,6 +444,7 @@ const Incident = ({ darkMode }) => {
         setQuery("");
         setLattitude("");
         setLongitude("");
+
         setTimeout(() => {
           navigate("/sop");
         }, 3000);
