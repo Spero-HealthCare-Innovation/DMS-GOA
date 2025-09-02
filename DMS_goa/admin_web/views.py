@@ -1334,6 +1334,8 @@ class closure_Post_api(APIView):
             inc_vh = incident_vehicles.objects.filter(incident_id=inc_dtl, veh_id=vehicl_dtls, status=1)
             if inc_vh.exists():
                 inc_vh.update(jobclosure_status=1,pcr_status=3)
+            else:
+                add_inc_vh = incident_vehicles.objects.create(incident_id=inc_dtl, veh_id=vehicl_dtls, status=1,jobclosure_status=1,pcr_status=3,added_by=request.data.get('closure_added_by'))
                 
             invh_dtl = incident_vehicles.objects.filter(veh_id=vehicl_dtls,jobclosure_status=2)
             if invh_dtl.exists() and invh_dtl.exclude(jobclosure_status=1).exists() and vehicl_dtls:
@@ -1763,8 +1765,8 @@ class incident_wise_responder_list(APIView):
                         "veh_id": j.veh_id,
                         "vehicle_no": j.veh_number
                     })
-
-            kk.append(  {
+            if vehi_dtl:
+                kk.append(  {
                 "responder_id": i.responder_id,
                 "responder_name": i.responder_name,
                 "vehicle": vehi_dtl
