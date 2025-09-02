@@ -93,33 +93,48 @@ const Departmentsidebar = ({ darkMode }) => {
         setOpen(false);
         setDropdowns({});
       }}
-      sx={{
-        transition: "width 0.3s ease",
-        width: open ? drawerWidth : 60,
-        "& .MuiDrawer-paper": {
-          transition: "width 0.3s ease, background 0.3s ease",
-          width: open ? drawerWidth : 50,
-          height: "65%", // smaller height
-          position: "fixed",
-          top: "50%",
-          transform: "translateY(-50%)",
-          background: darkMode
-            ? "linear-gradient(to bottom, #5FC8EC, rgb(19, 26, 28))"
-            : "linear-gradient(to bottom, #5FC8EC, rgb(18, 24, 26))",
-          borderRadius: "30px",
-          overflow: "hidden",
-          pt: 2,
-          pb: 2,
-          marginLeft: "0.5em",
-          color: "white",
-          boxShadow: "0 4px 12px rgba(0, 0, 0, 0.2)",
-          display: "flex",
-          flexDirection: "column",
-          justifyContent: "center",
-        },
-      }}
-    >
-      <Box sx={{ width: "100%" }}>
+       sx={{
+    transition: "width 0.3s ease",
+    width: open ? drawerWidth : 60,
+    "& .MuiDrawer-paper": {
+      transition: "width 0.3s ease, background 0.3s ease",
+      width: open ? drawerWidth : 50,
+      height: "65%",
+      position: "fixed",
+      top: "50%",
+      transform: "translateY(-50%)",
+      background: darkMode
+        ? "linear-gradient(to bottom, #5FC8EC, rgb(19, 26, 28))"
+        : "linear-gradient(to bottom, #5FC8EC, rgb(18, 24, 26))",
+      borderRadius: "30px",
+      pt: 2,
+      pb: 2,
+      marginLeft: "0.5em",
+      color: "white",
+      boxShadow: "0 4px 12px rgba(0, 0, 0, 0.2)",
+      display: "flex",
+      flexDirection: "column",
+      justifyContent: "flex-start",
+      overflow: "hidden", // Drawer ke andar overflow hide
+    },
+  }}
+>
+     <Box
+    sx={{
+      width: "100%",
+      flexGrow: 1,
+      overflowY: "auto",
+      overflowX: "hidden",
+      px: 0.5,
+
+      // Scrollbar hide styles
+      "&::-webkit-scrollbar": {
+        display: "none",
+      },
+      "-ms-overflow-style": "none", // IE & Edge
+      "scrollbar-width": "none", // Firefox
+    }}
+  >
         <List>
           {Object.entries(screenConfig).map(([sectionName, { icon, screens }]) => {
             const hasSubmenus = screens.length > 0;
