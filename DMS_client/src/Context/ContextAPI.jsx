@@ -386,6 +386,69 @@ export const AuthProvider = ({ children }) => {
     fetchDisaster();
   }, []);
 
+
+  ///Dashboards api///
+
+  const [vehicleData, setVehicleData] = useState([]);
+  const [loading1, setLoading1] = useState(true);
+  const [error1, setError1] = useState(null);
+  const [callData, setCallData] = useState(null);
+  const [loading2, setLoading2] = useState(true);
+  const [error2, setError2] = useState(null);
+  const [dispatchClosure, setDispatchClosure] = useState(null);
+  const [filter, setFilter] = useState("today"); // default filter
+
+   const fetchVehicles = async () => {
+    try {
+      setLoading1(true);
+      const response = await axios.get(
+        `${port}/DMS_mdt/vehical_dashboard/`
+      );
+      setVehicleData(response.data);
+      setError1(null);
+    } catch (err) {
+      setError1("Failed to fetch vehicle data");
+      console.error(err);
+    } finally {
+      setLoading1(false);
+    }
+  };
+
+   const fetchCallData = async () => {
+    try {
+      setLoading1(true);
+      const response = await axios.get(
+        `${port}/admin_web/call_dashboard/`
+      );
+      setCallData(response.data);
+      setError1(null);
+    } catch (err) {
+      setError1("Failed to fetch call data");
+      console.error(err);
+    } finally {
+      setLoading1(false);
+    }
+  };
+
+   useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const res = await axios.get(`${port}/admin_web/dispatch_closure/`);
+        setDispatchClosure(res.data);
+        console.log(dispatchClosure,"hiii");
+        
+      } catch (error) {
+        console.error("Error fetching dispatch_closure:", error);
+      }
+    };
+    fetchData();
+  }, []);
+
+  useEffect(() => {
+    fetchVehicles();
+     fetchCallData();
+      }, []);
+
   return (
     <AuthContext.Provider
       value={{
@@ -451,6 +514,15 @@ export const AuthProvider = ({ children }) => {
         setSelectedDisasterId,
         selectedDisasterName,
         setSelectedDisasterName,
+        vehicleData,
+         loading1,
+          error1 ,
+          callData,
+           filter,
+            setFilter,
+            loading2,
+            error2,
+            dispatchClosure
       }}
     >
       {children}

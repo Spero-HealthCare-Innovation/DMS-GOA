@@ -12,6 +12,9 @@ import {
   MenuItem,
   Checkbox,
   ListItemText,
+  FormControl ,
+  InputLabel ,
+  FormHelperText 
 } from "@mui/material";
 import axios from "axios";
 import { useEffect, useState } from "react";
@@ -25,7 +28,7 @@ const CaseClosureDetails = ({
   darkMode,
   flag,
   selectedIncident,
-  fetchDispatchList,
+  fetchDispatchList, 
 }) => {
   const port = import.meta.env.VITE_APP_API_KEY;
   const token = localStorage.getItem("accessToken");
@@ -35,6 +38,7 @@ const CaseClosureDetails = ({
     disasterIdFromSop,
     setSelectedIncidentFromSop,
   } = useAuth();
+
   console.log(
     "disater name and inc_id from sop",
     selectedIncidentFromSop,
@@ -47,16 +51,45 @@ const CaseClosureDetails = ({
     }
   });
 
-
   console.log("selectedIncidentselectedIncident", selectedIncident);
 
   const [isDataCleared, setIsDataCleared] = useState(false);
   const [validationErrors, setValidationErrors] = useState({});
+  const [selectedDepartments, setSelectedDepartments] = useState('');
 
   // New state for responder list
   const [responderList, setResponderList] = useState([]);
   const [responderLoading, setResponderLoading] = useState(false);
   const [responderError, setResponderError] = useState(null);
+
+  // New state for vehicle management
+  const [availableVehicles, setAvailableVehicles] = useState([]);
+  const [closedVehicles, setClosedVehicles] = useState([]);
+
+  // Function to fetch closed vehicles for this incident
+  const fetchClosedVehicles = async (inc_id) => {
+    if (!inc_id) return;
+
+    try {
+      const authToken = localStorage.getItem("access_token") || token;
+      const response = await axios.get(
+        `${port}/admin_web/get_closed_vehicles/${inc_id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${authToken}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (response.data && Array.isArray(response.data)) {
+        setClosedVehicles(response.data.map(item => item.vehicle_no));
+      }
+    } catch (error) {
+      console.error("Error fetching closed vehicles:", error);
+      setClosedVehicles([]);
+    }
+  };
 
   // Function to fetch responder list
   const fetchResponderList = async (inc_id) => {
@@ -65,6 +98,19 @@ const CaseClosureDetails = ({
     try {
       setResponderLoading(true);
       setResponderError(null);
+      
+      // Clear ALL previous data first
+      setResponderList([]);
+      setSelectedDepartments('');
+      setAvailableVehicles([]);
+      setValidationErrors({}); // Clear all validation errors
+      setFormData(prev => ({ 
+        ...prev, 
+        vehicleNumber: '',
+        vehicleId: '',
+        responderName: '',
+        closureRemark: '' 
+      }));
 
       const authToken = localStorage.getItem("access_token") || token;
       const response = await axios.get(
@@ -79,24 +125,37 @@ const CaseClosureDetails = ({
 
       console.log("Responder API Response:", response.data);
 
-      // Assuming the API returns responder data in response.data
-      // Adjust this based on your actual API response structure
-      if (response.data && Array.isArray(response.data)) {
-        setResponderList(response.data);
-      } else if (response.data && response.data.responders) {
-        setResponderList(response.data.responders);
-      } else {
-        setResponderList([]);
-      }
+   if (response.data && Array.isArray(response.data)) {
+  setResponderList(response.data);
 
+  const allVehicles = response.data.reduce((acc, responder) => {
+    if (responder.vehicle && Array.isArray(responder.vehicle)) {
+      return [...acc, ...responder.vehicle];
+    }
+    return acc;
+  }, []);
+  setAvailableVehicles(allVehicles);
+
+  // 👉 Sirf ek responder mila → auto select kar do
+  if (response.data.length === 1) {
+    const singleResponder = response.data[0];
+    handleResponderChange(singleResponder.responder_name, true);
+  }
+
+} else {
+  setResponderList([]);
+  setAvailableVehicles([]);
+}
     } catch (error) {
       console.error("Error fetching responder list:", error);
       setResponderError(error.response?.data?.message || "Failed to fetch responder list");
       setResponderList([]);
+      setAvailableVehicles([]);
     } finally {
       setResponderLoading(false);
     }
   };
+
 
   // Fetch responder list when incidentId changes
   useEffect(() => {
@@ -116,15 +175,20 @@ const CaseClosureDetails = ({
       errors.selectedDepartments = "Responder Scope is required";
     }
 
-    // Vehicle Number
-    if (!formData.vehicleNumber) {
-      errors.vehicleNumber = "Vehicle Number is required";
-    } else {
-      const value = formData.vehicleNumber.replace(/-/g, '');
-      const vehicleRegex = /^[A-Z]{2}[0-9]{2}[A-Z]{1,2}[0-9]{4}$/;
-      if (value && !vehicleRegex.test(value)) {
-        errors.vehicleNumber = "Invalid format";
+    // Vehicle Number - Check if selected responder has vehicles
+    if (selectedDepartments) {
+      const selectedResponder = responderList.find(r => r.responder_name === selectedDepartments);
+      const selectedResponderVehicles = selectedResponder?.vehicle || [];
+      
+      if (selectedResponderVehicles.length === 0) {
+        errors.vehicleNumber = "No vehicles available for selected responder";
+      } else if (!formData.vehicleNumber) {
+        errors.vehicleNumber = "Vehicle Number is required";
+      } else if (closedVehicles.includes(formData.vehicleNumber)) {
+        errors.vehicleNumber = "This vehicle has already been closed for this incident";
       }
+    } else if (!formData.vehicleNumber) {
+      errors.vehicleNumber = "Vehicle Number is required";
     }
 
     // Responder Name
@@ -151,6 +215,7 @@ const CaseClosureDetails = ({
   const [formData, setFormData] = useState({
     responderName: "",
     vehicleNumber: "",
+    vehicleId: "", // Add vehicle ID to track selected vehicle's ID
     acknowledge: "",
     startBaseLocation: "",
     atScene: "",
@@ -166,39 +231,6 @@ const CaseClosureDetails = ({
   const textColor = darkMode ? "#ffffff" : "#000000";
   const fontFamily = "Roboto, sans-serif";
   const borderColor = darkMode ? "#7F7F7F" : "#e0e0e0";
-  const [remark, setRemark] = useState("");
-  const toISOString = (datetime) => {
-    if (!datetime) return null;
-    const date = new Date(datetime);
-    return date.toISOString(); // returns like "2025-05-29T10:00:00.000Z"
-  };
-
-  const [timestamps, setTimestamps] = useState({
-    acknowledge: "",
-    startBaseLocation: "",
-    atScene: "",
-    fromScene: "",
-    backToBase: "",
-  });
-  // Load initial values from props
-
-  // useEffect(() => {
-  //   if (selectedIncident) {
-  //     setTimestamps({
-  //       acknowledge: formatDateTimeLocal(selectedIncident.acknowledge),
-  //       startBaseLocation: formatDateTimeLocal(
-  //         selectedIncident.startBaseLocation
-  //       ),
-  //       atScene: formatDateTimeLocal(selectedIncident.atScene),
-  //       fromScene: formatDateTimeLocal(selectedIncident.fromScene),
-  //       backToBase: formatDateTimeLocal(selectedIncident.backToBase),
-  //     });
-  //   }
-  // }, [selectedIncident]);
-
-  // const handleChange = (key, value) => {
-  //   setTimestamps((prev) => ({ ...prev, [key]: value }));
-  // };
 
   const textFieldStyle = {
     "& .MuiInputLabel-root": { color: labelColor },
@@ -224,7 +256,73 @@ const CaseClosureDetails = ({
 
   const handleChange = (field, value) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
+    
+    // Clear validation error when user changes value
+    if (validationErrors[field]) {
+      setValidationErrors((prev) => ({
+        ...prev,
+        [field]: null,
+      }));
+    }
   };
+
+  // Handle responder selection
+const handleResponderChange = (responderName, isAuto = false) => {
+  setSelectedDepartments(responderName);
+
+  const selectedResponder = responderList.find(
+    (r) => r.responder_name === responderName
+  );
+
+  if (selectedResponder) {
+    const selectedVehicles = selectedResponder.vehicle || [];
+
+    // Dropdown me vehicles set karo
+    setAvailableVehicles(selectedVehicles);
+
+    if (selectedVehicles.length === 1) {
+      // ✅ Auto select single vehicle
+      const v = selectedVehicles[0];
+      handleChange("vehicleNumber", v.vehicle_no);
+      handleChange("vehicleId", v.veh_id);
+
+      setValidationErrors((prev) => ({
+        ...prev,
+        vehicleNumber: null,
+      }));
+    } else if (selectedVehicles.length === 0) {
+      // ❌ No vehicles available
+      handleChange("vehicleNumber", "");
+      handleChange("vehicleId", "");
+      setValidationErrors((prev) => ({
+        ...prev,
+        vehicleNumber: "No vehicles available for selected responder",
+      }));
+    } else {
+      // Multiple vehicles → clear selection first
+      handleChange("vehicleNumber", "");
+      handleChange("vehicleId", "");
+      setValidationErrors((prev) => ({
+        ...prev,
+        vehicleNumber: null,
+      }));
+    }
+  }
+
+  // Clear responder error if any
+  if (validationErrors.selectedDepartments) {
+    setValidationErrors((prev) => ({
+      ...prev,
+      selectedDepartments: null,
+    }));
+  }
+
+  // 👉 Auto case me direct call hoga (fetchResponderList se)
+  if (isAuto) {
+    console.log("Auto-selected responder:", responderName);
+  }
+};
+
 
   const formatDate = (date) => {
     if (!date) return "";
@@ -254,11 +352,8 @@ const CaseClosureDetails = ({
       return;
     }
 
-    // Check if we have incident data
     const numericIncId = selectedIncidentFromSop?.inc_id || selectedIncident?.inc_id;
-    const incidentId =
-      selectedIncidentFromSop?.incident_id || selectedIncident?.incident_id;
-
+    const incidentId = selectedIncidentFromSop?.incident_id || selectedIncident?.incident_id;
 
     if (!numericIncId) {
       setSubmitStatus({ type: "error", message: "No incident ID found!" });
@@ -268,16 +363,14 @@ const CaseClosureDetails = ({
     const payload = {
       incident_id: incidentId,
       inc_id: numericIncId,
-      // responder: selectedDepartments.length > 0 ? selectedDepartments[0] : "", 
       responder: selectedDepartments,
       closure_responder_name: formData.responderName || "",
-      vehicle_no: formData.vehicleNumber,
+      vehicle_no: parseInt(formData.vehicleId), // Vehicle ID as number
       closure_acknowledge: formData.acknowledge ? formatDate(formData.acknowledge) : "",
       closure_start_base_location: formData.startBaseLocation ? formatDate(formData.startBaseLocation) : "",
       closure_at_scene: formData.atScene ? formatDate(formData.atScene) : "",
       closure_from_scene: formData.fromScene ? formatDate(formData.fromScene) : "",
       closure_back_to_base: formData.backToBase ? formatDate(formData.backToBase) : "",
-      // incident_responder_by: selectedDepartments,
       closure_added_by: userName,
       closure_modified_by: userName,
       closure_modified_date: new Date().toISOString(),
@@ -309,20 +402,17 @@ const CaseClosureDetails = ({
         message: "Closure details saved successfully!",
       });
 
+      // Add the closed vehicle to the list
+      setClosedVehicles(prev => [...prev, formData.vehicleNumber]);
+
       const remainingDepartments = res.data.Departments || [];
-      setFormData({
-        responderName: "",
-        vehicleNumber: "",
-        acknowledge: "",
-        startBaseLocation: "",
-        atScene: "",
-        fromScene: "",
-        backToBase: "",
-        closureRemark: "",
-      });
+      
       if (remainingDepartments.length === 0) {
+        // Clear all form data
         setFormData({
+          selectedDepartments:"",
           vehicleNumber: "",
+          vehicleId: "",
           responderName: "",
           acknowledge: "",
           startBaseLocation: "",
@@ -330,15 +420,18 @@ const CaseClosureDetails = ({
           fromScene: "",
           backToBase: "",
           closureRemark: "",
+          
         });
         setSelectedDepartments([]);
         setSelectedIncidentFromSop(null);
         setIsDataCleared(true);
         fetchDispatchList();
-        await fetchResponderList(numericIncId);
+      } else {
+        // Partial reset - keep some fields, clear others
         setFormData(prev => ({
           ...prev,
-          vehicleNumber: "",
+         vehicleNumber: "",
+         vehicleId: "", 
           responderName: "",
           closureRemark: "",
           acknowledge: "",
@@ -347,9 +440,11 @@ const CaseClosureDetails = ({
           fromScene: "",
           backToBase: "",
         }));
-        setSelectedDepartments([]);
-        await fetchResponderList(numericIncId);
+        setSelectedDepartments('');
+        setAvailableVehicles([]);
       }
+      
+      await fetchResponderList(numericIncId);
 
     } catch (error) {
       console.error("API Error:", error);
@@ -366,7 +461,6 @@ const CaseClosureDetails = ({
     }
   };
 
-  // Inside your component
   useEffect(() => {
     if (submitStatus) {
       const timer = setTimeout(() => {
@@ -376,6 +470,7 @@ const CaseClosureDetails = ({
       return () => clearTimeout(timer);
     }
   }, [submitStatus]);
+
 
   const getAlertTypeName = (alertType) => {
     const alertTypeMap = {
@@ -411,7 +506,7 @@ const CaseClosureDetails = ({
     </Box>
   );
 
-  const [selectedDepartments, setSelectedDepartments] = useState([]);
+
 
   const handleChange1 = (event) => {
     setSelectedDepartments(event.target.value);
@@ -822,122 +917,92 @@ const CaseClosureDetails = ({
               }}
             >
               <Grid container spacing={2} sx={{ mt: 0.6 }}>
-                <Grid item xs={6}>
-                  <Select
-                    displayEmpty
-                    value={selectedDepartments}
-                    onChange={(event) => {
-                      setSelectedDepartments(event.target.value);
-                      if (validationErrors.selectedDepartments) {
-                        setValidationErrors((prev) => ({
-                          ...prev,
-                          selectedDepartments: null,
-                        }));
-                      }
-                    }}
-                    renderValue={(selected) => {
-                      if (!selected) {
-                        return (
-                          <span style={{ color: "#888", fontStyle: "normal" }}>
-                            {responderLoading ? "Loading..." : "Responder Scope"}
-                          </span>
-                        );
-                      }
-                      return selected;
-                    }}
-                    size="small"
-                    fullWidth
-                    disabled={responderLoading}
-                    inputProps={{ "aria-label": "Select Responder" }}
-                    MenuProps={{
-                      PaperProps: {
-                        style: {
-                          maxHeight: 250,
-                          width: 200,
-                        },
-                      },
-                    }}
-                    error={!!validationErrors.selectedDepartments}
-                    sx={validationErrors.selectedDepartments ? { border: '1px solid #d32f2f', borderRadius: 1 } : {}}
-                  >
-                    <MenuItem disabled value="">
-                      <em>
-                        {responderLoading
-                          ? "Loading responders..."
-                          : responderError
-                            ? "Error loading responders"
-                            : "Select Responder Scope"
-                        }
-                      </em>
-                    </MenuItem>
+            <Grid item xs={6}>
+        <Select
+          displayEmpty
+          value={selectedDepartments}
+          onChange={(event) => handleResponderChange(event.target.value)}
+          renderValue={(selected) => {
+            if (!selected) {
+              return (
+                <span style={{ color: "#888", fontStyle: "normal" }}>
+                  {responderLoading ? "Loading..." : "Responder Scope"}
+                </span>
+              );
+            }
+            return selected;
+          }}
+          size="small"
+          fullWidth
+          disabled={responderLoading}
+          inputProps={{ "aria-label": "Select Responder" }}
+          MenuProps={{
+            PaperProps: {
+              style: {
+                maxHeight: 250,
+                width: 200,
+              },
+            },
+          }}
+          error={!!validationErrors.selectedDepartments}
+          sx={validationErrors.selectedDepartments ? { border: '1px solid #d32f2f', borderRadius: 1 } : {}}
+        >
+          <MenuItem disabled value="">
+            <em>
+              {responderLoading
+                ? "Loading responders..."
+                : responderError
+                  ? "Error loading responders"
+                  : "Select Responder Scope"
+              }
+            </em>
+          </MenuItem>
 
-                    {responderList.map((responder, index) => (
-                      <MenuItem
-                        key={responder.responder_id || index}
-                        value={responder.responder_name || responder.name}
-                      >
-                        {responder.responder_name || responder.name}
-                      </MenuItem>
-                    ))}
-                  </Select>
+          {responderList.map((responder, index) => (
+            <MenuItem
+              key={responder.responder_id || index}
+              value={responder.responder_name}
+            >
+              {responder.responder_name}
+            </MenuItem>
+          ))}
+        </Select>
 
-                  {(validationErrors.selectedDepartments || responderError) && (
-                    <Typography
-                      variant="caption"
-                      color="error"
-                      sx={{ mt: 0.5, display: 'block' }}
-                    >
-                      {validationErrors.selectedDepartments || responderError}
-                    </Typography>
-                  )}
-                </Grid>
+        {(validationErrors.selectedDepartments || responderError) && (
+          <Typography
+            variant="caption"
+            color="error"
+            sx={{ mt: 0.5, display: 'block' }}
+          >
+            {validationErrors.selectedDepartments || responderError}
+          </Typography>
+        )}
+        </Grid>
 
-                <Grid item xs={6}>
-                  <TextField
-                    id="outlined-basic"
-                    label="Vehicle Number"
-                    variant="outlined"
-                    size="small"
-                    placeholder="Eg.MH-12-AB-1234"
-                    value={formData.vehicleNumber || ''}
-                    onChange={(e) => {
-                      const value = e.target.value.toUpperCase();
-                      // Allow only alphanumeric characters and hyphens, limit to 13 characters
-                      const filteredValue = value.replace(/[^A-Z0-9-]/g, '').slice(0, 13);
-                      handleChange("vehicleNumber", filteredValue);
-
-                      // Clear validation error when user starts typing
-                      if (validationErrors.vehicleNumber) {
-                        setValidationErrors((prev) => ({
-                          ...prev,
-                          vehicleNumber: null,
-                        }));
-                      }
-                    }}
-                    onBlur={(e) => {
-                      const value = e.target.value.replace(/-/g, ''); // Remove hyphens for validation
-                      // Validate both formats: MH12AB1234 and MH12A1234
-                      const vehicleRegex = /^[A-Z]{2}[0-9]{2}[A-Z]{1,2}[0-9]{4}$/;
-
-                      if (value && !vehicleRegex.test(value)) {
-                        setValidationErrors((prev) => ({
-                          ...prev,
-                          vehicleNumber: "Invalid format",
-                        }));
-                      }
-                    }}
-                    error={!!validationErrors.vehicleNumber}
-                    helperText={validationErrors.vehicleNumber}
-                    InputProps={{
-                      sx: {
-                        color: textColor,
-                        textTransform: 'uppercase'
-                      }
-                    }}
-                  // sx={textFieldStyle}
-                  />
-                </Grid>
-
+             <Grid item xs={6}>
+            <FormControl fullWidth size="small" error={!!validationErrors.vehicleNumber}>
+            <InputLabel>Vehicle Number</InputLabel>
+            <Select
+              value={formData.vehicleNumber || ''}
+              onChange={(e) => handleChange("vehicleNumber", e.target.value)}
+              label="Vehicle Number"
+            >
+              {availableVehicles.map((vehicle, index) => (
+                <MenuItem 
+                  key={vehicle.veh_id || index} 
+                  value={vehicle.vehicle_no}
+                  disabled={closedVehicles.includes(vehicle.vehicle_no)}
+                >
+                  {vehicle.vehicle_no}
+                  {closedVehicles.includes(vehicle.vehicle_no) && " (Closed)"}
+                </MenuItem>
+              ))}
+            </Select>
+            {validationErrors.vehicleNumber && (
+              <FormHelperText>{validationErrors.vehicleNumber}</FormHelperText>
+            )}
+          </FormControl>
+      </Grid>
                 <Grid item xs={6}>
                   <TextField
                     id="responder-name-field"
@@ -1025,189 +1090,6 @@ const CaseClosureDetails = ({
                       }}
                     />
                   </Grid>
-
-                  {/* <Grid item xs={6}>
-                    <DateTimePicker
-                      label="Start Location"
-                      value={formData.startBaseLocation || null}
-                      onChange={(newValue) => {
-                        handleChange("startBaseLocation", newValue);
-                        if (validationErrors.startBaseLocation) {
-                          setValidationErrors((prev) => ({
-                            ...prev,
-                            startBaseLocation: null,
-                          }));
-                        }
-                      }}
-                      ampm={false}
-                      minDateTime={
-                        formData.acknowledge ||
-                        (selectedIncidentFromSop?.incident_details?.[0]?.inc_datetime
-                          ? new Date(selectedIncidentFromSop.incident_details[0].inc_datetime)
-                          : new Date())
-                      }
-                      inputFormat="yyyy-MM-dd | HH:mm"
-                      slotProps={{
-                        textField: {
-                          size: 'small',
-                          required: true,
-                          error: !!validationErrors.startBaseLocation,
-                          helperText: validationErrors.startBaseLocation,
-                          fullWidth: true,
-                          placeholder: "yyyy-MM-dd | hh:mm",
-                          InputLabelProps: { shrink: true },
-                          InputProps: {
-                            sx: {
-                              color: textColor,
-                              height: "35px",
-                              "& .MuiSvgIcon-root": {
-                                color: "white",
-                              },
-                            },
-                          },
-                          sx: textFieldStyle,
-                        }
-                      }}
-                    />
-                  </Grid>
-
-                  <Grid item xs={6}>
-                    <DateTimePicker
-                      label="At Scene"
-                      value={formData.atScene || null}
-                      onChange={(newValue) => {
-                        handleChange("atScene", newValue);
-                        if (validationErrors.atScene) {
-                          setValidationErrors((prev) => ({
-                            ...prev,
-                            atScene: null,
-                          }));
-                        }
-                      }}
-                      ampm={false}
-                      minDateTime={
-                        formData.acknowledge ||
-                        (selectedIncidentFromSop?.incident_details?.[0]?.inc_datetime
-                          ? new Date(selectedIncidentFromSop.incident_details[0].inc_datetime)
-                          : new Date())
-                      }
-                      inputFormat="yyyy-MM-dd | HH:mm"
-                      slotProps={{
-                        textField: {
-                          size: 'small',
-                          required: true,
-                          error: !!validationErrors.atScene,
-                          helperText: validationErrors.atScene,
-                          fullWidth: true,
-                          placeholder: "yyyy-MM-dd | hh:mm",
-                          InputLabelProps: { shrink: true },
-                          InputProps: {
-                            sx: {
-                              color: textColor,
-                              height: "35px",
-                              fontSize: "0.85rem",
-                              "& .MuiSvgIcon-root": {
-                                color: "white",
-                              },
-                            },
-                          },
-                          sx: textFieldStyle,
-                        }
-                      }}
-                    />
-                  </Grid>
-
-                  <Grid item xs={6}>
-                    <DateTimePicker
-                      label="From Scene"
-                      value={formData.fromScene || null}
-                      onChange={(newValue) => {
-                        handleChange("fromScene", newValue);
-                        if (validationErrors.fromScene) {
-                          setValidationErrors((prev) => ({
-                            ...prev,
-                            fromScene: null,
-                          }));
-                        }
-                      }}
-                      ampm={false}
-                      minDateTime={
-                        formData.acknowledge ||
-                        (selectedIncidentFromSop?.incident_details?.[0]?.inc_datetime
-                          ? new Date(selectedIncidentFromSop.incident_details[0].inc_datetime)
-                          : new Date())
-                      }
-                      inputFormat="yyyy-MM-dd | HH:mm"
-                      slotProps={{
-                        textField: {
-                          size: 'small',
-                          required: true,
-                          error: !!validationErrors.fromScene,
-                          helperText: validationErrors.fromScene,
-                          fullWidth: true,
-                          placeholder: "yyyy-MM-dd | hh:mm",
-                          InputLabelProps: { shrink: true },
-                          InputProps: {
-                            sx: {
-                              color: textColor,
-                              height: "35px",
-                              fontSize: "0.85rem",
-                              "& .MuiSvgIcon-root": {
-                                color: "white",
-                              },
-                            },
-                          },
-                          sx: textFieldStyle,
-                        }
-                      }}
-                    />
-                  </Grid>
-
-                  <Grid item xs={6}>
-                    <DateTimePicker
-                      label="Back to Base"
-                      value={formData.backToBase || null}
-                      onChange={(newValue) => {
-                        handleChange("backToBase", newValue);
-                        if (validationErrors.backToBase) {
-                          setValidationErrors((prev) => ({
-                            ...prev,
-                            backToBase: null,
-                          }));
-                        }
-                      }}
-                      ampm={false}
-                      minDateTime={
-                        formData.acknowledge ||
-                        (selectedIncidentFromSop?.incident_details?.[0]?.inc_datetime
-                          ? new Date(selectedIncidentFromSop.incident_details[0].inc_datetime)
-                          : new Date())
-                      }
-                      inputFormat="yyyy-MM-dd | HH:mm"
-                      slotProps={{
-                        textField: {
-                          size: 'small',
-                          required: true,
-                          error: !!validationErrors.backToBase,
-                          helperText: validationErrors.backToBase,
-                          fullWidth: true,
-                          placeholder: "yyyy-MM-dd | hh:mm",
-                          InputLabelProps: { shrink: true },
-                          InputProps: {
-                            sx: {
-                              color: textColor,
-                              height: "35px",
-                              fontSize: "0.85rem",
-                              "& .MuiSvgIcon-root": {
-                                color: "white",
-                              },
-                            },
-                          },
-                          sx: textFieldStyle,
-                        }
-                      }}
-                    />
-                  </Grid> */}
                   <Grid item xs={6}>
                     <DateTimePicker
                       label="Start Location"
