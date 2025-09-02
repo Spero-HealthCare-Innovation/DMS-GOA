@@ -18,6 +18,8 @@ const AddEmployee = lazy(() => import("../Componenets/SuperAdmin/System/Employee
 const Map = lazy(() => import("../Componenets/DispatchModule/Map/Map"));
 const MultiScreen = lazy(() => import("../Page/multiscreen"));
 const ClosureDetail = lazy(() => import("../Componenets/SuperAdmin/Closure/ClosureDetail"));
+const MissingPerson = lazy(() => import("../Componenets/SuperAdmin/System/Bolo/MissingPerson"));
+const UnclaimedBody = lazy(() => import("../Componenets/SuperAdmin/System/Bolo/UnclaimedBody"));
 
 const Loader = () => (
   <Box
@@ -109,7 +111,7 @@ const AppRoutes = ({ darkMode, setIsLoggedIn }) => {
           }
         />
         <Route
-          path="/add-group"
+          path="/Add-Group"
           element={
             <PrivateRoute>
               <AddGroup darkMode={darkMode} />
@@ -117,10 +119,28 @@ const AppRoutes = ({ darkMode, setIsLoggedIn }) => {
           }
         />
         <Route
-          path="/add-employee"
+          path="/Add-Employee"
           element={
             <PrivateRoute>
               <AddEmployee darkMode={darkMode} />
+            </PrivateRoute>
+          }
+        />
+
+         <Route
+          path="/add-employee"
+          element={
+            <PrivateRoute>
+              <MissingPerson darkMode={darkMode} />
+            </PrivateRoute>
+          }
+        />
+
+          <Route
+          path="/Unclaimed-Body"
+          element={
+            <PrivateRoute>
+              <UnclaimedBody darkMode={darkMode} />
             </PrivateRoute>
           }
         />

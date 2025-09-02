@@ -1094,6 +1094,186 @@ const handleResponderChange = (responderName, isAuto = false) => {
                       }}
                     />
                   </Grid>
+
+                  {/* <Grid item xs={6}>
+                    <DateTimePicker
+                      label="Start Location"
+                      value={formData.startBaseLocation || null}
+                      onChange={(newValue) => {
+                        handleChange("startBaseLocation", newValue);
+                        if (validationErrors.startBaseLocation) {
+                          setValidationErrors((prev) => ({
+                            ...prev,
+                            startBaseLocation: null,
+                          }));
+                        }
+                      }}
+                      ampm={false}
+                      minDateTime={
+                        formData.acknowledge ||
+                        (selectedIncidentFromSop?.incident_details?.[0]?.inc_datetime
+                          ? new Date(selectedIncidentFromSop.incident_details[0].inc_datetime)
+                          : new Date())
+                      }
+                      inputFormat="yyyy-MM-dd | HH:mm"
+                      slotProps={{
+                        textField: {
+                          size: 'small',
+                          required: true,
+                          error: !!validationErrors.startBaseLocation,
+                          helperText: validationErrors.startBaseLocation,
+                          fullWidth: true,
+                          placeholder: "yyyy-MM-dd | hh:mm",
+                          InputLabelProps: { shrink: true },
+                          InputProps: {
+                            sx: {
+                              color: textColor,
+                              height: "35px",
+                              "& .MuiSvgIcon-root": {
+                                color: "white",
+                              },
+                            },
+                          },
+                          sx: textFieldStyle,
+                        }
+                      }}
+                    />
+                  </Grid>
+
+                  <Grid item xs={6}>
+                    <DateTimePicker
+                      label="At Scene"
+                      value={formData.atScene || null}
+                      onChange={(newValue) => {
+                        handleChange("atScene", newValue);
+                        if (validationErrors.atScene) {
+                          setValidationErrors((prev) => ({
+                            ...prev,
+                            atScene: null,
+                          }));
+                        }
+                      }}
+                      ampm={false}
+                      minDateTime={
+                        formData.acknowledge ||
+                        (selectedIncidentFromSop?.incident_details?.[0]?.inc_datetime
+                          ? new Date(selectedIncidentFromSop.incident_details[0].inc_datetime)
+                          : new Date())
+                      }
+                      inputFormat="yyyy-MM-dd | HH:mm"
+                      slotProps={{
+                        textField: {
+                          size: 'small',
+                          required: true,
+                          error: !!validationErrors.atScene,
+                          helperText: validationErrors.atScene,
+                          fullWidth: true,
+                          placeholder: "yyyy-MM-dd | hh:mm",
+                          InputLabelProps: { shrink: true },
+                          InputProps: {
+                            sx: {
+                              color: textColor,
+                              height: "35px",
+                              "& .MuiSvgIcon-root": {
+                                color: "white",
+                              },
+                            },
+                          },
+                          sx: textFieldStyle,
+                        }
+                      }}
+                    />
+                  </Grid>
+
+                  <Grid item xs={6}>
+                    <DateTimePicker
+                      label="From Scene"
+                      value={formData.fromScene || null}
+                      onChange={(newValue) => {
+                        handleChange("fromScene", newValue);
+                        if (validationErrors.fromScene) {
+                          setValidationErrors((prev) => ({
+                            ...prev,
+                            fromScene: null,
+                          }));
+                        }
+                      }}
+                      ampm={false}
+                      minDateTime={
+                        formData.acknowledge ||
+                        (selectedIncidentFromSop?.incident_details?.[0]?.inc_datetime
+                          ? new Date(selectedIncidentFromSop.incident_details[0].inc_datetime)
+                          : new Date())
+                      }
+                      inputFormat="yyyy-MM-dd | HH:mm"
+                      slotProps={{
+                        textField: {
+                          size: 'small',
+                          required: true,
+                          error: !!validationErrors.fromScene,
+                          helperText: validationErrors.fromScene,
+                          fullWidth: true,
+                          placeholder: "yyyy-MM-dd | hh:mm",
+                          InputLabelProps: { shrink: true },
+                          InputProps: {
+                            sx: {
+                              color: textColor,
+                              height: "35px",
+                              "& .MuiSvgIcon-root": {
+                                color: "white",
+                              },
+                            },
+                          },
+                          sx: textFieldStyle,
+                        }
+                      }}
+                    />
+                  </Grid>
+
+                  <Grid item xs={6}>
+                    <DateTimePicker
+                      label="Back to Base"
+                      value={formData.backToBase || null}
+                      onChange={(newValue) => {
+                        handleChange("backToBase", newValue);
+                        if (validationErrors.backToBase) {
+                          setValidationErrors((prev) => ({
+                            ...prev,
+                            backToBase: null,
+                          }));
+                        }
+                      }}
+                      ampm={false}
+                      minDateTime={
+                        formData.acknowledge ||
+                        (selectedIncidentFromSop?.incident_details?.[0]?.inc_datetime
+                          ? new Date(selectedIncidentFromSop.incident_details[0].inc_datetime)
+                          : new Date())
+                      }
+                      inputFormat="yyyy-MM-dd | HH:mm"
+                      slotProps={{
+                        textField: {
+                          size: 'small',
+                          required: true,
+                          error: !!validationErrors.backToBase,
+                          helperText: validationErrors.backToBase,
+                          fullWidth: true,
+                          placeholder: "yyyy-MM-dd | hh:mm",
+                          InputLabelProps: { shrink: true },
+                          InputProps: {
+                            sx: {
+                              color: textColor,
+                              height: "35px",
+                              "& .MuiSvgIcon-root": {
+                                color: "white",
+                              },
+                            },
+                          },
+                          sx: textFieldStyle,
+                        }
+                      }}
+                    />
+                  </Grid> */}
                   <Grid item xs={6}>
                     <DateTimePicker
                       label="Start Location"
@@ -1163,7 +1343,6 @@ const handleResponderChange = (responderName, isAuto = false) => {
                             sx: {
                               color: textColor,
                               height: "35px",
-                              fontSize: "0.85rem",
                               "& .MuiSvgIcon-root": {
                                 color: "white",
                               },
@@ -1204,7 +1383,6 @@ const handleResponderChange = (responderName, isAuto = false) => {
                             sx: {
                               color: textColor,
                               height: "35px",
-                              fontSize: "0.85rem",
                               "& .MuiSvgIcon-root": {
                                 color: "white",
                               },
@@ -1245,7 +1423,6 @@ const handleResponderChange = (responderName, isAuto = false) => {
                             sx: {
                               color: textColor,
                               height: "35px",
-                              fontSize: "0.85rem",
                               "& .MuiSvgIcon-root": {
                                 color: "white",
                               },
