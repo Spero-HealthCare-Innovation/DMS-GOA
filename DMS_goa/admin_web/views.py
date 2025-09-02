@@ -1706,9 +1706,9 @@ class incident_wise_responder_list(APIView):
                     grouped[responder_id] = {
                         "responder_id": responder_id,
                         "responder_name": responder_name,
-                        "vehicles": []
+                        "vehicle": []
                     }
-                grouped[responder_id]["vehicles"].append({
+                grouped[responder_id]["vehicle"].append({
                     "veh_id": i.veh_id.veh_id,
                     "vehicle_no": i.veh_id.veh_number
                 })  
