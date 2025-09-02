@@ -1755,8 +1755,9 @@ class incident_wise_responder_list(APIView):
             vh_dtl=Vehical.objects.filter(responder=i,status=1)
             vehi_dtl = []
             for j in vh_dtl:
-                inc_vh = incident_vehicles.objects.filter(incident_id=inc_dtl, veh_id=j, status=1).exclude(jobclosure_status=1)
-                if inc_vh.exists():
+                inc_vh = incident_vehicles.objects.filter(incident_id=inc_dtl, veh_id=j, jobclosure_status=1,status=1)
+                is_vehical_close = True if inc_vh.exists() else False
+                if is_vehical_close == False:
                     vehi_dtl.append({
                         "veh_id": j.veh_id,
                         "vehicle_no": j.veh_number
