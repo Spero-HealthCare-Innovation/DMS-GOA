@@ -532,7 +532,7 @@ function ClosureDetail({ darkMode, fromDate, toDate, onChange, onDownload }) {
                       }}
                     >
                       <Typography variant="subtitle2">
-                        Disaster Type
+                       Chief Compaints
                       </Typography>
                     </StyledCardContent>
                     <StyledCardContent

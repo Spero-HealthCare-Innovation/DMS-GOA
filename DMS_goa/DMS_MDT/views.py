@@ -9,7 +9,7 @@ from rest_framework import status
 from rest_framework.decorators import api_view
 from django.utils import timezone
 from admin_web.models import *
-import math, ast
+import math
 # from datetime import datetime
 from datetime import datetime, timedelta
 
@@ -40,10 +40,8 @@ class VehicleLogin(APIView):
         print('12')
         veh_number = request.data.get('vehicleNumber')
         password = request.data.get('password')
-        # print(ast.literal_eval(request.data.get('pilotid[]')))
-        # employee_ids = ast.literal_eval(request.data.get('pilotid[]'))
         employee_ids = list(request.data.get('pilotid[]').replace('[','').replace(']','').replace(',',''))
-        print(type(employee_ids), 'ids')
+        # print(employee_ids, 'ids')
         employee_photo = request.FILES.getlist('photo[]')
         # print(employee_photo, 'photos')
         user = authenticate(user_username=veh_number, password=password)
@@ -310,6 +308,7 @@ class get_vehicle(APIView):
         responder = request.GET.get("responder")
         lat = request.GET.get("lat")
         long = request.GET.get("long")
+        veh_num = request.GET.get("veh_num")
 
         veh = Vehical.objects.filter(status=1)
 
@@ -318,6 +317,8 @@ class get_vehicle(APIView):
 
         if responder:
             veh = veh.filter(responder=responder)
+        if veh_num:
+            veh = veh.filter(veh_number=veh_num)
 
         # Convert to float (only if lat/long provided)
         try:
@@ -526,8 +527,10 @@ def update_pcr_report(request):
 
 class get_alldriverparameters(APIView):
     def post(self, request):
-        user_id = request.user.user_id
-        print("user id in assign inc call", user_id)
+        try:
+            user_id = request.user.user_id
+        except AttributeError:
+            return Response({"data": [],"error": None},status=status.HTTP_401_UNAUTHORIZED)
         inc_id = request.data["incidentId"]
         print("inc id in assign inc call", inc_id)
         pcr_rep = PcrReport.objects.get(incident_id = inc_id, amb_no__user = user_id)
@@ -731,7 +734,6 @@ class vehicleotp(APIView):
 class userlist(APIView):
     def post(self, request):
         users = DMS_Employee.objects.filter(emp_is_deleted=False,user_id__user_is_deleted=False)
-        print(users)
         user_data = []
         for user in users:
             user_data.append({
@@ -903,3 +905,4 @@ class VehicalDashboardCount(APIView):
         }
 
         return Response(data)
+ 
