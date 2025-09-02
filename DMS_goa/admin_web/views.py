@@ -1770,7 +1770,7 @@ class incident_wise_responder_list(APIView):
                 "vehicle": vehi_dtl
 
             })
-            return Response(kk)
+        return Response(kk)
 
 
 
