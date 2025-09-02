@@ -75,9 +75,9 @@ function IncidentDetails({
   const port = import.meta.env.VITE_APP_API_KEY;
   const token = localStorage.getItem("access_token");
   const userName = localStorage.getItem("userId");
-  window.addEventListener('storage', (e) => {
-    if (e.key === 'logout') {
-      location.href = '/login';
+  window.addEventListener("storage", (e) => {
+    if (e.key === "logout") {
+      location.href = "/login";
     }
   });
 
@@ -93,8 +93,6 @@ function IncidentDetails({
   const [Longitude, setLongitude] = useState("");
   const [openDialog, setOpenDialog] = useState(false);
 
-
-
   const [stateData, setStateData] = useState(null);
 
   // =========== FLAGS FOR MANUAL FIELD OVERRIDE ============================
@@ -102,21 +100,18 @@ function IncidentDetails({
   const [tehsilManual, setTehsilManual] = useState(false);
   const [wardManual, setWardManual] = useState(false);
 
-
- //responder modal
+  //responder modal
   const [activeResponder, setActiveResponder] = useState(null);
   const [openModal, setOpenModal] = useState(false);
   const [assignedMap, setAssignedMap] = useState({});
-const [vehicleIds, setVehicleIds] = useState([]);
-const [openAmbulanceModal, setOpenAmbulanceModal] = useState(false);
+  const [vehicleIds, setVehicleIds] = useState([]);
+  const [openAmbulanceModal, setOpenAmbulanceModal] = useState(false);
 
   // ✅ Button click pe modal open
   const handleOpenModal = () => {
     setActiveResponder(selectedResponders[0]); // default tab first responder
     setOpenModal(true);
   };
-
-  
 
   // =================== CONTEXT (useAuth) VARIABLES ========================
 
@@ -361,11 +356,10 @@ const [openAmbulanceModal, setOpenAmbulanceModal] = useState(false);
   // }, [responderScope]);
 
   useEffect(() => {
-  if (Array.isArray(responderScope?.responder_scope)) {
-    setSelectedResponders([]); // default empty → sab unchecked
-  }
-}, [responderScope]);
-
+    if (Array.isArray(responderScope?.responder_scope)) {
+      setSelectedResponders([]); // default empty → sab unchecked
+    }
+  }, [responderScope]);
 
   // ================== FIELD VALIDATION LOGIC ==========================
 
@@ -375,7 +369,8 @@ const [openAmbulanceModal, setOpenAmbulanceModal] = useState(false);
     if (!selectedDistrictId) errors.district = "District is required";
     if (!selectedTehsilId) errors.tehsil = "Tahsil is required";
     if (!selectedWard) errors.ward = "Ward is required";
-    if (!selectedWardOfficer.length) errors.wardOfficer = "Ward Officer is required";
+    if (!selectedWardOfficer.length)
+      errors.wardOfficer = "Ward Officer is required";
     if (!query) errors.location = "Location is required";
     if (!selectedSummary) errors.summary = "Summary is required";
     setFieldErrors(errors);
@@ -596,10 +591,16 @@ const [openAmbulanceModal, setOpenAmbulanceModal] = useState(false);
                         fullWidth
                         size="small"
                         SelectProps={{
-                          multiple: true, renderValue: (selected) => selected.map(id => {
-                            const officer = wardOfficerList.find(item => item.emp_id === id);
-                            return officer ? officer.emp_name : id;
-                          }).join(', ')
+                          multiple: true,
+                          renderValue: (selected) =>
+                            selected
+                              .map((id) => {
+                                const officer = wardOfficerList.find(
+                                  (item) => item.emp_id === id
+                                );
+                                return officer ? officer.emp_name : id;
+                              })
+                              .join(", "),
                         }}
                         value={selectedWardOfficer}
                         onChange={(e) => setSelectedWardOfficer(e.target.value)}
@@ -611,17 +612,25 @@ const [openAmbulanceModal, setOpenAmbulanceModal] = useState(false);
                         <MenuItem
                           value="all"
                           onClick={() => {
-                            if (selectedWardOfficer.length === wardOfficerList.length) {
+                            if (
+                              selectedWardOfficer.length ===
+                              wardOfficerList.length
+                            ) {
                               setSelectedWardOfficer([]);
                             } else {
-                              setSelectedWardOfficer(wardOfficerList.map(item => item.emp_id));
+                              setSelectedWardOfficer(
+                                wardOfficerList.map((item) => item.emp_id)
+                              );
                             }
                           }}
-                        >
-                        </MenuItem>
+                        ></MenuItem>
                         {wardOfficerList?.map((item) => (
                           <MenuItem key={item.emp_id} value={item.emp_id}>
-                            <Checkbox checked={selectedWardOfficer.indexOf(item.emp_id) > -1} />
+                            <Checkbox
+                              checked={
+                                selectedWardOfficer.indexOf(item.emp_id) > -1
+                              }
+                            />
                             {item.emp_name}
                           </MenuItem>
                         ))}
@@ -651,13 +660,19 @@ const [openAmbulanceModal, setOpenAmbulanceModal] = useState(false);
                         inputValue={query || ""}
                         onInputChange={(event, newValue) => {
                           setQuery(newValue);
-                          setFieldErrors((prev) => ({ ...prev, location: undefined }));
+                          setFieldErrors((prev) => ({
+                            ...prev,
+                            location: undefined,
+                          }));
                           if (event)
                             handleSearchChange({ target: { value: newValue } });
                         }}
                         onChange={(event, newValue) => {
                           setQuery(newValue || "");
-                          setFieldErrors((prev) => ({ ...prev, location: undefined }));
+                          setFieldErrors((prev) => ({
+                            ...prev,
+                            location: undefined,
+                          }));
                           const selected = suggestions.find(
                             (s) => s.address.label === newValue
                           );
@@ -911,7 +926,7 @@ const [openAmbulanceModal, setOpenAmbulanceModal] = useState(false);
                               </Typography>
 
                               {incident?.location &&
-                                incident.location.length > 20 ? (
+                              incident.location.length > 20 ? (
                                 <Tooltip title={incident.location} arrow>
                                   <Typography
                                     variant="subtitle2"
@@ -952,7 +967,7 @@ const [openAmbulanceModal, setOpenAmbulanceModal] = useState(false);
                                 Ward Officer
                               </Typography>
                               {Array.isArray(incident?.ward_officer_name) &&
-                                incident.ward_officer_name.length > 0 ? (
+                              incident.ward_officer_name.length > 0 ? (
                                 <Typography
                                   variant="subtitle2"
                                   sx={{
@@ -994,7 +1009,7 @@ const [openAmbulanceModal, setOpenAmbulanceModal] = useState(false);
                               </Typography>
 
                               {incident?.summary_name &&
-                                incident.summary_name.length > 40 ? (
+                              incident.summary_name.length > 40 ? (
                                 <Tooltip title={incident.summary_name} arrow>
                                   <Typography
                                     variant="subtitle2"
@@ -1182,7 +1197,7 @@ const [openAmbulanceModal, setOpenAmbulanceModal] = useState(false);
                             </Typography>
 
                             {incident?.location &&
-                              incident.location.length > 20 ? (
+                            incident.location.length > 20 ? (
                               <Tooltip title={incident.location} arrow>
                                 <Typography
                                   variant="subtitle2"
@@ -1224,7 +1239,7 @@ const [openAmbulanceModal, setOpenAmbulanceModal] = useState(false);
                               Ward Officer
                             </Typography>
                             {Array.isArray(incident?.ward_officer_name) &&
-                              incident.ward_officer_name.length > 0 ? (
+                            incident.ward_officer_name.length > 0 ? (
                               <Typography
                                 variant="subtitle2"
                                 sx={{
@@ -1266,7 +1281,7 @@ const [openAmbulanceModal, setOpenAmbulanceModal] = useState(false);
                             </Typography>
 
                             {incident?.summary_name &&
-                              incident.summary_name.length > 40 ? (
+                            incident.summary_name.length > 40 ? (
                               <Tooltip title={incident.summary_name} arrow>
                                 <Typography
                                   variant="subtitle2"
@@ -1409,92 +1424,96 @@ const [openAmbulanceModal, setOpenAmbulanceModal] = useState(false);
                   )}
                 </Box>
 
- <Box>
-  <Typography
-    variant="subtitle2"
-    sx={{ color: labelColor, fontWeight: 500, fontFamily }}
-  >
-    Responder Scope
-  </Typography>
-  {responderScope?.responder_scope?.length > 0 ? (
-    <Stack spacing={1} mt={1}>
-      <Box display="flex" flexWrap="wrap" gap={1}>
-        {responderScope.responder_scope.map(
-          ({ res_id, responder_name }) => (
-            <FormControlLabel
-              key={res_id}
-              control={
-                <Checkbox
-                  checked={selectedResponders.includes(res_id)}
-                  onChange={(e) => {
-                    if (e.target.checked) {
-                      // add responder
-                      setSelectedResponders((prev) => [...prev, res_id]);
-                      setActiveResponder({ res_id, responder_name });
-                    } else {
-                      // remove responder
-                      setSelectedResponders((prev) =>
-                        prev.filter((id) => id !== res_id)
-                      );
-                      if (activeResponder?.res_id === res_id) {
-                        setActiveResponder(null);
-                      }
-                    }
-                  }}
-                  sx={{ color: labelColor }}
-                />
-              }
-              label={
-                <Typography variant="subtitle2" sx={{ fontFamily }}>
-                  {responder_name}
-                </Typography>
-              }
-            />
-          )
-        )}
-      </Box>
+                <Box>
+                  <Typography
+                    variant="subtitle2"
+                    sx={{ color: labelColor, fontWeight: 500, fontFamily }}
+                  >
+                    Responder Scope
+                  </Typography>
+                  {responderScope?.responder_scope?.length > 0 ? (
+                    <Stack spacing={1} mt={1}>
+                      <Box display="flex" flexWrap="wrap" gap={1}>
+                        {responderScope.responder_scope.map(
+                          ({ res_id, responder_name }) => (
+                            <FormControlLabel
+                              key={res_id}
+                              control={
+                                <Checkbox
+                                  checked={selectedResponders.includes(res_id)}
+                                  onChange={(e) => {
+                                    if (e.target.checked) {
+                                      // add responder
+                                      setSelectedResponders((prev) => [
+                                        ...prev,
+                                        res_id,
+                                      ]);
+                                      setActiveResponder({
+                                        res_id,
+                                        responder_name,
+                                      });
+                                    } else {
+                                      // remove responder
+                                      setSelectedResponders((prev) =>
+                                        prev.filter((id) => id !== res_id)
+                                      );
+                                      if (activeResponder?.res_id === res_id) {
+                                        setActiveResponder(null);
+                                      }
+                                    }
+                                  }}
+                                  sx={{ color: labelColor }}
+                                />
+                              }
+                              label={
+                                <Typography
+                                  variant="subtitle2"
+                                  sx={{ fontFamily }}
+                                >
+                                  {responder_name}
+                                </Typography>
+                              }
+                            />
+                          )
+                        )}
+                      </Box>
 
-      {/* View Responder Button */}
-      <Box mt={2}>
-        <Button
-          variant="contained"
-          size="small"
-          disabled={selectedResponders.length === 0} // ✅ at least 1 responder select hona chahiye
-          onClick={() => setOpenModal(true)}
-        >
-          View Responder
-        </Button>
-      </Box>
-    </Stack>
-  ) : (
-    <Box display="flex" alignItems="center" gap={1} mt={1}>
-      <Typography variant="subtitle2" sx={{ fontFamily }}>
-        Responder scope data not available.
-      </Typography>
-    </Box>
-  )}
-
-{openModal && (
-  <ResponderModal
-    open={openModal}
-    responderList={responderScope.responder_scope} // 👉 saare responders bhejo
-    selectedResponders={selectedResponders}        // 👉 checkbox se selected list bhejo
-    responder={activeResponder}
-    lattitude={lattitude}
-    longitude={longitude}
-    assignedMap={assignedMap}
-    onClose={() => setOpenModal(false)}
-  onSave={(data) => {
-  console.log("Saved Data:", data);
-  setAssignedMap(data.assignedVehicles);
-  setVehicleIds(data.assignedVehicles || []); 
-  setOpenModal(false);
-}}
-  />
-)}
-</Box>
-
-
+                      {/* View Responder Button */}
+                      <Box mt={2}>
+                        <Button
+                          variant="contained"
+                          size="small"
+                          disabled={selectedResponders.length === 0} // ✅ at least 1 responder select hona chahiye
+                          onClick={() => setOpenModal(true)}
+                        >
+                          View Responder
+                        </Button>
+                      </Box>
+                    </Stack>
+                  ) : (
+                    <Box display="flex" alignItems="center" gap={1} mt={1}>
+                      <Typography variant="subtitle2" sx={{ fontFamily }}>
+                        Responder scope data not available.
+                      </Typography>
+                    </Box>
+                  )}
+                  {openModal && (
+                    <ResponderModal
+                      open={openModal}
+                      responderList={selectedResponders}
+                      responder={activeResponder}
+                      lattitude={lattitude}
+                      longitude={longitude}
+                      assignedMap={assignedMap}
+                      onClose={() => setOpenModal(false)}
+                      onSave={(data) => {
+                        console.log("Saved Data:", data);
+                        setAssignedMap(data.assignedVehicles);
+                        setOpenModal(false);
+                      }}
+                    />
+                  )}
+                </Box>
               </>
             ) : (
               <>
@@ -1601,7 +1620,7 @@ const [openAmbulanceModal, setOpenAmbulanceModal] = useState(false);
                   </Typography>
 
                   {Array.isArray(incidentDetails?.["responders scope"]) &&
-                    incidentDetails["responders scope"].length > 0 ? (
+                  incidentDetails["responders scope"].length > 0 ? (
                     <Stack spacing={1} mt={1}>
                       <Box display="flex" flexWrap="wrap" gap={1}>
                         {incidentDetails["responders scope"].map(
@@ -1656,21 +1675,20 @@ const [openAmbulanceModal, setOpenAmbulanceModal] = useState(false);
                   )}
                 </Box>
                 <Box mt={1}>
-  <Button
-    variant="contained"
-    size="small"
-    onClick={() => setOpenAmbulanceModal(true)}
-    disabled={!selectedIncident}   // <-- disable if no incident selected
-    sx={{ 
-      textTransform: "none", 
-      borderRadius: "8px",
-      opacity: !selectedIncident ? 0.6 : 1  // thoda faded look when disabled
-    }}
-  >
-    View Assigned Ambulance
-  </Button>
-</Box>
-
+                  <Button
+                    variant="contained"
+                    size="small"
+                    onClick={() => setOpenAmbulanceModal(true)}
+                    disabled={!selectedIncident} // <-- disable if no incident selected
+                    sx={{
+                      textTransform: "none",
+                      borderRadius: "8px",
+                      opacity: !selectedIncident ? 0.6 : 1, // thoda faded look when disabled
+                    }}
+                  >
+                    View Assigned Ambulance
+                  </Button>
+                </Box>
               </>
             )}
           </Grid>
@@ -1710,7 +1728,7 @@ const [openAmbulanceModal, setOpenAmbulanceModal] = useState(false);
                 validateFields={validateFields}
                 fieldErrors={fieldErrors}
                 setFieldErrors={setFieldErrors}
-                 savedResponderData={vehicleIds}
+                savedResponderData={vehicleIds}
               />
             ) : (
               <Typography
@@ -1722,31 +1740,45 @@ const [openAmbulanceModal, setOpenAmbulanceModal] = useState(false);
             )}
           </Grid>
         </Grid>
-        
 
+        {/* ASSIGND AMBULANCE MODAL */}
 
-{/* ASSIGND AMBULANCE MODAL */}
-
- <Dialog
+<Dialog
   open={openAmbulanceModal}
   onClose={() => setOpenAmbulanceModal(false)}
   maxWidth="sm"
   fullWidth
 >
-  <DialogTitle>Assigned Ambulances</DialogTitle>
-  <DialogContent dividers>
+  <DialogTitle
+    sx={{
+      backgroundColor: "#222",
+      color: "#fff",
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "center",
+      p: 2,
+    }}
+  >
+    <Typography variant="h6" sx={{ fontWeight: 600 }}>
+      Assigned Ambulances
+    </Typography>
+
+    {/* ✅ Close Icon on Right */}
+    <IconButton
+      aria-label="close"
+      onClick={() => setOpenAmbulanceModal(false)}
+      sx={{ color: "#fff" }}
+    >
+      <CloseIcon />
+    </IconButton>
+  </DialogTitle>
+
+  <DialogContent dividers sx={{ backgroundColor: "#1a1a1a" }}>
     {Array.isArray(incidentDetails?.["responders scope"]) &&
     incidentDetails["responders scope"].length > 0 ? (
       incidentDetails["responders scope"].map(
         ({ responder_id, responder_name, vehicles }) => (
           <Box key={responder_id} mb={2}>
-            <Typography
-              variant="subtitle1"
-              sx={{ fontWeight: 600, mb: 1 }}
-            >
-              {responder_name} {/* Department/Responder name */}
-            </Typography>
-
             {Array.isArray(vehicles) && vehicles.length > 0 ? (
               <Box>
                 {vehicles.map((veh, idx) => (
@@ -1754,23 +1786,30 @@ const [openAmbulanceModal, setOpenAmbulanceModal] = useState(false);
                     key={idx}
                     display="flex"
                     justifyContent="space-between"
+                    alignItems="center"
                     sx={{
-                      p: 1,
-                      border: "1px solid #e0e0e0",
+                      p: 1.5,
+                      border: "1px solid #444",
                       borderRadius: 1,
                       mb: 1,
-                      backgroundColor: "#f9f9f9",
+                      backgroundColor: "#333",
+                      color: "#fff",
                     }}
                   >
-                    <Typography variant="body2">{veh.vehicle_name}</Typography>
-                    <Typography variant="body2" color="text.secondary">
+                    {/* ✅ Left side: responder name */}
+                    <Typography variant="body2" sx={{ fontWeight: 600, color: "#fff" }}>
+                      {responder_name}
+                    </Typography>
+
+                    {/* ✅ Right side: vehicle number */}
+                    <Typography variant="body2" sx={{ color: "#fff" }}>
                       {veh.vehicle_number}
                     </Typography>
                   </Box>
                 ))}
               </Box>
             ) : (
-              <Typography variant="body2" color="text.secondary">
+              <Typography variant="body2" sx={{ color: "#ccc" }}>
                 No ambulances assigned
               </Typography>
             )}
@@ -1778,7 +1817,7 @@ const [openAmbulanceModal, setOpenAmbulanceModal] = useState(false);
         )
       )
     ) : (
-      <Typography>No responder scope available.</Typography>
+      <Typography sx={{ color: "#ccc" }}>No responder scope available.</Typography>
     )}
   </DialogContent>
 </Dialog>
