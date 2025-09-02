@@ -1334,6 +1334,8 @@ class closure_Post_api(APIView):
             inc_vh = incident_vehicles.objects.filter(incident_id=inc_dtl, veh_id=vehicl_dtls, status=1)
             if inc_vh.exists():
                 inc_vh.update(jobclosure_status=1,pcr_status=3)
+            else:
+                add_inc_vh = incident_vehicles.objects.create(incident_id=inc_dtl, veh_id=vehicl_dtls, status=1,jobclosure_status=1,pcr_status=3,added_by=request.data.get('closure_added_by'))
                 
             invh_dtl = incident_vehicles.objects.filter(veh_id=vehicl_dtls,jobclosure_status=2)
             if invh_dtl.exists() and invh_dtl.exclude(jobclosure_status=1).exists() and vehicl_dtls:
@@ -1651,6 +1653,7 @@ class incident_get_Api(APIView):
 
             responder_details.append({
                 "responder_id": responder["responder_id"],
+                "responder_name": responder["responder_name"],
                 "vehicles": vehicles
             })
         
@@ -1719,29 +1722,62 @@ class UpdateTriggerStatusAPIView(APIView):
 
 
 
+# class incident_wise_responder_list(APIView):
+
+#     def get(self, request, inc_id):
+#         nid = incident_vehicles.objects.filter(incident_id=inc_id,status=1).exclude(jobclosure_status=1).select_related("veh_id__responder")
+#         if not nid.exists():
+#             return Response({"data": [], "error": {"code": 1, "message": "No vehicles found"}})
+#         grouped = {}
+#         for i in nid:
+#             if i.veh_id and i.veh_id.responder:
+#                 responder_id = i.veh_id.responder.responder_id
+#                 responder_name = i.veh_id.responder.responder_name
+#                 if responder_id not in grouped:
+#                     grouped[responder_id] = {
+#                         "responder_id": responder_id,
+#                         "responder_name": responder_name,
+#                         "vehicle": []
+#                     }
+#                 grouped[responder_id]["vehicle"].append({
+#                     "veh_id": i.veh_id.veh_id,
+#                     "vehicle_no": i.veh_id.veh_number
+#                 })  
+
+#         return Response(list(grouped.values()), status=status.HTTP_200_OK)
+
+
+
+
+
 class incident_wise_responder_list(APIView):
-
     def get(self, request, inc_id):
-        nid = incident_vehicles.objects.filter(incident_id=inc_id,status=1).exclude(jobclosure_status=1).select_related("veh_id__responder")
-        if not nid.exists():
-            return Response({"data": [], "error": {"code": 1, "message": "No vehicles found"}})
-        grouped = {}
-        for i in nid:
-            if i.veh_id and i.veh_id.responder:
-                responder_id = i.veh_id.responder.responder_id
-                responder_name = i.veh_id.responder.responder_name
-                if responder_id not in grouped:
-                    grouped[responder_id] = {
-                        "responder_id": responder_id,
-                        "responder_name": responder_name,
-                        "vehicle": []
-                    }
-                grouped[responder_id]["vehicle"].append({
-                    "veh_id": i.veh_id.veh_id,
-                    "vehicle_no": i.veh_id.veh_number
-                })  
+        inc_dtl = DMS_Incident.objects.get(inc_id=inc_id)
+        kk = []
+        for i in inc_dtl.responder_scope.all():
+            vh_dtl=Vehical.objects.filter(responder=i,status=1)
+            vehi_dtl = []
+            for j in vh_dtl:
+                inc_vh = incident_vehicles.objects.filter(incident_id=inc_dtl, veh_id=j, jobclosure_status=1,status=1)
+                is_vehical_close = True if inc_vh.exists() else False
+                if is_vehical_close == False:
+                    vehi_dtl.append({
+                        "veh_id": j.veh_id,
+                        "vehicle_no": j.veh_number
+                    })
+            if vehi_dtl:
+                kk.append(  {
+                "responder_id": i.responder_id,
+                "responder_name": i.responder_name,
+                "vehicle": vehi_dtl
 
-        return Response(list(grouped.values()), status=status.HTTP_200_OK)
+            })
+        return Response(kk)
+
+
+
+
+        
 
 
 
