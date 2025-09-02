@@ -1651,6 +1651,7 @@ class incident_get_Api(APIView):
 
             responder_details.append({
                 "responder_id": responder["responder_id"],
+                "responder_name": responder["responder_name"],
                 "vehicles": vehicles
             })
         
