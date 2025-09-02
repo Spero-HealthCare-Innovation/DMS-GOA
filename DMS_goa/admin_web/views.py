@@ -1917,7 +1917,7 @@ class CombinedAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request, format=None):
-        permission_modules = Permission_module.objects.all()
+        permission_modules = Permission_module.objects.all().order_by("module_id")
         modules_serializer = Moduleserializer(permission_modules, many=True)
 
         permission_objects = permission.objects.all()
@@ -2453,3 +2453,55 @@ class ChiefComplaintWiseCount(APIView):
         ]
 
         return Response({"chief_complaints": result})
+    
+    
+    
+class SubChiefComplaintWiseCount(APIView):
+    def get(self, request, pc_id):
+        today = now().date()
+        start_of_month = today.replace(day=1)
+        last_month_start = (start_of_month - timedelta(days=1)).replace(day=1)
+        last_month_end = start_of_month - timedelta(days=1)
+
+        sub_complaints = (
+            DMS_Disaster_Type.objects.filter(
+                disaster_is_deleted=False,
+                disaster_parent_id=pc_id
+            )
+            .annotate(
+                total=Count(
+                    "dms_incident",
+                    filter=Q(dms_incident__inc_is_deleted=False),
+                ),
+                today_count=Count(
+                    "dms_incident",
+                    filter=Q(
+                        dms_incident__inc_is_deleted=False,
+                        dms_incident__inc_added_date__gte=today,
+                        dms_incident__inc_added_date__lt=today + timedelta(days=1),
+                    ),
+                ),
+                last_month_count=Count(
+                    "dms_incident",
+                    filter=Q(
+                        dms_incident__inc_is_deleted=False,
+                        dms_incident__inc_added_date__gte=last_month_start,
+                        dms_incident__inc_added_date__lte=last_month_end,
+                    ),
+                ),
+            )
+            .values("disaster_id", "disaster_name", "total", "today_count", "last_month_count")
+        )
+
+        result = [
+            {
+                "id": item["disaster_id"],
+                "name": item["disaster_name"],
+                "total": item["total"],
+                "today": item["today_count"],
+                "last_month": item["last_month_count"],
+            }
+            for item in sub_complaints
+        ]
+
+        return Response({"sub_chief_complaints": result})

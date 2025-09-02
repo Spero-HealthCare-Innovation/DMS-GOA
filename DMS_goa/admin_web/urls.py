@@ -129,8 +129,8 @@ urlpatterns = [
     path("dispatch_closure/", DispatchClosureDashboardCount.as_view(), name="dispatch-closure-dashboard"),
     path("average_dispatch_time/", AverageCallTimeDashboard.as_view(), name="average-dispatch-time"),
     path("call_type_count/", CallTypeWiseCount.as_view(), name="call-type-count"),
-    path("chief_complaints/<int:call_type_id>/", ChiefComplaintWiseCount.as_view(), name="chief-complaints-count",
-    ),
+    path("chief_complaints/<int:call_type_id>/", ChiefComplaintWiseCount.as_view(), name="chief-complaints-count"), 
+    path("sub_chief_complaints/<int:pc_id>/", SubChiefComplaintWiseCount.as_view(), name="sub-chief-complaints-count"),
 
     #=============================== Mayank =========================================================
 
