@@ -51,6 +51,11 @@ class PasswordResetConfirmSerializer(serializers.Serializer):
         return attrs
     
 
+class IncidentVehicleSerializer(serializers.ModelSerializer):
+    class Meta:
+        model=incident_vehicles
+        fields='__all__'
+
 class DMS_department_serializer(serializers.ModelSerializer):
     class Meta:
         model=DMS_Department
