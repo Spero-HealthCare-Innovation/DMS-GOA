@@ -1743,63 +1743,86 @@ function IncidentDetails({
 
         {/* ASSIGND AMBULANCE MODAL */}
 
-        <Dialog
-          open={openAmbulanceModal}
-          onClose={() => setOpenAmbulanceModal(false)}
-          maxWidth="sm"
-          fullWidth
-        >
-          <DialogTitle>Assigned Ambulances</DialogTitle>
-          <DialogContent dividers>
-            {Array.isArray(incidentDetails?.["responders scope"]) &&
-            incidentDetails["responders scope"].length > 0 ? (
-              incidentDetails["responders scope"].map(
-                ({ responder_id, responder_name, vehicles }) => (
-                  <Box key={responder_id} mb={2}>
-                    <Typography
-                      variant="subtitle1"
-                      sx={{ fontWeight: 600, mb: 1 }}
-                    >
-                      {responder_name} {/* Department/Responder name */}
+<Dialog
+  open={openAmbulanceModal}
+  onClose={() => setOpenAmbulanceModal(false)}
+  maxWidth="sm"
+  fullWidth
+>
+  <DialogTitle
+    sx={{
+      backgroundColor: "#222",
+      color: "#fff",
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "center",
+      p: 2,
+    }}
+  >
+    <Typography variant="h6" sx={{ fontWeight: 600 }}>
+      Assigned Ambulances
+    </Typography>
+
+    {/* ✅ Close Icon on Right */}
+    <IconButton
+      aria-label="close"
+      onClick={() => setOpenAmbulanceModal(false)}
+      sx={{ color: "#fff" }}
+    >
+      <CloseIcon />
+    </IconButton>
+  </DialogTitle>
+
+  <DialogContent dividers sx={{ backgroundColor: "#1a1a1a" }}>
+    {Array.isArray(incidentDetails?.["responders scope"]) &&
+    incidentDetails["responders scope"].length > 0 ? (
+      incidentDetails["responders scope"].map(
+        ({ responder_id, responder_name, vehicles }) => (
+          <Box key={responder_id} mb={2}>
+            {Array.isArray(vehicles) && vehicles.length > 0 ? (
+              <Box>
+                {vehicles.map((veh, idx) => (
+                  <Box
+                    key={idx}
+                    display="flex"
+                    justifyContent="space-between"
+                    alignItems="center"
+                    sx={{
+                      p: 1.5,
+                      border: "1px solid #444",
+                      borderRadius: 1,
+                      mb: 1,
+                      backgroundColor: "#333",
+                      color: "#fff",
+                    }}
+                  >
+                    {/* ✅ Left side: responder name */}
+                    <Typography variant="body2" sx={{ fontWeight: 600, color: "#fff" }}>
+                      {responder_name}
                     </Typography>
 
-                    {Array.isArray(vehicles) && vehicles.length > 0 ? (
-                      <Box>
-                        {vehicles.map((veh, idx) => (
-                          <Box
-                            key={idx}
-                            display="flex"
-                            justifyContent="space-between"
-                            sx={{
-                              p: 1,
-                              border: "1px solid #e0e0e0",
-                              borderRadius: 1,
-                              mb: 1,
-                              backgroundColor: "#f9f9f9",
-                            }}
-                          >
-                            <Typography variant="body2">
-                              {veh.vehicle_name}
-                            </Typography>
-                            <Typography variant="body2" color="text.secondary">
-                              {veh.vehicle_number}
-                            </Typography>
-                          </Box>
-                        ))}
-                      </Box>
-                    ) : (
-                      <Typography variant="body2" color="text.secondary">
-                        No ambulances assigned
-                      </Typography>
-                    )}
+                    {/* ✅ Right side: vehicle number */}
+                    <Typography variant="body2" sx={{ color: "#fff" }}>
+                      {veh.vehicle_number}
+                    </Typography>
                   </Box>
-                )
-              )
+                ))}
+              </Box>
             ) : (
-              <Typography>No responder scope available.</Typography>
+              <Typography variant="body2" sx={{ color: "#ccc" }}>
+                No ambulances assigned
+              </Typography>
             )}
-          </DialogContent>
-        </Dialog>
+          </Box>
+        )
+      )
+    ) : (
+      <Typography sx={{ color: "#ccc" }}>No responder scope available.</Typography>
+    )}
+  </DialogContent>
+</Dialog>
+
+
       </Paper>
     </>
   );
