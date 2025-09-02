@@ -14,7 +14,8 @@ import {
 import { useTheme } from "@mui/material/styles";
 // import loginBg from "../../assets/Bg_login1.png";
 import loginBg from "../../assets/pune_login_bg.png";
-import PMCLogo from "../../assets/PMC.png";
+// import PMCLogo from "../../assets/PMC.png";
+import PMCLogo from "../../assets/logo.png";
 import Spero from "../../assets/spero1.png";
 import { useNavigate } from "react-router-dom";
 import CachedIcon from "@mui/icons-material/Cached";
