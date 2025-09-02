@@ -109,7 +109,7 @@ const AppRoutes = ({ darkMode, setIsLoggedIn }) => {
           }
         />
         <Route
-          path="/add-group"
+          path="/Add-Group"
           element={
             <PrivateRoute>
               <AddGroup darkMode={darkMode} />
@@ -117,7 +117,7 @@ const AppRoutes = ({ darkMode, setIsLoggedIn }) => {
           }
         />
         <Route
-          path="/add-employee"
+          path="/Add-Employee"
           element={
             <PrivateRoute>
               <AddEmployee darkMode={darkMode} />
