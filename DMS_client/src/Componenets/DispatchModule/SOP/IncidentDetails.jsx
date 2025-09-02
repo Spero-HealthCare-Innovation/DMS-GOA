@@ -1727,7 +1727,7 @@ const [openAmbulanceModal, setOpenAmbulanceModal] = useState(false);
 
 {/* ASSIGND AMBULANCE MODAL */}
 
-   <Dialog
+ <Dialog
   open={openAmbulanceModal}
   onClose={() => setOpenAmbulanceModal(false)}
   maxWidth="sm"
@@ -1744,16 +1744,31 @@ const [openAmbulanceModal, setOpenAmbulanceModal] = useState(false);
               variant="subtitle1"
               sx={{ fontWeight: 600, mb: 1 }}
             >
-              {responder_name}
+              {responder_name} {/* Department/Responder name */}
             </Typography>
+
             {Array.isArray(vehicles) && vehicles.length > 0 ? (
-              <Stack spacing={1}>
+              <Box>
                 {vehicles.map((veh, idx) => (
-                  <Typography key={idx} variant="body2">
-                    🚑 {veh.vehicle_name}
-                  </Typography>
+                  <Box
+                    key={idx}
+                    display="flex"
+                    justifyContent="space-between"
+                    sx={{
+                      p: 1,
+                      border: "1px solid #e0e0e0",
+                      borderRadius: 1,
+                      mb: 1,
+                      backgroundColor: "#f9f9f9",
+                    }}
+                  >
+                    <Typography variant="body2">{veh.vehicle_name}</Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      {veh.vehicle_number}
+                    </Typography>
+                  </Box>
                 ))}
-              </Stack>
+              </Box>
             ) : (
               <Typography variant="body2" color="text.secondary">
                 No ambulances assigned
@@ -1767,6 +1782,7 @@ const [openAmbulanceModal, setOpenAmbulanceModal] = useState(false);
     )}
   </DialogContent>
 </Dialog>
+
 
       </Paper>
     </>

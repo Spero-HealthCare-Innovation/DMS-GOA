@@ -69,7 +69,6 @@ const Incident = ({ darkMode }) => {
   const [assignedMap, setAssignedMap] = useState({});
   // const [responderList, setResponderList] = useState([]);
 
-
   const handleSaveFromModal = (data) => {
     setAssignedMap(data.assignedVehicles); // ✅ parent update
   };
@@ -86,18 +85,27 @@ const Incident = ({ darkMode }) => {
     setSelectedTehsilId,
     setSelectedCityId,
     fetchTehsilsByDistrict,
-    setQuery
+    setQuery,
+    callType,
+    selectedcallType,
+    setselectedcallType,
+    selectedSubchiefComplaint,
+    setselectedSubchiefComplaint,
+    subChiefComplaint,
+    selectedChiefComplaint,
+    ChiefComplaint,
+    setselectedChiefComplaint,
+    fetchResponderScope,
   } = useAuth();
+
+  console.log(
+    selectedChiefComplaint,
+    "selectedChiefComplaintselectedChiefComplaintselectedChiefComplaint"
+  );
 
   useEffect(() => {
     fetchDistrictsByState();
   }, []);
-
-  // useEffect(() => {
-  //     if (districts.length > 0) {
-  //         console.log("All districts:", districts);
-  //     }
-  // }, [districts]);
 
   useEffect(() => {
     if (districts.length > 0 && districtName) {
@@ -214,12 +222,20 @@ const Incident = ({ darkMode }) => {
     return () => clearInterval(intervalId);
   }, [timerActive]);
 
+  const hours = Math.floor(secondsElapsed / 3600);
   const minutes = Math.floor(secondsElapsed / 60);
   const seconds = secondsElapsed % 60;
-  const formattedTime = `${minutes.toString().padStart(2, "0")}:${seconds
+  const formattedTime = `${hours.toString().padStart(2, "0")}:${minutes
     .toString()
-    .padStart(2, "0")}`;
+    .padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
 
+  // useEffect(() => {
+  //   const interval = setInterval(() => {
+  //     setSecondsElapsed((prev) => prev + 1);
+  //   }, 1000);
+
+  //   return () => clearInterval(interval); // cleanup
+  // }, []);
   // console.log(googleKey, 'googleKey');
   const navigate = useNavigate();
   const token = localStorage.getItem("access_token");
@@ -312,6 +328,16 @@ const Incident = ({ darkMode }) => {
 
   const [errors, setErrors] = useState({});
 
+  // time duration
+  const [hrs = 0, min = 0, sec = 0] = (formattedTime || "00:00:00")
+    .split(":")
+    .map((v) => Number(v) || 0);
+
+  // Pad with leading zeros
+  const pad = (n) => String(n).padStart(2, "0");
+
+  // Final HH:MM:SS string
+  const TimeDuration = `${pad(hrs)}:${pad(min)}:${pad(sec)}`;
   const handleSubmit = async () => {
     const newErrors = {};
 
@@ -322,8 +348,8 @@ const Incident = ({ darkMode }) => {
     if (!query && !popupText) newErrors.location = "Location is required";
     if (!summaryId) newErrors.summary = "Summary is required";
     if (selectedEmergencyValue === 1) {
-      if (!selectedDisaster)
-        newErrors.disaster_type = "Disaster Type is required";
+      // if (!selectedDisaster)
+      //   newErrors.disaster_type = "Disaster Type is required";
       if (!alertType) newErrors.alert_type = "Alert Type is required";
       if (!comments) newErrors.comments = "Comment is required";
       if (!sopId || sopId.length === 0) {
@@ -341,8 +367,18 @@ const Incident = ({ darkMode }) => {
       return;
     }
 
+    const vehicleIds = Object.keys(assignedMap).filter(
+      (key) => assignedMap[key]
+    );
+    if (vehicleIds.length === 0) {
+      newErrors.assignAmbulance = "At least one vehicle must be assigned";
+    }
 
-    const vehicleIds = Object.keys(assignedMap).filter((key) => assignedMap[key]);
+    // Agar koi bhi error hai to wahi return kar do
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
+    }
 
     const payload = {
       inc_type: selectedEmergencyValue,
@@ -368,7 +404,13 @@ const Incident = ({ darkMode }) => {
       ward: selectedWard,
       ward_officer: selectedWardOfficer,
       vehicle: vehicleIds,
+      call_type: selectedcallType,
+      parent_complaint: selectedChiefComplaint,
+      call_recieved_from: null,
+      disaster_type: selectedSubchiefComplaint,
+      time: formattedTime,
     };
+    console.log(payload, "payload");
 
     try {
       const response = await fetch(`${port}/admin_web/manual_call_incident/`, {
@@ -576,7 +618,7 @@ const Incident = ({ darkMode }) => {
             </Box>
 
             <Grid container spacing={1.6}>
-              <Grid item xs={12} sm={ 4}>
+              <Grid item xs={12} sm={4}>
                 <TextField
                   select
                   fullWidth
@@ -604,20 +646,20 @@ const Incident = ({ darkMode }) => {
                       label="Select Call Type"
                       variant="outlined"
                       sx={inputStyle}
-                      value={selectedDisaster}
-                      onChange={(e) => setSelectedDisaster(e.target.value)}
-                      error={!!errors.disaster_type}
-                      helperText={errors.disaster_type}
+                      value={selectedcallType}
+                      onChange={(e) => setselectedcallType(e.target.value)}
+                      // error={!!errors.disaster_type}
+                      // helperText={errors.disaster_type}
                     >
                       <MenuItem disabled value="">
                         Select Call Type
                       </MenuItem>
-                      {disaster.map((item) => (
+                      {callType.map((item) => (
                         <MenuItem
-                          key={item.disaster_id}
-                          value={item.disaster_id}
+                          key={item.call_type_id}
+                          value={item.call_type_id}
                         >
-                          {item.disaster_name}
+                          {item.call_type_name}
                         </MenuItem>
                       ))}
                     </TextField>
@@ -631,20 +673,22 @@ const Incident = ({ darkMode }) => {
                       label="Select Chief Complaint"
                       variant="outlined"
                       sx={inputStyle}
-                      value={selectedDisaster}
-                      onChange={(e) => setSelectedDisaster(e.target.value)}
-                      error={!!errors.disaster_type}
-                      helperText={errors.disaster_type}
+                      value={selectedChiefComplaint}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        setselectedChiefComplaint(value); // update context state
+                        fetchResponderScope(value); // call API with selected chief complaint
+                      }}
+                      // onChange={(e) => setselectedChiefComplaint(e.target.value)}
+                      // error={!!errors.disaster_type}
+                      // helperText={errors.disaster_type}
                     >
                       <MenuItem disabled value="">
                         Select Chief Complaint
                       </MenuItem>
-                      {disaster.map((item) => (
-                        <MenuItem
-                          key={item.disaster_id}
-                          value={item.disaster_id}
-                        >
-                          {item.disaster_name}
+                      {ChiefComplaint.map((item) => (
+                        <MenuItem key={item.pc_id} value={item.pc_id}>
+                          {item.pc_name}
                         </MenuItem>
                       ))}
                     </TextField>
@@ -658,15 +702,17 @@ const Incident = ({ darkMode }) => {
                       label="Sub Chief Complaint"
                       variant="outlined"
                       sx={inputStyle}
-                      value={selectedDisaster}
-                      onChange={(e) => setSelectedDisaster(e.target.value)}
-                      error={!!errors.disaster_type}
-                      helperText={errors.disaster_type}
+                      value={selectedSubchiefComplaint}
+                      onChange={(e) =>
+                        setselectedSubchiefComplaint(e.target.value)
+                      }
+                      // error={!!errors.disaster_type}
+                      // helperText={errors.disaster_type}
                     >
                       <MenuItem disabled value="">
                         Sub Chief Complaint
                       </MenuItem>
-                      {disaster.map((item) => (
+                      {subChiefComplaint.map((item) => (
                         <MenuItem
                           key={item.disaster_id}
                           value={item.disaster_id}
@@ -779,16 +825,16 @@ const Incident = ({ darkMode }) => {
                     id="district-select"
                     value={
                       districtName &&
-                        districts.find(
-                          (d) =>
-                            d.dis_name.toLowerCase() ===
-                            districtName.toLowerCase()
-                        )
+                      districts.find(
+                        (d) =>
+                          d.dis_name.toLowerCase() ===
+                          districtName.toLowerCase()
+                      )
                         ? districts.find(
-                          (d) =>
-                            d.dis_name.toLowerCase() ===
-                            districtName.toLowerCase()
-                        ).dis_id
+                            (d) =>
+                              d.dis_name.toLowerCase() ===
+                              districtName.toLowerCase()
+                          ).dis_id
                         : selectedDistrictId || ""
                     }
                     label="District"
@@ -812,15 +858,15 @@ const Incident = ({ darkMode }) => {
                   variant="outlined"
                   value={
                     tehsilName &&
-                      Tehsils.find(
-                        (t) =>
-                          t.tah_name.toLowerCase() === tehsilName.toLowerCase()
-                      )
+                    Tehsils.find(
+                      (t) =>
+                        t.tah_name.toLowerCase() === tehsilName.toLowerCase()
+                    )
                       ? Tehsils.find(
-                        (t) =>
-                          t.tah_name.toLowerCase() ===
-                          tehsilName.toLowerCase()
-                      ).tah_id
+                          (t) =>
+                            t.tah_name.toLowerCase() ===
+                            tehsilName.toLowerCase()
+                        ).tah_id
                       : selectedTehsilId || ""
                   }
                   onChange={(e) => setSelectedTehsilId(e.target.value)}
@@ -919,12 +965,33 @@ const Incident = ({ darkMode }) => {
                   onChange={(e) => setSummaryId(e.target.value)}
                   error={!!errors.summary}
                   helperText={errors.summary}
+                  SelectProps={{
+                    MenuProps: {
+                      PaperProps: {
+                        sx: {
+                          width: "400px", // <-- force dropdown menu width
+                          maxWidth: "none", // prevent auto max-width behaviour
+                          // optional: limit height and allow scroll
+                          maxHeight: 400,
+                        },
+                      },
+                    },
+                  }}
                 >
                   <MenuItem disabled value="">
                     Select Summary
                   </MenuItem>
                   {summary.map((item) => (
-                    <MenuItem key={item.sum_id} value={item.sum_id}>
+                    <MenuItem
+                      key={item.sum_id}
+                      value={item.sum_id}
+                      sx={{
+                        whiteSpace: "normal", // allow wrapping
+                        // overflowWrap: "anywhere", // break long words if needed
+                        wordBreak: "break-word",
+                        maxWidth: "100%",
+                      }}
+                    >
                       {item.summary}
                     </MenuItem>
                   ))}
@@ -1032,13 +1099,13 @@ const Incident = ({ darkMode }) => {
                       {alertType === 1
                         ? "High"
                         : alertType === 2
-                          ? "Medium"
-                          : alertType === 2
-                            ? "Low"
-                            : "-"}
+                        ? "Medium"
+                        : alertType === 2
+                        ? "Low"
+                        : "-"}
                     </Typography>
                   </Box>
-                  <Box>
+                  {/* <Box>
                     <Typography
                       variant="subtitle2"
                       sx={{
@@ -1064,7 +1131,7 @@ const Incident = ({ darkMode }) => {
                         (item) => item.disaster_id === selectedDisaster
                       )?.disaster_name || "-"}
                     </Typography>
-                  </Box>
+                  </Box> */}
                 </Grid>
 
                 {/* SOP Section */}
@@ -1219,11 +1286,16 @@ const Incident = ({ darkMode }) => {
                     <Button
                       variant="contained"
                       onClick={handleOpenModal}
-                      disabled={sopId.length === 0} // sirf tab enable hoga jab koi checkbox selected ho
+                      disabled={sopId.length === 0}
                       sx={{ mt: 2 }}
                     >
                       Assign Ambulance
                     </Button>
+                    {errors?.assignAmbulance && (
+                      <Typography color="error" variant="body2" mt={1}>
+                        {errors.assignAmbulance}
+                      </Typography>
+                    )}
                   </Box>
                 </Grid>
 
@@ -1291,7 +1363,7 @@ const Incident = ({ darkMode }) => {
           onClose={() => setOpenModal(false)}
           onSave={(data) => {
             console.log("Saved Data:", data);
-            setAssignedMap(data.assignedVehicles); 
+            setAssignedMap(data.assignedVehicles);
             setOpenModal(false);
           }}
         />

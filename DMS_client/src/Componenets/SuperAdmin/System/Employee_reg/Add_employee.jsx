@@ -447,7 +447,7 @@ function Add_employee({ darkMode }) {
       const age = today.getFullYear() - dobDate.getFullYear();
       const monthDiff = today.getMonth() - dobDate.getMonth();
       if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < dobDate.getDate())) {
-        age--;
+        // age--;
       }
       if (age < 18) {
         errors.empDOB = 'Employee must be at least 18 years old';
@@ -654,7 +654,6 @@ function Add_employee({ darkMode }) {
       if (err.response) {
         console.error("Server Response:", err.response.data);
       }
-      setError(err);
     } finally {
       setLoading1(false);
     }
