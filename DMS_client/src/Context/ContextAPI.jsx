@@ -402,7 +402,7 @@ export const AuthProvider = ({ children }) => {
   const [loading2, setLoading2] = useState(true);
   const [error2, setError2] = useState(null);
   const [dispatchClosure, setDispatchClosure] = useState(null);
-  const [filter, setFilter] = useState("today"); // default filter
+  const [filter, setFilter] = useState("total"); // default filter
 
    const fetchVehicles = async () => {
     try {
