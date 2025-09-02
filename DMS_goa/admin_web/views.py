@@ -2505,3 +2505,48 @@ class SubChiefComplaintWiseCount(APIView):
         ]
 
         return Response({"sub_chief_complaints": result})
+    
+    
+class GisAnaIncidentFilterAPIView(APIView):
+    # permission_classes = [IsAuthenticated]
+
+    def get(self, request, format=None):
+        # Query parameters le rahe hain
+        start_date = request.query_params.get("start_date", None)
+        end_date = request.query_params.get("end_date", None)
+        call_type = request.query_params.get("call_type", None)
+        parent_complaint = request.query_params.get("parent_complaint", None)
+
+        # Base queryset
+        queryset = DMS_Incident.objects.filter(inc_is_deleted=False, inc_type=1)  # sirf emergency calls
+
+        # Date filter (agar start_date aur end_date diye ho)
+        if start_date and end_date:
+            try:
+                start = datetime.strptime(start_date, "%Y-%m-%d")
+                end = datetime.strptime(end_date, "%Y-%m-%d")
+                queryset = queryset.filter(inc_added_date__date__range=[start, end])
+            except Exception as e:
+                return Response({"error": f"Invalid date format, use YYYY-MM-DD. {str(e)}"}, status=400)
+
+        # Call type filter
+        if call_type:
+            queryset = queryset.filter(call_type=call_type)
+
+        # Chief complaint filter
+        if parent_complaint:
+            queryset = queryset.filter(parent_complaint=parent_complaint)
+
+        # Response format
+        data = []
+        for obj in queryset:
+            data.append({
+                "incident_id": obj.incident_id,
+                "location": obj.location,
+                "latitude": obj.latitude,
+                "longitude": obj.longitude,
+                "district": obj.district.dis_name if obj.district else None,  # assuming DMS_District has dst_name
+                "clouser_status": obj.clouser_status
+            })
+
+        return Response(data, status=200)
