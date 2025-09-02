@@ -12,9 +12,9 @@ import {
   MenuItem,
   Checkbox,
   ListItemText,
-  FormControl ,
-  InputLabel ,
-  FormHelperText 
+  FormControl,
+  InputLabel,
+  FormHelperText
 } from "@mui/material";
 import axios from "axios";
 import { useEffect, useState } from "react";
@@ -28,7 +28,7 @@ const CaseClosureDetails = ({
   darkMode,
   flag,
   selectedIncident,
-  fetchDispatchList, 
+  fetchDispatchList,
 }) => {
   const port = import.meta.env.VITE_APP_API_KEY;
   const token = localStorage.getItem("accessToken");
@@ -81,6 +81,7 @@ const CaseClosureDetails = ({
           },
         }
       );
+      console.log(inc_id, "incident id");
 
       if (response.data && Array.isArray(response.data)) {
         setClosedVehicles(response.data.map(item => item.vehicle_no));
@@ -92,72 +93,73 @@ const CaseClosureDetails = ({
   };
 
   // Function to fetch responder list
- const fetchResponderList = async (inc_id) => {
-  if (!inc_id) return;
+  const fetchResponderList = async (inc_id) => {
+    if (!inc_id) return;
 
-  try {
-    setResponderLoading(true);
-    setResponderError(null);
-    
-    // Clear ALL previous data first
-    setResponderList([]);
-    setSelectedDepartments('');
-    setAvailableVehicles([]);
-    setValidationErrors({});
-    setFormData(prev => ({ 
-      ...prev, 
-      vehicleNumber: '',
-      vehicleId: '',
-      responderName: '',
-      closureRemark: '' 
-    }));
+    try {
+      setResponderLoading(true);
+      setResponderError(null);
 
-    const authToken = localStorage.getItem("access_token") || token;
-    const response = await axios.get(
-      `${port}/admin_web/get_responder_list/${inc_id}`,
-      {
-        headers: {
-          Authorization: `Bearer ${authToken}`,
-          "Content-Type": "application/json",
-        },
-      }
-    );
+      // Clear ALL previous data first
+      setResponderList([]);
+      setSelectedDepartments('');
+      setAvailableVehicles([]);
+      setValidationErrors({});
+      setFormData(prev => ({
+        ...prev,
+        vehicleNumber: '',
+        vehicleId: '',
+        responderName: '',
+        closureRemark: ''
+      }));
 
-    console.log("Responder API Response:", response.data);
-
-    if (response.data && Array.isArray(response.data)) {
-      setResponderList(response.data);
-
-      // Extract all vehicles from all responders
-      const allVehicles = response.data.reduce((acc, responder) => {
-        if (responder.vehicle && Array.isArray(responder.vehicle)) {
-          return [...acc, ...responder.vehicle];
+      const authToken = localStorage.getItem("access_token") || token;
+      const response = await axios.get(
+        `${port}/admin_web/get_responder_list/${inc_id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${authToken}`,
+            "Content-Type": "application/json",
+          },
         }
-        return acc;
-      }, []);
+      );
 
-      // Auto-select if only one responder
-      if (response.data.length === 1) {
-        const singleResponder = response.data[0];
-        console.log("Auto-selecting single responder:", singleResponder.responder_name);
-        handleResponderChange(singleResponder.responder_name, true);
+      console.log("Responder API Response:", response.data);
+
+      if (response.data && Array.isArray(response.data)) {
+        setResponderList(response.data);
+
+        // Extract all vehicles from all responders
+        const allVehicles = response.data.reduce((acc, responder) => {
+          if (responder.vehicle && Array.isArray(responder.vehicle)) {
+            return [...acc, ...responder.vehicle];
+          }
+          return acc;
+        }, []);
+
+        // Auto-select if only one responder
+        if (response.data.length === 1) {
+          const singleResponder = response.data[0];
+          console.log("Auto-selecting single responder:", singleResponder.responder_name);
+          handleResponderChange(singleResponder.responder_name, true);
+        } else {
+          // Multiple responders - just set available vehicles for reference
+          setAvailableVehicles(allVehicles);
+        }
       } else {
-        // Multiple responders - just set available vehicles for reference
-        setAvailableVehicles(allVehicles);
+        setResponderList([]);
+        setAvailableVehicles([]);
       }
-    } else {
+    } catch (error) {
+      console.error("Error fetching responder list:", error);
+      setResponderError(error.response?.data?.message || "Failed to fetch responder list");
       setResponderList([]);
       setAvailableVehicles([]);
+    } finally {
+      setResponderLoading(false);
     }
-  } catch (error) {
-    console.error("Error fetching responder list:", error);
-    setResponderError(error.response?.data?.message || "Failed to fetch responder list");
-    setResponderList([]);
-    setAvailableVehicles([]);
-  } finally {
-    setResponderLoading(false);
-  }
-};
+  };
+
 
 
 
@@ -183,7 +185,7 @@ const CaseClosureDetails = ({
     if (selectedDepartments) {
       const selectedResponder = responderList.find(r => r.responder_name === selectedDepartments);
       const selectedResponderVehicles = selectedResponder?.vehicle || [];
-      
+
       if (selectedResponderVehicles.length === 0) {
         errors.vehicleNumber = "No vehicles available for selected responder";
       } else if (!formData.vehicleNumber) {
@@ -260,7 +262,7 @@ const CaseClosureDetails = ({
 
   const handleChange = (field, value) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
-    
+
     // Clear validation error when user changes value
     if (validationErrors[field]) {
       setValidationErrors((prev) => ({
@@ -271,61 +273,61 @@ const CaseClosureDetails = ({
   };
 
   // Handle responder selection
-const handleResponderChange = (responderName, isAuto = false) => {
-  setSelectedDepartments(responderName);
+  const handleResponderChange = (responderName, isAuto = false) => {
+    setSelectedDepartments(responderName);
 
-  const selectedResponder = responderList.find(
-    (r) => r.responder_name === responderName
-  );
+    const selectedResponder = responderList.find(
+      (r) => r.responder_name === responderName
+    );
 
-  if (selectedResponder) {
-    const selectedVehicles = selectedResponder.vehicle || [];
+    if (selectedResponder) {
+      const selectedVehicles = selectedResponder.vehicle || [];
 
-    // Dropdown me vehicles set karo
-    setAvailableVehicles(selectedVehicles);
+      // Dropdown me vehicles set karo
+      setAvailableVehicles(selectedVehicles);
 
-    if (selectedVehicles.length === 1) {
-      //  Auto select single vehicle
-      const v = selectedVehicles[0];
-      handleChange("vehicleNumber", v.vehicle_no);
-      handleChange("vehicleId", v.veh_id);
+      if (selectedVehicles.length === 1) {
+        //  Auto select single vehicle
+        const v = selectedVehicles[0];
+        handleChange("vehicleNumber", v.vehicle_no);
+        handleChange("vehicleId", v.veh_id);
 
+        setValidationErrors((prev) => ({
+          ...prev,
+          vehicleNumber: null,
+        }));
+      } else if (selectedVehicles.length === 0) {
+        //  No vehicles available
+        handleChange("vehicleNumber", "");
+        handleChange("vehicleId", "");
+        setValidationErrors((prev) => ({
+          ...prev,
+          vehicleNumber: "No vehicles available for selected responder",
+        }));
+      } else {
+        // Multiple vehicles → clear selection first
+        handleChange("vehicleNumber", "");
+        handleChange("vehicleId", "");
+        setValidationErrors((prev) => ({
+          ...prev,
+          vehicleNumber: null,
+        }));
+      }
+    }
+
+    // Clear responder error if any
+    if (validationErrors.selectedDepartments) {
       setValidationErrors((prev) => ({
         ...prev,
-        vehicleNumber: null,
-      }));
-    } else if (selectedVehicles.length === 0) {
-      //  No vehicles available
-      handleChange("vehicleNumber", "");
-      handleChange("vehicleId", "");
-      setValidationErrors((prev) => ({
-        ...prev,
-        vehicleNumber: "No vehicles available for selected responder",
-      }));
-    } else {
-      // Multiple vehicles → clear selection first
-      handleChange("vehicleNumber", "");
-      handleChange("vehicleId", "");
-      setValidationErrors((prev) => ({
-        ...prev,
-        vehicleNumber: null,
+        selectedDepartments: null,
       }));
     }
-  }
 
-  // Clear responder error if any
-  if (validationErrors.selectedDepartments) {
-    setValidationErrors((prev) => ({
-      ...prev,
-      selectedDepartments: null,
-    }));
-  }
-
-  // 👉 Auto case me direct call hoga (fetchResponderList se)
-  if (isAuto) {
-    console.log("Auto-selected responder:", responderName);
-  }
-};
+    // 👉 Auto case me direct call hoga (fetchResponderList se)
+    if (isAuto) {
+      console.log("Auto-selected responder:", responderName);
+    }
+  };
 
 
   const formatDate = (date) => {
@@ -410,11 +412,11 @@ const handleResponderChange = (responderName, isAuto = false) => {
       setClosedVehicles(prev => [...prev, formData.vehicleNumber]);
 
       const remainingDepartments = res.data.Departments || [];
-      
+
       if (remainingDepartments.length === 0) {
         // Clear all form data
         setFormData({
-          selectedDepartments:"",
+          selectedDepartments: "",
           vehicleNumber: "",
           vehicleId: "",
           responderName: "",
@@ -424,7 +426,7 @@ const handleResponderChange = (responderName, isAuto = false) => {
           fromScene: "",
           backToBase: "",
           closureRemark: "",
-          
+
         });
         setSelectedDepartments([]);
         setSelectedIncidentFromSop(null);
@@ -434,8 +436,8 @@ const handleResponderChange = (responderName, isAuto = false) => {
         // Partial reset - keep some fields, clear others
         setFormData(prev => ({
           ...prev,
-         vehicleNumber: "",
-         vehicleId: "", 
+          vehicleNumber: "",
+          vehicleId: "",
           responderName: "",
           closureRemark: "",
           acknowledge: "",
@@ -447,7 +449,7 @@ const handleResponderChange = (responderName, isAuto = false) => {
         setSelectedDepartments('');
         setAvailableVehicles([]);
       }
-      
+
       await fetchResponderList(numericIncId);
 
     } catch (error) {
@@ -921,92 +923,92 @@ const handleResponderChange = (responderName, isAuto = false) => {
               }}
             >
               <Grid container spacing={2} sx={{ mt: 0.6 }}>
-            <Grid item xs={6}>
-        <Select
-          displayEmpty
-          value={selectedDepartments}
-          onChange={(event) => handleResponderChange(event.target.value)}
-          renderValue={(selected) => {
-            if (!selected) {
-              return (
-                <span style={{ color: "#888", fontStyle: "normal" }}>
-                  {responderLoading ? "Loading..." : "Responder Scope"}
-                </span>
-              );
-            }
-            return selected;
-          }}
-          size="small"
-          fullWidth
-          disabled={responderLoading}
-          inputProps={{ "aria-label": "Select Responder" }}
-          MenuProps={{
-            PaperProps: {
-              style: {
-                maxHeight: 250,
-                width: 200,
-              },
-            },
-          }}
-          error={!!validationErrors.selectedDepartments}
-          sx={validationErrors.selectedDepartments ? { border: '1px solid #d32f2f', borderRadius: 1 } : {}}
-        >
-          <MenuItem disabled value="">
-            <em>
-              {responderLoading
-                ? "Loading responders..."
-                : responderError
-                  ? "Error loading responders"
-                  : "Select Responder Scope"
-              }
-            </em>
-          </MenuItem>
+                <Grid item xs={6}>
+                  <Select
+                    displayEmpty
+                    value={selectedDepartments}
+                    onChange={(event) => handleResponderChange(event.target.value)}
+                    renderValue={(selected) => {
+                      if (!selected) {
+                        return (
+                          <span style={{ color: "#888", fontStyle: "normal" }}>
+                            {responderLoading ? "Loading..." : "Responder Scope"}
+                          </span>
+                        );
+                      }
+                      return selected;
+                    }}
+                    size="small"
+                    fullWidth
+                    disabled={responderLoading}
+                    inputProps={{ "aria-label": "Select Responder" }}
+                    MenuProps={{
+                      PaperProps: {
+                        style: {
+                          maxHeight: 250,
+                          width: 200,
+                        },
+                      },
+                    }}
+                    error={!!validationErrors.selectedDepartments}
+                    sx={validationErrors.selectedDepartments ? { border: '1px solid #d32f2f', borderRadius: 1 } : {}}
+                  >
+                    <MenuItem disabled value="">
+                      <em>
+                        {responderLoading
+                          ? "Loading responders..."
+                          : responderError
+                            ? "Error loading responders"
+                            : "Select Responder Scope"
+                        }
+                      </em>
+                    </MenuItem>
 
-          {responderList.map((responder, index) => (
-            <MenuItem
-              key={responder.responder_id || index}
-              value={responder.responder_name}
-            >
-              {responder.responder_name}
-            </MenuItem>
-          ))}
-        </Select>
+                    {responderList.map((responder, index) => (
+                      <MenuItem
+                        key={responder.responder_id || index}
+                        value={responder.responder_name}
+                      >
+                        {responder.responder_name}
+                      </MenuItem>
+                    ))}
+                  </Select>
 
-        {(validationErrors.selectedDepartments || responderError) && (
-          <Typography
-            variant="caption"
-            color="error"
-            sx={{ mt: 0.5, display: 'block' }}
-          >
-            {validationErrors.selectedDepartments || responderError}
-          </Typography>
-        )}
-        </Grid>
+                  {(validationErrors.selectedDepartments || responderError) && (
+                    <Typography
+                      variant="caption"
+                      color="error"
+                      sx={{ mt: 0.5, display: 'block' }}
+                    >
+                      {validationErrors.selectedDepartments || responderError}
+                    </Typography>
+                  )}
+                </Grid>
 
-             <Grid item xs={6}>
-            <FormControl fullWidth size="small" error={!!validationErrors.vehicleNumber}>
-            <InputLabel>Vehicle Number</InputLabel>
-            <Select
-              value={formData.vehicleNumber || ''}
-              onChange={(e) => handleChange("vehicleNumber", e.target.value)}
-              label="Vehicle Number"
-            >
-              {availableVehicles.map((vehicle, index) => (
-                <MenuItem 
-                  key={vehicle.veh_id || index} 
-                  value={vehicle.vehicle_no}
-                  disabled={closedVehicles.includes(vehicle.vehicle_no)}
-                >
-                  {vehicle.vehicle_no}
-                  {/* {closedVehicles.includes(vehicle.vehicle_no) && " (Closed)"} */}
-                </MenuItem>
-              ))}
-            </Select>
-            {validationErrors.vehicleNumber && (
-              <FormHelperText>{validationErrors.vehicleNumber}</FormHelperText>
-            )}
-          </FormControl>
-      </Grid>
+                <Grid item xs={6}>
+                  <FormControl fullWidth size="small" error={!!validationErrors.vehicleNumber}>
+                    <InputLabel>Vehicle Number</InputLabel>
+                    <Select
+                      value={formData.vehicleNumber || ''}
+                      onChange={(e) => handleChange("vehicleNumber", e.target.value)}
+                      label="Vehicle Number"
+                    >
+                      {availableVehicles.map((vehicle, index) => (
+                        <MenuItem
+                          key={vehicle.veh_id || index}
+                          value={vehicle.vehicle_no}
+                          disabled={closedVehicles.includes(vehicle.vehicle_no)}
+                        >
+                          {vehicle.vehicle_no}
+                          {/* {closedVehicles.includes(vehicle.vehicle_no) && " (Closed)"} */}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                    {validationErrors.vehicleNumber && (
+                      <FormHelperText>{validationErrors.vehicleNumber}</FormHelperText>
+                    )}
+                  </FormControl>
+                </Grid>
                 <Grid item xs={6}>
                   <TextField
                     id="responder-name-field"

@@ -402,6 +402,9 @@ export const AuthProvider = ({ children }) => {
   const [loading2, setLoading2] = useState(true);
   const [error2, setError2] = useState(null);
   const [dispatchClosure, setDispatchClosure] = useState(null);
+  const [avgTimes, setAvgTimes] = useState(null);
+  const [callTypes, setCallTypes] = useState([]);
+  const [chiefComplaints, setChiefComplaints] = useState([]);
   const [filter, setFilter] = useState("total"); // default filter
 
    const fetchVehicles = async () => {
@@ -450,10 +453,50 @@ export const AuthProvider = ({ children }) => {
     fetchData();
   }, []);
 
+  const fetchAvgTimes = async () => {
+  try {
+    const res = await axios.get(
+      `${port}/admin_web/average_dispatch_time/`
+    );
+    setAvgTimes(res.data);
+  } catch (error) {
+    console.error("Error fetching average dispatch time:", error);
+  }
+};
+
+const fetchCallTypes = async () => {
+  try {
+    const res = await axios.get(
+      "http://192.168.1.116:6003/admin_web/call_type_count/"
+    );
+    setCallTypes(res.data.call_type_counts || []);
+  } catch (error) {
+    console.error("Error fetching call types:", error);
+  }
+};
+
+
+const fetchChiefComplaints = async (callTypeId = 1) => {
+  try {
+    const res = await axios.get(
+      `http://192.168.1.116:6003/admin_web/chief_complaints/${callTypeId}/`
+    );
+    setChiefComplaints(res.data.chief_complaints || []);
+  } catch (error) {
+    console.error("Error fetching chief complaints:", error);
+  }
+};
+
+
   useEffect(() => {
     fetchVehicles();
      fetchCallData();
+     fetchAvgTimes();
+       fetchCallTypes();
+       fetchChiefComplaints(1);
       }, []);
+
+
   // chief complaint
 
   const [disaster, setDisaster] = useState([]);
@@ -594,7 +637,11 @@ useEffect(() => {
             setFilter,
             loading2,
             error2,
-            dispatchClosure
+            dispatchClosure,
+            avgTimes,
+            callTypes,
+             chiefComplaints,
+  fetchChiefComplaints
       }}
     >
       {children}
