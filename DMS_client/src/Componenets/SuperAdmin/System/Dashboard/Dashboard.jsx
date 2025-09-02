@@ -15,7 +15,6 @@ import {
   ComposedChart,
   Line,
   Legend,
-
 } from "recharts";
 import vehical from "./../../../../assets/vehical.png";
 import * as am5percent from "@amcharts/amcharts5/percent";
@@ -213,14 +212,7 @@ const COLORS = [
   "#d5a8f5", "#9be6c2", "#77b3f9"
 ];
 
-const data1 = [
 
-  { name: "Police", value: 50, color: "rgba(200, 147, 253, 1)" },
-  { name: "Fire", value: 70, color: "rgba(179, 234, 106, 1)" },
-  { name: "Disaster", value: 20, color: "rgba(255, 113, 139, 1)" },
-  { name: "Municipal", value: 80, color: "rgba(127, 167, 247, 1)" },
-
-];
 
 const pyramidData = [
   // { number: "01", title: "Total Calls", color: "#3f51b5" },
@@ -233,100 +225,106 @@ const pyramidData = [
 
 
 function Dashboard() {
-    const {
-      vehicleData,
-      loading1,
-      error1,
-      callData,
-      filter,
-      setFilter,
-      loading2,
-      error2,
-      dispatchClosure
-    } = useAuth();
+  const {
+    vehicleData,
+    loading1,
+    error1,
+    callData,
+    filter,
+    setFilter,
+    loading2,
+    error2,
+    dispatchClosure,
+    avgTimes,
+    callTypes,
+    chiefComplaints,
+    fetchChiefComplaints,
+  } = useAuth();
   const chartRef = useRef(null);
-  
+
   console.log("vehical count", callData);
-  
-
-useLayoutEffect(() => {
-  if (!chartRef.current || !callData) return;  // 👈 null check
-
-  const root = am5.Root.new(chartRef.current);
-  root._logo.dispose();
-  root.setThemes([am5themes_Animated.new(root)]);
-
-  const chart = root.container.children.push(
-    am5percent.PieChart.new(root, {
-      layout: root.verticalLayout,
-      innerRadius: am5.percent(60),
-      startAngle: 180,
-      endAngle: 360,
-    })
-  );
-
-  const series = chart.series.push(
-  am5percent.PieSeries.new(root, {
-    valueField: "value",
-    categoryField: "category",
-    startAngle: 180,
-    endAngle: 360,
-  })
-);
-
-series.labels.template.setAll({
-  text: "{category}: {value}"  // shows count
-});
-
-series.slices.template.setAll({
-  tooltipText: "{category}: {value}", 
-  strokeOpacity: 0,
-  fillOpacity: 1
-});
-
-  // ✅ color set
-  series.set("colors", am5.ColorSet.new(root, {
-    colors: [
-      am5.color("rgba(255, 113, 139, 1)"),
-      am5.color("rgba(45, 200, 125, 1)")
-    ],
-    reuse: true,
-    step: 1,
-  }));
-
-  // ✅ data from context
-  const filteredData = callData[filter] || { emergency: 0, non_emergency: 0 };
-  const data = [
-    { category: "Emergency", value: filteredData.emergency || callData.emergency },
-    { category: "Non-Emergency", value: filteredData.non_emergency || callData.non_emergency },
-  ];
-  series.data.setAll(data);
-
-// Calculate total only from available counts
-const total = data
-  .filter(d => d.value > 0)   // only non-zero values
-  .reduce((s, d) => s + d.value, 0);
-
-// Add center label
-series.children.push(
-  am5.Label.new(root, {
-    text: `Total Call\n${total}`,
-    fontSize: 17,
-    fontWeight: "700",
-    fill: am5.color(0xffffff),
-    textAlign: "center",
-    centerX: am5.p50,
-    centerY: am5.p50,
-    dy: -13,
-  })
-);
+  const [selectedCallType, setSelectedCallType] = useState("Municipal Call");
+  const [activeType, setActiveType] = useState("municipal");
 
 
-  series.appear(1000, 500);
-  chart.appear(1000, 500);
+  useLayoutEffect(() => {
+    if (!chartRef.current || !callData) return;  // 👈 null check
 
-  return () => root.dispose();
-}, [callData, filter]);
+    const root = am5.Root.new(chartRef.current);
+    root._logo.dispose();
+    root.setThemes([am5themes_Animated.new(root)]);
+
+    const chart = root.container.children.push(
+      am5percent.PieChart.new(root, {
+        layout: root.verticalLayout,
+        innerRadius: am5.percent(60),
+        startAngle: 180,
+        endAngle: 360,
+      })
+    );
+
+    const series = chart.series.push(
+      am5percent.PieSeries.new(root, {
+        valueField: "value",
+        categoryField: "category",
+        startAngle: 180,
+        endAngle: 360,
+      })
+    );
+
+    series.labels.template.setAll({
+      text: "{category}: {value}"  // shows count
+    });
+
+    series.slices.template.setAll({
+      tooltipText: "{category}: {value}",
+      strokeOpacity: 0,
+      fillOpacity: 1
+    });
+
+    // ✅ color set
+    series.set("colors", am5.ColorSet.new(root, {
+      colors: [
+        am5.color("rgba(255, 113, 139, 1)"),
+        am5.color("rgba(45, 200, 125, 1)")
+      ],
+      reuse: true,
+      step: 1,
+    }));
+
+    // ✅ data from context
+    const filteredData = callData[filter] || { emergency: 0, non_emergency: 0 };
+    const data = [
+      { category: "Emergency", value: filteredData.emergency || callData.emergency },
+      { category: "Non-Emergency", value: filteredData.non_emergency || callData.non_emergency },
+    ];
+    series.data.setAll(data);
+
+    // Calculate total only from available counts
+    const total = data
+      .filter(d => d.value > 0)   // only non-zero values
+      .reduce((s, d) => s + d.value, 0);
+
+    // Add center label
+    series.children.push(
+      am5.Label.new(root, {
+        text: `Total Call\n${total}`,
+        fontSize: 17,
+        fontWeight: "700",
+        fill: am5.color(0xffffff),
+        textAlign: "center",
+        centerX: am5.p50,
+        centerY: am5.p50,
+        dy: -13,
+      })
+    );
+
+
+    series.appear(1000, 500);
+    chart.appear(1000, 500);
+
+    return () => root.dispose();
+  }, [callData, filter]);
 
   const fallbackData = [
     { name: 'Div-1', value: 0, line: 0 },
@@ -354,21 +352,43 @@ series.children.push(
   };
 
 
-// ---- Call Chart Component ----
-// if (loading2) return <Typography>Loading...</Typography>;
-// if (error2) return <Typography color="red">{error}</Typography>;
-if (!callData) return null;
+  // ---- Call Chart Component ----
+  // if (loading2) return <Typography>Loading...</Typography>;
+  // if (error2) return <Typography color="red">{error}</Typography>;
+  if (!callData) return null;
 
-console.log(callData,"Call status");
+  console.log(callData, "Call status");
 
-// pick the right data from filter
-const filteredData = callData[filter] || { all: 0, emergency: 0, non_emergency: 0 };
+  // pick the right data from filter
+  const filteredData = callData[filter] || { all: 0, emergency: 0, non_emergency: 0 };
 
-const handleFilterClick = (type) => {
-  setFilter(type);
-};  
+  const handleFilterClick = (type) => {
+    setFilter(type);
+  };
 
+  //average time
+  const avgDispatch = avgTimes?.average_dispatch_time?.[filter] || "00:00:00";
+  const avgResponse = avgTimes?.average_response_time?.[filter] || "00:00:00";
 
+  //call types
+  // Map API response -> chart data
+  const data1 = callTypes.map((ct, idx) => ({
+    name: ct.name,
+    value: ct[filter] || 0,   // today, last_month, total
+    color: ["rgba(200, 147, 253, 1)", "rgba(179, 234, 106, 1)", "rgba(255, 113, 139, 1)", "rgba(127, 167, 247, 1)", "#dea53d"][idx % 5], // random colors
+  }));
+
+  // Handle call type change
+  const handleCallTypeChange = (event) => {
+    const selected = event.target.value;
+    setSelectedCallType(selected);
+
+    // find call type id from name
+    const selectedType = callTypes.find((ct) => ct.name === selected);
+    if (selectedType) {
+      fetchChiefComplaints(selectedType.id);
+    }
+  };
 
 
 
@@ -399,8 +419,8 @@ const handleFilterClick = (type) => {
               }}
             >
               <Tabs
-                 value={filter}
-                 onChange={(e, val) => setFilter(val)}
+                value={filter}
+                onChange={(e, val) => setFilter(val)}
                 TabIndicatorProps={{ style: { display: "none" } }}
                 sx={{
                   minHeight: "auto",
@@ -422,14 +442,16 @@ const handleFilterClick = (type) => {
                 }}
               >
 
-                  <Tab label="Till Date" value="total"/>
+                <Tab label="Till Date" value="total" />
                 <Tab label="Last Month" value="last_month" />
-                <Tab label="Today"  value="today"/>
+                <Tab label="Today" value="today" />
               </Tabs>
             </Box>
             <Box>
               <Select
                 size="small"
+                value={selectedCallType}
+                onChange={handleCallTypeChange}
                 displayEmpty
                 renderValue={(selected) => {
                   if (!selected) {
@@ -493,10 +515,11 @@ const handleFilterClick = (type) => {
                 <MenuItem value="" disabled hidden>
                   Select Call Type
                 </MenuItem>
-                <MenuItem value="Fire">Fire</MenuItem>
-                <MenuItem value="Police">Police</MenuItem>
-                <MenuItem value="Medical">Munciple</MenuItem>
-                <MenuItem value="Medical">Disaster</MenuItem>
+                {callTypes.map((ct) => (
+                  <MenuItem key={ct.id} value={ct.name}>
+                    {ct.name}
+                  </MenuItem>
+                ))}
               </Select>
 
               {/* Chief Complaint Dropdown */}
@@ -596,7 +619,7 @@ const handleFilterClick = (type) => {
               >
                 <Box textAlign="center" className="hvr-shrink">
                   <CallIcon sx={{ fontSize: 50, color: "rgba(127, 167, 247, 1)" }} />
-                  <Typography sx={{ fontWeight: "600", mt: 1, ...commonStyles1.fontFamily }}>200</Typography>
+                  <Typography sx={{ fontWeight: "600", mt: 1, ...commonStyles1.fontFamily }}>00:01:00</Typography>
                   <Typography sx={{ fontSize: "11px", ...commonStyles1.fontFamily }}>Average Call Take Time</Typography>
                 </Box>
               </motion.div>
@@ -611,7 +634,7 @@ const handleFilterClick = (type) => {
               >
                 <Box textAlign="center" className="hvr-shrink">
                   <CheckCircleOutlineIcon sx={{ fontSize: 50, color: "rgba(127, 228, 126, 1)" }} />
-                  <Typography sx={{ fontWeight: "600", mt: 1, ...commonStyles1.fontFamily }}>500</Typography>
+                  <Typography sx={{ fontWeight: "600", mt: 1, ...commonStyles1.fontFamily }}> {avgDispatch}</Typography>
                   <Typography sx={{ fontSize: "11px", ...commonStyles1.fontFamily }}>Average Call Dispatch Time</Typography>
                 </Box>
               </motion.div>
@@ -626,7 +649,7 @@ const handleFilterClick = (type) => {
               >
                 <Box textAlign="center" className="hvr-shrink">
                   <AccessTimeIcon sx={{ fontSize: 50, color: "rgba(248, 195, 145, 1)" }} />
-                  <Typography sx={{ fontWeight: "600", mt: 1, ...commonStyles1.fontFamily }}>100</Typography>
+                  <Typography sx={{ fontWeight: "600", mt: 1, ...commonStyles1.fontFamily }}>{avgResponse}</Typography>
                   <Typography sx={{ fontSize: "11px", ...commonStyles1.fontFamily }}>Average Response Time</Typography>
                 </Box>
               </motion.div>
@@ -670,53 +693,53 @@ const handleFilterClick = (type) => {
           {/* <Box display="flex" gap={2} mt={3}> */}
           {/* Dispatch */}
 
-           <Paper
-                elevation={3}
-                sx={{
-                  p: 1,
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  gap: 1,
-                  borderRadius: "12px",
-                  bgcolor: "rgba(112, 144, 176, 0.12)",
-                  color: "#fff",
-                  minWidth: 230,
-                  mt:2,
-                }}
-              >
-                {/* Heading */}
-                <Typography
-                  variant="subtitle1"
-                  sx={{
-                    fontWeight: 600,
-                    ...commonStyles1.heading,
-                    alignSelf: "flex-start",
-                  }}
-                >
-                  Vehicle
-                </Typography>
-                {/* Image (Right → Left Animation) */}
-                <Box
-                  component={motion.img}
-                  src={vehical}
-                  alt="Vehicle"
-                  initial={{ x: 120, opacity: 0 }}   // start off right side
-                  animate={{ x: 0, opacity: 1 }}     // slide to normal position
-                  transition={{ duration: 0.8, ease: "easeOut" }}
-                  sx={{ height: 60, width: 200, mt: 1 }}
-                />
-                {/* Label */}
-                <Typography variant="body1" sx={{ fontWeight: 500 }}>
-                  Total Vehicle
-                </Typography>
+          <Paper
+            elevation={3}
+            sx={{
+              p: 1,
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              gap: 1,
+              borderRadius: "12px",
+              bgcolor: "rgba(112, 144, 176, 0.12)",
+              color: "#fff",
+              minWidth: 230,
+              mt: 2,
+            }}
+          >
+            {/* Heading */}
+            <Typography
+              variant="subtitle1"
+              sx={{
+                fontWeight: 600,
+                ...commonStyles1.heading,
+                alignSelf: "flex-start",
+              }}
+            >
+              Vehicle
+            </Typography>
+            {/* Image (Right → Left Animation) */}
+            <Box
+              component={motion.img}
+              src={vehical}
+              alt="Vehicle"
+              initial={{ x: 120, opacity: 0 }}   // start off right side
+              animate={{ x: 0, opacity: 1 }}     // slide to normal position
+              transition={{ duration: 0.8, ease: "easeOut" }}
+              sx={{ height: 60, width: 200, mt: 1 }}
+            />
+            {/* Label */}
+            <Typography variant="body1" sx={{ fontWeight: 500 }}>
+              Total Vehicle
+            </Typography>
 
-                {/* Count */}
-                <Typography variant="h5" sx={{ fontWeight: 600 }}>
-                {vehicleData.total_vehicle_today}
-                </Typography>
-              </Paper>
-       
+            {/* Count */}
+            <Typography variant="h5" sx={{ fontWeight: 600 }}>
+              {vehicleData.total_vehicle_today}
+            </Typography>
+          </Paper>
+
           <Paper
             elevation={3}
             sx={{
@@ -779,75 +802,80 @@ const handleFilterClick = (type) => {
         <Grid item xs={12} md={5.5}>
           {/* First Row - Chart taking full width */}
           <Grid container spacing={2}>
-           
+
 
             {/* Second Row - Split into 6 and 6 */}
 
-   <Grid item xs={12} md={5}>
+            <Grid item xs={12} md={5}>
 
-                 <Paper
-            elevation={3}
-            sx={{
-              p: 1,
-              display: "flex",
-              flexDirection: "column", // stack heading on top, chart below
-              gap: 2,
-              borderRadius: "12px",
-              bgcolor: "rgba(112, 144, 176, 0.12)",
-              color: "#fff",
-              minWidth: 235,
-              mt: 2,
-              ml:5,
-            }}
-          >
-            {/* Heading */}
-            <Typography
-              variant="subtitle1"
-              sx={{ fontWeight: 600, ...commonStyles1.heading, alignSelf: "flex-start" }}
-            >
-              Call Types
-            </Typography>
-
-
-            <BarChart
-              width={200}
-              height={135}
-              layout="vertical"
-              data={data1}
-              margin={{ top: -2, left: -40, bottom: 4 }}
-            >
-              <XAxis type="number" hide />
-              <YAxis
-                dataKey="name"
-                type="category"
-                axisLine={true}
-                tick={false}
-              />
-              <Tooltip
-                formatter={(val, name, props) => [val, props.payload.name]}
-                contentStyle={{
-                  padding: "2px 4px",
-                  fontSize: "12px",
+              <Paper
+                elevation={3}
+                sx={{
+                  p: 1,
+                  display: "flex",
+                  flexDirection: "column", // stack heading on top, chart below
+                  gap: 2,
+                  borderRadius: "12px",
+                  bgcolor: "rgba(112, 144, 176, 0.12)",
+                  color: "#fff",
+                  minWidth: 235,
+                  mt: 2,
+                  ml: 5,
                 }}
-                itemStyle={{
-                  padding: "2px 0",
-                }}
-              />
-
-              <Bar
-                dataKey="value"
-                isAnimationActive={false}
-                radius={[4, 4, 4, 4]}
-                background={false}
-                barSize={12}
               >
-                {data1.map((entry, index) => (
-                  <Cell key={index} fill={entry.color}
-                    style={{ cursor: "pointer" }} />
-                ))}
-              </Bar>
-            </BarChart>
-          </Paper>
+                {/* Heading */}
+                <Typography
+                  variant="subtitle1"
+                  sx={{ fontWeight: 600, ...commonStyles1.heading, alignSelf: "flex-start" }}
+                >
+                  Call Types
+                </Typography>
+
+
+                <BarChart
+                  width={200}
+                  height={135}
+                  layout="vertical"
+                  data={data1}
+                  margin={{ top: -2, left: -40, bottom: 4 }}
+                >
+                  <XAxis type="number" hide />
+                  <YAxis
+                    dataKey="name"
+                    type="category"
+                    axisLine={true}
+                    tick={false}
+                  />
+                  <Tooltip
+                    formatter={(val, name, props) => [val, props.payload.name]}
+                    contentStyle={{
+                      padding: "2px 4px",
+                      fontSize: "12px",
+                    }}
+                    itemStyle={{
+                      padding: "2px 0",
+                    }}
+                  />
+
+                  <Bar
+                    dataKey="value"
+                    isAnimationActive={false}
+                    radius={[4, 4, 4, 4]}
+                    background={false}
+                    barSize={12}
+                    minPointSize={4}   // 👈 ensures even "0" shows as tiny bar
+                  >
+                    {data1.map((entry, index) => (
+                      <Cell
+                        key={index}
+                        fill={entry.color}
+                        style={{ cursor: "pointer" }}
+                      />
+                    ))}
+                  </Bar>
+
+                </BarChart>
+              </Paper>
             </Grid>
             <Grid item xs={12} md={7}>
               {/* Enhanced List Section */}
@@ -860,7 +888,7 @@ const handleFilterClick = (type) => {
                   borderRadius: 2,
                   p: 1,
                   ml: 5,
-                  mt:2,
+                  mt: 2,
 
                   // Custom scrollbar styling
                   '&::-webkit-scrollbar': {
@@ -880,9 +908,8 @@ const handleFilterClick = (type) => {
                 }}
               >
                 <List sx={{ p: 0 }}>
-                  {complaintsData.map((item, index) => (
-                    <React.Fragment key={index}>
-                      {/* Main Chief Complaint */}
+                  {chiefComplaints.map((item, index) => (
+                    <React.Fragment key={item.id}>
                       <ListItem
                         onClick={() => handleClick(index)}
                         sx={{
@@ -890,17 +917,14 @@ const handleFilterClick = (type) => {
                           backgroundColor: "#31373D",
                           borderRadius: 1,
                           mb: 0.5,
-                          '&:hover': {
-                            backgroundColor: '#323030ff', // light hover effect only
-                          },
-
+                          '&:hover': { backgroundColor: '#323030ff' },
                           display: 'flex',
                           justifyContent: 'space-between',
                           alignItems: 'center',
                         }}
                       >
                         <ListItemText
-                          primary={item.chief}
+                          primary={item.name}
                           primaryTypographyProps={{
                             fontWeight: "500",
                             color: '#fff',
@@ -910,29 +934,26 @@ const handleFilterClick = (type) => {
                         />
                         <Box
                           sx={{
-                            backgroundColor: item.color,
+                            backgroundColor: "#5e3dea",
                             borderRadius: '12px',
                             padding: '4px 8px',
                             minWidth: '30px',
-                            textAlign: 'center'
+                            textAlign: 'center',
                           }}
                         >
                           <Typography
                             variant="caption"
-                            sx={{
-                              color: '#010101ff',
-                              fontWeight: 'bold'
-                            }}
+                            sx={{ color: '#010101ff', fontWeight: 'bold' }}
                           >
-                            {item.count}
+                            {item[filter] || 0} {/* today/last_month/total ke hisaab se */}
                           </Typography>
                         </Box>
                       </ListItem>
 
-                      {/* Sub-complaints */}
+                      {/* Sub complaints same as abhi */}
                       <Collapse in={openIndex === index} timeout="auto" unmountOnExit>
                         <List component="div" disablePadding>
-                          {item.sub.map((subItem, subIndex) => (
+                          {item.sub?.map((subItem, subIndex) => (
                             <ListItem
                               key={subIndex}
                               sx={{
@@ -942,19 +963,17 @@ const handleFilterClick = (type) => {
                                 mb: 0.3,
                                 mr: 1,
                                 cursor: 'pointer',
-                                '&:hover': {
-                                  backgroundColor: '#9a9494ff',
-                                },
+                                '&:hover': { backgroundColor: '#9a9494ff' },
                                 display: 'flex',
                                 justifyContent: 'space-between',
-                                alignItems: 'center'
+                                alignItems: 'center',
                               }}
                             >
                               <ListItemText
                                 primary={subItem.name}
                                 primaryTypographyProps={{
                                   color: '#ffffffff',
-                                  fontSize: '14px'
+                                  fontSize: '14px',
                                 }}
                               />
                               <Typography
@@ -962,13 +981,13 @@ const handleFilterClick = (type) => {
                                 sx={{
                                   color: '#000000ff',
                                   fontWeight: 'bold',
-                                  backgroundColor: item.color,
+                                  backgroundColor: "#5e3dea",
                                   borderRadius: '8px',
                                   padding: '2px 6px',
-                                  marginRight: "10"
+                                  marginRight: "10",
                                 }}
                               >
-                                {subItem.count}
+                                {subItem[filter] || 0}
                               </Typography>
                             </ListItem>
                           ))}
@@ -977,9 +996,10 @@ const handleFilterClick = (type) => {
                     </React.Fragment>
                   ))}
                 </List>
+
               </Paper>
             </Grid>
-             <Grid item xs={12}>
+            <Grid item xs={12}>
               {/* Chart Section */}
               <Paper
                 elevation={3}
