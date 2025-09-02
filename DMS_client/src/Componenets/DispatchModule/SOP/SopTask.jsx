@@ -106,7 +106,7 @@ const Alerts = [
 const DispatchHeaders = [
   "Incident ID",
   "Date & Time",
-  "Disaster Type",
+  "Chief Compaint",
   "Severity ",
   "Initiated By",
   "Actions",
@@ -740,7 +740,7 @@ function SopTask({
                           >
                             <Typography
                               variant="subtitle2"
-                              sx={{ textAlign: "center", fontSize: "12px" }}
+                              sx={{ textAlign: "center", fontSize: "13px" }}
                             >
                               {item.inc_added_date
                                 ? new Date(item.inc_added_date).toLocaleString(
@@ -758,7 +758,7 @@ function SopTask({
                             </Typography>
                           </StyledCardContent>
 
-                          {/* Disaster Type */}
+                          {/* Chief Compint */}
                           <StyledCardContent
                             sx={{ flex: 1, justifyContent: "center" }}
                           >
@@ -769,7 +769,7 @@ function SopTask({
 
                           {/* Alert Type */}
                           <StyledCardContent
-                            sx={{ flex: 1, justifyContent: "center" }}
+                            sx={{ flex: 1, justifyContent: "center",minWidth: 80, maxWidth: 100  }}
                           >
                             <Typography variant="subtitle2">
                               {{
@@ -783,9 +783,9 @@ function SopTask({
 
                           {/* Initiated By */}
                           <StyledCardContent
-                            sx={{ flex: 1, justifyContent: "center" }}
+                            sx={{ flex: 1, justifyContent: "center", }}
                           >
-                            <Typography variant="subtitle2">
+                            <Typography variant="subtitle2" sx={{ml:6}}>
                               {item.inc_added_by || "N/A"}
                             </Typography>
                           </StyledCardContent>
@@ -815,7 +815,7 @@ function SopTask({
                                     }}
                                   >
                                     <Visibility
-                                      sx={{ color: "orange", fontSize: 28 }}
+                                      sx={{ color: "orange", fontSize: 28 ,ml:4}}
                                     />
                                   </IconButton>
                                 </Tooltip>

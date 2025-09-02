@@ -366,15 +366,7 @@ const filteredData = callData[filter] || { all: 0, emergency: 0, non_emergency: 
 
 const handleFilterClick = (type) => {
   setFilter(type);
-};  // if (error1) return <Typography color="red">{error}</Typography>;
-  // if (!callData) return null;
-
-  // // pick the right data from filter
-  // const filteredData = callData[filter] || { all: 0, emergency: 0, non_emergency: 0 };
-
-  // const handleFilterClick = (type) => {
-  //   setFilter(type);
-  // };
+};  
 
 
 
@@ -430,10 +422,9 @@ const handleFilterClick = (type) => {
                 }}
               >
 
+                  <Tab label="Till Date" value="total"/>
                 <Tab label="Last Month" value="last_month" />
-                <Tab label="Today"  value="today" />
-                
-
+                <Tab label="Today"  value="today"/>
               </Tabs>
             </Box>
             <Box>
