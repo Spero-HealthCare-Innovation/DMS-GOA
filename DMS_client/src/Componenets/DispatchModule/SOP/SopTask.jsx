@@ -106,7 +106,7 @@ const Alerts = [
 const DispatchHeaders = [
   "Incident ID",
   "Date & Time",
-  "Disaster Type",
+  "Chief Compaint",
   "Severity ",
   "Initiated By",
   "Actions",
@@ -674,8 +674,7 @@ function SopTask({
             <TableContainer>
               <Table>
                 <TableBody>
-                  {/* Header Row */}
-                  <EnquiryCard>
+                  {/* <EnquiryCard>
                     {DispatchHeaders.map((header, idx) => (
                       <StyledCardContent
                         key={header}
@@ -690,9 +689,50 @@ function SopTask({
                         </Typography>
                       </StyledCardContent>
                     ))}
+                  </EnquiryCard> */}
+
+                  <EnquiryCard>
+                    <StyledCardContent sx={{ flex: 1, justifyContent: "center" }}>
+                      <Typography variant="subtitle2" fontWeight={500}>
+                        Incident ID
+                      </Typography>
+                    </StyledCardContent>
+
+                    <StyledCardContent sx={{ flex: 1.5, justifyContent: "center" }}>
+                      <Typography variant="subtitle2" fontWeight={500}>
+                        Date & Time
+                      </Typography>
+                    </StyledCardContent>
+
+                    <StyledCardContent sx={{ flex: 1.5, justifyContent: "center" }}>
+                      <Typography variant="subtitle2" fontWeight={500}>
+                        Chief Complaint
+                      </Typography>
+                    </StyledCardContent>
+
+                    <StyledCardContent
+                      sx={{ flex: 1, justifyContent: "center", minWidth: 80, maxWidth: 100 }}
+                    >
+                      <Typography variant="subtitle2" fontWeight={500}>
+                        Severity
+                      </Typography>
+                    </StyledCardContent>
+
+                    <StyledCardContent sx={{ flex: 1, justifyContent: "center" }}>
+                      <Typography variant="subtitle2" fontWeight={500} sx={{ ml: 6 }}>
+                        Initiated By
+                      </Typography>
+                    </StyledCardContent>
+
+                    <StyledCardContent
+                      sx={{ flex: 1, justifyContent: "center", display: "flex", gap: 1 }}
+                    >
+                      <Typography variant="subtitle2" fontWeight={500}>
+                        Actions
+                      </Typography>
+                    </StyledCardContent>
                   </EnquiryCard>
 
-                  {/* Scrollable Body */}
                   <Box
                     sx={{
                       maxHeight: 170,
@@ -711,7 +751,6 @@ function SopTask({
                       },
                     }}
                   >
-                    {/* Body Rows */}
                     {paginatedDispatchList.length === 0 ? (
                       <Box p={2} width="100%">
                         <Typography align="center" color="textSecondary">
@@ -725,7 +764,6 @@ function SopTask({
                           alertType={item.inc_type}
                           isHighlighted={item.incident_id === highlightedId}
                         >
-                          {/* Incident ID */}
                           <StyledCardContent
                             sx={{ flex: 1, justifyContent: "center" }}
                           >
@@ -734,13 +772,12 @@ function SopTask({
                             </Typography>
                           </StyledCardContent>
 
-                          {/* Date & Time */}
                           <StyledCardContent
-                            sx={{ flex: 1, justifyContent: "center" }}
+                            sx={{ flex: 1.5, justifyContent: "center" }}
                           >
                             <Typography
                               variant="subtitle2"
-                              sx={{ textAlign: "center", fontSize: "12px" }}
+                              sx={{ textAlign: "center", fontSize: "13px" }}
                             >
                               {item.inc_added_date
                                 ? new Date(item.inc_added_date).toLocaleString(
@@ -758,9 +795,8 @@ function SopTask({
                             </Typography>
                           </StyledCardContent>
 
-                          {/* Disaster Type */}
                           <StyledCardContent
-                            sx={{ flex: 1, justifyContent: "center" }}
+                            sx={{ flex: 1.5, justifyContent: "center" }}
                           >
                             <Typography variant="subtitle2">
                               {item.disaster_name || "N/A"}
@@ -769,7 +805,7 @@ function SopTask({
 
                           {/* Alert Type */}
                           <StyledCardContent
-                            sx={{ flex: 1, justifyContent: "center" }}
+                            sx={{ flex: 1, justifyContent: "center", minWidth: 80, maxWidth: 100 }}
                           >
                             <Typography variant="subtitle2">
                               {{
@@ -783,9 +819,9 @@ function SopTask({
 
                           {/* Initiated By */}
                           <StyledCardContent
-                            sx={{ flex: 1, justifyContent: "center" }}
+                            sx={{ flex: 1, justifyContent: "center", }}
                           >
-                            <Typography variant="subtitle2">
+                            <Typography variant="subtitle2" sx={{ ml: 6 }}>
                               {item.inc_added_by || "N/A"}
                             </Typography>
                           </StyledCardContent>
@@ -815,7 +851,7 @@ function SopTask({
                                     }}
                                   >
                                     <Visibility
-                                      sx={{ color: "orange", fontSize: 28 }}
+                                      sx={{ color: "orange", fontSize: 28, ml: 4 }}
                                     />
                                   </IconButton>
                                 </Tooltip>

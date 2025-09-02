@@ -133,8 +133,6 @@ class Device_version_info(models.Model):
     added_date = models.DateTimeField(auto_now_add=True)
     modified_date = models.DateTimeField(auto_now=True)
     
-
-
 class vehicle_login_info(models.Model):
     veh_login_id = models.AutoField(primary_key=True)
     veh_login_time = models.DateTimeField(null=True)
