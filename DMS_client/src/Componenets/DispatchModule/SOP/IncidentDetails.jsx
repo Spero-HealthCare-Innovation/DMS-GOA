@@ -1483,7 +1483,7 @@ function IncidentDetails({
                         <Button
                           variant="contained"
                           size="small"
-                          disabled={selectedResponders.length === 0} // ✅ at least 1 responder select hona chahiye
+                          disabled={selectedResponders.length === 0} 
                           onClick={() => setOpenModal(true)}
                         >
                           View Responder
@@ -1562,7 +1562,7 @@ function IncidentDetails({
                           WebkitBoxOrient: "vertical",
                           overflow: "hidden",
                           textOverflow: "ellipsis",
-                          whiteSpace: "normal", // required for clamping to work
+                          whiteSpace: "normal", 
                         }}
                       >
                         {responderScope.sop_responses[0].sop_description}
@@ -1683,7 +1683,7 @@ function IncidentDetails({
                     sx={{
                       textTransform: "none",
                       borderRadius: "8px",
-                      opacity: !selectedIncident ? 0.6 : 1, // thoda faded look when disabled
+                      opacity: !selectedIncident ? 0.6 : 1, 
                     }}
                   >
                     View Assigned Ambulance
@@ -1763,7 +1763,7 @@ function IncidentDetails({
       Assigned Ambulances
     </Typography>
 
-    {/* ✅ Close Icon on Right */}
+    {/*  Close Icon on Right */}
     <IconButton
       aria-label="close"
       onClick={() => setOpenAmbulanceModal(false)}
@@ -1796,12 +1796,12 @@ function IncidentDetails({
                       color: "#fff",
                     }}
                   >
-                    {/* ✅ Left side: responder name */}
+                    {/*  Left side: responder name */}
                     <Typography variant="body2" sx={{ fontWeight: 600, color: "#fff" }}>
                       {responder_name}
                     </Typography>
 
-                    {/* ✅ Right side: vehicle number */}
+                    {/*  Right side: vehicle number */}
                     <Typography variant="body2" sx={{ color: "#fff" }}>
                       {veh.vehicle_number}
                     </Typography>

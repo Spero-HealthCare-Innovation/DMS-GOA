@@ -105,17 +105,17 @@ function Login() {
     let hasError = false;
 
     if (!emp_username) {
-      setUsernameError("Please enter User ID");
+      setUsernameError("Please Enter User Name");
       hasError = true;
     }
 
     if (!password) {
-      setPasswordError("Please enter Password");
+      setPasswordError("Please Enter Password");
       hasError = true;
     }
 
     if (captchaError || (!captchaValue && captchaKey)) {
-      setCaptchaTextError("Please enter valid captcha text");
+      setCaptchaTextError("Please Enter Valid Captcha Text");
       hasError = true;
     }
 
