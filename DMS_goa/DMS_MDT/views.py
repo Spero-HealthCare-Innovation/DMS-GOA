@@ -903,3 +903,4 @@ class VehicalDashboardCount(APIView):
         }
 
         return Response(data)
+ 
