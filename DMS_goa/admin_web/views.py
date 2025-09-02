@@ -1889,7 +1889,7 @@ class CombinedAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request, format=None):
-        permission_modules = Permission_module.objects.all()
+        permission_modules = Permission_module.objects.all().order_by("module_id")
         modules_serializer = Moduleserializer(permission_modules, many=True)
 
         permission_objects = permission.objects.all()
