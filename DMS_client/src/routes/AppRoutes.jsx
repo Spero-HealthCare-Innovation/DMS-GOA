@@ -30,12 +30,12 @@ const MultiScreen = lazy(() => import("../Page/multiscreen"));
 const ClosureDetail = lazy(() =>
   import("../Componenets/SuperAdmin/Closure/ClosureDetail")
 );
-// const MissingPerson = lazy(() =>
-//   import("../Componenets/SuperAdmin/System/Bolo/MissingPerson")
-// );
-// const UnclaimedBody = lazy(() =>
-//   import("../Componenets/SuperAdmin/System/Bolo/UnclaimedBody")
-// );
+const MissingPerson = lazy(() =>
+  import("../Componenets/SuperAdmin/System/Bolo/MissingPerson")
+);
+const UnclaimedBody = lazy(() =>
+  import("../Componenets/SuperAdmin/System/Bolo/UnclaimedBody")
+);
 
 const Loader = () => (
   <Box
@@ -166,7 +166,7 @@ const AppRoutes = ({ darkMode, setIsLoggedIn }) => {
         /> */}
 
 
-          {/* <Route
+          <Route
           path="/Unclaimed-Body"
           element={
             <PrivateRoute>
@@ -182,7 +182,7 @@ const AppRoutes = ({ darkMode, setIsLoggedIn }) => {
               <MissingPerson darkMode={darkMode} />
             </PrivateRoute>
           }
-        /> */}
+        />
         <Route
           path="/create-incident"
           element={

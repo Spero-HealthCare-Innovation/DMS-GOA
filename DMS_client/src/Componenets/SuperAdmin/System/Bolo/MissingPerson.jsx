@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Box,
   Typography,
@@ -37,26 +37,32 @@ import {
 } from "../../../../CommonStyle/Style";
 import { useTheme } from "@mui/material/styles";
 import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
+import { useAuth } from "../../../../Context/ContextAPI";
+import { useLocation } from "react-router-dom";
 
 const MissingPerson = () => {
-  const [formData, setFormData] = useState({
-    name: "",
-    age: "",
-    gender: "",
-    vitals: "",
-    identificationMarks: "",
-    file: null,
-    schedules: "",
-    date: "",
-    time: "",
-    address: "",
-    contactNo: "",
-  });
+  const port = import.meta.env.VITE_APP_API_KEY;
+  // const Department = localStorage.getItem("user_Department");
+  const token = localStorage.getItem("access_token");
+  const {
+    newToken,
+    responderScope,
+    setDisasterIncident,
+    disaster,
+    popupText,
+    setPopupText,
+    lattitude,
+    setLattitude,
+    longitude,
+    setLongitude,
+  } = useAuth();
   const theme = useTheme();
-
   const isDarkMode = theme.palette.mode === "dark";
   const darkMode = true;
+  const location = useLocation();
+
   const selectStyles = getCustomSelectStyles(isDarkMode);
+  const { handleSearchChange, handleSelectSuggestion, query } = useAuth();
 
   const labelColor = darkMode ? "#5FECC8" : "#1976d2";
   const borderColor = darkMode ? "#7F7F7F" : "#ccc";
@@ -86,16 +92,57 @@ const MissingPerson = () => {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    setStaticData((prev) => [
-      ...prev,
-      {
-        id: prev.length + 1,
-        ...formData,
-      },
-    ]);
-    handleClose();
+
+    try {
+      const formDataToSend = new FormData();
+      formDataToSend.append("name", personName || "");
+      formDataToSend.append("age", age || "");
+      formDataToSend.append("gender", gender !== "" ? gender : null);
+      formDataToSend.append("vitals", vitals || "");
+      formDataToSend.append("identification_marks", identificationMarks || "");
+      formDataToSend.append("contact_no", contactNo || "");
+      formDataToSend.append("address", address || "");
+      formDataToSend.append("scheduled_datetime", datetime || "");
+      formDataToSend.append("latitude", 3456.45);
+      formDataToSend.append("longitude", 12345.45);
+
+      if (file) {
+        formDataToSend.append("file_upload", file);
+      }
+
+      const response = await fetch(`${port}/admin_web/MissingPerson_post/`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token || newToken}`,
+          // ❌ DO NOT set Content-Type here, fetch will set it automatically for FormData
+        },
+        body: formDataToSend,
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        console.log("Form submitted successfully:", data);
+
+        // reset form
+        setpersonName("");
+        setContactNo("");
+        setAge("");
+        setGender("");
+        setVitals("");
+        setIdentificationMarks("");
+        setAddress("");
+        setDatetime("");
+        setFile(null);
+
+        alert("Missing person added successfully ✅");
+      } else {
+        console.error("Form submission failed:", await response.text());
+      }
+    } catch (error) {
+      console.error("Error submitting form:", error);
+    }
   };
 
   const handleClose = () => {
@@ -127,6 +174,7 @@ const MissingPerson = () => {
   const [personName, setpersonName] = useState("");
   const [age, setAge] = useState("");
   const [gender, setGender] = useState("");
+
   const [file, setFile] = useState(null);
   const [photo, setPhoto] = useState(null);
   const [vitals, setVitals] = useState("");
@@ -142,6 +190,10 @@ const MissingPerson = () => {
   const handleChangeRowsPerPage = (event) => {
     setRowsPerPage(parseInt(event.target.value, 10));
     setPage(0);
+  };
+
+  const handleFileChange = (e) => {
+    setFile(e.target.files[0]);
   };
 
   // Handle filter submit
@@ -172,6 +224,8 @@ const MissingPerson = () => {
   const [anchorEl, setAnchorEl] = useState(null);
   const [openModal, setOpenModal] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
+  const [MissingPerson, setMissingPerson] = useState(null);
+  const [missingPersonList, setMissingpersonList] = useState([]);
 
   const handleOpenPopover = (event, item) => {
     setAnchorEl(event.currentTarget);
@@ -233,6 +287,28 @@ const MissingPerson = () => {
 
     return hasAction;
   };
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await fetch(`${port}/admin_web/MissingPerson_get/`, {
+          headers: {
+            Authorization: `Bearer ${token || newToken}`,
+          },
+        });
+        if (response.ok) {
+          const data = await response.json();
+          setMissingpersonList(data);
+        } else {
+          console.error("Failed to fetch mmissing person list.");
+        }
+      } catch (error) {
+        console.error("Error fetching missing person list:", error);
+      }
+    };
+
+    fetchData();
+  }, []);
   return (
     <Box sx={{ p: 2, marginLeft: "3rem" }}>
       <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
@@ -384,7 +460,7 @@ const MissingPerson = () => {
                     },
                   }}
                 >
-                  {rows.length === 0 ? (
+                  {missingPersonList.length === 0 ? (
                     <TableRow>
                       <StyledCardContent
                         sx={{
@@ -401,14 +477,14 @@ const MissingPerson = () => {
                       </StyledCardContent>
                     </TableRow>
                   ) : (
-                    rows
+                    missingPersonList
                       .slice(
                         page * rowsPerPage,
                         page * rowsPerPage + rowsPerPage
                       )
                       .map((row, index) => (
                         <TableDataCardBody
-                          key={index}
+                          key={row.id}
                           sx={{
                             bgcolor: "rgb(53 53 53)",
                             borderRadius: 2,
@@ -451,7 +527,11 @@ const MissingPerson = () => {
                             sx={{ flex: 0.8, justifyContent: "center" }}
                           >
                             <Typography variant="subtitle2" sx={fontsTableBody}>
-                              {row.photo}
+                              {row.gender === 1
+                                ? "Male"
+                                : row.gender === 2
+                                ? "Female"
+                                : ""}{" "}
                             </Typography>
                           </StyledCardContent>
 
@@ -464,7 +544,7 @@ const MissingPerson = () => {
                             </Typography>
                           </StyledCardContent>
 
-                          {/* Schedules */}
+                          {/* Address */}
                           <StyledCardContent
                             sx={{ flex: 1.2, justifyContent: "center" }}
                           >
@@ -676,7 +756,7 @@ const MissingPerson = () => {
                     fullWidth
                     size="small"
                     // placeholder="Gender"
-                    value={gender}
+                    value={gender ?? ""}
                     displayEmpty
                     onChange={(e) => setGender(e.target.value)}
                     sx={selectStyles}
@@ -685,8 +765,8 @@ const MissingPerson = () => {
                     <MenuItem value="" disabled>
                       Select Gender
                     </MenuItem>
-                    <MenuItem value="Male">Male</MenuItem>
-                    <MenuItem value="Female">Female</MenuItem>
+                    <MenuItem value={1}>Male</MenuItem>
+                    <MenuItem value={2}>Female</MenuItem>
                   </Select>
                 </Grid>
 
@@ -755,12 +835,13 @@ const MissingPerson = () => {
                     type="file"
                     hidden
                     name="file"
-                    //   onChange={handleFileChange}
+                    onChange={handleFileChange}
                   />
                 </Button>
-                {formData.file && (
+
+                {file && (
                   <Typography variant="body2" sx={{ mt: 1, color: "white" }}>
-                    Selected: {formData.file.name}
+                    Selected: {file.name}
                   </Typography>
                 )}
               </Grid>
@@ -772,17 +853,8 @@ const MissingPerson = () => {
                   justifyContent: "center",
                   mt: 3,
                   gap: 2,
-                  
                 }}
               >
-                <Button
-                  onClick={handleClose}
-                  color="error"
-                  variant="outlined"
-                  sx={{ borderColor: "red", color: "red",alignItems:"center" }}
-                >
-                  Close
-                </Button>
                 <Button
                   type="submit"
                   variant="contained"

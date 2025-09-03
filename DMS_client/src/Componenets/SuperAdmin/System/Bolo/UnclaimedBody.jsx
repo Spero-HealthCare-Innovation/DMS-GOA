@@ -831,14 +831,7 @@ const UnclaimedBody = () => {
                   gap: 2,
                 }}
               >
-                <Button
-                  onClick={handleClose}
-                  color="error"
-                  variant="outlined"
-                  sx={{ borderColor: "red", color: "red" }}
-                >
-                  Close
-                </Button>
+               
                 <Button
                   type="submit"
                   variant="contained"
