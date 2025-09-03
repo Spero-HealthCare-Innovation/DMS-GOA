@@ -1007,6 +1007,7 @@ class Missing_Person(models.Model):
     added_by = models.CharField(max_length=255, null=True, blank=True)
     modified_by = models.CharField(max_length=255, null=True, blank=True)
     modified_date = models.DateTimeField(auto_now=True,null=True, blank=True)
+    added_date = models.DateTimeField(auto_now=True, null=True, blank=True)
 
 
 class Unclaimed_Bodies(models.Model):
@@ -1025,6 +1026,7 @@ class Unclaimed_Bodies(models.Model):
     added_by = models.CharField(max_length=255, null=True, blank=True)
     modified_by = models.CharField(max_length=255, null=True, blank=True)
     modified_date = models.DateTimeField(auto_now=True,null=True, blank=True)
+    added_date = models.DateTimeField(auto_now=True, null=True, blank=True)
 
 
 class Unclaimed_Vehicles(models.Model):
@@ -1042,6 +1044,7 @@ class Unclaimed_Vehicles(models.Model):
     added_by = models.CharField(max_length=255, null=True, blank=True)
     modified_by = models.CharField(max_length=255, null=True, blank=True)
     modified_date = models.DateTimeField(auto_now=True,null=True, blank=True)
+    added_date = models.DateTimeField(auto_now=True, null=True, blank=True)
 
 class Vehicle_Theft(models.Model):
     id = models.AutoField(primary_key=True)
@@ -1059,6 +1062,7 @@ class Vehicle_Theft(models.Model):
     added_by = models.CharField(max_length=255, null=True, blank=True)
     modified_by = models.CharField(max_length=255, null=True, blank=True)
     modified_date = models.DateTimeField(auto_now=True,null=True, blank=True)
+    added_date = models.DateTimeField(auto_now=True, null=True, blank=True)
 
 
 
