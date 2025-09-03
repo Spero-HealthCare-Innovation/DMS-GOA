@@ -382,7 +382,7 @@ const Incident = ({ darkMode }) => {
 
     const payload = {
       inc_type: selectedEmergencyValue,
-      disaster_type: selectedDisaster,
+      // disaster_type: selectedDisaster,
       alert_type: alertType || null,
       location: popupText || query,
       latitude: lattitude,
@@ -876,6 +876,7 @@ const Incident = ({ darkMode }) => {
                   ))}
                 </TextField>
               </Grid>
+
               <Grid item xs={12} sm={6}>
                 <TextField
                   fullWidth
@@ -922,6 +923,7 @@ const Incident = ({ darkMode }) => {
                   ))}
                 </TextField>
               </Grid>
+
               <Grid item xs={12} sm={6}>
                 <FormControl fullWidth size="small">
                   <InputLabel>Ward Officer</InputLabel>
@@ -947,6 +949,7 @@ const Incident = ({ darkMode }) => {
                   </Select>
                 </FormControl>
               </Grid>
+              
               <Grid item xs={12}>
                 <TextField
                   select
@@ -1293,7 +1296,7 @@ const Incident = ({ darkMode }) => {
                       disabled={sopId.length === 0}
                       sx={{ mt: 2 }}
                     >
-                      Assign Ambulance
+                      Assign Responder
                     </Button>
                     {errors?.assignAmbulance && (
                       <Typography color="error" variant="body2" mt={1}>

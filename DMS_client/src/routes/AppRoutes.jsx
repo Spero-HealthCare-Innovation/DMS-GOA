@@ -9,6 +9,8 @@ import ProtectedLoginRoute from "../Componenets/Login/ProtectedLoginRoute";
 import IncidentReport from "../Componenets/SuperAdmin/Incident/IncidentReport";
 import Permission from "../Componenets/SuperAdmin/System/Permission/Permission";
 import Dashboard from "../Componenets/SuperAdmin/System/Dashboard/Dashboard";
+// import VehicleTheft from "../Componenets/SuperAdmin/System/Bolo/VehicleTheft";
+// import UnclaimedVehicles from "../Componenets/SuperAdmin/System/Bolo/UnclaimedVehicles.JSX";
 const Login = lazy(() => import("../Componenets/Login/Login"));
 const Sop = lazy(() => import("../Componenets/DispatchModule/SOP/Sop"));
 const AlertPanel = lazy(() =>
@@ -28,12 +30,12 @@ const MultiScreen = lazy(() => import("../Page/multiscreen"));
 const ClosureDetail = lazy(() =>
   import("../Componenets/SuperAdmin/Closure/ClosureDetail")
 );
-const MissingPerson = lazy(() =>
-  import("../Componenets/SuperAdmin/System/Bolo/MissingPerson")
-);
-const UnclaimedBody = lazy(() =>
-  import("../Componenets/SuperAdmin/System/Bolo/UnclaimedBody")
-);
+// const MissingPerson = lazy(() =>
+//   import("../Componenets/SuperAdmin/System/Bolo/MissingPerson")
+// );
+// const UnclaimedBody = lazy(() =>
+//   import("../Componenets/SuperAdmin/System/Bolo/UnclaimedBody")
+// );
 
 const Loader = () => (
   <Box
@@ -130,7 +132,7 @@ const AppRoutes = ({ darkMode, setIsLoggedIn }) => {
           }
         />
         <Route
-          path="/add-group"
+          path="/Add-Group"
           element={
             <PrivateRoute>
               <AddGroup darkMode={darkMode} />
@@ -138,7 +140,7 @@ const AppRoutes = ({ darkMode, setIsLoggedIn }) => {
           }
         />
         <Route
-          path="/add-employee"
+          path="/Add-Employee"
           element={
             <PrivateRoute>
               <AddEmployee darkMode={darkMode} />
@@ -146,7 +148,25 @@ const AppRoutes = ({ darkMode, setIsLoggedIn }) => {
           }
         />
 
-        <Route
+         {/* <Route
+          path="/Vehicle-Theft"
+          element={
+            <PrivateRoute>
+              <VehicleTheft darkMode={darkMode} />
+            </PrivateRoute>
+          }
+        /> */}
+        {/* <Route
+          path="/Unclaimed-Vehicles"
+          element={
+            <PrivateRoute>
+              <UnclaimedVehicles darkMode={darkMode} />
+            </PrivateRoute>
+          }
+        /> */}
+
+
+          {/* <Route
           path="/Unclaimed-Body"
           element={
             <PrivateRoute>
@@ -162,7 +182,7 @@ const AppRoutes = ({ darkMode, setIsLoggedIn }) => {
               <MissingPerson darkMode={darkMode} />
             </PrivateRoute>
           }
-        />
+        /> */}
         <Route
           path="/create-incident"
           element={

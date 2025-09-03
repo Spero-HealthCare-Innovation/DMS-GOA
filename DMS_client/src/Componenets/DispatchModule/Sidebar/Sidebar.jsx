@@ -113,7 +113,7 @@ const Sidebar = ({ darkMode }) => {
                   src={item.img}
                   alt={item.text}
                   style={{ width: 24, height: 24, objectFit: "contain" }}
-                  onError={(e) => (e.target.style.display = "none")} // hide broken image
+                  onError={(e) => (e.target.style.display = "none")} 
                 />
               </ListItemIcon>
               <ListItemText

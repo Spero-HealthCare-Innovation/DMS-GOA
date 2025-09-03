@@ -185,6 +185,7 @@ const AlertPanel = ({ darkMode }) => {
 
 
     useEffect(() => {
+        // const socket = new WebSocket(`ws://192.168.1.116:7777/ws/weather_alerts`);
         const socket = new WebSocket(`${socketUrl}/ws/weather_alerts`);
 
         socket.onmessage = (event) => {
@@ -358,10 +359,10 @@ const AlertPanel = ({ darkMode }) => {
 
 
     return (
-        <Box sx={{ flexGrow: 1, mt: 1, ml: '5em', mr: 1, mb: 2 }}>
-            {
+        <Box sx={{ flexGrow: 1, mt: 1, ml: '1em', mr: 1, mb: 2 }}>
+            {/* {
                 localStorage.getItem("user_group") !== "1" && <Sidebar darkMode={darkMode} />
-            }
+            } */}
             <Grid container spacing={2}>
                 <Grid item xs={12} md={7}>
                     <Grid container spacing={2} alignItems="center">
