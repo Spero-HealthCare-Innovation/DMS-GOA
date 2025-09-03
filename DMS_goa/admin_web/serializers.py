@@ -754,3 +754,8 @@ class Unclaimed_Bodiesserializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+class Unclaimed_Vehiclesserializer(serializers.ModelSerializer):
+    class Meta:
+        model = Unclaimed_Vehicles
+        fields = '__all__'
+
