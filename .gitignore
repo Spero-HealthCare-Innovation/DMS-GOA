@@ -7224,3 +7224,5 @@ DMS_goa/db.sqlite3
 DMS_client/.env
 DMS_client/.vite/
 DMS_goa/DMS_MDT/migrations/
+logs/*.log
+.DMS_goa/media_files/
