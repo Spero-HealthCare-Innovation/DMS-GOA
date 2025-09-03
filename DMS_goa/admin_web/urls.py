@@ -175,6 +175,13 @@ urlpatterns = [
     path('UnclaimedBodies_delete/<int:id>/',UnclaimedBodies_delete.as_view(), name='MissingPersonget_delete'),
 
 
+    path('UnclaimedVehicle_get/',UnclaimedVehicle_get.as_view(), name='UnclaimedVehicle_get'),
+    path('UnclaimedVehicle_post/',UnclaimedVehicle_post.as_view(), name='UnclaimedVehicle_post'),
+    path('UnclaimedVehicle_put/<int:id>/',UnclaimedVehicle_put.as_view(), name='UnclaimedVehicle_put'),
+    path('UnclaimedVehicle_delete/<int:id>/',UnclaimedVehicle_delete.as_view(), name='UnclaimedVehicle_delete'),
+
+
+
 
 
 ]
