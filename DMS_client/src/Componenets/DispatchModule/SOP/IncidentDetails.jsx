@@ -1686,7 +1686,7 @@ function IncidentDetails({
                       opacity: !selectedIncident ? 0.6 : 1, 
                     }}
                   >
-                    View Assigned Ambulance
+                    View Responder
                   </Button>
                 </Box>
               </>
@@ -1760,7 +1760,7 @@ function IncidentDetails({
     }}
   >
     <Typography variant="h6" sx={{ fontWeight: 600 }}>
-      Assigned Ambulances
+      Assigned Responder
     </Typography>
 
     {/*  Close Icon on Right */}
