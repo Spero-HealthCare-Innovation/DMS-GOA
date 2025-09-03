@@ -9,8 +9,8 @@ import ProtectedLoginRoute from "../Componenets/Login/ProtectedLoginRoute";
 import IncidentReport from "../Componenets/SuperAdmin/Incident/IncidentReport";
 import Permission from "../Componenets/SuperAdmin/System/Permission/Permission";
 import Dashboard from "../Componenets/SuperAdmin/System/Dashboard/Dashboard";
-// import VehicleTheft from "../Componenets/SuperAdmin/System/Bolo/VehicleTheft";
-// import UnclaimedVehicles from "../Componenets/SuperAdmin/System/Bolo/UnclaimedVehicles.JSX";
+const VehicleTheft = lazy(() =>import("../Componenets/SuperAdmin/System/Bolo/VehicleTheft"));
+const UnclaimedVehicles = lazy(() =>import("../Componenets/SuperAdmin/System/Bolo/Unclaimed_Vehicles"));
 const Login = lazy(() => import("../Componenets/Login/Login"));
 const Sop = lazy(() => import("../Componenets/DispatchModule/SOP/Sop"));
 const AlertPanel = lazy(() =>
@@ -148,22 +148,34 @@ const AppRoutes = ({ darkMode, setIsLoggedIn }) => {
           }
         />
 
+<<<<<<< Updated upstream
          {/* <Route
+=======
+         <Route
+          path="/Missing-Person"
+          element={
+            <PrivateRoute>
+              <MissingPerson darkMode={darkMode} />
+            </PrivateRoute>
+          }
+        />
+         <Route
+>>>>>>> Stashed changes
           path="/Vehicle-Theft"
           element={
             <PrivateRoute>
               <VehicleTheft darkMode={darkMode} />
             </PrivateRoute>
           }
-        /> */}
-        {/* <Route
+        />
+        <Route
           path="/Unclaimed-Vehicles"
           element={
             <PrivateRoute>
               <UnclaimedVehicles darkMode={darkMode} />
             </PrivateRoute>
           }
-        /> */}
+        />
 
 
           <Route
