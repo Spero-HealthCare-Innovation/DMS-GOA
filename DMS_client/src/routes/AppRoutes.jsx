@@ -11,15 +11,29 @@ import Permission from "../Componenets/SuperAdmin/System/Permission/Permission";
 import Dashboard from "../Componenets/SuperAdmin/System/Dashboard/Dashboard";
 const Login = lazy(() => import("../Componenets/Login/Login"));
 const Sop = lazy(() => import("../Componenets/DispatchModule/SOP/Sop"));
-const AlertPanel = lazy(() => import("../Componenets/DispatchModule/AlertPanel/AlertPanel"));
-const AddDepartment = lazy(() => import("../Componenets/SuperAdmin/System/Department/AddDepartment"));
-const AddGroup = lazy(() => import("../Componenets/SuperAdmin/System/Groups/Add_group"));
-const AddEmployee = lazy(() => import("../Componenets/SuperAdmin/System/Employee_reg/Add_employee"));
+const AlertPanel = lazy(() =>
+  import("../Componenets/DispatchModule/AlertPanel/AlertPanel")
+);
+const AddDepartment = lazy(() =>
+  import("../Componenets/SuperAdmin/System/Department/AddDepartment")
+);
+const AddGroup = lazy(() =>
+  import("../Componenets/SuperAdmin/System/Groups/Add_group")
+);
+const AddEmployee = lazy(() =>
+  import("../Componenets/SuperAdmin/System/Employee_reg/Add_employee")
+);
 const Map = lazy(() => import("../Componenets/DispatchModule/Map/Map"));
 const MultiScreen = lazy(() => import("../Page/multiscreen"));
-const ClosureDetail = lazy(() => import("../Componenets/SuperAdmin/Closure/ClosureDetail"));
-const MissingPerson = lazy(() => import("../Componenets/SuperAdmin/System/Bolo/MissingPerson"));
-const UnclaimedBody = lazy(() => import("../Componenets/SuperAdmin/System/Bolo/UnclaimedBody"));
+const ClosureDetail = lazy(() =>
+  import("../Componenets/SuperAdmin/Closure/ClosureDetail")
+);
+const MissingPerson = lazy(() =>
+  import("../Componenets/SuperAdmin/System/Bolo/MissingPerson")
+);
+const UnclaimedBody = lazy(() =>
+  import("../Componenets/SuperAdmin/System/Bolo/UnclaimedBody")
+);
 
 const Loader = () => (
   <Box
@@ -96,7 +110,12 @@ const AppRoutes = ({ darkMode, setIsLoggedIn }) => {
           path="/sop"
           element={
             <PrivateRoute>
-              <Box sx={{ ml: localStorage.getItem("user_group") === "1" ? "50px" : "0px" }}>
+              <Box
+                sx={{
+                  ml:
+                    localStorage.getItem("user_group") === "1" ? "50px" : "0px",
+                }}
+              >
                 <Sop darkMode={darkMode} />
               </Box>
             </PrivateRoute>
@@ -127,16 +146,7 @@ const AppRoutes = ({ darkMode, setIsLoggedIn }) => {
           }
         />
 
-         <Route
-          path="/add-employee"
-          element={
-            <PrivateRoute>
-              <MissingPerson darkMode={darkMode} />
-            </PrivateRoute>
-          }
-        />
-
-          <Route
+        <Route
           path="/Unclaimed-Body"
           element={
             <PrivateRoute>
@@ -144,11 +154,25 @@ const AppRoutes = ({ darkMode, setIsLoggedIn }) => {
             </PrivateRoute>
           }
         />
+        
+        <Route
+          path="/Missing-Person"
+          element={
+            <PrivateRoute>
+              <MissingPerson darkMode={darkMode} />
+            </PrivateRoute>
+          }
+        />
         <Route
           path="/create-incident"
           element={
             <PrivateRoute>
-              <Box sx={{ ml: localStorage.getItem("user_group") === "1" ? "50px" : "0px" }}>
+              <Box
+                sx={{
+                  ml:
+                    localStorage.getItem("user_group") === "1" ? "50px" : "0px",
+                }}
+              >
                 <Incident darkMode={darkMode} />
               </Box>
             </PrivateRoute>
@@ -194,7 +218,7 @@ const AppRoutes = ({ darkMode, setIsLoggedIn }) => {
             </PrivateRoute>
           }
         />
-         <Route
+        <Route
           path="/Dashboard"
           element={
             <PrivateRoute>
