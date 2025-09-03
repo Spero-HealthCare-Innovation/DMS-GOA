@@ -1,11 +1,8 @@
-import { View, Text } from 'react-native'
 import React from 'react'
 
-const MissingPerson = () => {
+function MissingPerson() {
   return (
-    <View>
-      <Text>MIssingPerson</Text>
-    </View>
+    <div>MissingPerson</div>
   )
 }
 
