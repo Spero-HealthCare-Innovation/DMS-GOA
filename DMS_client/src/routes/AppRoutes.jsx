@@ -137,22 +137,22 @@ const AppRoutes = ({ darkMode, setIsLoggedIn }) => {
             </PrivateRoute>
           }
         />
-         <Route
+         {/* <Route
           path="/Vehicle-Theft"
           element={
             <PrivateRoute>
               <VehicleTheft darkMode={darkMode} />
             </PrivateRoute>
           }
-        />
-        <Route
+        /> */}
+        {/* <Route
           path="/Unclaimed-Vehicles"
           element={
             <PrivateRoute>
               <UnclaimedVehicles darkMode={darkMode} />
             </PrivateRoute>
           }
-        />
+        /> */}
 
 
           <Route
