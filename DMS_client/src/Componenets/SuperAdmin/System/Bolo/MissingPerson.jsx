@@ -1,11 +1,8 @@
-import { text } from 'react'
 import React from 'react'
 
-const MissingPerson = () => {
+function MissingPerson() {
   return (
-    <div>
-      <text>MMissing Person</text>
-    </div>
+    <div>MissingPerson</div>
   )
 }
 
