@@ -30,6 +30,7 @@ const MultiScreen = lazy(() => import("../Page/multiscreen"));
 const ClosureDetail = lazy(() =>
   import("../Componenets/SuperAdmin/Closure/ClosureDetail")
 );
+
 const MissingPerson = lazy(() =>
   import("../Componenets/SuperAdmin/System/Bolo/MissingPerson")
 );
@@ -148,9 +149,6 @@ const AppRoutes = ({ darkMode, setIsLoggedIn }) => {
           }
         />
 
-<<<<<<< Updated upstream
-         {/* <Route
-=======
          <Route
           path="/Missing-Person"
           element={
@@ -160,7 +158,6 @@ const AppRoutes = ({ darkMode, setIsLoggedIn }) => {
           }
         />
          <Route
->>>>>>> Stashed changes
           path="/Vehicle-Theft"
           element={
             <PrivateRoute>
