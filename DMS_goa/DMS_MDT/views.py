@@ -170,13 +170,14 @@ class VehicleLogout(APIView):
                 token_obj = RefreshToken(refresh_token)
                 token_obj.blacklist()
             except TokenError:
-                return Response({
-                    "data": {
-                        "code": 1,
-                        "message": "Invalid or expired refresh token"
-                    },
-                    "error": None
-                }, status=status.HTTP_200_OK)
+                # return Response({
+                #     "data": {
+                #         "code": 1,
+                #         "message": "Invalid or expired refresh token"
+                #     },
+                #     "error": None
+                # }, status=status.HTTP_200_OK)
+                pass
 
             vehicle_obj = Vehical.objects.filter(veh_number=veh_number).last()
             if not vehicle_obj:
@@ -501,8 +502,8 @@ def update_pcr_report(request):
         if status_code == 1:  # Acknowledge
             incident_vehicles.objects.filter(incident_id=inc_id).update(pcr_status=2)
 
-        elif status_code == 6:  # Back to Base
-            incident_vehicles.objects.filter(incident_id=inc_id).update(pcr_status=3)
+        # elif status_code == 6:  # Back to Base
+        #     incident_vehicles.objects.filter(incident_id=inc_id).update(pcr_status=3)
 
         report.save()
         # return Response(
@@ -625,17 +626,17 @@ class get_assign_completed_inc_calls(APIView):
         print("incident vehicles:", inc_veh)
         assign_inc_objs_arr = []
         for veh in inc_veh:
-            incident_datetime = veh.incident_id.inc_added_date  # already a datetime object
+            incident_datetime = veh.incident_id.inc_modified_date  # already a datetime object
             incidentDate = incident_datetime.strftime("%Y-%m-%d")   # e.g. "2025-08-25"
             incidentTime = incident_datetime.strftime("%H:%M:%S")   # e.g. "12:13:20"
             assign_inc_obj = {
                 "incidentId": str(veh.incident_id.inc_id),
                 "incidentDate": incidentDate,
                 "incidentTime": incidentTime,
-                "callType": "Emergency",
+                "callType": veh.incident_id.call_type.call_type_name if veh.incident_id.call_type else None,
                 "CallerRelationName": "",
                 "incidentCallsStatus": "Completed",
-                "callerName":"Vinayak"
+                "callerName":veh.incident_id.caller_id.caller_name if veh.incident_id.caller_id else None
             } 
             assign_inc_objs_arr.append(assign_inc_obj)
         return Response({"data": assign_inc_objs_arr, "error": None}, status=status.HTTP_200_OK)
@@ -654,18 +655,19 @@ class get_assign_inc_calls(APIView):
                 "incidentId": str(veh.incident_id.inc_id),
                 "incidentDate": veh.incident_id.inc_added_date,
                 "incidentTime": veh.incident_id.inc_added_date,
-                "callType": veh.incident_id.disaster_type.disaster_name,
-                "callerName":"vishal",
+                # "callType": veh.incident_id.disaster_type.disaster_name if veh.incident_id.disaster_type else None,
+                "callType": veh.incident_id.call_type.call_type_name if veh.incident_id.call_type else None,
+                "callerName":veh.incident_id.caller_id.caller_name if veh.incident_id.caller_id else None,
                 "lat": veh.incident_id.latitude,
                 "long": veh.incident_id.longitude,
                 "incidentAddress": veh.incident_id.location,
                 "incidentStatus": str(veh.pcr_status),
                 "currentStatus": {
-                    "code": pcr_exists.status if pcr_exists else 1,
+                    "code": pcr_exists.status if pcr_exists else 0,
                     "outOfSych": "false",
                     "message": "Already back to base"
                 },
-                "incidentCallsStatus": "In-progress",
+                "incidentCallsStatus": "Pending" if veh.pcr_status==1 else "In-progress" if veh.pcr_status == 2 else "Complete",
                 "clikable": "true",
                 "progress": "true",
                 "completed": "true" if veh.jobclosure_status==1 else "false",
@@ -759,8 +761,9 @@ class closure_Post_api_app(APIView):
             dpt_dtl = vehicl_dtls.responder
             ex_cl_dtl = DMS_incident_closure.objects.filter(incident_id=inc_dtl, responder=dpt_dtl,vehicle_no=vehicl_dtls, closure_is_deleted=False)
             if ex_cl_dtl.exists():
-                return Response({"msg":f"Closure already done for incident {inc_dtl.incident_id} of that department/Responder {dpt_dtl.responder_name} with vehicle no {vehicle_no}"},
-                                 status=status.HTTP_200_OK)
+                # return Response({"msg":f"Closure already done for incident {inc_dtl.incident_id} of that department/Responder {dpt_dtl.responder_name} with vehicle no {vehicle_no}"},
+                                #  status=status.HTTP_200_OK)
+                return Response({"data": {"code": 1,"message": "Case Closure Successfully"},"error": None})
             log_in_user = employee_clockin_info.objects.filter(veh_id=vehicl_dtls,clock_out_in_status=1,status=1)
             print(vehicle_no)
             cls_dtl_add = DMS_incident_closure.objects.create(
@@ -781,10 +784,14 @@ class closure_Post_api_app(APIView):
                 closure_remark=request.data.get('remark')
             )
             inc_vh = incident_vehicles.objects.filter(incident_id=inc_dtl, veh_id=vehicl_dtls, status=1)
-            inc_vh.update(jobclosure_status=1)
+            if inc_vh.exists():
+                inc_vh.update(jobclosure_status=1,pcr_status=3)
+                
             invh_dtl = incident_vehicles.objects.filter(veh_id=vehicl_dtls,jobclosure_status=2)
-            if invh_dtl.exists() and invh_dtl.exclude(jobclosure_status=1).exists():
-                vehicl_dtls.update(vehical_status=1)
+            if invh_dtl.exists() and invh_dtl.exclude(jobclosure_status=1).exists() and vehicl_dtls:
+                # vehicl_dtls.update(vehical_status=1)
+                vehicl_dtls.vehical_status = 1
+                vehicl_dtls.save()
             # return Response({"msg": f"Closure for {dpt_dtl.responder_name} - {vehicl_dtls.veh_number} is done",}, status=status.HTTP_201_CREATED)
             return Response({"data": {"code": 1,"message": "Case Closure Successfully"},"error": None})
         except DMS_Incident.DoesNotExist:
@@ -793,7 +800,7 @@ class closure_Post_api_app(APIView):
             return Response({"data": None,"error": {"code": 1,"message": "Case Closure Not Successfully"}})
         except Exception as e:
             # return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-            return Response({"data": None,"error": {"code": 1,"message": "Case Closure Not Successfully"},"ex_error": str(e)})
+            return Response({"data": None,"error": {"code": 1,"message": "Case Closure Not Successfully"}})
         
 
 
@@ -863,7 +870,7 @@ class Clockinout(APIView):
                 else:
                     return Response({"data": None,"error": {"code": 1,"message": "Employee not found or already clocked out"}}, status=status.HTTP_200_OK)  
         except Exception as e:
-            return Response({"data": None,"error": {"code": 1,"message": "Clock in/out Not Successfully"},"ex_error": str(e)}, status=status.HTTP_200_OK)
+            return Response({"data": None,"error": {"code": 1,"message": "Clock in/out Not Successfully"}}, status=status.HTTP_200_OK)
 			
 			
 #Dashboard---------------------Mayank
@@ -896,3 +903,4 @@ class VehicalDashboardCount(APIView):
         }
 
         return Response(data)
+ 

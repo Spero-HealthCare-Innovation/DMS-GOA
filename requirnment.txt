@@ -77,3 +77,4 @@ selenium
 deep-translator
 tweepy
 langdetect
+ 

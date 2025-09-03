@@ -27,6 +27,8 @@ from django.core.mail import send_mail
 from rest_framework_simplejwt.tokens import AccessToken
 from geopy.geocoders import Nominatim
 from django.http import JsonResponse
+from django.db.models import Count, Q
+from django.db.models.functions import TruncDate
 
 import ast
 import tweepy
@@ -1330,10 +1332,16 @@ class closure_Post_api(APIView):
                 closure_remark=request.data.get('closure_remark')
             )
             inc_vh = incident_vehicles.objects.filter(incident_id=inc_dtl, veh_id=vehicl_dtls, status=1)
-            inc_vh.update(jobclosure_status=1)
-            invh_dtl = incident_vehicles.objects.filter(veh_id=vehicl_dtls,jobclosure_status=0)
-            if invh_dtl.exists() and invh_dtl.exclude(jobclosure_status=1).exists():
-                vehicl_dtls.update(vehical_status=1)
+            if inc_vh.exists():
+                inc_vh.update(jobclosure_status=1,pcr_status=3)
+            else:
+                add_inc_vh = incident_vehicles.objects.create(incident_id=inc_dtl, veh_id=vehicl_dtls, status=1,jobclosure_status=1,pcr_status=3,added_by=request.data.get('closure_added_by'))
+                
+            invh_dtl = incident_vehicles.objects.filter(veh_id=vehicl_dtls,jobclosure_status=2)
+            if invh_dtl.exists() and invh_dtl.exclude(jobclosure_status=1).exists() and vehicl_dtls:
+                # vehicl_dtls.update(vehical_status=1)
+                vehicl_dtls.vehical_status = 1
+                vehicl_dtls.save()
             return Response({"msg": f"Closure for {dpt_dtl.responder_name} - {vehicl_dtls.veh_number} is done",}, status=status.HTTP_201_CREATED)
         except DMS_Incident.DoesNotExist:
             return Response({"error": "Incident not found."}, status=status.HTTP_404_NOT_FOUND)
@@ -1618,8 +1626,37 @@ class incident_get_Api(APIView):
             responder_ids = [int(rid) for rid in raw_ids if str(rid).isdigit()]
 
         # Get responder details
-        responders = DMS_Responder.objects.filter(responder_id__in=responder_ids).values('responder_id', 'responder_name')
-        responder_details = list(responders)
+        veh_data = incident_vehicles.objects.filter(incident_id=inc_id, status=1)
+        print("veh_data--", veh_data)
+
+        responders = DMS_Responder.objects.filter(
+            responder_id__in=responder_ids
+        ).values('responder_id', 'responder_name')
+
+        responder_details = []
+        for responder in responders:
+            veh_data = incident_vehicles.objects.filter(
+                incident_id=inc_id,
+                status=1
+            ).values(
+                'veh_id__veh_id',
+                'veh_id__veh_number'
+            )
+
+            vehicles = [
+                {
+                    "vehicle_id": v["veh_id__veh_id"],
+                    "vehicle_number": v["veh_id__veh_number"]
+                }
+                for v in veh_data
+            ]
+
+            responder_details.append({
+                "responder_id": responder["responder_id"],
+                "responder_name": responder["responder_name"],
+                "vehicles": vehicles
+            })
+        
 
         # Get related comments
         comments_qs = DMS_Comments.objects.filter(incident_id=inc_id, comm_is_deleted=False)
@@ -1685,36 +1722,63 @@ class UpdateTriggerStatusAPIView(APIView):
 
 
 
-class incident_wise_responder_list(APIView):
-    def get(self, request,inc_id):
-        nid = DMS_Notify.objects.filter(incident_id=inc_id, not_is_deleted=False).last()
-        if nid:
-            res_lst = list(nid.alert_type_id.values_list('responder_id', flat=True))
-            kk=[]
-            ll = sorted(set(int(x) for x in res_lst))
-            for m in ll:
-                mm=DMS_Responder.objects.get(responder_id=int(m))
-                resp_vhcl=Vehical.objects.filter(responder=mm.responder_id,status=1)
-                vhcl_dtl = []
-                for vh in resp_vhcl:
-                    cl_vhcl_dtl = DMS_incident_closure.objects.filter(incident_id=inc_id,vehicle_no=vh.veh_id, closure_is_deleted=False)
-                    if cl_vhcl_dtl.exists():
-                        continue
-                    else:
-                        vhcl_dtl.append({
-                        'veh_id': vh.veh_id,
-                        'vehicle_no': vh.veh_number
-                    })
+# class incident_wise_responder_list(APIView):
 
-                dt={
-                    'responder_id':mm.responder_id,
-                    'responder_name':mm.responder_name,
-                    'vehicle':vhcl_dtl
-                    }
-                kk.append(dt)
-            return Response(kk)
-        else:
-            return Response([])
+#     def get(self, request, inc_id):
+#         nid = incident_vehicles.objects.filter(incident_id=inc_id,status=1).exclude(jobclosure_status=1).select_related("veh_id__responder")
+#         if not nid.exists():
+#             return Response({"data": [], "error": {"code": 1, "message": "No vehicles found"}})
+#         grouped = {}
+#         for i in nid:
+#             if i.veh_id and i.veh_id.responder:
+#                 responder_id = i.veh_id.responder.responder_id
+#                 responder_name = i.veh_id.responder.responder_name
+#                 if responder_id not in grouped:
+#                     grouped[responder_id] = {
+#                         "responder_id": responder_id,
+#                         "responder_name": responder_name,
+#                         "vehicle": []
+#                     }
+#                 grouped[responder_id]["vehicle"].append({
+#                     "veh_id": i.veh_id.veh_id,
+#                     "vehicle_no": i.veh_id.veh_number
+#                 })  
+
+#         return Response(list(grouped.values()), status=status.HTTP_200_OK)
+
+
+
+
+
+class incident_wise_responder_list(APIView):
+    def get(self, request, inc_id):
+        inc_dtl = DMS_Incident.objects.get(inc_id=inc_id)
+        kk = []
+        for i in inc_dtl.responder_scope.all():
+            vh_dtl=Vehical.objects.filter(responder=i,status=1)
+            vehi_dtl = []
+            for j in vh_dtl:
+                inc_vh = incident_vehicles.objects.filter(incident_id=inc_dtl, veh_id=j, jobclosure_status=1,status=1)
+                is_vehical_close = True if inc_vh.exists() else False
+                if is_vehical_close == False:
+                    vehi_dtl.append({
+                        "veh_id": j.veh_id,
+                        "vehicle_no": j.veh_number
+                    })
+            if vehi_dtl:
+                kk.append(  {
+                "responder_id": i.responder_id,
+                "responder_name": i.responder_name,
+                "vehicle": vehi_dtl
+
+            })
+        return Response(kk)
+
+
+
+
+        
+
 
 
 
@@ -1889,7 +1953,7 @@ class CombinedAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request, format=None):
-        permission_modules = Permission_module.objects.all()
+        permission_modules = Permission_module.objects.all().order_by("module_id")
         modules_serializer = Moduleserializer(permission_modules, many=True)
 
         permission_objects = permission.objects.all()
@@ -2325,3 +2389,200 @@ class AverageCallTimeDashboard(APIView):
         }
 
         return Response(data)
+
+
+class CallTypeWiseCount(APIView):
+    def get(self, request):
+        today = now().date()
+        start_of_month = today.replace(day=1)
+        last_month_start = (start_of_month - timedelta(days=1)).replace(day=1)
+        last_month_end = start_of_month - timedelta(days=1)
+
+        call_type_counts = (
+            CallType.objects.filter(call_type_is_deleted=False)
+            .annotate(
+                total=Count(
+                    "dms_incident",
+                    filter=Q(dms_incident__inc_is_deleted=False),
+                ),
+                today_count=Count(
+                    "dms_incident",
+                    filter=Q(
+                        dms_incident__inc_is_deleted=False,
+                        dms_incident__inc_added_date__gte=today,
+                        dms_incident__inc_added_date__lt=today + timedelta(days=1),
+                    ),
+                ),
+                last_month_count=Count(
+                    "dms_incident",
+                    filter=Q(
+                        dms_incident__inc_is_deleted=False,
+                        dms_incident__inc_added_date__gte=last_month_start,
+                        dms_incident__inc_added_date__lte=last_month_end,
+                    ),
+                ),
+            )
+            .values("call_type_id", "call_type_name", "total", "today_count", "last_month_count")
+        )
+
+        result = [
+            {
+                "id": item["call_type_id"],
+                "name": item["call_type_name"],
+                "total": item["total"],
+                "today": item["today_count"],
+                "last_month": item["last_month_count"],
+            }
+            for item in call_type_counts
+        ]
+
+        return Response({"call_type_counts": result})
+    
+    
+    
+class ChiefComplaintWiseCount(APIView):
+    def get(self, request, call_type_id):
+        today = now().date()
+        start_of_month = today.replace(day=1)
+        last_month_start = (start_of_month - timedelta(days=1)).replace(day=1)
+        last_month_end = start_of_month - timedelta(days=1)
+
+        complaints = (
+            ParentComplaint.objects.filter(
+                parent_is_deleted=False,
+                call_type_id=call_type_id
+            )
+            .annotate(
+                total=Count(
+                    "dms_incident",
+                    filter=Q(dms_incident__inc_is_deleted=False),
+                ),
+                today_count=Count(
+                    "dms_incident",
+                    filter=Q(
+                        dms_incident__inc_is_deleted=False,
+                        dms_incident__inc_added_date__gte=today,
+                        dms_incident__inc_added_date__lt=today + timedelta(days=1),
+                    ),
+                ),
+                last_month_count=Count(
+                    "dms_incident",
+                    filter=Q(
+                        dms_incident__inc_is_deleted=False,
+                        dms_incident__inc_added_date__gte=last_month_start,
+                        dms_incident__inc_added_date__lte=last_month_end,
+                    ),
+                ),
+            )
+            .values("pc_id", "pc_name", "total", "today_count", "last_month_count")
+        )
+
+        result = [
+            {
+                "id": item["pc_id"],
+                "name": item["pc_name"],
+                "total": item["total"],
+                "today": item["today_count"],
+                "last_month": item["last_month_count"],
+            }
+            for item in complaints
+        ]
+
+        return Response({"chief_complaints": result})
+    
+    
+    
+class SubChiefComplaintWiseCount(APIView):
+    def get(self, request, pc_id):
+        today = now().date()
+        start_of_month = today.replace(day=1)
+        last_month_start = (start_of_month - timedelta(days=1)).replace(day=1)
+        last_month_end = start_of_month - timedelta(days=1)
+
+        sub_complaints = (
+            DMS_Disaster_Type.objects.filter(
+                disaster_is_deleted=False,
+                disaster_parent_id=pc_id
+            )
+            .annotate(
+                total=Count(
+                    "dms_incident",
+                    filter=Q(dms_incident__inc_is_deleted=False),
+                ),
+                today_count=Count(
+                    "dms_incident",
+                    filter=Q(
+                        dms_incident__inc_is_deleted=False,
+                        dms_incident__inc_added_date__gte=today,
+                        dms_incident__inc_added_date__lt=today + timedelta(days=1),
+                    ),
+                ),
+                last_month_count=Count(
+                    "dms_incident",
+                    filter=Q(
+                        dms_incident__inc_is_deleted=False,
+                        dms_incident__inc_added_date__gte=last_month_start,
+                        dms_incident__inc_added_date__lte=last_month_end,
+                    ),
+                ),
+            )
+            .values("disaster_id", "disaster_name", "total", "today_count", "last_month_count")
+        )
+
+        result = [
+            {
+                "id": item["disaster_id"],
+                "name": item["disaster_name"],
+                "total": item["total"],
+                "today": item["today_count"],
+                "last_month": item["last_month_count"],
+            }
+            for item in sub_complaints
+        ]
+
+        return Response({"sub_chief_complaints": result})
+    
+    
+class GisAnaIncidentFilterAPIView(APIView):
+    # permission_classes = [IsAuthenticated]
+
+    def get(self, request, format=None):
+        # Query parameters le rahe hain
+        start_date = request.query_params.get("start_date", None)
+        end_date = request.query_params.get("end_date", None)
+        call_type = request.query_params.get("call_type", None)
+        parent_complaint = request.query_params.get("parent_complaint", None)
+
+        # Base queryset
+        queryset = DMS_Incident.objects.filter(inc_is_deleted=False, inc_type=1)  # sirf emergency calls
+
+        # Date filter (agar start_date aur end_date diye ho)
+        if start_date and end_date:
+            try:
+                start = datetime.strptime(start_date, "%Y-%m-%d")
+                end = datetime.strptime(end_date, "%Y-%m-%d")
+                queryset = queryset.filter(inc_added_date__date__range=[start, end])
+            except Exception as e:
+                return Response({"error": f"Invalid date format, use YYYY-MM-DD. {str(e)}"}, status=400)
+
+        # Call type filter
+        if call_type:
+            queryset = queryset.filter(call_type=call_type)
+
+        # Chief complaint filter
+        if parent_complaint:
+            queryset = queryset.filter(parent_complaint=parent_complaint)
+
+        # Response format
+        data = []
+        for obj in queryset:
+            data.append({
+                "incident_id": obj.incident_id,
+                "location": obj.location,
+                "latitude": obj.latitude,
+                "longitude": obj.longitude,
+                "district": obj.district.dis_name if obj.district else None,  # assuming DMS_District has dst_name
+                "clouser_status": obj.clouser_status
+            })
+
+        return Response(data, status=200)
